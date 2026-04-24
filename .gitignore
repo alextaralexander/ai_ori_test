@@ -1,0 +1,280 @@
+############################
+
+# Общие
+
+############################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+############################
+
+# IDE / Editor
+
+############################
+
+# IntelliJ IDEA
+
+.idea/*
+!.idea/.gitignore
+!.idea/codeStyles/
+!.idea/runConfigurations/
+!.idea/vcs.xml
+
+*.iml
+
+# User-specific
+
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf/
+
+# Generated
+
+.idea/**/contentModel.xml
+
+# Sensitive / machine-specific
+
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle IntelliJ
+
+.idea/**/gradle.xml
+
+# Caches
+
+.idea/**/libraries/
+
+.vscode/
+*.code-workspace
+
+############################
+
+# Backend (Java / Spring)
+
+############################
+
+# Maven
+
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+
+# Gradle (на случай добавления)
+
+**/.gradle/
+**/build/
+
+# Logs
+
+**/logs/
+*.log
+
+# Build artifacts
+
+*.jar
+*.war
+*.ear
+*.class
+
+# Lombok
+
+delombok/
+
+############################
+
+# Frontend (React + TypeScript)
+
+############################
+
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/coverage/
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/coverage/
+frontend/**/.vite/
+frontend/**/.turbo/
+frontend/**/.pnpm-store/
+
+# Cache
+
+frontend/.cache/
+frontend/.next/
+frontend/out/
+frontend/**/.cache/
+frontend/**/.next/
+frontend/**/out/
+
+# Logs
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+############################
+
+# TypeScript
+
+############################
+*.tsbuildinfo
+
+############################
+
+# C / C++
+
+############################
+
+# Build directories
+cmake-build-*/
+build-*/
+build/
+out/
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+install_manifest.txt
+
+# Autotools / Make
+Makefile
+aclocal.m4
+autom4te.cache/
+libtool
+m4/
+makedep*
+
+# Compiler outputs
+*.o
+*.obj
+*.so
+*.a
+*.la
+*.lo
+*.dll
+*.lib
+*.exp
+*.exe
+*.out
+*.app
+*.i*
+*.pdb
+*.idb
+*.ilk
+
+############################
+
+# Python / agents_app
+
+############################
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py,cover
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+
+############################
+
+# ENV (важно!)
+
+############################
+
+.env
+.env.local
+.env.*.local
+!.env.example
+
+############################
+
+# Docker
+
+############################
+
+.dockerignore
+docker-compose.override.yml
+
+docker-data/
+*.pid
+
+############################
+
+# Helm / Kubernetes
+
+############################
+
+**/helm/*.tgz
+**/helm/values.local.yaml
+**/helm/secrets.yaml
+*.secret.yaml
+
+.kube/
+kubeconfig*
+
+############################
+
+# Test / Coverage
+
+############################
+coverage/
+*.lcov
+
+############################
+
+# Security
+
+############################
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+############################
+
+# Database
+
+############################
+*.db
+*.sqlite
+*.sqlite3
+
+############################
+
+# Temporary
+
+############################
+tmp/
+temp/
