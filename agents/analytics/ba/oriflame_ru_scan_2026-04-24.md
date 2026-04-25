@@ -1,5 +1,8 @@
 # Анализ oriflame.ru от 2026-04-24
 
+> Этот документ является исходным route-scan donor-сайта.
+> Актуальный backlog под продуктовую модель Best Ori Gin зафиксирован в `agents/analytics/ba/bestorigin_feature_inventory_2026-04-25.md`.
+
 ## Метод сканирования
 - Источник истины для SPA-маршрутов: клиентский manifest `https://oriflame.ru/assets/manifest-c6aae4ba.js`.
 - Из manifest извлечены все зарегистрированные client-side routes, route modules и parameterized paths.
