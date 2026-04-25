@@ -6,7 +6,7 @@ Primary process entrypoint for this repository (for a new feature, except `agent
 ## Стэк технологий:
 - Backend: Java, SpringBoot, Maven, Liquibase, Hibernate, MapStruct, Lombok, Postgres, S3/MinIO
 - Frontend: TypeScript, React, Ant Design
-- Infrastructure: Docker, Docker compose, Kubernetes, Helm, Ansible
+- Infrastructure: Docker, Docker compose, Kubernetes, Helm, Ansible, OpenSearch, Prometheus/Grafana
 
 ## Operating Rule
 
