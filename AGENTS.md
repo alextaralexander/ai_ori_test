@@ -3,6 +3,11 @@
 Primary process entrypoint for this repository (for a new feature, except `agents_app`): [agents/FEATURE_WORKFLOW__NEW.md](agents/FEATURE_WORKFLOW__NEW.md)
 Все артефакты по аналитике в рамках workflow всегда создавай на русском языке!
 
+## Стэк технологий:
+- Backend: Java, SpringBoot, Maven, Liquibase, Hibernate, MapStruct, Lombok, Postgres, S3/MinIO
+- Frontend: TypeScript, React, Ant Design
+- Infrastructure: Docker, Docker compose, Kubernetes, Helm, Ansible
+
 ## Operating Rule
 
 - Any task that touches `agents_app/` must be executed directly from the user request.
