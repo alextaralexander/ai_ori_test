@@ -151,7 +151,7 @@ Primary process entrypoint for this repository (for a new feature, except `agent
 - In analysis, architecture, implementation, and DevOps artifacts, explicitly state the version baseline or point to the artifact section where the latest-stable baseline for the task is recorded.
 
 ## Основной домен для этого приложения bestorigin.com
-- соответственно java пакеты и все остальное что нужно строить от этого домена
+- соответственно java пакеты и все остальное что нужно строим от этого домена
 
 ## Продуктовая идея этого приложения/продукта/платформы
 
