@@ -150,12 +150,12 @@ Primary process entrypoint for this repository (for a new feature, except `agent
 - If a task affects delivery flow, statuses, or handoffs, update artifacts under `agents/` in addition to product code.
 - In analysis, architecture, implementation, and DevOps artifacts, explicitly state the version baseline or point to the artifact section where the latest-stable baseline for the task is recorded.
 
-## Основной домен для этого приложения origin.com
+## Основной домен для этого приложения bestorigin.com
 - соответственно java пакеты и все остальное что нужно строить от этого домена
 
 ## Продуктовая идея этого приложения/продукта/платформы
 
-Платформа OriGin предназначена для реализации онлайн площадки продажи косметики.
+Платформа Best Ori Gin предназначена для реализации онлайн площадки продажи косметики.
 Основные функции:
 - Онлайн маркетплэйс для косметики
 - Multilevel marketing партеров покупающих косметику через этот маркетплэйс и продающих потом оффлайн
@@ -163,4 +163,4 @@ Primary process entrypoint for this repository (for a new feature, except `agent
 - Интеграция с WMS системой для получения остатков (с 1С)
 - Интеграция системой сборки заказов (конвеер с косметикой)
 - Интеграция системой доставки заказов (в том числе функции для владельцев точек выдачи)
-- Админские функции для всего что есть на сайте и для управленияинтеграциями
+- Админские функции для всего что есть на сайте и для управления интеграциями
