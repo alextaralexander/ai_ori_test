@@ -1,5 +1,5 @@
 @startuml
-title Module catalog. Полная ER-диаграмма на feature 004
+title Module catalog. Полная ER-диаграмма на feature 005
 
 entity "catalog_category" as category {
   * id : uuid
@@ -20,13 +20,58 @@ entity "catalog_product" as product {
   * short_description_i18n_key : varchar(220)
   * category_id : uuid
   * image_url : varchar(500)
+  * brand : varchar(128)
+  * volume_label : varchar(64)
   * campaign_code : varchar(40)
   * base_price : decimal(12,2)
+  promo_price : decimal(12,2)
   * currency : char(3)
   * availability_status : varchar(40)
+  available_quantity : int
+  * min_order_quantity : int
+  * max_order_quantity : int
   * published : boolean
   * popular_rank : int
   * created_at : timestamptz
+}
+
+entity "catalog_product_detail" as detail {
+  * product_id : uuid
+  --
+  * full_description_i18n_key : varchar(220)
+  usage_instructions_i18n_key : varchar(220)
+  ingredients_i18n_key : varchar(220)
+  characteristics_json : text
+}
+
+entity "catalog_product_media" as media {
+  * id : uuid
+  --
+  * product_id : uuid
+  * media_type : varchar(40)
+  * url : varchar(1000)
+  * alt_text_i18n_key : varchar(220)
+  * display_order : int
+  * primary_media : boolean
+}
+
+entity "catalog_product_attachment" as attachment {
+  * id : uuid
+  --
+  * product_id : uuid
+  * title_i18n_key : varchar(220)
+  * document_type : varchar(80)
+  * url : varchar(1000)
+  * display_order : int
+}
+
+entity "catalog_product_recommendation" as recommendation {
+  * id : uuid
+  --
+  * product_id : uuid
+  * recommended_product_id : uuid
+  * recommendation_type : varchar(40)
+  * display_order : int
 }
 
 entity "catalog_product_tag" as tag {
@@ -47,11 +92,17 @@ entity "catalog_cart_item" as cart_item {
   * product_id : uuid
   * quantity : int
   * partner_context : boolean
+  * source : varchar(40)
   * created_at : timestamptz
 }
 
 category ||--o{ category : parent
 category ||--o{ product : contains
+product ||--|| detail : has
+product ||--o{ media : has
+product ||--o{ attachment : has
+product ||--o{ recommendation : recommends
+product ||--o{ recommendation : recommended_as
 product ||--o{ tag : has
 product ||--o{ promo : has
 product ||--o{ cart_item : added_to

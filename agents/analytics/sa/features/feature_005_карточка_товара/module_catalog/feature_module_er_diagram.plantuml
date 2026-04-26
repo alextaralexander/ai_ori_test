@@ -1,0 +1,86 @@
+@startuml
+title Feature 005. Module catalog. ER-изменения карточки товара
+
+entity "catalog_product" as catalog_product {
+  * product_code : varchar(64)
+  --
+  name : varchar(255)
+  category_code : varchar(64)
+  brand : varchar(128)
+  volume_label : varchar(64)
+  base_price : numeric(12,2)
+  promo_price : numeric(12,2)
+  currency : varchar(3)
+  availability_status : varchar(32)
+  available_quantity : integer
+  min_order_quantity : integer
+  max_order_quantity : integer
+  is_published : boolean
+  campaign_code : varchar(64)
+  tags : text
+  promo_badges : text
+}
+
+entity "catalog_product_detail" as catalog_product_detail {
+  * product_code : varchar(64)
+  --
+  short_description : text
+  full_description : text
+  usage_instructions : text
+  ingredients : text
+  characteristics_json : text
+}
+
+entity "catalog_product_media" as catalog_product_media {
+  * media_id : varchar(64)
+  --
+  product_code : varchar(64)
+  media_type : varchar(32)
+  url : varchar(1024)
+  alt_text : varchar(255)
+  sort_order : integer
+  is_primary : boolean
+}
+
+entity "catalog_product_attachment" as catalog_product_attachment {
+  * attachment_id : varchar(64)
+  --
+  product_code : varchar(64)
+  title : varchar(255)
+  document_type : varchar(64)
+  url : varchar(1024)
+  sort_order : integer
+}
+
+entity "catalog_product_recommendation" as catalog_product_recommendation {
+  * recommendation_id : varchar(64)
+  --
+  product_code : varchar(64)
+  recommended_product_code : varchar(64)
+  recommendation_type : varchar(32)
+  sort_order : integer
+}
+
+entity "cart_line" as cart_line {
+  * cart_line_id : varchar(64)
+  --
+  product_code : varchar(64)
+  quantity : integer
+  partner_context_id : varchar(64)
+  source : varchar(32)
+}
+
+catalog_product ||--|| catalog_product_detail : "детализация"
+catalog_product ||--o{ catalog_product_media : "медиа"
+catalog_product ||--o{ catalog_product_attachment : "вложения"
+catalog_product ||--o{ catalog_product_recommendation : "исходящие рекомендации"
+catalog_product ||--o{ catalog_product_recommendation : "рекомендуемый товар"
+catalog_product ||--o{ cart_line : "строки корзины"
+
+note right of catalog_product
+  Feature #5 использует существующий продукт каталога
+  и добавляет детализацию карточки, медиа,
+  вложения, рекомендации и ограничения заказа.
+end note
+
+@enduml

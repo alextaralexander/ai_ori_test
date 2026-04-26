@@ -1,0 +1,277 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Catalog Product Card API
+  version: 0.5.0
+  description: Feature 005 API contract for product card, recommendations and add-to-cart from product card.
+servers:
+  - url: /api/catalog
+tags:
+  - name: catalog-product-card
+paths:
+  /products/{productCode}:
+    get:
+      tags:
+        - catalog-product-card
+      summary: Get product card by product code
+      operationId: getCatalogProductCard
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+        - name: audience
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Audience'
+        - name: campaignCode
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        '200':
+          description: Product card is available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogProductCardResponse'
+        '404':
+          description: Product is not found or is not published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '500':
+          description: Catalog backend error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+  /cart/items:
+    post:
+      tags:
+        - catalog-product-card
+      summary: Add catalog product to cart
+      operationId: addCatalogProductToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Cart summary after successful add.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartSummaryResponse'
+        '400':
+          description: Invalid quantity or unavailable item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '401':
+          description: User must authenticate before adding to cart.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+components:
+  schemas:
+    Audience:
+      type: string
+      enum: [GUEST, CUSTOMER, PARTNER]
+    AvailabilityStatus:
+      type: string
+      enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK, COMING_SOON, DISCONTINUED]
+    CatalogProductCardResponse:
+      type: object
+      required:
+        - productCode
+        - name
+        - price
+        - availability
+        - media
+        - information
+        - recommendations
+      properties:
+        productCode:
+          type: string
+        name:
+          type: string
+        categoryCode:
+          type: string
+        categoryName:
+          type: string
+        brand:
+          type: string
+        volumeLabel:
+          type: string
+        campaignCode:
+          type: string
+        badges:
+          type: array
+          items:
+            type: string
+        price:
+          $ref: '#/components/schemas/CatalogPrice'
+        availability:
+          $ref: '#/components/schemas/CatalogAvailability'
+        orderLimits:
+          $ref: '#/components/schemas/CatalogOrderLimits'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogProductMedia'
+        information:
+          $ref: '#/components/schemas/CatalogProductInformation'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogProductAttachment'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogProductRecommendation'
+    CatalogPrice:
+      type: object
+      required: [basePrice, currency]
+      properties:
+        basePrice:
+          type: number
+          format: double
+        promoPrice:
+          type: number
+          format: double
+          nullable: true
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+    CatalogAvailability:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/AvailabilityStatus'
+        availableQuantity:
+          type: integer
+          nullable: true
+        messageCode:
+          type: string
+          example: STR_MNEMO_CATALOG_ITEM_UNAVAILABLE
+    CatalogOrderLimits:
+      type: object
+      required: [minQuantity, maxQuantity]
+      properties:
+        minQuantity:
+          type: integer
+          minimum: 1
+        maxQuantity:
+          type: integer
+          minimum: 1
+    CatalogProductMedia:
+      type: object
+      required: [url, altText, primary]
+      properties:
+        url:
+          type: string
+        altText:
+          type: string
+        primary:
+          type: boolean
+        sortOrder:
+          type: integer
+    CatalogProductInformation:
+      type: object
+      properties:
+        shortDescription:
+          type: string
+        fullDescription:
+          type: string
+        usageInstructions:
+          type: string
+        ingredients:
+          type: string
+        characteristics:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCharacteristic'
+    CatalogCharacteristic:
+      type: object
+      required: [name, value]
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    CatalogProductAttachment:
+      type: object
+      required: [title, url]
+      properties:
+        title:
+          type: string
+        documentType:
+          type: string
+        url:
+          type: string
+    CatalogProductRecommendation:
+      type: object
+      required: [productCode, name, price, availability, recommendationType]
+      properties:
+        productCode:
+          type: string
+        name:
+          type: string
+        imageUrl:
+          type: string
+        price:
+          $ref: '#/components/schemas/CatalogPrice'
+        availability:
+          $ref: '#/components/schemas/CatalogAvailability'
+        recommendationType:
+          type: string
+          enum: [RELATED, CROSS_SELL, ALTERNATIVE]
+    AddToCartRequest:
+      type: object
+      required: [productCode, quantity, source]
+      properties:
+        productCode:
+          type: string
+          maxLength: 64
+        quantity:
+          type: integer
+          minimum: 1
+        partnerContextId:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum: [SEARCH_RESULT, PRODUCT_CARD]
+    CartSummaryResponse:
+      type: object
+      required: [itemsCount, totalQuantity, messageCode]
+      properties:
+        itemsCount:
+          type: integer
+        totalQuantity:
+          type: integer
+        messageCode:
+          type: string
+          example: STR_MNEMO_CATALOG_CART_ITEM_ADDED
+    CatalogErrorResponse:
+      type: object
+      required: [code, messageCode]
+      properties:
+        code:
+          type: string
+        messageCode:
+          type: string
+          example: STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND

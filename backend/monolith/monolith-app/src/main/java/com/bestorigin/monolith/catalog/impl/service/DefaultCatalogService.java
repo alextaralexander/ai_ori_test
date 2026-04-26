@@ -13,13 +13,16 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultCatalogService implements CatalogService {
 
     private static final String EMPTY_CODE = "STR_MNEMO_CATALOG_SEARCH_EMPTY";
+    private static final String NOT_FOUND_CODE = "STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND";
     private static final String UNAVAILABLE_CODE = "STR_MNEMO_CATALOG_ITEM_UNAVAILABLE";
+    private static final String QUANTITY_LIMIT_CODE = "STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED";
     private static final String ADDED_CODE = "STR_MNEMO_CATALOG_CART_ITEM_ADDED";
 
     private final CatalogRepository repository;
@@ -60,12 +63,11 @@ public class DefaultCatalogService implements CatalogService {
         int from = Math.min(safePage * safeSize, filtered.size());
         int to = Math.min(from + safeSize, filtered.size());
         List<CatalogProductCardResponse> items = filtered.subList(from, to);
-        List<CatalogProductCardResponse> recommendations = recommendations(normalizedAudience);
         String messageCode = items.isEmpty() ? EMPTY_CODE : null;
 
         return new CatalogSearchResponse(
                 items,
-                recommendations,
+                recommendations(normalizedAudience),
                 safePage,
                 safeSize,
                 filtered.size(),
@@ -75,22 +77,48 @@ public class DefaultCatalogService implements CatalogService {
     }
 
     @Override
+    public CatalogProductCardResponse getProductCard(String productCode, Audience audience, String campaignCode) {
+        Audience normalizedAudience = audience == null ? Audience.GUEST : audience;
+        CatalogProduct product = repository.findProductBySku(productCode)
+                .filter(CatalogProduct::published)
+                .filter(item -> campaignCode == null || campaignCode.isBlank() || item.campaignCode().equals(campaignCode))
+                .orElseThrow(() -> new CatalogProductNotFoundException(NOT_FOUND_CODE));
+        return toDetailedCard(product, normalizedAudience);
+    }
+
+    @Override
     public CartSummaryResponse addToCart(AddToCartRequest request) {
         Audience audience = request.audience() == null ? Audience.GUEST : request.audience();
         if (audience == Audience.GUEST || request.quantity() <= 0) {
             throw new CatalogItemUnavailableException(UNAVAILABLE_CODE);
         }
-        CatalogProduct product = repository.findProduct(request.productId())
+        CatalogProduct product = resolveCartProduct(request)
                 .filter(CatalogProduct::published)
                 .filter(item -> item.availability() != AvailabilityStatus.OUT_OF_STOCK)
                 .orElseThrow(() -> new CatalogItemUnavailableException(UNAVAILABLE_CODE));
+        if (request.quantity() < product.minOrderQuantity()
+                || request.quantity() > product.maxOrderQuantity()
+                || request.quantity() > product.availableQuantity()) {
+            throw new CatalogItemUnavailableException(QUANTITY_LIMIT_CODE);
+        }
+        boolean partnerContext = audience == Audience.PARTNER || request.partnerContextId() != null && !request.partnerContextId().isBlank();
         CatalogRepository.CartSnapshot snapshot = repository.saveCartItem(
                 request.userContextId(),
                 product.id(),
                 request.quantity(),
-                audience == Audience.PARTNER
+                partnerContext
         );
-        return new CartSummaryResponse(snapshot.itemsCount(), snapshot.totalQuantity(), ADDED_CODE);
+        return new CartSummaryResponse(snapshot.itemsCount(), snapshot.totalQuantity(), ADDED_CODE, partnerContext);
+    }
+
+    private Optional<CatalogProduct> resolveCartProduct(AddToCartRequest request) {
+        if (request.productCode() != null && !request.productCode().isBlank()) {
+            return repository.findProductBySku(request.productCode());
+        }
+        if (request.productId() != null && !request.productId().isBlank()) {
+            return repository.findProduct(request.productId());
+        }
+        return Optional.empty();
     }
 
     private List<CatalogProductCardResponse> recommendations(Audience audience) {
@@ -102,7 +130,37 @@ public class DefaultCatalogService implements CatalogService {
                 .toList();
     }
 
+    private List<CatalogProductCardResponse.CatalogProductRecommendation> productRecommendations(CatalogProduct current) {
+        return repository.findPublishedProducts().stream()
+                .filter(product -> !product.id().equals(current.id()))
+                .filter(product -> product.availability() != AvailabilityStatus.OUT_OF_STOCK)
+                .sorted(Comparator.comparingInt(CatalogProduct::popularRank).reversed())
+                .limit(4)
+                .map(product -> new CatalogProductCardResponse.CatalogProductRecommendation(
+                        product.sku(),
+                        displayName(product),
+                        product.imageUrl(),
+                        product.price(),
+                        product.currency(),
+                        product.availability(),
+                        product.tags().contains("serum") ? "CROSS_SELL" : "RELATED"
+                ))
+                .toList();
+    }
+
+    private CatalogProductCardResponse toDetailedCard(CatalogProduct product, Audience audience) {
+        return baseCard(product, audience, productRecommendations(product));
+    }
+
     private static CatalogProductCardResponse toCard(CatalogProduct product, Audience audience) {
+        return baseCard(product, audience, List.of());
+    }
+
+    private static CatalogProductCardResponse baseCard(
+            CatalogProduct product,
+            Audience audience,
+            List<CatalogProductCardResponse.CatalogProductRecommendation> recommendations
+    ) {
         boolean canAdd = audience != Audience.GUEST && product.availability() != AvailabilityStatus.OUT_OF_STOCK;
         return new CatalogProductCardResponse(
                 product.id(),
@@ -120,8 +178,72 @@ public class DefaultCatalogService implements CatalogService {
                         : product.tags(),
                 product.promoBadges(),
                 canAdd,
-                canAdd ? null : UNAVAILABLE_CODE
+                canAdd ? null : UNAVAILABLE_CODE,
+                product.sku(),
+                displayName(product),
+                categoryName(product.categorySlug()),
+                product.brand(),
+                product.volumeLabel(),
+                product.campaignCode(),
+                new CatalogProductCardResponse.CatalogOrderLimits(product.minOrderQuantity(), product.maxOrderQuantity()),
+                media(product),
+                information(product),
+                attachments(product),
+                recommendations
         );
+    }
+
+    private static List<CatalogProductCardResponse.CatalogProductMedia> media(CatalogProduct product) {
+        return List.of(
+                new CatalogProductCardResponse.CatalogProductMedia(product.imageUrl(), displayName(product), true, 1),
+                new CatalogProductCardResponse.CatalogProductMedia(product.imageUrl().replace(".jpg", "-detail.jpg"), displayName(product), false, 2)
+        );
+    }
+
+    private static CatalogProductCardResponse.CatalogProductInformation information(CatalogProduct product) {
+        return new CatalogProductCardResponse.CatalogProductInformation(
+                displayDescription(product),
+                displayDescription(product) + " Подходит для ежедневного ухода Best Ori Gin.",
+                "Нанесите небольшое количество на чистую кожу и распределите мягкими движениями.",
+                "Вода, глицерин, растительные экстракты, косметическая основа.",
+                List.of(
+                        new CatalogProductCardResponse.CatalogCharacteristic("Тип кожи", product.categorySlug().equals("face-care") ? "Для всех типов кожи" : "Универсальный"),
+                        new CatalogProductCardResponse.CatalogCharacteristic("Кампания", product.campaignCode()),
+                        new CatalogProductCardResponse.CatalogCharacteristic("Объем", product.volumeLabel())
+                )
+        );
+    }
+
+    private static List<CatalogProductCardResponse.CatalogProductAttachment> attachments(CatalogProduct product) {
+        return List.of(new CatalogProductCardResponse.CatalogProductAttachment(
+                "Инструкция и состав",
+                "PRODUCT_INFO",
+                "/assets/catalog/" + product.slug() + "-info.pdf"
+        ));
+    }
+
+    private static String displayName(CatalogProduct product) {
+        if (product.sku().contains("CREAM")) {
+            return "Увлажняющий крем Best Ori Gin";
+        }
+        if (product.sku().contains("SERUM")) {
+            return "Сыворотка Vitamin Glow";
+        }
+        return "Товар Best Ori Gin";
+    }
+
+    private static String displayDescription(CatalogProduct product) {
+        if (product.sku().contains("CREAM")) {
+            return "Крем для увлажнения и поддержки сияния кожи.";
+        }
+        if (product.sku().contains("SERUM")) {
+            return "Сыворотка для ровного тона и свежего вида кожи.";
+        }
+        return "Косметический продукт текущей кампании.";
+    }
+
+    private static String categoryName(String categorySlug) {
+        return "face-care".equals(categorySlug) ? "Уход за лицом" : "Макияж";
     }
 
     private static List<String> appendPartnerTag(List<String> tags) {

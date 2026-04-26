@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-005-product-card-001" author="codex">
+        <addColumn tableName="catalog_product">
+            <column name="brand" type="varchar(128)" defaultValue="Best Ori Gin">
+                <constraints nullable="false"/>
+            </column>
+            <column name="volume_label" type="varchar(64)" defaultValue="50 ml">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promo_price" type="decimal(12,2)"/>
+            <column name="available_quantity" type="int"/>
+            <column name="min_order_quantity" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_order_quantity" type="int" defaultValueNumeric="12">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <createTable tableName="catalog_product_detail">
+            <column name="product_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="full_description_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usage_instructions_i18n_key" type="varchar(220)"/>
+            <column name="ingredients_i18n_key" type="varchar(220)"/>
+            <column name="characteristics_json" type="text"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_product_detail"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_detail_product"/>
+
+        <createTable tableName="catalog_product_media">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="media_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="alt_text_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_media" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_product_media"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_media_product"/>
+        <createIndex tableName="catalog_product_media" indexName="idx_catalog_product_media_order">
+            <column name="product_id"/>
+            <column name="display_order"/>
+        </createIndex>
+
+        <createTable tableName="catalog_product_attachment">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_type" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_product_attachment"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_attachment_product"/>
+        <createIndex tableName="catalog_product_attachment" indexName="idx_catalog_product_attachment_order">
+            <column name="product_id"/>
+            <column name="display_order"/>
+        </createIndex>
+
+        <createTable tableName="catalog_product_recommendation">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recommended_product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recommendation_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_product_recommendation"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_recommendation_product"/>
+        <addForeignKeyConstraint baseTableName="catalog_product_recommendation"
+                                 baseColumnNames="recommended_product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_recommendation_target"/>
+        <createIndex tableName="catalog_product_recommendation" indexName="idx_catalog_product_recommendation_order">
+            <column name="product_id"/>
+            <column name="recommendation_type"/>
+            <column name="display_order"/>
+        </createIndex>
+
+        <addColumn tableName="catalog_cart_item">
+            <column name="source" type="varchar(40)" defaultValue="SEARCH_RESULT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addCheckConstraint tableName="catalog_product"
+                            constraintName="chk_catalog_product_order_limits"
+                            checkConstraint="min_order_quantity &gt; 0 and max_order_quantity &gt;= min_order_quantity"/>
+    </changeSet>
+</databaseChangeLog>

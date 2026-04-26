@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" role="img" aria-label="Схематичный макет состояний карточки товара">
+  <rect x="0" y="0" width="1180" height="760" fill="#ffffff"/>
+  <text x="40" y="40" font-family="Arial" font-size="20">Состояния карточки товара</text>
+  <rect x="40" y="80" width="340" height="250" fill="none" stroke="#222"/>
+  <text x="70" y="115" font-family="Arial" font-size="16">Доступен</text>
+  <text x="70" y="155" font-family="Arial" font-size="13">Цена, промо, остаток</text>
+  <rect x="70" y="185" width="130" height="42" fill="none" stroke="#444"/>
+  <text x="92" y="212" font-family="Arial" font-size="12">Количество</text>
+  <rect x="215" y="185" width="130" height="42" fill="none" stroke="#444"/>
+  <text x="244" y="212" font-family="Arial" font-size="12">В корзину</text>
+  <text x="70" y="265" font-family="Arial" font-size="13">После успеха: подтверждение и checkout</text>
+  <rect x="420" y="80" width="340" height="250" fill="none" stroke="#222"/>
+  <text x="450" y="115" font-family="Arial" font-size="16">Недоступен</text>
+  <text x="450" y="155" font-family="Arial" font-size="13">Статус и причина недоступности</text>
+  <rect x="450" y="185" width="280" height="42" fill="none" stroke="#444"/>
+  <text x="520" y="212" font-family="Arial" font-size="12">Сообщить о поступлении</text>
+  <text x="450" y="265" font-family="Arial" font-size="13">Рекомендации замены ниже</text>
+  <rect x="800" y="80" width="340" height="250" fill="none" stroke="#222"/>
+  <text x="830" y="115" font-family="Arial" font-size="16">Не найден</text>
+  <text x="830" y="155" font-family="Arial" font-size="13">Локализованное пустое состояние</text>
+  <rect x="830" y="185" width="280" height="42" fill="none" stroke="#444"/>
+  <text x="900" y="212" font-family="Arial" font-size="12">Вернуться в каталог</text>
+  <text x="830" y="265" font-family="Arial" font-size="13">Без stack trace и raw JSON</text>
+  <rect x="40" y="380" width="540" height="300" fill="none" stroke="#222"/>
+  <text x="70" y="420" font-family="Arial" font-size="16">Ошибка добавления</text>
+  <text x="70" y="460" font-family="Arial" font-size="13">Некорректное количество, лимит или остаток</text>
+  <rect x="70" y="495" width="470" height="70" fill="none" stroke="#777"/>
+  <text x="90" y="535" font-family="Arial" font-size="13">Локализованная причина через i18n / STR_MNEMO</text>
+  <rect x="70" y="595" width="170" height="42" fill="none" stroke="#444"/>
+  <text x="112" y="622" font-family="Arial" font-size="12">Повторить</text>
+  <rect x="620" y="380" width="520" height="300" fill="none" stroke="#222"/>
+  <text x="650" y="420" font-family="Arial" font-size="16">Неполные данные</text>
+  <text x="650" y="460" font-family="Arial" font-size="13">Нет части медиа, вложений или рекомендаций</text>
+  <rect x="650" y="495" width="450" height="70" fill="none" stroke="#777"/>
+  <text x="670" y="535" font-family="Arial" font-size="13">Показываются только доступные блоки</text>
+  <text x="650" y="620" font-family="Arial" font-size="13">Основная информация и покупательский блок остаются видимыми</text>
+</svg>

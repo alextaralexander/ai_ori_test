@@ -9,6 +9,8 @@ public interface CatalogRepository {
 
     Optional<CatalogProduct> findProduct(String productId);
 
+    Optional<CatalogProduct> findProductBySku(String sku);
+
     CartSnapshot saveCartItem(String userContextId, String productId, int quantity, boolean partnerContext);
 
     record CartSnapshot(int itemsCount, int totalQuantity) {

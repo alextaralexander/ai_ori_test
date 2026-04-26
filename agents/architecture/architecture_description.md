@@ -1,14 +1,14 @@
-# Best Ori Gin. Описание архитектуры на feature 004
+# Best Ori Gin. Описание архитектуры на feature 005
 
 ## Version baseline
-На дату старта задачи 26.04.2026 используется совместимый baseline текущего монолита: Java 25, Spring Boot 4.0.6, Maven 3.9.13, React 19.2.0, TypeScript 5.9.3, Ant Design 6.0.0, Liquibase XML changelog policy и PostgreSQL-совместимая модель данных. В рамках feature #4 зависимости не обновляются, чтобы сохранить совместимость с уже реализованными feature #1-#3; обновление major/minor baseline требует отдельной миграционной задачи.
+На дату старта задачи 26.04.2026 используется совместимый baseline текущего монолита: Java 25, Spring Boot 4.0.6, Maven 3.9.13, React 19.2.0, TypeScript 5.9.3, Ant Design 6.0.0, Liquibase XML changelog policy и PostgreSQL-совместимая модель данных. В рамках feature #5 зависимости не обновляются, чтобы сохранить совместимость с уже реализованными feature #1-#4; обновление major/minor baseline требует отдельной миграционной задачи.
 
 ## Модули
-- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`, `/FAQ`, `/faq`, `/info/:section?`, `/documents/:documentType`, `/search`.
+- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`, `/FAQ`, `/faq`, `/info/:section?`, `/documents/:documentType`, `/search`, `/product/:productCode`.
 - `backend/monolith/public-content`: Spring Boot модуль read-only API для публичной CMS-конфигурации, новостей, контентных страниц, офферов, FAQ, информационных разделов и документов.
-- `backend/monolith/catalog`: Spring Boot модуль API для поиска товаров, фильтров, сортировки, карточек выдачи, рекомендаций и quick add в корзину.
+- `backend/monolith/catalog`: Spring Boot модуль API для поиска товаров, фильтров, сортировки, карточек выдачи, детальной карточки товара, рекомендаций и quick add в корзину.
 - `PostgreSQL public-content schema`: целевое хранение страниц, блоков, навигации, новостей, content pages, offers, FAQ, info sections, documents и archive versions.
-- `PostgreSQL catalog schema`: целевое хранение категорий, товаров, тегов, промо-меток и строк корзины quick add.
+- `PostgreSQL catalog schema`: целевое хранение категорий, товаров, детализации карточек, медиа, вложений, рекомендаций, тегов, промо-меток и строк корзины quick add.
 - `CMS admin контур`: будущий административный контур для управления публичным контентом и справкой.
 - `Auth/Profile контур`: будущий контур входа, профиля и определения пользовательской аудитории.
 - `Cart/Order контур`: будущий полноценный контур корзины, заказа, оплаты и до заказа; feature #4 добавляет только минимальный quick add summary.
@@ -17,10 +17,10 @@
 ## Связи
 - Пользователи открывают публичные маршруты через `frontend/public-web`.
 - Frontend вызывает `backend/monolith/public-content` по REST для страниц, навигации, новостей, контента, офферов, FAQ, info и documents.
-- Frontend вызывает `backend/monolith/catalog` по REST для `/api/catalog/search` и `/api/catalog/cart/items`.
+- Frontend вызывает `backend/monolith/catalog` по REST для `/api/catalog/search`, `/api/catalog/products/{productCode}` и `/api/catalog/cart/items`.
 - Backend возвращает DTO с i18n-ключами и mnemonic-кодами `STR_MNEMO_*`; пользовательские тексты локализуются на frontend.
 - `public-content` ссылается на каталог через `productRef` и route references на `/search`; синхронная загрузка товаров выполняется frontend через `catalog`.
-- `catalog` подготовлен к будущей интеграции с `Cart/Order контуром`, но на feature #4 хранит минимальные cart summary данные внутри owning module.
+- `catalog` подготовлен к будущей интеграции с `Cart/Order контуром`, но на feature #5 хранит минимальные cart summary данные внутри owning module и передает checkout handoff через frontend route `/checkout`.
 - CMS admin в будущих фичах будет управлять теми же сущностями через модуль `public-content`.
 
 ## Ownership
@@ -41,7 +41,14 @@ Backend module `catalog` соблюдает package policy:
 - `impl/config`: module metadata и OpenAPI group metadata.
 
 ## Локализация и сообщения
-Все новые frontend user-facing строки размещаются в `resources_ru.ts` и `resources_en.ts`. Backend не отправляет hardcoded пользовательские тексты в API responses; для предопределенных состояний используются `STR_MNEMO_PUBLIC_FAQ_EMPTY`, `STR_MNEMO_PUBLIC_INFO_NOT_FOUND`, `STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND`, `STR_MNEMO_CATALOG_SEARCH_EMPTY`, `STR_MNEMO_CATALOG_ITEM_UNAVAILABLE`, `STR_MNEMO_CATALOG_CART_ITEM_ADDED` и существующие коды публичного контента.
+Все новые frontend user-facing строки размещаются в `resources_ru.ts` и `resources_en.ts`. Backend не отправляет hardcoded пользовательские тексты в API responses; для предопределенных состояний используются `STR_MNEMO_PUBLIC_FAQ_EMPTY`, `STR_MNEMO_PUBLIC_INFO_NOT_FOUND`, `STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND`, `STR_MNEMO_CATALOG_SEARCH_EMPTY`, `STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND`, `STR_MNEMO_CATALOG_ITEM_UNAVAILABLE`, `STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED`, `STR_MNEMO_CATALOG_CART_ITEM_ADDED`, `STR_MNEMO_AUTH_REQUIRED` и существующие коды публичного контента.
+
+## Feature #5
+Feature #5 расширяет модуль `catalog` и frontend route `/product/:productCode`:
+- `GET /api/catalog/products/{productCode}` для детальной карточки товара, медиа, описания, состава, вложений, доступности, ограничений заказа и рекомендаций.
+- `POST /api/catalog/cart/items` принимает `source=PRODUCT_CARD`, `partnerContextId` и проверяет лимиты карточки перед добавлением в корзину.
+- Frontend показывает desktop/mobile карточку товара, локализует статические подписи и `STR_MNEMO_*`, а после успешного добавления открывает checkout handoff.
+- Партнер получает partner-specific контекст покупки из карточки для будущей бонусной и комиссионной логики.
 
 ## Feature #4
 Feature #4 добавляет модуль `catalog` и route `/search`:

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-label="Схематичный desktop-макет карточки товара">
+  <rect x="0" y="0" width="1280" height="900" fill="#ffffff"/>
+  <text x="40" y="40" font-family="Arial" font-size="20">Карточка товара desktop</text>
+  <rect x="40" y="70" width="1200" height="64" fill="none" stroke="#222"/>
+  <text x="60" y="108" font-family="Arial" font-size="16">Шапка: логотип, поиск, каталог, корзина, профиль</text>
+  <rect x="40" y="155" width="1200" height="32" fill="none" stroke="#777"/>
+  <text x="60" y="176" font-family="Arial" font-size="14">Хлебные крошки: Главная / Каталог / Категория / Товар</text>
+  <rect x="40" y="215" width="560" height="480" fill="none" stroke="#222"/>
+  <text x="250" y="455" font-family="Arial" font-size="18">Галерея фото</text>
+  <rect x="620" y="215" width="620" height="480" fill="none" stroke="#222"/>
+  <text x="650" y="250" font-family="Arial" font-size="18">Название товара</text>
+  <text x="650" y="285" font-family="Arial" font-size="14">Код, бренд, категория, объем</text>
+  <rect x="650" y="315" width="250" height="52" fill="none" stroke="#444"/>
+  <text x="670" y="347" font-family="Arial" font-size="16">Цена и промо-цена</text>
+  <rect x="920" y="315" width="270" height="52" fill="none" stroke="#444"/>
+  <text x="940" y="347" font-family="Arial" font-size="16">Статус доступности</text>
+  <rect x="650" y="395" width="140" height="48" fill="none" stroke="#444"/>
+  <text x="675" y="425" font-family="Arial" font-size="15">Количество</text>
+  <rect x="810" y="395" width="190" height="48" fill="none" stroke="#444"/>
+  <text x="840" y="425" font-family="Arial" font-size="15">В корзину</text>
+  <rect x="1020" y="395" width="170" height="48" fill="none" stroke="#444"/>
+  <text x="1042" y="425" font-family="Arial" font-size="15">Checkout</text>
+  <rect x="650" y="470" width="540" height="70" fill="none" stroke="#777"/>
+  <text x="670" y="500" font-family="Arial" font-size="14">Промо-метки, ограничения заказа, остаток</text>
+  <rect x="650" y="565" width="540" height="95" fill="none" stroke="#777"/>
+  <text x="670" y="600" font-family="Arial" font-size="14">Краткое описание и основные характеристики</text>
+  <rect x="40" y="725" width="1200" height="95" fill="none" stroke="#222"/>
+  <text x="60" y="760" font-family="Arial" font-size="16">Информационные секции: описание, применение, характеристики, состав, вложения</text>
+  <rect x="40" y="840" width="1200" height="45" fill="none" stroke="#222"/>
+  <text x="60" y="868" font-family="Arial" font-size="16">Рекомендации, cross-sell, related offers</text>
+</svg>

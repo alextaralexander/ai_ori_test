@@ -175,6 +175,14 @@ export const resourcesEn = {
   'catalog.empty.reset': 'Reset filters',
   'catalog.recommendations.title': 'Recommended products',
   'catalog.card.addToCart': 'Add to cart',
+  'catalog.product.loading': 'Loading product card',
+  'catalog.product.backToSearch': 'Back to catalog',
+  'catalog.product.gallery': 'Product gallery',
+  'catalog.product.quantity': 'Quantity',
+  'catalog.product.checkout': 'Go to checkout',
+  'catalog.product.details': 'Product details',
+  'catalog.product.usage': 'How to use',
+  'catalog.product.ingredients': 'Ingredients',
   'catalog.product.hydratingFaceCream.name': 'Hydrating face cream',
   'catalog.product.hydratingFaceCream.description': 'Daily care cream with gentle hydration.',
   'catalog.product.vitaminGlowSerum.name': 'Vitamin glow serum',
@@ -186,6 +194,9 @@ export const resourcesEn = {
   'catalog.badge.limited': 'Limited',
   'catalog.badge.partner': 'Partner',
   'STR_MNEMO_CATALOG_SEARCH_EMPTY': 'No products found',
+  'STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND': 'Product not found',
   'STR_MNEMO_CATALOG_ITEM_UNAVAILABLE': 'Product is unavailable for cart add',
-  'STR_MNEMO_CATALOG_CART_ITEM_ADDED': 'Product added to cart'
+  'STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED': 'Quantity exceeds the available limit',
+  'STR_MNEMO_CATALOG_CART_ITEM_ADDED': 'Product added to cart',
+  'STR_MNEMO_AUTH_REQUIRED': 'Sign in is required to buy'
 } as const;

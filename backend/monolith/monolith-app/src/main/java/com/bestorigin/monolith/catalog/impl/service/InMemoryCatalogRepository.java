@@ -25,10 +25,16 @@ public class InMemoryCatalogRepository implements CatalogRepository {
                     "catalog.product.hydratingFaceCream.description",
                     "face-care",
                     "/assets/catalog/hydrating-face-cream.jpg",
+                    "Best Ori Gin",
+                    "50 ml",
                     "2026-C07",
                     new BigDecimal("1290.00"),
+                    new BigDecimal("990.00"),
                     "RUB",
                     AvailabilityStatus.IN_STOCK,
+                    18,
+                    1,
+                    12,
                     true,
                     100,
                     OffsetDateTime.parse("2026-04-01T10:00:00+03:00"),
@@ -43,10 +49,16 @@ public class InMemoryCatalogRepository implements CatalogRepository {
                     "catalog.product.vitaminGlowSerum.description",
                     "face-care",
                     "/assets/catalog/vitamin-glow-serum.jpg",
+                    "Best Ori Gin",
+                    "30 ml",
                     "2026-C07",
                     new BigDecimal("1590.00"),
+                    new BigDecimal("1390.00"),
                     "RUB",
                     AvailabilityStatus.LOW_STOCK,
+                    3,
+                    1,
+                    6,
                     true,
                     80,
                     OffsetDateTime.parse("2026-04-05T10:00:00+03:00"),
@@ -55,16 +67,22 @@ public class InMemoryCatalogRepository implements CatalogRepository {
             ),
             new CatalogProduct(
                     "33333333-3333-3333-3333-333333333333",
-                    "BOG-LIP-003",
+                    "BOG-SOLDOUT-001",
                     "velvet-lipstick",
                     "catalog.product.velvetLipstick.name",
                     "catalog.product.velvetLipstick.description",
                     "makeup",
                     "/assets/catalog/velvet-lipstick.jpg",
+                    "Best Ori Gin",
+                    "4 g",
                     "2026-C07",
                     new BigDecimal("790.00"),
+                    null,
                     "RUB",
                     AvailabilityStatus.OUT_OF_STOCK,
+                    0,
+                    1,
+                    5,
                     true,
                     40,
                     OffsetDateTime.parse("2026-03-28T10:00:00+03:00"),
@@ -83,6 +101,11 @@ public class InMemoryCatalogRepository implements CatalogRepository {
     @Override
     public Optional<CatalogProduct> findProduct(String productId) {
         return products.stream().filter(product -> product.id().equals(productId)).findFirst();
+    }
+
+    @Override
+    public Optional<CatalogProduct> findProductBySku(String sku) {
+        return products.stream().filter(product -> product.sku().equalsIgnoreCase(sku)).findFirst();
     }
 
     @Override

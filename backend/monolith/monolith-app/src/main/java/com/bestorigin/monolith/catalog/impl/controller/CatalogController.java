@@ -4,9 +4,11 @@ import com.bestorigin.monolith.catalog.api.AddToCartRequest;
 import com.bestorigin.monolith.catalog.api.Audience;
 import com.bestorigin.monolith.catalog.api.CartSummaryResponse;
 import com.bestorigin.monolith.catalog.api.CatalogErrorResponse;
+import com.bestorigin.monolith.catalog.api.CatalogProductCardResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSearchResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSort;
 import com.bestorigin.monolith.catalog.impl.service.CatalogItemUnavailableException;
+import com.bestorigin.monolith.catalog.impl.service.CatalogProductNotFoundException;
 import com.bestorigin.monolith.catalog.impl.service.CatalogService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +50,15 @@ public class CatalogController {
         return service.search(audience, query, category, priceMin, priceMax, availability, tags, promo, sort, page, size);
     }
 
+    @GetMapping("/products/{productCode}")
+    public CatalogProductCardResponse getProductCard(
+            @PathVariable String productCode,
+            @RequestParam(defaultValue = "GUEST") Audience audience,
+            @RequestParam(required = false) String campaignCode
+    ) {
+        return service.getProductCard(productCode, audience, campaignCode);
+    }
+
     @PostMapping("/cart/items")
     public CartSummaryResponse addToCart(@RequestBody AddToCartRequest request) {
         return service.addToCart(request);
@@ -55,5 +67,10 @@ public class CatalogController {
     @ExceptionHandler(CatalogItemUnavailableException.class)
     public ResponseEntity<CatalogErrorResponse> handleUnavailable(CatalogItemUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new CatalogErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(CatalogProductNotFoundException.class)
+    public ResponseEntity<CatalogErrorResponse> handleProductNotFound(CatalogProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CatalogErrorResponse(ex.getMessage()));
     }
 }

@@ -1,0 +1,55 @@
+@startuml
+title Feature 005. Карточка товара. Последовательность взаимодействий
+
+actor "Гость / Покупатель / Партнер" as User
+participant "web-shell\nProductCardView" as Frontend
+participant "catalog\nCatalogController" as CatalogController
+participant "catalog\nCatalogService" as CatalogService
+database "catalog repository" as CatalogRepository
+participant "cart context" as Cart
+participant "frontend i18n" as I18n
+
+User -> Frontend: открыть /product/{productCode}
+Frontend -> CatalogController: GET /api/catalog/products/{productCode}?audience&campaignCode
+CatalogController -> CatalogService: getProductCard(productCode, audience, campaignCode)
+CatalogService -> CatalogRepository: findPublishedProductCard(productCode, campaignCode)
+CatalogRepository --> CatalogService: product, detail, media, attachments, recommendations
+
+alt товар найден и доступен аудитории
+  CatalogService --> CatalogController: CatalogProductCardResponse
+  CatalogController --> Frontend: 200 response
+  Frontend -> I18n: labels для цены, доступности, секций и кнопок
+  I18n --> Frontend: локализованные строки
+  Frontend --> User: галерея, цена, описание, состав, рекомендации, покупательский блок
+else товар не найден
+  CatalogService --> CatalogController: CatalogProductNotFoundException(STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND)
+  CatalogController --> Frontend: 404 CatalogErrorResponse
+  Frontend -> I18n: STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND
+  I18n --> Frontend: локализованное состояние
+  Frontend --> User: товар не найден, переход в каталог
+end
+
+alt пользователь добавляет товар в корзину
+  User -> Frontend: выбрать quantity и нажать "В корзину"
+  Frontend -> CatalogController: POST /api/catalog/cart/items
+  CatalogController -> CatalogService: addToCart(productCode, quantity, partnerContextId, PRODUCT_CARD)
+  CatalogService -> CatalogRepository: validateAvailabilityAndLimits(productCode, quantity)
+  CatalogRepository --> CatalogService: availability, limits, price
+  alt товар доступен
+    CatalogService -> Cart: addOrUpdateLine(productCode, quantity, partnerContextId, PRODUCT_CARD)
+    Cart --> CatalogService: CartSummaryResponse(STR_MNEMO_CATALOG_CART_ITEM_ADDED)
+    CatalogService --> CatalogController: CartSummaryResponse
+    CatalogController --> Frontend: 200 CartSummaryResponse
+    Frontend -> I18n: STR_MNEMO_CATALOG_CART_ITEM_ADDED
+    I18n --> Frontend: локализованное подтверждение
+    Frontend --> User: обновленная корзина и доступный checkout
+  else недоступен или лимит превышен
+    CatalogService --> CatalogController: CatalogItemUnavailableException(STR_MNEMO_CATALOG_ITEM_UNAVAILABLE или STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED)
+    CatalogController --> Frontend: 400 CatalogErrorResponse
+    Frontend -> I18n: messageCode
+    I18n --> Frontend: локализованная причина
+    Frontend --> User: товар не добавлен, причина показана
+  end
+end
+
+@enduml

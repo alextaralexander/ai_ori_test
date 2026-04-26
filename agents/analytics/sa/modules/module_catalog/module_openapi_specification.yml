@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Best Ori Gin catalog module API
-  version: 1.0.0
+  version: 1.1.0
 paths:
   /api/catalog/search:
     get:
@@ -21,32 +21,12 @@ paths:
           in: query
           schema:
             type: string
-        - name: priceMin
-          in: query
-          schema:
-            type: number
-            format: decimal
-        - name: priceMax
-          in: query
-          schema:
-            type: number
-            format: decimal
         - name: availability
           in: query
           schema:
             type: string
             enum: [all, inStock, outOfStock]
             default: all
-        - name: tags
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-        - name: promo
-          in: query
-          schema:
-            type: boolean
         - name: sort
           in: query
           schema:
@@ -69,13 +49,66 @@ paths:
       responses:
         "200":
           description: Search result or empty state with recommendations
+  /api/catalog/products/{productCode}:
+    get:
+      summary: Получить детальную карточку товара
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+            default: GUEST
+        - name: campaignCode
+          in: query
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        "200":
+          description: Product card
+        "404":
+          description: Product not found or not published
   /api/catalog/cart/items:
     post:
-      summary: Добавить товар из выдачи в корзину
+      summary: Добавить товар из выдачи или карточки в корзину
       requestBody:
         required: true
       responses:
         "200":
           description: Cart summary after successful add
+        "400":
+          description: Invalid quantity or unavailable item
+        "401":
+          description: Authentication required
         "409":
           description: Product unavailable for cart add
+components:
+  schemas:
+    CatalogProductCardResponse:
+      type: object
+      properties:
+        productCode:
+          type: string
+        name:
+          type: string
+        price:
+          type: object
+        availability:
+          type: object
+        orderLimits:
+          type: object
+        media:
+          type: array
+        information:
+          type: object
+        attachments:
+          type: array
+        recommendations:
+          type: array

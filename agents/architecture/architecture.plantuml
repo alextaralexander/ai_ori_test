@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 004
+title Best Ori Gin. Архитектура платформы на feature 005
 
 skinparam componentStyle rectangle
 
@@ -19,23 +19,24 @@ component "Auth/Profile контур\nбудущие фичи" as AuthProfile
 component "Cart/Order контур\nбудущие фичи" as CartOrder
 component "Partner контур\nбудущие фичи" as PartnerArea
 
-Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, /search
-Customer --> PublicWeb : HTTPS публичные, клиентские маршруты и /search
-Partner --> PublicWeb : HTTPS публичные, партнерские маршруты и /search
+Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, /search, /product/:code
+Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, /search и /product/:code
+Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, /search и /product/:code
 ContentManager --> CmsAdmin : HTTPS управление контентом
 LegalEditor --> CmsAdmin : HTTPS версии документов и архив
 
 PublicWeb --> PublicContent : REST pages, navigation, entry-points
 PublicWeb --> PublicContent : REST news, content, offers
 PublicWeb --> PublicContent : REST faq, info, documents
-PublicWeb --> Catalog : REST search, filters, product cards
-PublicWeb --> Catalog : REST cart quick add
+PublicWeb --> Catalog : REST search, filters, product cards, recommendations
+PublicWeb --> Catalog : REST product detail, media, attachments, availability
+PublicWeb --> Catalog : REST cart quick add from search/product card
 PublicContent --> PublicDb : JDBC / Liquibase XML target model
 Catalog --> CatalogDb : JDBC / Liquibase XML target model
 CmsAdmin --> PublicContent : REST управление CMS-контентом
 PublicWeb --> AuthProfile : REST вход, профиль, audience
 PublicContent ..> Catalog : productRef / route references to /search
-Catalog ..> CartOrder : future order/cart integration boundary
+Catalog ..> CartOrder : future order/cart integration boundary and checkout handoff
 PublicWeb --> PartnerArea : route navigation в партнерский офис
 
 @enduml
