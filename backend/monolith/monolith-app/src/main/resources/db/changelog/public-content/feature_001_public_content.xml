@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-001-public-content-001" author="codex">
+        <createTable tableName="public_page_config">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="page_key" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="route_path" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_i18n_key" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_content_block">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="page_config_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_public_content_block_page" references="public_page_config(id)"/>
+            </column>
+            <column name="block_key" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="block_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload_json" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_navigation_item">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parent_id" type="uuid"/>
+            <column name="area" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_key" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label_i18n_key" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_value" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_entry_point">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entry_key" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="label_i18n_key" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_i18n_key" type="varchar(128)"/>
+            <column name="target_route" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

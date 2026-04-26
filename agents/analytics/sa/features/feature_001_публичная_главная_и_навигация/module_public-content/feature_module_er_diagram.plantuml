@@ -1,0 +1,59 @@
+@startuml
+title Feature 001. ER изменения модуля public-content
+
+entity public_page_config {
+  * id : uuid
+  --
+  * page_key : varchar(64)
+  * route_path : varchar(128)
+  * title_i18n_key : varchar(128)
+  * status : varchar(32)
+  * active_from : timestamptz
+  active_to : timestamptz
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity public_content_block {
+  * id : uuid
+  --
+  * page_config_id : uuid
+  * block_key : varchar(64)
+  * block_type : varchar(32)
+  * sort_order : integer
+  * enabled : boolean
+  * payload_json : jsonb
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity public_navigation_item {
+  * id : uuid
+  --
+  parent_id : uuid
+  * area : varchar(32)
+  * item_key : varchar(64)
+  * label_i18n_key : varchar(128)
+  * target_type : varchar(32)
+  * target_value : varchar(256)
+  * sort_order : integer
+  * audience : varchar(32)
+  * enabled : boolean
+}
+
+entity public_entry_point {
+  * id : uuid
+  --
+  * entry_key : varchar(64)
+  * label_i18n_key : varchar(128)
+  description_i18n_key : varchar(128)
+  * target_route : varchar(256)
+  * audience : varchar(32)
+  * sort_order : integer
+  * enabled : boolean
+}
+
+public_page_config ||--o{ public_content_block : contains
+public_navigation_item ||--o{ public_navigation_item : parent_child
+
+@enduml

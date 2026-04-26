@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+  title: Public Content API for feature 001
+  version: 1.0.0
+  description: API модуля public-content для публичной главной, community, навигации и entry points.
+servers:
+  - url: /api/public-content
+paths:
+  /pages/home:
+    get:
+      summary: Получить конфигурацию публичной главной
+      operationId: getHomePage
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Конфигурация главной страницы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPageResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /pages/community:
+    get:
+      summary: Получить конфигурацию public community
+      operationId: getCommunityPage
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Конфигурация community-страницы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPageResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /navigation:
+    get:
+      summary: Получить глобальную навигацию
+      operationId: getNavigation
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+        - name: area
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [HEADER, FOOTER, MOBILE_MENU]
+      responses:
+        '200':
+          description: Пункты навигации
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NavigationItem'
+  /entry-points:
+    get:
+      summary: Получить быстрые entry points
+      operationId: getEntryPoints
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Быстрые переходы для аудитории
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntryPoint'
+components:
+  parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+        example: ru-RU
+    Audience:
+      name: audience
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER]
+        default: GUEST
+  responses:
+    ServiceUnavailable:
+      description: Public content fallback must be used by frontend
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    PublicPageResponse:
+      type: object
+      required: [pageKey, routePath, titleKey, blocks, navigation, entryPoints]
+      properties:
+        pageKey:
+          type: string
+          example: HOME
+        routePath:
+          type: string
+          example: /home
+        titleKey:
+          type: string
+          example: public.home.title
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentBlock'
+        navigation:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+        entryPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryPoint'
+    ContentBlock:
+      type: object
+      required: [blockKey, blockType, sortOrder, payload]
+      properties:
+        blockKey:
+          type: string
+        blockType:
+          type: string
+          enum: [HERO, PROMO, QUICK_LINKS, COMMUNITY_FEED, FALLBACK]
+        sortOrder:
+          type: integer
+        payload:
+          type: object
+          additionalProperties: true
+    NavigationItem:
+      type: object
+      required: [itemKey, labelKey, targetType, targetValue, area, children]
+      properties:
+        itemKey:
+          type: string
+        labelKey:
+          type: string
+        targetType:
+          type: string
+          enum: [INTERNAL_ROUTE, EXTERNAL_URL]
+        targetValue:
+          type: string
+        area:
+          type: string
+          enum: [HEADER, FOOTER, MOBILE_MENU]
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+    EntryPoint:
+      type: object
+      required: [entryKey, labelKey, targetRoute, audience]
+      properties:
+        entryKey:
+          type: string
+        labelKey:
+          type: string
+        descriptionKey:
+          type: string
+          nullable: true
+        targetRoute:
+          type: string
+        audience:
+          type: string
+          enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER, ANY]
+    ErrorResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+          example: STR_MNEMO_PUBLIC_CONTENT_UNAVAILABLE

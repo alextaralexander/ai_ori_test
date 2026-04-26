@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="1400" viewBox="0 0 390 1400" role="img" aria-labelledby="title desc">
+  <title id="title">Макет mobile: публичная главная Best Ori Gin</title>
+  <desc id="desc">Схематичный мобильный макет с компактной навигацией, hero, CTA, промо и футером.</desc>
+  <rect x="0" y="0" width="390" height="1400" fill="#ffffff"/>
+  <rect x="16" y="20" width="358" height="64" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="32" y="58" font-family="Arial" font-size="16">Best Ori Gin</text>
+  <rect x="300" y="32" width="48" height="40" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="312" y="58" font-family="Arial" font-size="18">☰</text>
+
+  <rect x="16" y="112" width="358" height="300" fill="none" stroke="#111111" stroke-width="2"/>
+  <rect x="36" y="136" width="318" height="90" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="56" y="172" font-family="Arial" font-size="20">Hero из CMS</text>
+  <text x="56" y="202" font-family="Arial" font-size="14">Оффер текущей кампании</text>
+  <rect x="36" y="246" width="145" height="48" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="64" y="276" font-family="Arial" font-size="14">В каталог</text>
+  <rect x="196" y="246" width="158" height="48" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="210" y="276" font-family="Arial" font-size="14">Стать партнером</text>
+  <rect x="36" y="316" width="318" height="72" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="144" y="358" font-family="Arial" font-size="16">Hero media</text>
+
+  <text x="16" y="468" font-family="Arial" font-size="20">Быстрые переходы</text>
+  <rect x="16" y="488" width="168" height="92" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="58" y="540" font-family="Arial" font-size="16">Каталог</text>
+  <rect x="206" y="488" width="168" height="92" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="248" y="540" font-family="Arial" font-size="16">Benefits</text>
+  <rect x="16" y="600" width="168" height="92" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="50" y="652" font-family="Arial" font-size="16">Новости</text>
+  <rect x="206" y="600" width="168" height="92" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="238" y="652" font-family="Arial" font-size="16">Community</text>
+
+  <text x="16" y="748" font-family="Arial" font-size="20">Промо CMS</text>
+  <rect x="16" y="768" width="358" height="120" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="56" y="834" font-family="Arial" font-size="16">Промо 1</text>
+  <rect x="16" y="908" width="358" height="120" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="56" y="974" font-family="Arial" font-size="16">Промо 2</text>
+
+  <text x="16" y="1084" font-family="Arial" font-size="20">Персональный блок</text>
+  <rect x="16" y="1104" width="358" height="96" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="36" y="1154" font-family="Arial" font-size="14">Вход / профиль / заказы / офис</text>
+
+  <rect x="16" y="1250" width="358" height="112" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="36" y="1308" font-family="Arial" font-size="14">Footer: FAQ, документы, контакты</text>
+</svg>

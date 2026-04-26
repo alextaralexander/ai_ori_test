@@ -3,13 +3,13 @@ api:
   end_to_end_root: "agents/tests/api/end_to_end"
   targets:
     - module: "backend/monolith/monolith-app"
-      feature_target_dir: "src/test/java/pro/{Основной домен для этого приложения с точками замененными на слэши}/monolith/app/generated/features"
-      end_to_end_target_dir: "src/test/java/{Основной домен для этого приложения с точками замененными на слэши}/monolith/app/generated/end_to_end"
+      feature_target_dir: "src/test/java/com/bestorigin/monolith/app/generated"
+      end_to_end_target_dir: "src/test/java/com/bestorigin/monolith/app/generated/end_to_end"
 
 ui:
   feature_tests_root: "agents/tests/ui"
   end_to_end_root: "agents/tests/ui/end_to_end"
   targets:
     - module: "frontend/monolith/apps/web-shell"
-      feature_target_dir: "src/tests/generated/features"
+      feature_target_dir: "src/tests/generated"
       end_to_end_target_dir: "src/tests/generated/end_to_end"

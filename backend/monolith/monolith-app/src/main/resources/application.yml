@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bestorigin-monolith
+
+bestorigin:
+  public-content:
+    module-key: public-content
+    version-baseline: "Java 25, Spring Boot 4.0.6, Maven 3.9.13"

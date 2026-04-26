@@ -1,0 +1,40 @@
+@startuml
+title Feature 001. Последовательность публичной главной и навигации
+
+actor "Гость / Пользователь" as User
+participant "Frontend public-web" as FE
+participant "Auth context" as Auth
+participant "public-content API" as PublicContent
+database "public-content DB" as DB
+participant "Frontend i18n" as I18n
+
+User -> FE: Открывает /, /home или /community
+FE -> Auth: Проверить локальный session context
+Auth --> FE: audience = GUEST | CUSTOMER | PARTNER
+
+alt Главная страница
+  FE -> PublicContent: GET /api/public-content/pages/home?audience
+else Community
+  FE -> PublicContent: GET /api/public-content/pages/community?audience
+end
+
+PublicContent -> DB: Найти опубликованную page_config
+DB --> PublicContent: page_config + enabled blocks
+PublicContent -> DB: Найти navigation и entry_points по audience
+DB --> PublicContent: navigation + entry_points
+PublicContent --> FE: PublicPageResponse с i18n keys
+
+FE -> I18n: Разрешить titleKey, labelKey, descriptionKey
+I18n --> FE: Локализованные строки
+FE --> User: Header, hero, промо, быстрые переходы, footer
+
+alt Ошибка public-content
+  PublicContent --> FE: 503 STR_MNEMO_PUBLIC_CONTENT_UNAVAILABLE
+  FE -> I18n: Разрешить mnemonic и fallback labels
+  FE --> User: Публичный fallback без приватных данных
+end
+
+User -> FE: Выбирает CTA или пункт навигации
+FE --> User: Открывает каталог, community, benefits, вход, профиль, заказы или партнерский офис
+
+@enduml

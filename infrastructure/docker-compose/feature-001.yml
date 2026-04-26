@@ -1,0 +1,16 @@
+services:
+  bestorigin-backend:
+    build:
+      context: ../../backend/monolith/monolith-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+
+  bestorigin-frontend:
+    build:
+      context: ../../frontend/monolith/apps/web-shell
+    ports:
+      - "5173:80"
+    depends_on:
+      - bestorigin-backend

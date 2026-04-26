@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1600" viewBox="0 0 1440 1600" role="img" aria-labelledby="title desc">
+  <title id="title">Макет desktop: публичная главная Best Ori Gin</title>
+  <desc id="desc">Схематичный макет расположения header, hero, promo, быстрых переходов и footer для desktop.</desc>
+  <rect x="0" y="0" width="1440" height="1600" fill="#ffffff"/>
+  <rect x="80" y="32" width="1280" height="88" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="104" y="84" font-family="Arial" font-size="24">Логотип Best Ori Gin</text>
+  <rect x="360" y="52" width="560" height="48" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="384" y="83" font-family="Arial" font-size="20">Каталог | Новости | FAQ | Community | Benefits</text>
+  <rect x="1040" y="52" width="136" height="48" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="1070" y="83" font-family="Arial" font-size="20">Вход</text>
+  <rect x="1192" y="52" width="144" height="48" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="1212" y="83" font-family="Arial" font-size="20">Корзина</text>
+
+  <rect x="80" y="160" width="1280" height="360" fill="none" stroke="#111111" stroke-width="2"/>
+  <rect x="112" y="196" width="560" height="108" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="136" y="242" font-family="Arial" font-size="28">Hero из CMS</text>
+  <text x="136" y="280" font-family="Arial" font-size="20">Заголовок, описание, основной оффер кампании</text>
+  <rect x="112" y="336" width="180" height="56" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="142" y="372" font-family="Arial" font-size="20">В каталог</text>
+  <rect x="316" y="336" width="220" height="56" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="348" y="372" font-family="Arial" font-size="20">Стать партнером</text>
+  <rect x="760" y="196" width="552" height="288" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="940" y="348" font-family="Arial" font-size="24">Hero media</text>
+
+  <text x="80" y="584" font-family="Arial" font-size="28">Быстрые переходы</text>
+  <rect x="80" y="616" width="300" height="148" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="120" y="696" font-family="Arial" font-size="22">Каталог</text>
+  <rect x="404" y="616" width="300" height="148" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="444" y="696" font-family="Arial" font-size="22">Кампании</text>
+  <rect x="728" y="616" width="300" height="148" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="768" y="696" font-family="Arial" font-size="22">Benefits</text>
+  <rect x="1052" y="616" width="308" height="148" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="1092" y="696" font-family="Arial" font-size="22">Community</text>
+
+  <text x="80" y="840" font-family="Arial" font-size="28">Промо-блоки CMS</text>
+  <rect x="80" y="872" width="410" height="260" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="120" y="1000" font-family="Arial" font-size="22">Промо 1</text>
+  <rect x="515" y="872" width="410" height="260" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="555" y="1000" font-family="Arial" font-size="22">Промо 2</text>
+  <rect x="950" y="872" width="410" height="260" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="990" y="1000" font-family="Arial" font-size="22">Промо 3</text>
+
+  <text x="80" y="1204" font-family="Arial" font-size="28">Персональный блок</text>
+  <rect x="80" y="1236" width="1280" height="140" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="112" y="1316" font-family="Arial" font-size="22">Гость: вход и регистрация. Пользователь: профиль, заказы, бонусы или партнерский офис.</text>
+
+  <rect x="80" y="1430" width="1280" height="120" fill="none" stroke="#111111" stroke-width="2"/>
+  <text x="112" y="1496" font-family="Arial" font-size="22">Footer: документы, FAQ, контакты, партнерские материалы, юридическая информация</text>
+</svg>

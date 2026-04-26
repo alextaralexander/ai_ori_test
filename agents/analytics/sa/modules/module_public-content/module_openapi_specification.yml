@@ -1,0 +1,193 @@
+openapi: 3.1.0
+info:
+  title: Public Content Module API
+  version: 1.0.0
+  description: Полная OpenAPI спецификация модуля public-content.
+servers:
+  - url: /api/public-content
+paths:
+  /pages/home:
+    get:
+      summary: Получить главную страницу
+      operationId: getHomePage
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          $ref: '#/components/responses/PublicPage'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /pages/community:
+    get:
+      summary: Получить community-страницу
+      operationId: getCommunityPage
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          $ref: '#/components/responses/PublicPage'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /navigation:
+    get:
+      summary: Получить навигацию
+      operationId: getNavigation
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+        - $ref: '#/components/parameters/NavigationArea'
+      responses:
+        '200':
+          description: Навигация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavigationResponse'
+  /entry-points:
+    get:
+      summary: Получить entry points
+      operationId: getEntryPoints
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Entry points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryPointResponse'
+components:
+  parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+    Audience:
+      name: audience
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/Audience'
+    NavigationArea:
+      name: area
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [HEADER, FOOTER, MOBILE_MENU]
+  responses:
+    PublicPage:
+      description: Public page response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PublicPageResponse'
+    ServiceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    Audience:
+      type: string
+      enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER, ANY]
+    PublicPageResponse:
+      type: object
+      required: [pageKey, routePath, titleKey, blocks, navigation, entryPoints]
+      properties:
+        pageKey:
+          type: string
+        routePath:
+          type: string
+        titleKey:
+          type: string
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentBlock'
+        navigation:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+        entryPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryPoint'
+    ContentBlock:
+      type: object
+      required: [blockKey, blockType, sortOrder, payload]
+      properties:
+        blockKey:
+          type: string
+        blockType:
+          type: string
+          enum: [HERO, PROMO, QUICK_LINKS, COMMUNITY_FEED, FALLBACK]
+        sortOrder:
+          type: integer
+        payload:
+          type: object
+          additionalProperties: true
+    NavigationResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+    NavigationItem:
+      type: object
+      required: [itemKey, labelKey, targetType, targetValue, area, children]
+      properties:
+        itemKey:
+          type: string
+        labelKey:
+          type: string
+        targetType:
+          type: string
+          enum: [INTERNAL_ROUTE, EXTERNAL_URL]
+        targetValue:
+          type: string
+        area:
+          type: string
+          enum: [HEADER, FOOTER, MOBILE_MENU]
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+    EntryPointResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryPoint'
+    EntryPoint:
+      type: object
+      required: [entryKey, labelKey, targetRoute, audience]
+      properties:
+        entryKey:
+          type: string
+        labelKey:
+          type: string
+        descriptionKey:
+          type: string
+          nullable: true
+        targetRoute:
+          type: string
+        audience:
+          $ref: '#/components/schemas/Audience'
+    ErrorResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
