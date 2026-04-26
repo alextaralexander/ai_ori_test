@@ -1,0 +1,59 @@
+@startuml
+title Feature 002. Sequence diagram. Контентные страницы и новости
+
+actor "Гость / пользователь" as User
+participant "Web Shell React" as Frontend
+participant "public-content controller" as Controller
+participant "PublicContentService" as Service
+database "public-content DB" as DB
+participant "Frontend i18n dictionaries" as I18n
+participant "Каталог" as Catalog
+
+User -> Frontend: Открывает /news
+Frontend -> Controller: GET /api/public-content/news?audience=GUEST
+Controller -> Service: getNewsFeed(GUEST)
+Service -> DB: Найти PUBLISHED новости по периоду публикации
+DB --> Service: News items
+Service --> Controller: NewsFeedResponse с i18n-ключами
+Controller --> Frontend: 200 NewsFeedResponse
+Frontend -> I18n: Resolve titleKey, summaryKey, emptyStateCode
+Frontend --> User: Лента новостей
+
+User -> Frontend: Выбирает новость
+Frontend -> Controller: GET /api/public-content/content/{contentId}
+Controller -> Service: getContentPage(contentId, audience)
+Service -> DB: Проверить статус и период публикации страницы
+alt Страница опубликована
+  DB --> Service: Content page, sections, attachments, product links, CTA
+  Service --> Controller: ContentPageResponse
+  Controller --> Frontend: 200 ContentPageResponse
+  Frontend -> I18n: Resolve breadcrumbs, SEO, секции и CTA
+  Frontend --> User: Контентная страница
+  opt Пользователь выбирает связанный товар
+    Frontend -> Catalog: Переход в каталог или карточку товара
+  end
+else Страница не опубликована или отсутствует
+  Service --> Controller: STR_MNEMO_PUBLIC_CONTENT_NOT_FOUND
+  Controller --> Frontend: 404 ErrorResponse
+  Frontend -> I18n: Resolve STR_MNEMO_PUBLIC_CONTENT_NOT_FOUND
+  Frontend --> User: Состояние недоступности и переходы в новости / каталог
+end
+
+User -> Frontend: Открывает /offer/{offerId}
+Frontend -> Controller: GET /api/public-content/offers/{offerId}
+Controller -> Service: getOffer(offerId, audience)
+Service -> DB: Проверить статус и период публикации оффера
+alt Оффер активен
+  DB --> Service: Offer, hero, conditions, attachments, products, CTA
+  Service --> Controller: OfferResponse
+  Controller --> Frontend: 200 OfferResponse
+  Frontend -> I18n: Resolve titleKey, summaryKey, CTA, sections
+  Frontend --> User: Промо-оффер
+else Оффер недоступен
+  Service --> Controller: STR_MNEMO_PUBLIC_CONTENT_NOT_FOUND
+  Controller --> Frontend: 404 ErrorResponse
+  Frontend -> I18n: Resolve mnemonic
+  Frontend --> User: Локализованное состояние недоступности
+end
+
+@enduml

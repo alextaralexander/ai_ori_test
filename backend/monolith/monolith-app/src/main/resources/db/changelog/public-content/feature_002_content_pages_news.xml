@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-002-content-pages-news-001" author="codex">
+        <createTable tableName="public_content_page">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content_id" type="varchar(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="template_code" type="varchar(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_key" type="varchar(160)"/>
+            <column name="seo_title_key" type="varchar(160)"/>
+            <column name="seo_description_key" type="varchar(160)"/>
+            <column name="canonical_url" type="varchar(512)"/>
+            <column name="breadcrumb_key" type="varchar(160)"/>
+            <column name="status" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_news_item">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="news_key" type="varchar(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="content_id" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summary_key" type="varchar(160)"/>
+            <column name="image_url" type="varchar(512)"/>
+            <column name="category_key" type="varchar(120)"/>
+            <column name="status" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_offer">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="offer_id" type="varchar(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="title_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summary_key" type="varchar(160)"/>
+            <column name="hero_image_url" type="varchar(512)"/>
+            <column name="primary_cta_label_key" type="varchar(160)"/>
+            <column name="primary_cta_target" type="varchar(512)"/>
+            <column name="status" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_content_section">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_type" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="section_key" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="section_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload_json" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_content_attachment">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_type" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attachment_key" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size_bytes" type="bigint"/>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="public_content_product_link">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_type" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_ref" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label_key" type="varchar(160)"/>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="public_news_item" indexName="ix_public_news_item_publication">
+            <column name="status"/>
+            <column name="active_from"/>
+            <column name="active_to"/>
+            <column name="sort_order"/>
+        </createIndex>
+        <createIndex tableName="public_content_page" indexName="ix_public_content_page_publication">
+            <column name="status"/>
+            <column name="active_from"/>
+            <column name="active_to"/>
+        </createIndex>
+        <createIndex tableName="public_offer" indexName="ix_public_offer_publication">
+            <column name="status"/>
+            <column name="active_from"/>
+            <column name="active_to"/>
+        </createIndex>
+        <createIndex tableName="public_content_section" indexName="ix_public_content_section_owner_sort">
+            <column name="owner_type"/>
+            <column name="owner_id"/>
+            <column name="enabled"/>
+            <column name="sort_order"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

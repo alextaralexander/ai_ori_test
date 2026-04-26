@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 001
+title Best Ori Gin. Архитектура платформы на feature 002
 
 skinparam componentStyle rectangle
 
@@ -9,23 +9,25 @@ actor "Партнер" as Partner
 actor "Контент-менеджер" as ContentManager
 
 component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
-component "backend/monolith/public-content\nSpring Boot module" as PublicContent
-database "PostgreSQL\npublic-content schema" as PublicDb
+component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers" as PublicContent
+database "PostgreSQL\npublic-content schema\nCMS pages, news, offers" as PublicDb
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
 component "Auth/Profile контур\nбудущие фичи" as AuthProfile
 component "Catalog контур\nбудущие фичи" as Catalog
 component "Partner контур\nбудущие фичи" as PartnerArea
 
-Guest --> PublicWeb : HTTPS /, /home, /community
+Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:contentId, /offer/:offerId
 Customer --> PublicWeb : HTTPS публичные и личные маршруты
 Partner --> PublicWeb : HTTPS публичные и партнерские маршруты
 ContentManager --> CmsAdmin : HTTPS управление контентом
 
-PublicWeb --> PublicContent : HTTPS REST /api/public-content/*
+PublicWeb --> PublicContent : HTTPS REST /api/public-content/pages/*, /navigation, /entry-points
+PublicWeb --> PublicContent : HTTPS REST /api/public-content/news, /content/{contentId}, /offers/{offerId}
 PublicContent --> PublicDb : JDBC
 CmsAdmin --> PublicContent : HTTPS REST управление CMS-контентом
 PublicWeb --> AuthProfile : HTTPS REST вход, профиль, audience
 PublicWeb --> Catalog : HTTPS REST переходы в каталог
+PublicContent ..> Catalog : productRef / route references для связанных товаров
 PublicWeb --> PartnerArea : HTTPS REST партнерский офис
 
 @enduml

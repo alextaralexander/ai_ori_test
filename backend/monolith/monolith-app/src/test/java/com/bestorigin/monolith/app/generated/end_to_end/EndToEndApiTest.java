@@ -1,4 +1,4 @@
-// Synchronized artifact from agents/tests/api. Do not edit manually.
+// Synchronized from agents/tests/. Do not edit this runtime copy manually.
 package com.bestorigin.tests.endtoend;
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
@@ -9,5 +9,6 @@ public class EndToEndApiTest {
     @Test
     void publicMarketplaceGreenPathAggregatesImplementedFeatureTests() throws Exception {
         new FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature002.FeatureApiTest().assertFeatureGreenPath();
     }
 }

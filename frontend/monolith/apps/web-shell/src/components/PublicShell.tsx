@@ -7,9 +7,10 @@ const { Content, Footer, Header } = Layout;
 
 interface PublicShellProps {
   page: PublicPage;
+  contentView?: ReactElement;
 }
 
-export function PublicShell({ page }: PublicShellProps): ReactElement {
+export function PublicShell({ page, contentView }: PublicShellProps): ReactElement {
   const headerItems = page.navigation.filter((item) => item.area === 'HEADER');
   const footerItems = page.navigation.filter((item) => item.area === 'FOOTER');
   const hero = page.blocks.find((block) => block.blockType === 'HERO');
@@ -28,7 +29,7 @@ export function PublicShell({ page }: PublicShellProps): ReactElement {
         </nav>
       </Header>
       <Content>
-        {isCommunity ? <CommunityPage page={page} /> : <HomePage page={page} hero={hero} promos={promos} />}
+        {contentView ?? (isCommunity ? <CommunityPage page={page} /> : <HomePage page={page} hero={hero} promos={promos} />)}
       </Content>
       <Footer className="public-footer">
         <nav aria-label={t('public.navigation.documents')}>

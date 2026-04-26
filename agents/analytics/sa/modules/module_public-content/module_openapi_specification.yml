@@ -59,6 +59,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntryPointResponse'
+  /news:
+    get:
+      summary: Получить опубликованную ленту новостей
+      operationId: getNews
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Лента опубликованных новостей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsFeedResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /content/{contentId}:
+    get:
+      summary: Получить опубликованную динамическую контентную страницу
+      operationId: getContentPage
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        '200':
+          description: Опубликованная контентная страница
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /offers/{offerId}:
+    get:
+      summary: Получить опубликованное промо-предложение
+      operationId: getOffer
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Audience'
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        '200':
+          description: Опубликованное промо-предложение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 components:
   parameters:
     AcceptLanguage:
@@ -81,6 +147,12 @@ components:
         type: string
         enum: [HEADER, FOOTER, MOBILE_MENU]
   responses:
+    NotFound:
+      description: Материал не найден или не опубликован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     PublicPage:
       description: Public page response
       content:
@@ -96,7 +168,7 @@ components:
   schemas:
     Audience:
       type: string
-      enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER, ANY]
+      enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER, CONTENT_MANAGER, ANY]
     PublicPageResponse:
       type: object
       required: [pageKey, routePath, titleKey, blocks, navigation, entryPoints]
@@ -181,6 +253,202 @@ components:
           type: string
           nullable: true
         targetRoute:
+          type: string
+        audience:
+          $ref: '#/components/schemas/Audience'
+    NewsFeedResponse:
+      type: object
+      required: [items, featured, emptyStateCode]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsItem'
+        featured:
+          oneOf:
+            - $ref: '#/components/schemas/NewsItem'
+            - type: 'null'
+        emptyStateCode:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+    NewsItem:
+      type: object
+      required: [newsKey, contentId, titleKey, publishedAt, targetRoute]
+      properties:
+        newsKey:
+          type: string
+        contentId:
+          type: string
+        titleKey:
+          type: string
+        summaryKey:
+          type: string
+          nullable: true
+        categoryKey:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+        targetRoute:
+          type: string
+    ContentPageResponse:
+      type: object
+      required: [contentId, templateCode, titleKey, breadcrumbs, seo, sections, attachments, productLinks, ctas]
+      properties:
+        contentId:
+          type: string
+        templateCode:
+          type: string
+          enum: [ARTICLE, LANDING, GUIDE]
+        titleKey:
+          type: string
+        descriptionKey:
+          type: string
+          nullable: true
+        breadcrumbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Breadcrumb'
+        seo:
+          $ref: '#/components/schemas/SeoMetadata'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSection'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentAttachment'
+        productLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductLink'
+        ctas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentCta'
+    OfferResponse:
+      type: object
+      required: [offerId, titleKey, breadcrumbs, seo, hero, sections, attachments, productLinks, ctas]
+      properties:
+        offerId:
+          type: string
+        titleKey:
+          type: string
+        summaryKey:
+          type: string
+          nullable: true
+        breadcrumbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Breadcrumb'
+        seo:
+          $ref: '#/components/schemas/SeoMetadata'
+        hero:
+          $ref: '#/components/schemas/OfferHero'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSection'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentAttachment'
+        productLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductLink'
+        ctas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentCta'
+    Breadcrumb:
+      type: object
+      required: [labelKey, route]
+      properties:
+        labelKey:
+          type: string
+        route:
+          type: string
+    SeoMetadata:
+      type: object
+      required: [titleKey, descriptionKey, canonicalUrl]
+      properties:
+        titleKey:
+          type: string
+        descriptionKey:
+          type: string
+        canonicalUrl:
+          type: string
+          nullable: true
+    OfferHero:
+      type: object
+      required: [titleKey, imageUrl]
+      properties:
+        titleKey:
+          type: string
+        summaryKey:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+    ContentSection:
+      type: object
+      required: [sectionKey, sectionType, sortOrder, payload]
+      properties:
+        sectionKey:
+          type: string
+        sectionType:
+          type: string
+          enum: [HERO, RICH_TEXT, IMAGE, CTA, PDF, PRODUCT_LINKS, CONDITIONS]
+        sortOrder:
+          type: integer
+        payload:
+          type: object
+          additionalProperties: true
+    ContentAttachment:
+      type: object
+      required: [attachmentKey, fileType, titleKey, url]
+      properties:
+        attachmentKey:
+          type: string
+        fileType:
+          type: string
+          enum: [PDF]
+        titleKey:
+          type: string
+        url:
+          type: string
+        fileSizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+    ProductLink:
+      type: object
+      required: [productRef, targetRoute]
+      properties:
+        productRef:
+          type: string
+        labelKey:
+          type: string
+          nullable: true
+        targetRoute:
+          type: string
+    ContentCta:
+      type: object
+      required: [labelKey, targetType, targetValue, audience]
+      properties:
+        labelKey:
+          type: string
+        targetType:
+          type: string
+          enum: [INTERNAL_ROUTE, EXTERNAL_URL]
+        targetValue:
           type: string
         audience:
           $ref: '#/components/schemas/Audience'

@@ -53,6 +53,101 @@ entity public_entry_point {
   * enabled : boolean
 }
 
+entity public_news_item {
+  * id : uuid
+  --
+  * news_key : varchar(120)
+  * content_id : varchar(120)
+  * title_key : varchar(160)
+  summary_key : varchar(160)
+  image_url : varchar(512)
+  category_key : varchar(120)
+  * status : varchar(24)
+  * active_from : timestamptz
+  active_to : timestamptz
+  * sort_order : integer
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity public_content_page {
+  * id : uuid
+  --
+  * content_id : varchar(120)
+  * template_code : varchar(60)
+  * title_key : varchar(160)
+  description_key : varchar(160)
+  seo_title_key : varchar(160)
+  seo_description_key : varchar(160)
+  canonical_url : varchar(512)
+  breadcrumb_key : varchar(160)
+  * status : varchar(24)
+  * active_from : timestamptz
+  active_to : timestamptz
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity public_offer {
+  * id : uuid
+  --
+  * offer_id : varchar(120)
+  * title_key : varchar(160)
+  summary_key : varchar(160)
+  hero_image_url : varchar(512)
+  primary_cta_label_key : varchar(160)
+  primary_cta_target : varchar(512)
+  * status : varchar(24)
+  * active_from : timestamptz
+  active_to : timestamptz
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity public_content_section {
+  * id : uuid
+  --
+  * owner_type : varchar(24)
+  * owner_id : uuid
+  * section_key : varchar(120)
+  * section_type : varchar(40)
+  * sort_order : integer
+  * payload_json : jsonb
+  * enabled : boolean
+}
+
+entity public_content_attachment {
+  * id : uuid
+  --
+  * owner_type : varchar(24)
+  * owner_id : uuid
+  * attachment_key : varchar(120)
+  * file_type : varchar(24)
+  * title_key : varchar(160)
+  * url : varchar(512)
+  file_size_bytes : bigint
+  * sort_order : integer
+  * enabled : boolean
+}
+
+entity public_content_product_link {
+  * id : uuid
+  --
+  * owner_type : varchar(24)
+  * owner_id : uuid
+  * product_ref : varchar(120)
+  label_key : varchar(160)
+  * sort_order : integer
+  * enabled : boolean
+}
+
 public_page_config ||--o{ public_content_block
 public_navigation_item ||--o{ public_navigation_item
+public_news_item }o--|| public_content_page : "content_id -> content_id"
+public_content_page ||--o{ public_content_section : "owner_type=CONTENT_PAGE"
+public_offer ||--o{ public_content_section : "owner_type=OFFER"
+public_content_page ||--o{ public_content_attachment : "owner_type=CONTENT_PAGE"
+public_offer ||--o{ public_content_attachment : "owner_type=OFFER"
+public_content_page ||--o{ public_content_product_link : "owner_type=CONTENT_PAGE"
+public_offer ||--o{ public_content_product_link : "owner_type=OFFER"
 @enduml

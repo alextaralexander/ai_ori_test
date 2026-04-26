@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="980" viewBox="0 0 390 980" role="img" aria-label="Схематичный mobile-макет промо-оффера Best Ori Gin">
+  <rect x="0" y="0" width="390" height="980" fill="#ffffff"/>
+  <rect x="16" y="16" width="358" height="56" fill="#f3f5f7" stroke="#1f2933"/>
+  <text x="32" y="50" font-family="Arial" font-size="14" fill="#111827">Header: logo, menu, cart/profile</text>
+  <rect x="16" y="92" width="358" height="44" fill="#eef2ff" stroke="#1f2933"/>
+  <text x="32" y="120" font-family="Arial" font-size="13" fill="#111827">Breadcrumbs: Главная / Оффер</text>
+  <rect x="16" y="156" width="358" height="210" fill="#fef3c7" stroke="#1f2933"/>
+  <text x="32" y="196" font-family="Arial" font-size="20" fill="#111827">Hero оффера</text>
+  <text x="32" y="232" font-family="Arial" font-size="14" fill="#111827">Заголовок, условия, изображение</text>
+  <rect x="32" y="292" width="326" height="46" fill="#ffffff" stroke="#1f2933"/>
+  <text x="116" y="321" font-family="Arial" font-size="14" fill="#111827">Основной CTA</text>
+  <rect x="16" y="386" width="358" height="180" fill="#f9fafb" stroke="#1f2933"/>
+  <text x="32" y="424" font-family="Arial" font-size="16" fill="#111827">Условия предложения</text>
+  <text x="32" y="464" font-family="Arial" font-size="13" fill="#111827">Rich text / bullet list из CMS</text>
+  <text x="32" y="504" font-family="Arial" font-size="13" fill="#111827">Период действия и ограничения</text>
+  <rect x="16" y="586" width="358" height="160" fill="#f9fafb" stroke="#1f2933"/>
+  <text x="32" y="624" font-family="Arial" font-size="16" fill="#111827">Связанные товары</text>
+  <rect x="32" y="650" width="145" height="70" fill="#ffffff" stroke="#1f2933"/>
+  <rect x="212" y="650" width="145" height="70" fill="#ffffff" stroke="#1f2933"/>
+  <rect x="16" y="766" width="358" height="80" fill="#f9fafb" stroke="#1f2933"/>
+  <text x="32" y="804" font-family="Arial" font-size="15" fill="#111827">PDF / правила акции / ссылки</text>
+  <rect x="16" y="878" width="358" height="70" fill="#f3f5f7" stroke="#1f2933"/>
+  <text x="32" y="920" font-family="Arial" font-size="14" fill="#111827">Footer: публичные ссылки</text>
+</svg>

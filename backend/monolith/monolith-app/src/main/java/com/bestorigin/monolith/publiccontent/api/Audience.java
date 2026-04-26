@@ -5,5 +5,6 @@ public enum Audience {
     AUTHENTICATED,
     CUSTOMER,
     PARTNER,
+    CONTENT_MANAGER,
     ANY
 }

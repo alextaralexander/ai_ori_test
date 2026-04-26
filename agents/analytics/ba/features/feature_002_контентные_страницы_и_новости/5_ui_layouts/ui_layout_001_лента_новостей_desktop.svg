@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-label="Схематичный desktop-макет ленты новостей Best Ori Gin">
+  <rect x="0" y="0" width="1280" height="900" fill="#ffffff"/>
+  <rect x="40" y="24" width="1200" height="72" fill="#f3f5f7" stroke="#1f2933"/>
+  <text x="64" y="68" font-family="Arial" font-size="20" fill="#111827">Header: logo, каталог, новости, FAQ, benefits, community, вход / профиль, корзина</text>
+  <rect x="40" y="120" width="1200" height="76" fill="#eef2ff" stroke="#1f2933"/>
+  <text x="64" y="153" font-family="Arial" font-size="24" fill="#111827">Breadcrumbs: Главная / Новости</text>
+  <text x="64" y="180" font-family="Arial" font-size="18" fill="#111827">H1: Новости и материалы Best Ori Gin</text>
+  <rect x="40" y="220" width="1200" height="150" fill="#fef3c7" stroke="#1f2933"/>
+  <text x="64" y="258" font-family="Arial" font-size="22" fill="#111827">Закрепленный баннер кампании / промо-материал</text>
+  <rect x="64" y="286" width="160" height="44" fill="#ffffff" stroke="#1f2933"/>
+  <text x="82" y="314" font-family="Arial" font-size="16" fill="#111827">CTA оффера</text>
+  <rect x="40" y="400" width="800" height="360" fill="#f9fafb" stroke="#1f2933"/>
+  <text x="64" y="435" font-family="Arial" font-size="20" fill="#111827">Сетка карточек новостей</text>
+  <rect x="64" y="460" width="232" height="260" fill="#ffffff" stroke="#1f2933"/>
+  <rect x="320" y="460" width="232" height="260" fill="#ffffff" stroke="#1f2933"/>
+  <rect x="576" y="460" width="232" height="260" fill="#ffffff" stroke="#1f2933"/>
+  <text x="86" y="500" font-family="Arial" font-size="15" fill="#111827">Изображение</text>
+  <text x="86" y="548" font-family="Arial" font-size="15" fill="#111827">Дата + категория</text>
+  <text x="86" y="588" font-family="Arial" font-size="15" fill="#111827">Заголовок</text>
+  <text x="86" y="628" font-family="Arial" font-size="15" fill="#111827">Анонс</text>
+  <text x="86" y="676" font-family="Arial" font-size="15" fill="#111827">Ссылка "Читать"</text>
+  <rect x="880" y="400" width="360" height="360" fill="#f9fafb" stroke="#1f2933"/>
+  <text x="904" y="435" font-family="Arial" font-size="20" fill="#111827">Боковая колонка</text>
+  <text x="904" y="480" font-family="Arial" font-size="16" fill="#111827">Фильтр категории</text>
+  <text x="904" y="520" font-family="Arial" font-size="16" fill="#111827">Ссылки на каталог</text>
+  <text x="904" y="560" font-family="Arial" font-size="16" fill="#111827">PDF и материалы кампании</text>
+  <rect x="40" y="800" width="1200" height="72" fill="#f3f5f7" stroke="#1f2933"/>
+  <text x="64" y="843" font-family="Arial" font-size="18" fill="#111827">Footer: публичные ссылки, документы, контакты, юридическая информация</text>
+</svg>
