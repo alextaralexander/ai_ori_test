@@ -8,6 +8,7 @@ import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loa
 import { BenefitLandingView } from './components/BenefitLandingView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
+import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { ProductCardView } from './components/ProductCardView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
@@ -43,7 +44,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest')) {
+    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -77,7 +78,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -112,6 +113,30 @@ function App() {
     ) : undefined;
   } else if (path === '/products/digital-catalogue-current') {
     contentView = <DigitalCatalogueView audience={audience} kind="current" preview={params.get('preview') === 'true'} />;
+  } else if (path === '/invite/beauty-partner-registration') {
+    contentView = (
+      <PartnerRegistrationView
+        campaignId={params.get('campaignId')}
+        code={params.get('code')}
+        landingType={params.get('landingType')}
+        onboardingType="BEAUTY_PARTNER"
+        variant={params.get('variant')}
+      />
+    );
+  } else if (path === '/invite/business-partner-registration') {
+    contentView = (
+      <PartnerRegistrationView
+        campaignId={params.get('campaignId')}
+        code={params.get('code')}
+        landingType={params.get('landingType')}
+        onboardingType="BUSINESS_PARTNER"
+        variant={params.get('variant')}
+      />
+    );
+  } else if (path === '/invite/partners-activation') {
+    contentView = <PartnerActivationView token={params.get('token') ?? 'ACT-008-001'} />;
+  } else if (path === '/invite/sponsor-cabinet') {
+    contentView = <SponsorCabinetView />;
   } else if (path === '/products/digital-catalogue-next') {
     contentView = <DigitalCatalogueView audience={audience} kind="next" preview={params.has('preview') ? params.get('preview') === 'true' : undefined} />;
   } else if (path === '/search') {

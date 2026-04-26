@@ -1,0 +1,71 @@
+@startuml
+title Feature 008. Регистрация и инвайты партнеров. Sequence diagram
+
+actor "Гость / кандидат" as Guest
+actor "Спонсор/партнер" as Sponsor
+participant "Frontend web-shell" as FE
+participant "Frontend i18n" as I18n
+participant "partner-onboarding API" as API
+database "partner-onboarding data" as DB
+participant "CRM / marketing integration" as CRM
+participant "Auth/session" as Auth
+
+Guest -> FE: Открывает /invite/business-partner-registration?code=BOG777
+FE -> API: GET /invites/validate?code=BOG777&onboardingType=BUSINESS_PARTNER
+API -> DB: Найти invite, проверить status, expires_at, campaign
+DB --> API: invite + sponsor attribution
+API --> FE: InviteValidationResponse(status=ACTIVE, sponsor public context)
+FE -> I18n: Разрешить labels, statuses, STR_MNEMO_* для формы
+I18n --> FE: Локализованные строки
+FE --> Guest: Пошаговая форма регистрации с sponsor context
+
+Guest -> FE: Заполняет данные, контакт, согласия
+FE -> API: POST /registrations с Idempotency-Key
+API -> DB: Проверить duplicate contact_hash и attribution conflict
+API -> DB: Создать registration application и onboarding event
+API -> CRM: Отправить registration lead event
+alt CRM доступна
+  CRM --> API: lead accepted
+  API -> DB: crm_lead_status=SENT
+else CRM недоступна
+  CRM --> API: timeout/error
+  API -> DB: crm_lead_status=FAILED_RETRY, event CRM_LEAD_RETRY
+end
+API --> FE: RegistrationApplicationResponse(nextAction)
+FE -> I18n: Разрешить messageCode
+FE --> Guest: Следующий шаг подтверждения или активации
+
+Guest -> FE: Открывает /invite/partners-activation?token=ACT-...
+FE -> API: GET /activations/{token}
+API -> DB: Проверить token_hash, application status, expires_at
+DB --> API: activation state
+API --> FE: ActivationStateResponse
+Guest -> FE: Вводит одноразовый код и принимает условия
+FE -> API: POST /activations/{token}/confirm-contact
+API -> DB: Подтвердить контакт, записать event
+API --> FE: ActivationStateResponse(contactConfirmed=true)
+FE -> API: POST /activations/{token}/complete с Idempotency-Key
+API -> DB: Создать partner profile и referral link
+API -> DB: Записать PARTNER_ACTIVATED и REFERRAL_LINK_CREATED
+API --> FE: ActivationCompleteResponse(partnerNumber, referralLink)
+FE --> Guest: Активированный партнерский статус и personal referral link
+
+Sponsor -> FE: Открывает /invite/sponsor-cabinet
+FE -> Auth: Получить текущий security context
+Auth --> FE: bearer token / session
+FE -> API: GET /sponsor-cabinet/invites
+API -> Auth: Проверить роль спонсора
+API -> DB: Найти invite только текущего sponsor_partner_id
+DB --> API: invite list
+API --> FE: SponsorInviteListResponse
+FE -> I18n: Разрешить статусы и CTA
+FE --> Sponsor: Invite list, safe candidate progress, actions
+
+Sponsor -> FE: Создает invite BUSINESS_PARTNER
+FE -> API: POST /sponsor-cabinet/invites с Idempotency-Key
+API -> Auth: Проверить роль и sponsor identity
+API -> DB: Создать invite, code, expires_at, event INVITE_CREATED
+API --> FE: SponsorInviteResponse(targetRoute)
+FE --> Sponsor: Безопасная invite-ссылка для копирования или отправки
+
+@enduml

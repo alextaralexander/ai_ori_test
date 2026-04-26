@@ -1,15 +1,18 @@
-# Best Ori Gin. Описание архитектуры на feature 007
+# Best Ori Gin. Описание архитектуры на feature 008
 
 ## Version baseline
-На дату старта задачи 27.04.2026 используется совместимый baseline текущего монолита: Java 25, Spring Boot 4.0.6, Maven 3.9.13, React 19.2.0, TypeScript 5.9.3, Ant Design 6.0.0, Liquibase XML changelog policy, PostgreSQL-совместимая модель данных и S3/MinIO-compatible storage для файлов. В рамках feature #7 зависимости не обновляются, чтобы сохранить совместимость с уже реализованными feature #1-#6; обновление major/minor baseline требует отдельной миграционной задачи.
+На дату старта задачи 27.04.2026 используется совместимый baseline текущего монолита: Java 25, Spring Boot 4.0.6, Maven 3.9.13, React 19.2.0, TypeScript 5.9.3, Ant Design 6.0.0, Liquibase XML changelog policy, PostgreSQL-совместимая модель данных и S3/MinIO-compatible storage для файлов. В рамках feature #8 зависимости не обновляются, чтобы сохранить совместимость с уже реализованными feature #1-#7; обновление major/minor baseline требует отдельной миграционной задачи.
 
 ## Модули
-- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`, `/FAQ`, `/faq`, `/info/:section?`, `/documents/:documentType`, `/beauty-benefits`, `/beauty-benefits/:code`, `/business-benefits`, `/business-benefits/:code`, `/member-benefits`, `/vip-customer-benefits`, `/the-new-oriflame-app`, `/products/digital-catalogue-current`, `/products/digital-catalogue-next`, `/search`, `/product/:productCode`.
+- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`, `/FAQ`, `/faq`, `/info/:section?`, `/documents/:documentType`, `/beauty-benefits`, `/beauty-benefits/:code`, `/business-benefits`, `/business-benefits/:code`, `/member-benefits`, `/vip-customer-benefits`, `/the-new-oriflame-app`, `/invite/beauty-partner-registration`, `/invite/business-partner-registration`, `/invite/partners-activation`, `/invite/sponsor-cabinet`, `/products/digital-catalogue-current`, `/products/digital-catalogue-next`, `/search`, `/product/:productCode`.
 - `backend/monolith/public-content`: Spring Boot модуль read-only API для публичной CMS-конфигурации, новостей, контентных страниц, офферов, FAQ, информационных разделов, документов, benefit-лендингов, referral statuses и conversion events.
 - `backend/monolith/catalog`: Spring Boot модуль API для поиска товаров, фильтров, сортировки, карточек выдачи, детальной карточки товара, рекомендаций, quick add в корзину, цифровых выпусков каталога и PDF material actions.
+- `backend/monolith/partner-onboarding`: Spring Boot модуль API для invite/referral validation, registration application, activation flow, partner profile activation, personal referral link, sponsor cabinet и registration lead events.
 - `PostgreSQL public-content schema`: целевое хранение страниц, блоков, навигации, новостей, content pages, offers, FAQ, info sections, documents, archive versions, benefit landings, blocks, CTA, referral codes и conversion events.
 - `PostgreSQL catalog schema`: целевое хранение категорий, товаров, детализации карточек, медиа, вложений, рекомендаций, тегов, промо-меток, строк корзины quick add, цифровых выпусков, страниц, PDF-материалов, hotspots и visibility rules.
+- `PostgreSQL partner-onboarding schema`: целевое хранение invite, registration applications, activation tokens, partner profiles, referral links и onboarding events.
 - `S3/MinIO catalog PDF materials`: хранилище PDF и preview-материалов цифровых каталогов; module `catalog` выдает только разрешенные temporary URLs.
+- `CRM / marketing systems`: внешний или внутренний интеграционный контур, который получает registration lead events и статусы onboarding funnel.
 - `CMS admin контур`: будущий административный контур для управления публичным контентом и справкой.
 - `Auth/Profile контур`: будущий контур входа, профиля и определения пользовательской аудитории.
 - `Cart/Order контур`: будущий полноценный контур корзины, заказа, оплаты и до заказа; feature #4 добавляет только минимальный quick add summary.
@@ -18,10 +21,13 @@
 ## Связи
 - Пользователи открывают публичные маршруты через `frontend/public-web`.
 - Frontend вызывает `backend/monolith/public-content` по REST для страниц, навигации, новостей, контента, офферов, FAQ, info, documents, benefit landing payload, referral status и conversion events.
+- Frontend вызывает `backend/monolith/partner-onboarding` по REST для `/api/partner-onboarding/invites/validate`, `/api/partner-onboarding/registrations`, `/api/partner-onboarding/activations/{token}`, `/api/partner-onboarding/activations/{token}/confirm-contact`, `/api/partner-onboarding/activations/{token}/complete`, `/api/partner-onboarding/sponsor-cabinet/invites` и `/api/partner-onboarding/sponsor-cabinet/invites/{inviteId}/resend`.
 - Frontend вызывает `backend/monolith/catalog` по REST для `/api/catalog/search`, `/api/catalog/products/{productCode}`, `/api/catalog/cart/items`, `/api/catalog/digital-catalogues/current`, `/api/catalog/digital-catalogues/next`, `/api/catalog/digital-catalogues/{issueCode}` и PDF material actions.
 - Backend возвращает DTO с i18n-ключами и mnemonic-кодами `STR_MNEMO_*`; пользовательские тексты локализуются на frontend.
 - `public-content` ссылается на каталог через `productRef` и route references на `/search`; синхронная загрузка товаров выполняется frontend через `catalog`.
-- `public-content` передает registration handoff через frontend route: `landingType`, `variant`, `code` и `campaignId` не требуют синхронного вызова auth module со стороны backend.
+- `public-content` передает registration handoff через frontend route: `landingType`, `variant`, `code` и `campaignId` переходят в `partner-onboarding`, без синхронного backend-вызова между модулями.
+- `partner-onboarding` взаимодействует с CRM/marketing systems по REST/event protocol для registration lead events; временная недоступность CRM переводит событие в retry/audit контур и не блокирует заявку.
+- `partner-onboarding` передает activation/profile handoff в будущий `Auth/Profile контур` и `Partner контур` через internal boundary: feature #8 создает начальный partner profile/referral link, но не реализует MLM compensation plan.
 - `catalog` подготовлен к будущей интеграции с `Cart/Order контуром`, но на feature #6 хранит минимальные cart summary данные внутри owning module и передает checkout handoff через frontend route `/checkout`.
 - `catalog` взаимодействует с S3/MinIO-compatible storage по внутреннему adapter/client protocol для генерации временных download/share URL PDF-материалов.
 - CMS admin в будущих фичах будет управлять теми же сущностями через модуль `public-content`.
@@ -44,8 +50,29 @@ Backend module `catalog` соблюдает package policy:
 - `impl/config`: module metadata и OpenAPI group metadata.
 - `impl/client`: storage adapter/client для PDF material URL, если общий S3/MinIO client отсутствует.
 
+Backend module `partner-onboarding` соблюдает package policy:
+- `api`: REST DTO, enums onboarding/invite/application statuses и request/response contracts.
+- `domain`: JPA entities и repository interfaces для invite, registration application, activation token, partner profile, referral link и onboarding events.
+- `db`: Liquibase XML changelog files, включая dedicated changelog feature #8.
+- `impl/controller`: REST controllers для invite validation, registrations, activations и sponsor cabinet.
+- `impl/service`: orchestration services регистрации, активации, invite lifecycle и idempotency.
+- `impl/validator`: validation invite/referral code, contact, consent, activation token и sponsor permissions.
+- `impl/mapper`: entity/DTO mapping.
+- `impl/event`: audit events и CRM lead event publisher.
+- `impl/client`: CRM/marketing integration adapter.
+- `impl/config`: module metadata, OpenAPI group metadata и настройки scheduler/retry.
+
 ## Локализация и сообщения
-Все новые frontend user-facing строки размещаются в `resources_ru.ts` и `resources_en.ts`. Backend не отправляет hardcoded пользовательские тексты в API responses; для предопределенных состояний используются `STR_MNEMO_PUBLIC_FAQ_EMPTY`, `STR_MNEMO_PUBLIC_INFO_NOT_FOUND`, `STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND`, `STR_MNEMO_PUBLIC_BENEFIT_LANDING_NOT_FOUND`, `STR_MNEMO_REFERRAL_CODE_INVALID`, `STR_MNEMO_REFERRAL_CODE_EXPIRED`, `STR_MNEMO_REFERRAL_CODE_DISABLED`, `STR_MNEMO_BENEFIT_CONVERSION_REJECTED`, `STR_MNEMO_CATALOG_SEARCH_EMPTY`, `STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND`, `STR_MNEMO_CATALOG_ITEM_UNAVAILABLE`, `STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED`, `STR_MNEMO_CATALOG_CART_ITEM_ADDED`, `STR_MNEMO_DIGITAL_CATALOGUE_NOT_FOUND`, `STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN`, `STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_UNAVAILABLE`, `STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED`, `STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED`, `STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY`, `STR_MNEMO_AUTH_REQUIRED` и существующие коды публичного контента.
+Все новые frontend user-facing строки размещаются в `resources_ru.ts` и `resources_en.ts`. Backend не отправляет hardcoded пользовательские тексты в API responses; для предопределенных состояний используются `STR_MNEMO_PUBLIC_FAQ_EMPTY`, `STR_MNEMO_PUBLIC_INFO_NOT_FOUND`, `STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND`, `STR_MNEMO_PUBLIC_BENEFIT_LANDING_NOT_FOUND`, `STR_MNEMO_REFERRAL_CODE_INVALID`, `STR_MNEMO_REFERRAL_CODE_EXPIRED`, `STR_MNEMO_REFERRAL_CODE_DISABLED`, `STR_MNEMO_BENEFIT_CONVERSION_REJECTED`, `STR_MNEMO_INVITE_CODE_INVALID`, `STR_MNEMO_INVITE_CODE_EXPIRED`, `STR_MNEMO_INVITE_CODE_DISABLED`, `STR_MNEMO_INVITE_TYPE_MISMATCH`, `STR_MNEMO_REGISTRATION_APPLICATION_CREATED`, `STR_MNEMO_REGISTRATION_DUPLICATE_CONTACT`, `STR_MNEMO_ATTRIBUTION_CONFLICT`, `STR_MNEMO_ACTIVATION_READY`, `STR_MNEMO_ACTIVATION_TOKEN_EXPIRED`, `STR_MNEMO_CONTACT_CODE_INVALID`, `STR_MNEMO_CONTACT_CODE_EXPIRED`, `STR_MNEMO_PARTNER_ACTIVATED`, `STR_MNEMO_INVITE_CREATED`, `STR_MNEMO_INVITE_RESEND_UNAVAILABLE`, `STR_MNEMO_SPONSOR_CABINET_FORBIDDEN`, `STR_MNEMO_CATALOG_SEARCH_EMPTY`, `STR_MNEMO_CATALOG_PRODUCT_NOT_FOUND`, `STR_MNEMO_CATALOG_ITEM_UNAVAILABLE`, `STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED`, `STR_MNEMO_CATALOG_CART_ITEM_ADDED`, `STR_MNEMO_DIGITAL_CATALOGUE_NOT_FOUND`, `STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN`, `STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_UNAVAILABLE`, `STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED`, `STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED`, `STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY`, `STR_MNEMO_AUTH_REQUIRED` и существующие коды публичного контента.
+
+## Feature #8
+Feature #8 добавляет модуль `partner-onboarding` и frontend routes регистрации/активации:
+- `GET /api/partner-onboarding/invites/validate` проверяет invite/referral-код, campaign и onboarding type, возвращая только public sponsor context.
+- `POST /api/partner-onboarding/registrations` создает registration application с idempotency, consent snapshot, source attribution и CRM lead event.
+- `GET /api/partner-onboarding/activations/{token}`, `POST /confirm-contact` и `POST /complete` поддерживают activation flow, подтверждение контакта, принятие условий, создание partner profile и personal referral link.
+- `GET/POST /api/partner-onboarding/sponsor-cabinet/invites` и `POST /resend` поддерживают sponsor cabinet, создание invite и повторную отправку без дублей.
+- Frontend открывает `/invite/beauty-partner-registration`, `/invite/business-partner-registration`, `/invite/partners-activation`, `/invite/sponsor-cabinet`, сохраняет referral/campaign context, локализует все статусы через i18n и не содержит hardcoded user-facing строк.
+- CRM получает registration lead events, но недоступность CRM не блокирует заявку и фиксируется в retry/audit контуре.
 
 ## Feature #7
 Feature #7 расширяет модуль `public-content` и frontend routes benefit-лендингов:

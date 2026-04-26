@@ -1,0 +1,96 @@
+@startuml
+title Module partner-onboarding. Полная ER diagram
+
+entity "partner_onboarding_invite" as invite {
+  * id : uuid <<PK>>
+  --
+  * code : varchar(64) <<UK>>
+  * sponsor_partner_id : uuid
+  * onboarding_type : varchar(40)
+  * campaign_id : varchar(80)
+  * source : varchar(80)
+  * status : varchar(40)
+  * expires_at : timestamptz
+  candidate_public_name : varchar(160)
+  last_opened_at : timestamptz
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "partner_registration_application" as application {
+  * id : uuid <<PK>>
+  --
+  * application_number : varchar(80) <<UK>>
+  invite_id : uuid <<FK>>
+  sponsor_partner_id : uuid
+  * onboarding_type : varchar(40)
+  * status : varchar(48)
+  * candidate_name : varchar(180)
+  * contact_hash : varchar(160)
+  contact_channel : varchar(40)
+  * campaign_id : varchar(80)
+  landing_type : varchar(40)
+  landing_variant : varchar(80)
+  source_route : varchar(220)
+  idempotency_key : varchar(120)
+  * consent_snapshot_json : jsonb
+  crm_lead_status : varchar(40)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "partner_activation_token" as activation {
+  * id : uuid <<PK>>
+  --
+  * application_id : uuid <<FK>>
+  * token_hash : varchar(160) <<UK>>
+  * status : varchar(40)
+  * expires_at : timestamptz
+  used_at : timestamptz
+  * created_at : timestamptz
+}
+
+entity "partner_profile" as profile {
+  * id : uuid <<PK>>
+  --
+  * application_id : uuid <<FK>>
+  sponsor_partner_id : uuid
+  * partner_number : varchar(80) <<UK>>
+  * status : varchar(40)
+  * initial_level : varchar(40)
+  * activated_at : timestamptz
+  * created_at : timestamptz
+}
+
+entity "partner_referral_link" as referral {
+  * id : uuid <<PK>>
+  --
+  * partner_profile_id : uuid <<FK>>
+  * referral_code : varchar(64) <<UK>>
+  * landing_type : varchar(40)
+  * target_route : varchar(220)
+  * status : varchar(40)
+  * created_at : timestamptz
+}
+
+entity "partner_onboarding_event" as event {
+  * id : uuid <<PK>>
+  --
+  invite_id : uuid <<FK>>
+  application_id : uuid <<FK>>
+  partner_profile_id : uuid <<FK>>
+  * event_type : varchar(60)
+  * event_idempotency_key : varchar(160) <<UK>>
+  * payload_json : jsonb
+  * created_at : timestamptz
+}
+
+invite ||--o{ application : "invite_id"
+application ||--o{ activation : "application_id"
+application ||--o| profile : "application_id"
+profile ||--o{ referral : "partner_profile_id"
+invite ||--o{ event : "invite_id"
+application ||--o{ event : "application_id"
+profile ||--o{ event : "partner_profile_id"
+
+@enduml

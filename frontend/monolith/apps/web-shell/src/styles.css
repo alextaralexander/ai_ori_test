@@ -499,6 +499,30 @@ body {
   margin: 12px 0 8px;
 }
 
+.partner-onboarding-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 32px 24px;
+}
+
+.partner-onboarding-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.partner-onboarding-page h1 {
+  font-size: 28px;
+  margin: 12px 0 20px;
+}
+
+.partner-onboarding-invite,
+.partner-onboarding-result,
+.partner-onboarding-actions,
+.partner-onboarding-consent {
+  margin-top: 16px;
+}
+
 .sr-only {
   height: 1px;
   left: -10000px;
@@ -536,14 +560,15 @@ body {
     padding: 20px;
   }
 
-  .catalog-toolbar form,
-  .catalog-grid,
-  .product-card-layout,
-  .product-gallery,
-  .product-characteristics,
-  .digital-catalogue-layout,
-  .benefit-hero,
-  .benefit-blocks {
+    .catalog-toolbar form,
+    .catalog-grid,
+    .product-card-layout,
+    .product-gallery,
+    .product-characteristics,
+    .digital-catalogue-layout,
+    .benefit-hero,
+    .benefit-blocks,
+    .partner-onboarding-grid {
     grid-template-columns: 1fr;
   }
 

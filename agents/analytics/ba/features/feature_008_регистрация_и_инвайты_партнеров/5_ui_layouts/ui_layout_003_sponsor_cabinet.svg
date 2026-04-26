@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" role="img" aria-label="Схематичный макет sponsor cabinet">
+  <rect x="0" y="0" width="1180" height="760" fill="#ffffff"/>
+  <text x="40" y="42" font-family="Arial" font-size="22">Sponsor cabinet: приглашения</text>
+  <rect x="40" y="70" width="1100" height="54" fill="none" stroke="#222"/>
+  <text x="62" y="102" font-family="Arial" font-size="14">Шапка партнера: профиль, язык, выход</text>
+  <rect x="40" y="150" width="250" height="560" fill="none" stroke="#222"/>
+  <text x="62" y="182" font-family="Arial" font-size="16">Панель действий</text>
+  <rect x="62" y="220" width="200" height="46" fill="none" stroke="#222"/>
+  <text x="86" y="249" font-family="Arial" font-size="13">Создать invite</text>
+  <rect x="62" y="292" width="200" height="46" fill="none" stroke="#777"/>
+  <text x="88" y="321" font-family="Arial" font-size="13">Скопировать link</text>
+  <rect x="62" y="364" width="200" height="46" fill="none" stroke="#777"/>
+  <text x="86" y="393" font-family="Arial" font-size="13">Повторно отправить</text>
+  <rect x="62" y="450" width="200" height="130" fill="none" stroke="#777"/>
+  <text x="78" y="480" font-family="Arial" font-size="13">Фильтры</text>
+  <text x="78" y="510" font-family="Arial" font-size="12">Тип регистрации</text>
+  <text x="78" y="532" font-family="Arial" font-size="12">Статус</text>
+  <text x="78" y="554" font-family="Arial" font-size="12">Период кампании</text>
+  <rect x="330" y="150" width="810" height="120" fill="none" stroke="#222"/>
+  <text x="360" y="184" font-family="Arial" font-size="16">Сводка</text>
+  <rect x="360" y="210" width="160" height="36" fill="none" stroke="#777"/>
+  <text x="390" y="233" font-family="Arial" font-size="12">Активные</text>
+  <rect x="548" y="210" width="160" height="36" fill="none" stroke="#777"/>
+  <text x="586" y="233" font-family="Arial" font-size="12">Открыты</text>
+  <rect x="736" y="210" width="160" height="36" fill="none" stroke="#777"/>
+  <text x="760" y="233" font-family="Arial" font-size="12">На регистрации</text>
+  <rect x="924" y="210" width="160" height="36" fill="none" stroke="#777"/>
+  <text x="958" y="233" font-family="Arial" font-size="12">Активированы</text>
+  <rect x="330" y="300" width="810" height="410" fill="none" stroke="#222"/>
+  <text x="360" y="332" font-family="Arial" font-size="16">Таблица приглашений текущего спонсора</text>
+  <rect x="360" y="360" width="750" height="34" fill="none" stroke="#444"/>
+  <text x="372" y="382" font-family="Arial" font-size="12">Код | тип | статус | кандидат | создано | истекает | действия</text>
+  <rect x="360" y="410" width="750" height="52" fill="none" stroke="#777"/>
+  <text x="372" y="440" font-family="Arial" font-size="12">BOG777 | business | opened | безопасное имя | 27.04 | 18.05 | copy / resend</text>
+  <rect x="360" y="482" width="750" height="52" fill="none" stroke="#777"/>
+  <text x="372" y="512" font-family="Arial" font-size="12">BOG778 | beauty | submitted | безопасное имя | 27.04 | 18.05 | view status</text>
+  <rect x="360" y="554" width="750" height="92" fill="none" stroke="#777"/>
+  <text x="372" y="586" font-family="Arial" font-size="12">Пустое / ошибочное состояние таблицы</text>
+  <text x="372" y="612" font-family="Arial" font-size="12">Локализованное сообщение, retry, без данных чужих спонсоров</text>
+  <text x="360" y="682" font-family="Arial" font-size="12">Все статусы, CTA, errors и aria-label берутся из frontend i18n dictionaries.</text>
+</svg>

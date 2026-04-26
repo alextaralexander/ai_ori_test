@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-008-partner-onboarding-001" author="codex">
+        <createTable tableName="partner_onboarding_invite">
+            <column name="id" type="uuid"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_onboarding_invite"/></column>
+            <column name="code" type="varchar(64)"><constraints nullable="false" unique="true" uniqueConstraintName="uk_partner_onboarding_invite_code"/></column>
+            <column name="sponsor_partner_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="onboarding_type" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="campaign_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="source" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="expires_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="candidate_public_name" type="varchar(160)"/>
+            <column name="last_opened_at" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex tableName="partner_onboarding_invite" indexName="idx_partner_invite_sponsor_status">
+            <column name="sponsor_partner_id"/>
+            <column name="status"/>
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex tableName="partner_onboarding_invite" indexName="idx_partner_invite_expires_status">
+            <column name="expires_at"/>
+            <column name="status"/>
+        </createIndex>
+
+        <createTable tableName="partner_registration_application">
+            <column name="id" type="uuid"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_registration_application"/></column>
+            <column name="application_number" type="varchar(80)"><constraints nullable="false" unique="true" uniqueConstraintName="uk_partner_registration_application_number"/></column>
+            <column name="invite_id" type="uuid"/>
+            <column name="sponsor_partner_id" type="uuid"/>
+            <column name="onboarding_type" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(48)"><constraints nullable="false"/></column>
+            <column name="candidate_name" type="varchar(180)"><constraints nullable="false"/></column>
+            <column name="contact_hash" type="varchar(160)"><constraints nullable="false"/></column>
+            <column name="contact_channel" type="varchar(40)"/>
+            <column name="campaign_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="landing_type" type="varchar(40)"/>
+            <column name="landing_variant" type="varchar(80)"/>
+            <column name="source_route" type="varchar(220)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="consent_snapshot_json" type="jsonb"><constraints nullable="false"/></column>
+            <column name="crm_lead_status" type="varchar(40)"/>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="partner_registration_application" baseColumnNames="invite_id"
+                                 referencedTableName="partner_onboarding_invite" referencedColumnNames="id"
+                                 constraintName="fk_partner_registration_invite"/>
+        <createIndex tableName="partner_registration_application" indexName="idx_partner_application_contact_status">
+            <column name="contact_hash"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="partner_registration_application" indexName="idx_partner_application_sponsor_status">
+            <column name="sponsor_partner_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
