@@ -7,9 +7,14 @@ import com.bestorigin.monolith.catalog.api.CatalogErrorResponse;
 import com.bestorigin.monolith.catalog.api.CatalogProductCardResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSearchResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSort;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueIssueResponse;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueMaterialActionRequest;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueMaterialActionResponse;
 import com.bestorigin.monolith.catalog.impl.service.CatalogItemUnavailableException;
 import com.bestorigin.monolith.catalog.impl.service.CatalogProductNotFoundException;
 import com.bestorigin.monolith.catalog.impl.service.CatalogService;
+import com.bestorigin.monolith.catalog.impl.service.DigitalCatalogueForbiddenException;
+import com.bestorigin.monolith.catalog.impl.service.DigitalCatalogueNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -64,6 +69,45 @@ public class CatalogController {
         return service.addToCart(request);
     }
 
+    @GetMapping("/digital-catalogues/current")
+    public DigitalCatalogueIssueResponse getCurrentDigitalCatalogue(
+            @RequestParam(defaultValue = "GUEST") Audience audience
+    ) {
+        return service.getCurrentDigitalCatalogue(audience);
+    }
+
+    @GetMapping("/digital-catalogues/next")
+    public DigitalCatalogueIssueResponse getNextDigitalCatalogue(
+            @RequestParam(defaultValue = "GUEST") Audience audience,
+            @RequestParam(required = false) Boolean preview
+    ) {
+        return service.getNextDigitalCatalogue(audience, preview);
+    }
+
+    @GetMapping("/digital-catalogues/{issueCode}")
+    public DigitalCatalogueIssueResponse getDigitalCatalogueByCode(
+            @PathVariable String issueCode,
+            @RequestParam(defaultValue = "GUEST") Audience audience
+    ) {
+        return service.getDigitalCatalogueByCode(issueCode, audience);
+    }
+
+    @PostMapping("/digital-catalogues/materials/{materialId}/download")
+    public DigitalCatalogueMaterialActionResponse downloadMaterial(
+            @PathVariable String materialId,
+            @RequestBody DigitalCatalogueMaterialActionRequest request
+    ) {
+        return service.createMaterialDownload(materialId, request);
+    }
+
+    @PostMapping("/digital-catalogues/materials/{materialId}/share")
+    public DigitalCatalogueMaterialActionResponse shareMaterial(
+            @PathVariable String materialId,
+            @RequestBody DigitalCatalogueMaterialActionRequest request
+    ) {
+        return service.createMaterialShare(materialId, request);
+    }
+
     @ExceptionHandler(CatalogItemUnavailableException.class)
     public ResponseEntity<CatalogErrorResponse> handleUnavailable(CatalogItemUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new CatalogErrorResponse(ex.getMessage()));
@@ -71,6 +115,16 @@ public class CatalogController {
 
     @ExceptionHandler(CatalogProductNotFoundException.class)
     public ResponseEntity<CatalogErrorResponse> handleProductNotFound(CatalogProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CatalogErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DigitalCatalogueForbiddenException.class)
+    public ResponseEntity<CatalogErrorResponse> handleDigitalCatalogueForbidden(DigitalCatalogueForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new CatalogErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DigitalCatalogueNotFoundException.class)
+    public ResponseEntity<CatalogErrorResponse> handleDigitalCatalogueNotFound(DigitalCatalogueNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CatalogErrorResponse(ex.getMessage()));
     }
 }

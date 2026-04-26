@@ -1,18 +1,14 @@
 openapi: 3.1.0
 info:
   title: Best Ori Gin catalog module API
-  version: 1.1.0
+  version: 1.2.0
+  description: Full catalog module API through feature 006: search, product card, cart add, current/next digital catalogues and PDF material actions.
 paths:
   /api/catalog/search:
     get:
       summary: Получить поисковую выдачу каталога
       parameters:
-        - name: audience
-          in: query
-          schema:
-            type: string
-            enum: [GUEST, CUSTOMER, PARTNER]
-            default: GUEST
+        - $ref: '#/components/parameters/Audience'
         - name: q
           in: query
           schema:
@@ -59,12 +55,7 @@ paths:
           schema:
             type: string
             maxLength: 64
-        - name: audience
-          in: query
-          schema:
-            type: string
-            enum: [GUEST, CUSTOMER, PARTNER]
-            default: GUEST
+        - $ref: '#/components/parameters/Audience'
         - name: campaignCode
           in: query
           schema:
@@ -89,7 +80,113 @@ paths:
           description: Authentication required
         "409":
           description: Product unavailable for cart add
+  /api/catalog/digital-catalogues/current:
+    get:
+      summary: Получить текущий цифровой каталог
+      parameters:
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        "200":
+          description: Current digital catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        "404":
+          description: Current digital catalogue not found
+  /api/catalog/digital-catalogues/next:
+    get:
+      summary: Получить следующий цифровой каталог
+      parameters:
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        "200":
+          description: Next digital catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        "403":
+          description: Next digital catalogue is not visible for the role
+        "404":
+          description: Next digital catalogue not found
+  /api/catalog/digital-catalogues/{issueCode}:
+    get:
+      summary: Получить цифровой каталог по коду выпуска
+      parameters:
+        - name: issueCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        "200":
+          description: Digital catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        "403":
+          description: Issue is not visible for the role
+        "404":
+          description: Issue not found
+  /api/catalog/digital-catalogues/materials/{materialId}/download:
+    post:
+      summary: Создать временную ссылку скачивания PDF-материала
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+      requestBody:
+        required: true
+      responses:
+        "200":
+          description: Download URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueMaterialActionResponse'
+        "403":
+          description: Download forbidden
+        "404":
+          description: Material unavailable
+  /api/catalog/digital-catalogues/materials/{materialId}/share:
+    post:
+      summary: Создать временную share-ссылку PDF-материала
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+      requestBody:
+        required: true
+      responses:
+        "200":
+          description: Share URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueMaterialActionResponse'
+        "403":
+          description: Share forbidden
+        "404":
+          description: Material unavailable
 components:
+  parameters:
+    Audience:
+      name: audience
+      in: query
+      schema:
+        type: string
+        enum: [GUEST, CUSTOMER, PARTNER, CONTENT_MANAGER, CATALOG_MANAGER]
+        default: GUEST
   schemas:
     CatalogProductCardResponse:
       type: object
@@ -112,3 +209,85 @@ components:
           type: array
         recommendations:
           type: array
+    DigitalCatalogueIssueResponse:
+      type: object
+      required: [issueCode, title, period, publicationStatus, pages, materials]
+      properties:
+        issueCode:
+          type: string
+        title:
+          type: string
+        periodType:
+          type: string
+          enum: [CURRENT, NEXT, ARCHIVE]
+        period:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+        publicationStatus:
+          type: string
+          enum: [DRAFT, SCHEDULED, PUBLISHED, ARCHIVED]
+        viewer:
+          type: object
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigitalCataloguePage'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigitalCatalogueMaterial'
+    DigitalCataloguePage:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        imageUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        hotspots:
+          type: array
+          items:
+            type: object
+            properties:
+              productCode:
+                type: string
+              xPercent:
+                type: number
+              yPercent:
+                type: number
+              widthPercent:
+                type: number
+              heightPercent:
+                type: number
+    DigitalCatalogueMaterial:
+      type: object
+      properties:
+        materialId:
+          type: string
+        materialType:
+          type: string
+          enum: [MAIN_CATALOG, BROCHURE, PROMO_LEAFLET, DOCUMENT]
+        title:
+          type: string
+        previewUrl:
+          type: string
+        actions:
+          type: object
+    DigitalCatalogueMaterialActionResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        messageCode:
+          type: string
+          examples: [STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY]

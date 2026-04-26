@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-label="Схематичный desktop-макет цифрового каталога">
+  <rect x="0" y="0" width="1280" height="900" fill="#ffffff"/>
+  <text x="40" y="40" font-family="Arial" font-size="20">Цифровой каталог desktop</text>
+  <rect x="40" y="70" width="1200" height="64" fill="none" stroke="#222"/>
+  <text x="60" y="108" font-family="Arial" font-size="16">Шапка: логотип, поиск, каталог, корзина, профиль</text>
+  <rect x="40" y="155" width="1200" height="72" fill="none" stroke="#222"/>
+  <text x="60" y="184" font-family="Arial" font-size="16">Заголовок выпуска, период действия, статус публикации</text>
+  <rect x="60" y="198" width="190" height="20" fill="none" stroke="#777"/>
+  <text x="70" y="213" font-family="Arial" font-size="12">Текущий / Следующий</text>
+  <rect x="40" y="250" width="260" height="590" fill="none" stroke="#222"/>
+  <text x="60" y="282" font-family="Arial" font-size="15">Материалы выпуска</text>
+  <rect x="60" y="310" width="220" height="58" fill="none" stroke="#777"/>
+  <text x="75" y="344" font-family="Arial" font-size="13">Основной каталог PDF</text>
+  <rect x="60" y="382" width="220" height="58" fill="none" stroke="#777"/>
+  <text x="75" y="416" font-family="Arial" font-size="13">Брошюра / промо-лист</text>
+  <rect x="60" y="454" width="220" height="58" fill="none" stroke="#777"/>
+  <text x="75" y="488" font-family="Arial" font-size="13">Дополнительный PDF</text>
+  <rect x="325" y="250" width="685" height="590" fill="none" stroke="#222"/>
+  <text x="600" y="285" font-family="Arial" font-size="16">PDF viewer / страница каталога</text>
+  <rect x="365" y="315" width="605" height="430" fill="none" stroke="#777"/>
+  <text x="590" y="535" font-family="Arial" font-size="16">Страница каталога</text>
+  <rect x="500" y="475" width="150" height="80" fill="none" stroke="#444"/>
+  <text x="515" y="520" font-family="Arial" font-size="12">Интерактивная зона</text>
+  <rect x="680" y="585" width="160" height="70" fill="none" stroke="#444"/>
+  <text x="697" y="625" font-family="Arial" font-size="12">Переход в товар</text>
+  <rect x="365" y="765" width="605" height="52" fill="none" stroke="#444"/>
+  <text x="385" y="798" font-family="Arial" font-size="14">Пагинация страниц, номер страницы, миниатюры</text>
+  <rect x="1035" y="250" width="205" height="590" fill="none" stroke="#222"/>
+  <text x="1055" y="282" font-family="Arial" font-size="15">Действия viewer</text>
+  <rect x="1055" y="315" width="165" height="44" fill="none" stroke="#777"/>
+  <text x="1085" y="342" font-family="Arial" font-size="13">Увеличить</text>
+  <rect x="1055" y="373" width="165" height="44" fill="none" stroke="#777"/>
+  <text x="1085" y="400" font-family="Arial" font-size="13">Уменьшить</text>
+  <rect x="1055" y="431" width="165" height="44" fill="none" stroke="#777"/>
+  <text x="1082" y="458" font-family="Arial" font-size="13">Сброс масштаба</text>
+  <rect x="1055" y="489" width="165" height="44" fill="none" stroke="#777"/>
+  <text x="1092" y="516" font-family="Arial" font-size="13">Скачать</text>
+  <rect x="1055" y="547" width="165" height="44" fill="none" stroke="#777"/>
+  <text x="1095" y="574" font-family="Arial" font-size="13">Поделиться</text>
+  <rect x="1055" y="625" width="165" height="92" fill="none" stroke="#777"/>
+  <text x="1070" y="660" font-family="Arial" font-size="12">Права доступа</text>
+  <text x="1070" y="686" font-family="Arial" font-size="12">и состояние PDF</text>
+</svg>

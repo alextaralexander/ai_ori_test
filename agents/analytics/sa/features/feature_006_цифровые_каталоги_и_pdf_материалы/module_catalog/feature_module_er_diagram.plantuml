@@ -1,0 +1,98 @@
+@startuml
+title Feature 006. Module catalog. ER-изменения цифровых каталогов и PDF-материалов
+
+entity "catalog_digital_issue" as catalog_digital_issue {
+  * issue_id : varchar(64)
+  --
+  issue_code : varchar(64)
+  title : varchar(255)
+  period_type : varchar(32)
+  period_start : date
+  period_end : date
+  publication_status : varchar(32)
+  preview_allowed_from : timestamp
+  sort_order : integer
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "catalog_digital_page" as catalog_digital_page {
+  * page_id : varchar(64)
+  --
+  issue_id : varchar(64)
+  page_number : integer
+  image_url : varchar(1024)
+  thumbnail_url : varchar(1024)
+  width_px : integer
+  height_px : integer
+  created_at : timestamp
+}
+
+entity "catalog_digital_material" as catalog_digital_material {
+  * material_id : varchar(64)
+  --
+  issue_id : varchar(64)
+  material_type : varchar(32)
+  title : varchar(255)
+  file_url : varchar(1024)
+  file_size_bytes : bigint
+  publication_status : varchar(32)
+  allow_download : boolean
+  allow_share : boolean
+  sort_order : integer
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "catalog_digital_page_hotspot" as catalog_digital_page_hotspot {
+  * hotspot_id : varchar(64)
+  --
+  page_id : varchar(64)
+  product_code : varchar(64)
+  x_percent : numeric(6,3)
+  y_percent : numeric(6,3)
+  width_percent : numeric(6,3)
+  height_percent : numeric(6,3)
+  sort_order : integer
+}
+
+entity "catalog_digital_visibility" as catalog_digital_visibility {
+  * visibility_id : varchar(64)
+  --
+  issue_id : varchar(64)
+  material_id : varchar(64)
+  role_code : varchar(64)
+  can_preview : boolean
+  can_download : boolean
+  can_share : boolean
+}
+
+entity "catalog_product" as catalog_product {
+  * product_code : varchar(64)
+  --
+  name : varchar(255)
+  campaign_code : varchar(64)
+  is_published : boolean
+}
+
+catalog_digital_issue ||--o{ catalog_digital_page : "страницы выпуска"
+catalog_digital_issue ||--o{ catalog_digital_material : "PDF и брошюры"
+catalog_digital_issue ||--o{ catalog_digital_visibility : "видимость выпуска"
+catalog_digital_material ||--o{ catalog_digital_visibility : "видимость материала"
+catalog_digital_page ||--o{ catalog_digital_page_hotspot : "интерактивные зоны"
+catalog_product ||--o{ catalog_digital_page_hotspot : "переход в карточку"
+
+note right of catalog_digital_issue
+  Feature #6 добавляет текущие и следующие
+  трехнедельные цифровые выпуски каталога.
+  Публичный доступ определяется статусом,
+  периодом и ролевой видимостью.
+end note
+
+note bottom of catalog_digital_material
+  PDF viewer использует allow_download и allow_share.
+  User-facing ошибки возвращаются mnemonic-кодами
+  STR_MNEMO_DIGITAL_CATALOGUE_*.
+end note
+
+@enduml

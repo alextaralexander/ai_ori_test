@@ -1,5 +1,5 @@
 @startuml
-title Module catalog. Полная ER-диаграмма на feature 005
+title Module catalog. Полная ER-диаграмма на feature 006
 
 entity "catalog_category" as category {
   * id : uuid
@@ -96,6 +96,72 @@ entity "catalog_cart_item" as cart_item {
   * created_at : timestamptz
 }
 
+entity "catalog_digital_issue" as digital_issue {
+  * id : uuid
+  --
+  * issue_code : varchar(64)
+  * title_i18n_key : varchar(220)
+  * period_type : varchar(32)
+  * period_start : date
+  * period_end : date
+  * publication_status : varchar(32)
+  preview_allowed_from : timestamptz
+  * display_order : int
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "catalog_digital_page" as digital_page {
+  * id : uuid
+  --
+  * issue_id : uuid
+  * page_number : int
+  * image_url : varchar(1000)
+  thumbnail_url : varchar(1000)
+  * width_px : int
+  * height_px : int
+  * created_at : timestamptz
+}
+
+entity "catalog_digital_material" as digital_material {
+  * id : uuid
+  --
+  * issue_id : uuid
+  * material_type : varchar(32)
+  * title_i18n_key : varchar(220)
+  * file_url : varchar(1000)
+  file_size_bytes : bigint
+  * publication_status : varchar(32)
+  * allow_download : boolean
+  * allow_share : boolean
+  * display_order : int
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "catalog_digital_page_hotspot" as digital_hotspot {
+  * id : uuid
+  --
+  * page_id : uuid
+  * product_id : uuid
+  * x_percent : decimal(6,3)
+  * y_percent : decimal(6,3)
+  * width_percent : decimal(6,3)
+  * height_percent : decimal(6,3)
+  * display_order : int
+}
+
+entity "catalog_digital_visibility" as digital_visibility {
+  * id : uuid
+  --
+  * issue_id : uuid
+  material_id : uuid
+  * role_code : varchar(64)
+  * can_preview : boolean
+  * can_download : boolean
+  * can_share : boolean
+}
+
 category ||--o{ category : parent
 category ||--o{ product : contains
 product ||--|| detail : has
@@ -106,4 +172,10 @@ product ||--o{ recommendation : recommended_as
 product ||--o{ tag : has
 product ||--o{ promo : has
 product ||--o{ cart_item : added_to
+digital_issue ||--o{ digital_page : pages
+digital_issue ||--o{ digital_material : materials
+digital_issue ||--o{ digital_visibility : issue_visibility
+digital_material ||--o{ digital_visibility : material_visibility
+digital_page ||--o{ digital_hotspot : hotspots
+product ||--o{ digital_hotspot : linked_from_catalogue
 @enduml

@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
 import { CatalogSearchView } from './components/CatalogSearchView';
+import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { ProductCardView } from './components/ProductCardView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
@@ -17,6 +18,12 @@ function resolveAudience(): Audience {
   }
   if (stored === 'partner') {
     return 'PARTNER';
+  }
+  if (stored === 'content-manager') {
+    return 'CONTENT_MANAGER';
+  }
+  if (stored === 'catalog-manager') {
+    return 'CATALOG_MANAGER';
   }
   return 'GUEST';
 }
@@ -35,7 +42,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner')) {
+    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -69,7 +76,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -92,6 +99,10 @@ function App() {
     contentView = infoPage === null ? <ContentUnavailableView /> : infoPage ? <InfoPageView page={infoPage} /> : undefined;
   } else if (path.startsWith('/documents/')) {
     contentView = documentsPage === null ? <ContentUnavailableView /> : documentsPage ? <DocumentsPageView collection={documentsPage} /> : undefined;
+  } else if (path === '/products/digital-catalogue-current') {
+    contentView = <DigitalCatalogueView audience={audience} kind="current" preview={params.get('preview') === 'true'} />;
+  } else if (path === '/products/digital-catalogue-next') {
+    contentView = <DigitalCatalogueView audience={audience} kind="next" preview={params.has('preview') ? params.get('preview') === 'true' : undefined} />;
   } else if (path === '/search') {
     contentView = <CatalogSearchView audience={audience} />;
   } else if (path.startsWith('/product/')) {

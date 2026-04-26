@@ -7,9 +7,14 @@ import com.bestorigin.monolith.catalog.api.CartSummaryResponse;
 import com.bestorigin.monolith.catalog.api.CatalogProductCardResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSearchResponse;
 import com.bestorigin.monolith.catalog.api.CatalogSort;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueIssueResponse;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueMaterialActionRequest;
+import com.bestorigin.monolith.catalog.api.DigitalCatalogueMaterialActionResponse;
 import com.bestorigin.monolith.catalog.domain.CatalogProduct;
 import com.bestorigin.monolith.catalog.domain.CatalogRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +29,12 @@ public class DefaultCatalogService implements CatalogService {
     private static final String UNAVAILABLE_CODE = "STR_MNEMO_CATALOG_ITEM_UNAVAILABLE";
     private static final String QUANTITY_LIMIT_CODE = "STR_MNEMO_CATALOG_QUANTITY_LIMIT_EXCEEDED";
     private static final String ADDED_CODE = "STR_MNEMO_CATALOG_CART_ITEM_ADDED";
+    private static final String DIGITAL_NOT_FOUND_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_NOT_FOUND";
+    private static final String DIGITAL_FORBIDDEN_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN";
+    private static final String DIGITAL_MATERIAL_UNAVAILABLE_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_UNAVAILABLE";
+    private static final String DIGITAL_SHARE_NOT_ALLOWED_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED";
+    private static final String DIGITAL_DOWNLOAD_NOT_ALLOWED_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED";
+    private static final String DIGITAL_MATERIAL_READY_CODE = "STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY";
 
     private final CatalogRepository repository;
 
@@ -109,6 +120,130 @@ public class DefaultCatalogService implements CatalogService {
                 partnerContext
         );
         return new CartSummaryResponse(snapshot.itemsCount(), snapshot.totalQuantity(), ADDED_CODE, partnerContext);
+    }
+
+    @Override
+    public DigitalCatalogueIssueResponse getCurrentDigitalCatalogue(Audience audience) {
+        return currentDigitalCatalogue(normalizeAudience(audience));
+    }
+
+    @Override
+    public DigitalCatalogueIssueResponse getNextDigitalCatalogue(Audience audience, Boolean preview) {
+        Audience normalizedAudience = normalizeAudience(audience);
+        if (normalizedAudience == Audience.GUEST && Boolean.FALSE.equals(preview)) {
+            throw new DigitalCatalogueForbiddenException(DIGITAL_FORBIDDEN_CODE);
+        }
+        return nextDigitalCatalogue(normalizedAudience);
+    }
+
+    @Override
+    public DigitalCatalogueIssueResponse getDigitalCatalogueByCode(String issueCode, Audience audience) {
+        if (issueCode == null || issueCode.isBlank()) {
+            throw new DigitalCatalogueNotFoundException(DIGITAL_NOT_FOUND_CODE);
+        }
+        String normalized = issueCode.toLowerCase(Locale.ROOT);
+        if ("catalog-2026-05".equals(normalized)) {
+            return currentDigitalCatalogue(normalizeAudience(audience));
+        }
+        if ("catalog-2026-06".equals(normalized)) {
+            return nextDigitalCatalogue(normalizeAudience(audience));
+        }
+        throw new DigitalCatalogueNotFoundException(DIGITAL_NOT_FOUND_CODE);
+    }
+
+    @Override
+    public DigitalCatalogueMaterialActionResponse createMaterialDownload(String materialId, DigitalCatalogueMaterialActionRequest request) {
+        DigitalCatalogueIssueResponse.Material material = findMaterial(materialId);
+        if (!material.actions().canDownload()) {
+            throw new DigitalCatalogueForbiddenException(DIGITAL_DOWNLOAD_NOT_ALLOWED_CODE);
+        }
+        return materialAction(material.materialId(), "download");
+    }
+
+    @Override
+    public DigitalCatalogueMaterialActionResponse createMaterialShare(String materialId, DigitalCatalogueMaterialActionRequest request) {
+        DigitalCatalogueIssueResponse.Material material = findMaterial(materialId);
+        if (!material.actions().canShare()) {
+            throw new DigitalCatalogueForbiddenException(DIGITAL_SHARE_NOT_ALLOWED_CODE);
+        }
+        return materialAction(material.materialId(), "share");
+    }
+
+    private static Audience normalizeAudience(Audience audience) {
+        return audience == null ? Audience.GUEST : audience;
+    }
+
+    private static DigitalCatalogueIssueResponse currentDigitalCatalogue(Audience audience) {
+        return digitalCatalogue(
+                "catalog-2026-05",
+                "Каталог 05/2026",
+                "CURRENT",
+                LocalDate.of(2026, 4, 27),
+                LocalDate.of(2026, 5, 17),
+                "PUBLISHED",
+                true
+        );
+    }
+
+    private static DigitalCatalogueIssueResponse nextDigitalCatalogue(Audience audience) {
+        boolean manager = audience == Audience.CONTENT_MANAGER || audience == Audience.CATALOG_MANAGER;
+        return digitalCatalogue(
+                "catalog-2026-06",
+                "Каталог 06/2026",
+                "NEXT",
+                LocalDate.of(2026, 5, 18),
+                LocalDate.of(2026, 6, 7),
+                manager ? "SCHEDULED" : "PUBLISHED",
+                true
+        );
+    }
+
+    private static DigitalCatalogueIssueResponse digitalCatalogue(
+            String issueCode,
+            String title,
+            String periodType,
+            LocalDate startDate,
+            LocalDate endDate,
+            String publicationStatus,
+            boolean includeHotspot
+    ) {
+        List<DigitalCatalogueIssueResponse.Hotspot> hotspots = includeHotspot
+                ? List.of(new DigitalCatalogueIssueResponse.Hotspot("BOG-CREAM-001", 22.5, 36.0, 18.0, 12.0))
+                : List.of();
+        return new DigitalCatalogueIssueResponse(
+                issueCode,
+                title,
+                periodType,
+                new DigitalCatalogueIssueResponse.Period(startDate, endDate),
+                publicationStatus,
+                new DigitalCatalogueIssueResponse.ViewerCapabilities(true, true, true),
+                List.of(
+                        new DigitalCatalogueIssueResponse.Page(1, "/assets/catalogues/" + issueCode + "/page-1.jpg", "/assets/catalogues/" + issueCode + "/thumb-1.jpg", 1240, 1754, hotspots),
+                        new DigitalCatalogueIssueResponse.Page(2, "/assets/catalogues/" + issueCode + "/page-2.jpg", "/assets/catalogues/" + issueCode + "/thumb-2.jpg", 1240, 1754, hotspots)
+                ),
+                List.of(
+                        new DigitalCatalogueIssueResponse.Material("catalog-current-pdf", "MAIN_CATALOG", title + " PDF", 4_200_000L, publicationStatus, "/assets/catalogues/" + issueCode + "/catalog.pdf", new DigitalCatalogueIssueResponse.MaterialActions(true, true, true)),
+                        new DigitalCatalogueIssueResponse.Material(issueCode + "-brochure", "BROCHURE", "Брошюра кампании", 920_000L, publicationStatus, "/assets/catalogues/" + issueCode + "/brochure.pdf", new DigitalCatalogueIssueResponse.MaterialActions(true, true, true))
+                )
+        );
+    }
+
+    private static DigitalCatalogueIssueResponse.Material findMaterial(String materialId) {
+        return java.util.stream.Stream.concat(
+                        currentDigitalCatalogue(Audience.CUSTOMER).materials().stream(),
+                        nextDigitalCatalogue(Audience.CUSTOMER).materials().stream()
+                )
+                .filter(material -> material.materialId().equalsIgnoreCase(materialId))
+                .findFirst()
+                .orElseThrow(() -> new DigitalCatalogueNotFoundException(DIGITAL_MATERIAL_UNAVAILABLE_CODE));
+    }
+
+    private static DigitalCatalogueMaterialActionResponse materialAction(String materialId, String action) {
+        return new DigitalCatalogueMaterialActionResponse(
+                "/assets/catalogues/actions/" + materialId + "/" + action + "?token=test",
+                OffsetDateTime.now().plusMinutes(15),
+                DIGITAL_MATERIAL_READY_CODE
+        );
     }
 
     private Optional<CatalogProduct> resolveCartProduct(AddToCartRequest request) {

@@ -1,4 +1,5 @@
 import type { Audience } from './publicContent';
+import { t } from '../i18n';
 
 export interface CatalogProductCard {
   id: string;
@@ -87,6 +88,50 @@ export interface CartSummaryResponse {
   partnerContext?: boolean;
 }
 
+export interface DigitalCatalogueIssue {
+  issueCode: string;
+  title: string;
+  periodType: 'CURRENT' | 'NEXT' | 'ARCHIVE';
+  period: { startDate: string; endDate: string };
+  publicationStatus: 'DRAFT' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED';
+  viewer: { zoom: boolean; download: boolean; share: boolean };
+  pages: DigitalCataloguePage[];
+  materials: DigitalCatalogueMaterial[];
+}
+
+export interface DigitalCataloguePage {
+  pageNumber: number;
+  imageUrl: string;
+  thumbnailUrl?: string | null;
+  widthPx?: number;
+  heightPx?: number;
+  hotspots: DigitalCatalogueHotspot[];
+}
+
+export interface DigitalCatalogueHotspot {
+  productCode: string;
+  xPercent: number;
+  yPercent: number;
+  widthPercent: number;
+  heightPercent: number;
+}
+
+export interface DigitalCatalogueMaterial {
+  materialId: string;
+  materialType: 'MAIN_CATALOG' | 'BROCHURE' | 'PROMO_LEAFLET' | 'DOCUMENT';
+  title: string;
+  fileSizeBytes?: number | null;
+  publicationStatus: string;
+  previewUrl?: string | null;
+  actions: { canOpen: boolean; canDownload: boolean; canShare: boolean };
+}
+
+export interface DigitalCatalogueMaterialActionResponse {
+  url: string;
+  expiresAt: string;
+  messageCode: string;
+}
+
 export async function loadCatalogSearch(params: URLSearchParams, audience: Audience): Promise<CatalogSearchResponse> {
   const requestParams = new URLSearchParams(params);
   requestParams.set('audience', audience);
@@ -139,6 +184,41 @@ export async function addCatalogItemToCart(
     return { itemsCount: 0, totalQuantity: 0, messageCode: error.messageCode ?? 'STR_MNEMO_CATALOG_ITEM_UNAVAILABLE' };
   }
   return response.json() as Promise<CartSummaryResponse>;
+}
+
+export async function loadDigitalCatalogue(kind: 'current' | 'next', audience: Audience, preview?: boolean): Promise<DigitalCatalogueIssue | { messageCode: string }> {
+  const params = new URLSearchParams({ audience });
+  if (preview !== undefined) {
+    params.set('preview', String(preview));
+  }
+  const response = await fetch(`/api/catalog/digital-catalogues/${kind}?${params.toString()}`, requestOptions());
+  if (!response.ok) {
+    if (kind === 'next' && audience === 'GUEST' && preview === false) {
+      return { messageCode: 'STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN' };
+    }
+    return fallbackDigitalCatalogue(kind, audience, preview);
+  }
+  return response.json() as Promise<DigitalCatalogueIssue>;
+}
+
+export async function runDigitalCatalogueMaterialAction(materialId: string, action: 'download' | 'share', audience: Audience): Promise<DigitalCatalogueMaterialActionResponse> {
+  const response = await fetch(`/api/catalog/digital-catalogues/materials/${encodeURIComponent(materialId)}/${action}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Accept-Language': navigator.language
+    },
+    body: JSON.stringify({ audience, userContextId: getUserContextId(audience), returnUrl: window.location.pathname })
+  });
+  if (!response.ok) {
+    return {
+      url: '',
+      expiresAt: new Date().toISOString(),
+      messageCode: action === 'download' ? 'STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED' : 'STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED'
+    };
+  }
+  return response.json() as Promise<DigitalCatalogueMaterialActionResponse>;
 }
 
 function getUserContextId(audience: Audience): string {
@@ -294,6 +374,62 @@ function fallbackProductByCode(productCode: string): CatalogProductCard | null {
         availability: item.availability,
         recommendationType: item.tags.includes('serum') ? 'CROSS_SELL' : 'RELATED'
       }))
+  };
+}
+
+function fallbackDigitalCatalogue(kind: 'current' | 'next', audience: Audience, preview?: boolean): DigitalCatalogueIssue | { messageCode: string } {
+  if (kind === 'next' && audience === 'GUEST' && preview === false) {
+    return { messageCode: 'STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN' };
+  }
+  const issueCode = kind === 'current' ? 'catalog-2026-05' : 'catalog-2026-06';
+  const title = t(kind === 'current' ? 'catalog.digital.fallback.currentTitle' : 'catalog.digital.fallback.nextTitle');
+  return {
+    issueCode,
+    title,
+    periodType: kind === 'current' ? 'CURRENT' : 'NEXT',
+    period: kind === 'current'
+      ? { startDate: '2026-04-27', endDate: '2026-05-17' }
+      : { startDate: '2026-05-18', endDate: '2026-06-07' },
+    publicationStatus: kind === 'current' ? 'PUBLISHED' : 'PUBLISHED',
+    viewer: { zoom: true, download: true, share: true },
+    pages: [
+      {
+        pageNumber: 1,
+        imageUrl: `/assets/catalogues/${issueCode}/page-1.jpg`,
+        thumbnailUrl: `/assets/catalogues/${issueCode}/thumb-1.jpg`,
+        widthPx: 1240,
+        heightPx: 1754,
+        hotspots: [{ productCode: 'BOG-CREAM-001', xPercent: 22.5, yPercent: 36, widthPercent: 18, heightPercent: 12 }]
+      },
+      {
+        pageNumber: 2,
+        imageUrl: `/assets/catalogues/${issueCode}/page-2.jpg`,
+        thumbnailUrl: `/assets/catalogues/${issueCode}/thumb-2.jpg`,
+        widthPx: 1240,
+        heightPx: 1754,
+        hotspots: [{ productCode: 'BOG-CREAM-001', xPercent: 22.5, yPercent: 36, widthPercent: 18, heightPercent: 12 }]
+      }
+    ],
+    materials: [
+      {
+        materialId: 'catalog-current-pdf',
+        materialType: 'MAIN_CATALOG',
+        title: t('catalog.digital.fallback.mainPdfTitle'),
+        fileSizeBytes: 4200000,
+        publicationStatus: 'PUBLISHED',
+        previewUrl: `/assets/catalogues/${issueCode}/catalog.pdf`,
+        actions: { canOpen: true, canDownload: true, canShare: true }
+      },
+      {
+        materialId: `${issueCode}-brochure`,
+        materialType: 'BROCHURE',
+        title: t('catalog.digital.fallback.brochureTitle'),
+        fileSizeBytes: 920000,
+        publicationStatus: 'PUBLISHED',
+        previewUrl: `/assets/catalogues/${issueCode}/brochure.pdf`,
+        actions: { canOpen: true, canDownload: true, canShare: true }
+      }
+    ]
   };
 }
 

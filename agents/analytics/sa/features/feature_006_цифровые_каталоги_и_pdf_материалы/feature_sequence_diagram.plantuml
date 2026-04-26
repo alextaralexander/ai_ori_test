@@ -1,0 +1,88 @@
+@startuml
+title Feature 006. Цифровые каталоги и PDF-материалы. Последовательность взаимодействий
+
+actor "Гость / Пользователь / Менеджер" as User
+participant "web-shell\nDigitalCatalogueView" as Frontend
+participant "catalog\nDigitalCatalogueController" as Controller
+participant "catalog\nDigitalCatalogueService" as Service
+database "catalog repository" as Repository
+participant "S3/MinIO\nPDF material storage" as Storage
+participant "frontend i18n" as I18n
+participant "web-shell\nProductCardView" as ProductCard
+
+User -> Frontend: открыть /products/digital-catalogue-current или /products/digital-catalogue-next
+Frontend -> Controller: GET /api/catalog/digital-catalogues/{current|next}?audience
+Controller -> Service: getCurrentOrNextCatalogue(periodType, audience)
+Service -> Repository: findIssueByPeriodTypeAndPublicationRules(periodType, audience)
+Repository --> Service: issue, pages, materials, visibility, hotspots
+
+alt выпуск доступен роли
+  Service --> Controller: DigitalCatalogueIssueResponse
+  Controller --> Frontend: 200 response
+  Frontend -> I18n: labels viewer, period, publication status, empty/error states
+  I18n --> Frontend: локализованные строки
+  Frontend --> User: выпуск, страницы, PDF viewer, материалы, hotspots
+else выпуск закрыт или отсутствует
+  Service --> Controller: DigitalCatalogueAccessException(STR_MNEMO_DIGITAL_CATALOGUE_FORBIDDEN или STR_MNEMO_DIGITAL_CATALOGUE_NOT_FOUND)
+  Controller --> Frontend: 403/404 CatalogErrorResponse
+  Frontend -> I18n: messageCode
+  I18n --> Frontend: локализованное состояние
+  Frontend --> User: каталог недоступен без технических деталей
+end
+
+alt пользователь открывает PDF-материал
+  User -> Frontend: выбрать материал
+  Frontend --> User: встроенный viewer открывает previewUrl
+  User -> Frontend: zoom in / zoom out / reset
+  Frontend --> User: масштаб страницы изменен локально
+end
+
+alt пользователь скачивает материал
+  User -> Frontend: download
+  Frontend -> Controller: POST /api/catalog/digital-catalogues/materials/{materialId}/download
+  Controller -> Service: createDownloadUrl(materialId, audience)
+  Service -> Repository: validateMaterialVisibility(materialId, audience, DOWNLOAD)
+  Repository --> Service: material, allowDownload
+  alt скачивание разрешено
+    Service -> Storage: createTemporaryDownloadUrl(fileUrl)
+    Storage --> Service: temporaryUrl, expiresAt
+    Service --> Controller: DigitalCatalogueMaterialActionResponse(STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY)
+    Controller --> Frontend: 200 response
+    Frontend --> User: открывает или сохраняет PDF
+  else скачивание запрещено
+    Service --> Controller: DigitalCatalogueActionForbiddenException(STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED)
+    Controller --> Frontend: 403 CatalogErrorResponse
+    Frontend -> I18n: STR_MNEMO_DIGITAL_CATALOGUE_DOWNLOAD_NOT_ALLOWED
+    I18n --> Frontend: локализованная причина
+    Frontend --> User: действие недоступно
+  end
+end
+
+alt пользователь делится материалом
+  User -> Frontend: share
+  Frontend -> Controller: POST /api/catalog/digital-catalogues/materials/{materialId}/share
+  Controller -> Service: createShareUrl(materialId, audience, returnUrl)
+  Service -> Repository: validateMaterialVisibility(materialId, audience, SHARE)
+  Repository --> Service: material, allowShare
+  alt шаринг разрешен
+    Service -> Storage: createTemporaryShareUrl(fileUrl)
+    Storage --> Service: temporaryUrl, expiresAt
+    Service --> Controller: DigitalCatalogueMaterialActionResponse(STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY)
+    Controller --> Frontend: 200 response
+    Frontend --> User: share URL готов
+  else шаринг запрещен
+    Service --> Controller: DigitalCatalogueActionForbiddenException(STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED)
+    Controller --> Frontend: 403 CatalogErrorResponse
+    Frontend -> I18n: STR_MNEMO_DIGITAL_CATALOGUE_SHARE_NOT_ALLOWED
+    I18n --> Frontend: локализованная причина
+    Frontend --> User: действие недоступно
+  end
+end
+
+alt пользователь выбирает hotspot товара
+  User -> Frontend: выбрать интерактивную зону productCode
+  Frontend -> ProductCard: navigate /product/{productCode}?campaignCode=issueCode
+  ProductCard --> User: карточка товара с campaign-контекстом выпуска
+end
+
+@enduml

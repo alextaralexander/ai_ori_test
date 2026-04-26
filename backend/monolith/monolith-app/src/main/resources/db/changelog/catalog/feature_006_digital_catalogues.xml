@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-006-digital-catalogues-001" author="codex">
+        <createTable tableName="catalog_digital_issue">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_code" type="varchar(64)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_catalog_digital_issue_code"/>
+            </column>
+            <column name="title_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="period_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="period_start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="period_end" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="publication_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="preview_allowed_from" type="timestamp with time zone"/>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="catalog_digital_issue" indexName="idx_catalog_digital_issue_period_status">
+            <column name="period_type"/>
+            <column name="publication_status"/>
+            <column name="period_start"/>
+            <column name="period_end"/>
+        </createIndex>
+
+        <createTable tableName="catalog_digital_page">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_number" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_url" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thumbnail_url" type="varchar(1000)"/>
+            <column name="width_px" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="height_px" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_digital_page"
+                                 baseColumnNames="issue_id"
+                                 referencedTableName="catalog_digital_issue"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_digital_page_issue"/>
+        <addUniqueConstraint tableName="catalog_digital_page"
+                             columnNames="issue_id,page_number"
+                             constraintName="uk_catalog_digital_page_number"/>
+
+        <createTable tableName="catalog_digital_material">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="material_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_url" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size_bytes" type="bigint"/>
+            <column name="publication_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="allow_download" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="allow_share" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_digital_material"
+                                 baseColumnNames="issue_id"
+                                 referencedTableName="catalog_digital_issue"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_digital_material_issue"/>
+        <createIndex tableName="catalog_digital_material" indexName="idx_catalog_digital_material_issue_status">
+            <column name="issue_id"/>
+            <column name="publication_status"/>
+            <column name="display_order"/>
+        </createIndex>
+
+        <createTable tableName="catalog_digital_page_hotspot">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="page_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="x_percent" type="decimal(6,3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y_percent" type="decimal(6,3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="width_percent" type="decimal(6,3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="height_percent" type="decimal(6,3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_digital_page_hotspot"
+                                 baseColumnNames="page_id"
+                                 referencedTableName="catalog_digital_page"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_digital_hotspot_page"/>
+        <addForeignKeyConstraint baseTableName="catalog_digital_page_hotspot"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_digital_hotspot_product"/>
+    </changeSet>
+</databaseChangeLog>

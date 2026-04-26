@@ -1,4 +1,4 @@
-export type Audience = 'GUEST' | 'CUSTOMER' | 'PARTNER';
+export type Audience = 'GUEST' | 'CUSTOMER' | 'PARTNER' | 'CONTENT_MANAGER' | 'CATALOG_MANAGER';
 
 export interface ContentBlock {
   blockKey: string;

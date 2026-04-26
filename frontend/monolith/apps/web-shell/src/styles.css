@@ -392,6 +392,60 @@ body {
   background: #ffffff;
 }
 
+.digital-catalogue-page {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+}
+
+.digital-catalogue-header,
+.digital-catalogue-materials,
+.digital-catalogue-viewer {
+  display: grid;
+  gap: 12px;
+}
+
+.digital-catalogue-layout {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.digital-catalogue-viewer-toolbar,
+.digital-catalogue-pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.digital-catalogue-page-frame {
+  position: relative;
+  min-height: 460px;
+  transform-origin: top left;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+}
+
+.digital-catalogue-page-preview {
+  display: grid;
+  min-height: 460px;
+  place-items: center;
+  color: #595959;
+}
+
+.digital-catalogue-hotspot {
+  position: absolute;
+  border: 2px solid #1677ff;
+  background: rgb(22 119 255 / 12%);
+  cursor: pointer;
+}
+
+.digital-catalogue-state {
+  min-height: 260px;
+  align-content: center;
+}
+
 .public-footer {
   background: #fafafa;
   border-top: 1px solid #d9d9d9;
@@ -424,8 +478,15 @@ body {
   .catalog-grid,
   .product-card-layout,
   .product-gallery,
-  .product-characteristics {
+  .product-characteristics,
+  .digital-catalogue-layout {
     grid-template-columns: 1fr;
+  }
+
+  .digital-catalogue-viewer-toolbar,
+  .digital-catalogue-pagination {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .product-buybox {

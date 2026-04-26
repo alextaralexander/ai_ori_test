@@ -3,3 +3,4 @@ import '../feature_002_контентные_страницы_и_новости/f
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
 import '../feature_004_каталог_и_поиск_товаров/feature_ui_flow';
 import '../feature_005_карточка_товара/feature_ui_flow';
+import '../feature_006_цифровые_каталоги_и_pdf_материалы/feature_ui_flow';

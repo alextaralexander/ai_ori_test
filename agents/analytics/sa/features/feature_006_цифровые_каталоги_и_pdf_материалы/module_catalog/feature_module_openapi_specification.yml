@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Digital Catalogue API
+  version: 0.6.0
+  description: Feature 006 API contract for current and next digital catalogues, PDF materials, viewer actions and product hotspots.
+servers:
+  - url: /api/catalog
+tags:
+  - name: digital-catalogues
+paths:
+  /digital-catalogues/current:
+    get:
+      tags:
+        - digital-catalogues
+      summary: Get current digital catalogue issue
+      operationId: getCurrentDigitalCatalogue
+      parameters:
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Current digital catalogue is available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        '404':
+          description: Current digital catalogue is not published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+  /digital-catalogues/next:
+    get:
+      tags:
+        - digital-catalogues
+      summary: Get next digital catalogue issue
+      operationId: getNextDigitalCatalogue
+      parameters:
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Next digital catalogue is available for the current role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        '403':
+          description: Next digital catalogue exists but is not visible for the current role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '404':
+          description: Next digital catalogue is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+  /digital-catalogues/{issueCode}:
+    get:
+      tags:
+        - digital-catalogues
+      summary: Get digital catalogue issue by code
+      operationId: getDigitalCatalogueByCode
+      parameters:
+        - name: issueCode
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+        - $ref: '#/components/parameters/Audience'
+      responses:
+        '200':
+          description: Digital catalogue is available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueIssueResponse'
+        '403':
+          description: Digital catalogue is not visible for the current role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '404':
+          description: Digital catalogue is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+  /digital-catalogues/materials/{materialId}/download:
+    post:
+      tags:
+        - digital-catalogues
+      summary: Create a download URL for an allowed PDF material
+      operationId: createDigitalCatalogueMaterialDownload
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DigitalCatalogueMaterialActionRequest'
+      responses:
+        '200':
+          description: Download URL is created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueMaterialActionResponse'
+        '403':
+          description: Download is not allowed for the role or material.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '404':
+          description: Material is not available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+  /digital-catalogues/materials/{materialId}/share:
+    post:
+      tags:
+        - digital-catalogues
+      summary: Create a share URL for an allowed PDF material
+      operationId: createDigitalCatalogueMaterialShare
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DigitalCatalogueMaterialActionRequest'
+      responses:
+        '200':
+          description: Share URL is created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalCatalogueMaterialActionResponse'
+        '403':
+          description: Sharing is not allowed for the role or material.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+        '404':
+          description: Material is not available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogErrorResponse'
+components:
+  parameters:
+    Audience:
+      name: audience
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/Audience'
+  schemas:
+    Audience:
+      type: string
+      enum: [GUEST, CUSTOMER, PARTNER, CONTENT_MANAGER, CATALOG_MANAGER]
+    DigitalCataloguePeriodType:
+      type: string
+      enum: [CURRENT, NEXT, ARCHIVE]
+    DigitalCataloguePublicationStatus:
+      type: string
+      enum: [DRAFT, SCHEDULED, PUBLISHED, ARCHIVED]
+    DigitalCatalogueMaterialType:
+      type: string
+      enum: [MAIN_CATALOG, BROCHURE, PROMO_LEAFLET, DOCUMENT]
+    DigitalCatalogueIssueResponse:
+      type: object
+      required:
+        - issueCode
+        - title
+        - period
+        - publicationStatus
+        - pages
+        - materials
+      properties:
+        issueCode:
+          type: string
+        title:
+          type: string
+        periodType:
+          $ref: '#/components/schemas/DigitalCataloguePeriodType'
+        period:
+          $ref: '#/components/schemas/DigitalCataloguePeriod'
+        publicationStatus:
+          $ref: '#/components/schemas/DigitalCataloguePublicationStatus'
+        viewer:
+          $ref: '#/components/schemas/DigitalCatalogueViewerCapabilities'
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigitalCataloguePage'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigitalCatalogueMaterial'
+    DigitalCataloguePeriod:
+      type: object
+      required: [startDate, endDate]
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    DigitalCatalogueViewerCapabilities:
+      type: object
+      required: [zoom, download, share]
+      properties:
+        zoom:
+          type: boolean
+        download:
+          type: boolean
+        share:
+          type: boolean
+    DigitalCataloguePage:
+      type: object
+      required: [pageNumber, imageUrl, hotspots]
+      properties:
+        pageNumber:
+          type: integer
+          minimum: 1
+        imageUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+          nullable: true
+        widthPx:
+          type: integer
+          minimum: 1
+        heightPx:
+          type: integer
+          minimum: 1
+        hotspots:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigitalCatalogueHotspot'
+    DigitalCatalogueHotspot:
+      type: object
+      required: [productCode, xPercent, yPercent, widthPercent, heightPercent]
+      properties:
+        productCode:
+          type: string
+          maxLength: 64
+        xPercent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        yPercent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        widthPercent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        heightPercent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+    DigitalCatalogueMaterial:
+      type: object
+      required: [materialId, materialType, title, publicationStatus, actions]
+      properties:
+        materialId:
+          type: string
+        materialType:
+          $ref: '#/components/schemas/DigitalCatalogueMaterialType'
+        title:
+          type: string
+        fileSizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+        publicationStatus:
+          $ref: '#/components/schemas/DigitalCataloguePublicationStatus'
+        previewUrl:
+          type: string
+          nullable: true
+        actions:
+          $ref: '#/components/schemas/DigitalCatalogueMaterialActions'
+    DigitalCatalogueMaterialActions:
+      type: object
+      required: [canOpen, canDownload, canShare]
+      properties:
+        canOpen:
+          type: boolean
+        canDownload:
+          type: boolean
+        canShare:
+          type: boolean
+    DigitalCatalogueMaterialActionRequest:
+      type: object
+      required: [audience]
+      properties:
+        audience:
+          $ref: '#/components/schemas/Audience'
+        returnUrl:
+          type: string
+          maxLength: 1024
+    DigitalCatalogueMaterialActionResponse:
+      type: object
+      required: [url, expiresAt, messageCode]
+      properties:
+        url:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        messageCode:
+          type: string
+          example: STR_MNEMO_DIGITAL_CATALOGUE_MATERIAL_READY
+    CatalogErrorResponse:
+      type: object
+      required: [code, messageCode]
+      properties:
+        code:
+          type: string
+        messageCode:
+          type: string
+          example: STR_MNEMO_DIGITAL_CATALOGUE_NOT_FOUND
