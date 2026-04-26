@@ -1,6 +1,10 @@
 package com.bestorigin.monolith.publiccontent.impl.service;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionRequest;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingType;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
 import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
@@ -77,6 +81,32 @@ public class DefaultPublicContentService implements PublicContentService {
     public DocumentCollectionResponse getDocuments(String documentType, Audience audience) {
         return repository.findDocuments(documentType, normalize(audience))
                 .orElseThrow(() -> new PublicContentNotFoundException("STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND"));
+    }
+
+    @Override
+    public BenefitLandingResponse getBenefitLanding(
+            BenefitLandingType landingType,
+            String code,
+            String campaignId,
+            String variant
+    ) {
+        return repository.findBenefitLanding(landingType, code, campaignId, variant)
+                .orElseThrow(() -> new PublicContentNotFoundException("STR_MNEMO_PUBLIC_BENEFIT_LANDING_NOT_FOUND"));
+    }
+
+    @Override
+    public BenefitLandingConversionResponse registerBenefitLandingConversion(BenefitLandingConversionRequest request) {
+        repository.saveBenefitLandingConversion(
+                request.landingType(),
+                request.variant(),
+                request.referralCode(),
+                request.campaignId(),
+                request.ctaType(),
+                request.routePath(),
+                request.occurredAt(),
+                request.anonymousSessionId()
+        );
+        return new BenefitLandingConversionResponse(true);
     }
 
     private static Audience normalize(Audience audience) {

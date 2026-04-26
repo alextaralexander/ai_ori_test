@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 006
+title Best Ori Gin. Архитектура платформы на feature 007
 
 skinparam componentStyle rectangle
 
@@ -7,13 +7,14 @@ actor "Гость" as Guest
 actor "Покупатель" as Customer
 actor "Партнер" as Partner
 actor "Контент-менеджер" as ContentManager
+actor "Маркетинг-менеджер" as MarketingManager
 actor "Каталожный менеджер" as CatalogManager
 actor "Редактор документов" as LegalEditor
 
 component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
-component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents" as PublicContent
+component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents, benefit landings" as PublicContent
 component "backend/monolith/catalog\nSpring Boot module\nsearch, product cards, cart quick add, digital catalogues" as Catalog
-database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents" as PublicDb
+database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents, benefit landings, referral, conversions" as PublicDb
 database "PostgreSQL\ncatalog schema\ncategories, products, tags, promos, cart items, digital issues" as CatalogDb
 cloud "S3/MinIO\ncatalog PDF materials" as CatalogStorage
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
@@ -21,16 +22,18 @@ component "Auth/Profile контур\nбудущие фичи" as AuthProfile
 component "Cart/Order контур\nбудущие фичи" as CartOrder
 component "Partner контур\nбудущие фичи" as PartnerArea
 
-Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, /products/digital-catalogue-current, /products/digital-catalogue-next, /search, /product/:code
+Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, benefit routes, /products/digital-catalogue-current, /products/digital-catalogue-next, /search, /product/:code
 Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, digital catalogues, /search и /product/:code
-Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, digital catalogues, /search и /product/:code
+Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, referral benefit routes, digital catalogues, /search и /product/:code
 ContentManager --> CmsAdmin : HTTPS управление контентом
+MarketingManager --> CmsAdmin : HTTPS управление benefit-блоками, A/B-вариантами и CTA
 CatalogManager --> CmsAdmin : HTTPS управление товарами, кампаниями и цифровыми выпусками
 LegalEditor --> CmsAdmin : HTTPS версии документов и архив
 
 PublicWeb --> PublicContent : REST pages, navigation, entry-points
 PublicWeb --> PublicContent : REST news, content, offers
 PublicWeb --> PublicContent : REST faq, info, documents
+PublicWeb --> PublicContent : REST benefit landing payload, referral status, conversion events
 PublicWeb --> Catalog : REST search, filters, product cards, recommendations
 PublicWeb --> Catalog : REST product detail, media, attachments, availability
 PublicWeb --> Catalog : REST cart quick add from search/product card
@@ -42,6 +45,7 @@ CmsAdmin --> PublicContent : REST управление CMS-контентом
 CmsAdmin --> Catalog : REST управление каталогом и цифровыми выпусками
 PublicWeb --> AuthProfile : REST вход, профиль, audience
 PublicContent ..> Catalog : productRef / route references to /search
+PublicContent ..> AuthProfile : referral context handoff to registration
 Catalog ..> CartOrder : future order/cart integration boundary and checkout handoff
 PublicWeb --> PartnerArea : route navigation в партнерский офис
 

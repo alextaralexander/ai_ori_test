@@ -1,6 +1,10 @@
 package com.bestorigin.monolith.publiccontent.impl.controller;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionRequest;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingType;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
 import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
@@ -21,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -102,6 +108,23 @@ public class PublicContentController {
             @RequestParam(defaultValue = "GUEST") Audience audience
     ) {
         return service.getDocuments(documentType, audience);
+    }
+
+    @GetMapping("/benefit-landings/{landingType}")
+    public BenefitLandingResponse getBenefitLanding(
+            @PathVariable BenefitLandingType landingType,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String campaignId,
+            @RequestParam(required = false) String variant
+    ) {
+        return service.getBenefitLanding(landingType, code, campaignId, variant);
+    }
+
+    @PostMapping("/benefit-landings/conversions")
+    public ResponseEntity<BenefitLandingConversionResponse> registerBenefitLandingConversion(
+            @RequestBody BenefitLandingConversionRequest request
+    ) {
+        return ResponseEntity.accepted().body(service.registerBenefitLandingConversion(request));
     }
 
     @ExceptionHandler(PublicContentNotFoundException.class)

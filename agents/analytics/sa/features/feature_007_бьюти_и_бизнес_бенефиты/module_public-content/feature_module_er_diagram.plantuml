@@ -1,72 +1,5 @@
 @startuml
-title Public-content module. Целевая ER-модель публичного контента и справки
-
-entity public_page {
-  * id : uuid
-  --
-  page_key : varchar
-  route_path : varchar
-  title_key : varchar
-  audience : varchar
-}
-
-entity public_content_block {
-  * id : uuid
-  --
-  page_id : uuid
-  block_key : varchar
-  block_type : varchar
-  sort_order : int
-  payload : jsonb
-}
-
-entity public_navigation_item {
-  * id : uuid
-  --
-  item_key : varchar
-  label_key : varchar
-  target_type : varchar
-  target_value : varchar
-  area : varchar
-}
-
-entity public_content_page {
-  * id : uuid
-  --
-  content_id : varchar
-  template_code : varchar
-  title_key : varchar
-  published : boolean
-}
-
-entity public_faq_item {
-  * id : uuid
-  --
-  category_code : varchar
-  question_key : varchar
-  answer_key : varchar
-  audience : varchar
-  published : boolean
-}
-
-entity public_info_section {
-  * id : uuid
-  --
-  section_code : varchar
-  title_key : varchar
-  audience : varchar
-  published : boolean
-}
-
-entity public_document {
-  * id : uuid
-  --
-  document_type : varchar
-  title_key : varchar
-  version_label : varchar
-  current : boolean
-  audience : varchar
-}
+title Feature 007. Public-content ER изменения: benefit-лендинги, referral-коды и conversion events
 
 entity public_benefit_landing {
   * id : uuid
@@ -129,11 +62,6 @@ entity public_landing_conversion_event {
   anonymous_session_id : varchar
 }
 
-public_page ||--o{ public_content_block
-public_content_page ||--o{ public_document
-public_info_section ||--o{ public_document
-public_faq_item }o--|| public_info_section
-public_faq_item }o--|| public_document
 public_benefit_landing ||--o{ public_benefit_landing_block
 public_benefit_landing_block ||--o{ public_benefit_cta
 public_referral_code ||--o{ public_landing_conversion_event : referral_code

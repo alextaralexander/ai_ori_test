@@ -446,6 +446,68 @@ body {
   align-content: center;
 }
 
+.benefit-landing-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 32px 24px 56px;
+}
+
+.benefit-hero {
+  align-items: center;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  min-height: 360px;
+}
+
+.benefit-hero h1 {
+  font-size: 42px;
+  line-height: 1.12;
+  margin: 18px 0 14px;
+}
+
+.benefit-hero p {
+  font-size: 18px;
+  line-height: 1.55;
+  max-width: 680px;
+}
+
+.benefit-hero-media {
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, #f4fbf7, #f8f0ff);
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+}
+
+.benefit-referral {
+  margin: 18px 0;
+}
+
+.benefit-blocks {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 28px;
+}
+
+.benefit-block-card {
+  border-radius: 8px;
+}
+
+.benefit-block-card h2 {
+  font-size: 22px;
+  margin: 12px 0 8px;
+}
+
+.sr-only {
+  height: 1px;
+  left: -10000px;
+  overflow: hidden;
+  position: absolute;
+  top: auto;
+  width: 1px;
+}
+
 .public-footer {
   background: #fafafa;
   border-top: 1px solid #d9d9d9;
@@ -479,7 +541,9 @@ body {
   .product-card-layout,
   .product-gallery,
   .product-characteristics,
-  .digital-catalogue-layout {
+  .digital-catalogue-layout,
+  .benefit-hero,
+  .benefit-blocks {
     grid-template-columns: 1fr;
   }
 
@@ -491,5 +555,13 @@ body {
 
   .product-buybox {
     position: static;
+  }
+
+  .benefit-hero {
+    min-height: auto;
+  }
+
+  .benefit-hero h1 {
+    font-size: 30px;
   }
 }

@@ -193,6 +193,45 @@ export interface DocumentCollection {
   emptyStateCode: string;
 }
 
+export type BenefitLandingType = 'BEAUTY' | 'BUSINESS' | 'MEMBER' | 'VIP_CUSTOMER' | 'APP';
+export type ReferralCodeStatus = 'ACTIVE' | 'EXPIRED' | 'DISABLED' | 'NOT_FOUND';
+export type BenefitLandingBlockType = 'HERO' | 'BENEFIT_CARD' | 'SCENARIO' | 'DISCLAIMER' | 'APP_PROMO' | 'SEO_LINKS';
+export type BenefitCtaType = 'REGISTER' | 'REGISTER_PARTNER' | 'OPEN_CATALOG' | 'INSTALL_APP' | 'CONTACT_SPONSOR' | 'ACTIVATE_BENEFITS';
+
+export interface ReferralContext {
+  code?: string | null;
+  status: ReferralCodeStatus;
+  sponsorPublicNameKey?: string | null;
+  messageCode?: string | null;
+}
+
+export interface BenefitLandingCta {
+  ctaType: BenefitCtaType;
+  labelKey: string;
+  targetRoute: string;
+  preserveReferralContext: boolean;
+}
+
+export interface BenefitLandingBlock {
+  blockKey: string;
+  blockType: BenefitLandingBlockType;
+  titleKey: string;
+  bodyKey?: string | null;
+  payload: Record<string, unknown>;
+  sortOrder: number;
+  ctas: BenefitLandingCta[];
+}
+
+export interface BenefitLanding {
+  landingType: BenefitLandingType;
+  routePath: string;
+  campaignId: string;
+  variant: string;
+  seo: SeoMetadata;
+  referral: ReferralContext;
+  blocks: BenefitLandingBlock[];
+}
+
 export async function loadPublicPage(page: 'home' | 'community', audience: Audience): Promise<PublicPage> {
   const response = await fetch(`/api/public-content/pages/${page}?audience=${audience}`, {
     headers: {
@@ -326,6 +365,55 @@ export async function loadDocuments(documentType: string, audience: Audience): P
     return documentType === 'terms' || documentType === 'partner' ? fallbackDocuments(documentType, audience) : null;
   }
   return response.json() as Promise<DocumentCollection>;
+}
+
+export async function loadBenefitLanding(
+  landingType: BenefitLandingType,
+  code: string | null,
+  campaignId: string | null,
+  variant: string | null
+): Promise<BenefitLanding> {
+  const params = new URLSearchParams();
+  if (code) {
+    params.set('code', code);
+  }
+  if (campaignId) {
+    params.set('campaignId', campaignId);
+  }
+  if (variant) {
+    params.set('variant', variant);
+  }
+  const query = params.toString();
+  const response = await fetch(`/api/public-content/benefit-landings/${landingType}${query ? `?${query}` : ''}`, requestOptions());
+  if (!response.ok) {
+    return fallbackBenefitLanding(landingType, code, campaignId, variant);
+  }
+  return response.json() as Promise<BenefitLanding>;
+}
+
+export async function registerBenefitLandingConversion(
+  landing: BenefitLanding,
+  ctaType: string,
+  routePath: string
+): Promise<void> {
+  await fetch('/api/public-content/benefit-landings/conversions', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Accept-Language': navigator.language
+    },
+    body: JSON.stringify({
+      landingType: landing.landingType,
+      variant: landing.variant,
+      referralCode: landing.referral.code,
+      campaignId: landing.campaignId,
+      ctaType,
+      routePath,
+      occurredAt: new Date().toISOString(),
+      anonymousSessionId: window.localStorage.getItem('bestorigin.role') ?? 'guest'
+    })
+  });
 }
 
 function requestOptions(): RequestInit {
@@ -558,6 +646,115 @@ function fallbackDocuments(documentType: string, audience: Audience): DocumentCo
     documents,
     emptyStateCode: 'STR_MNEMO_PUBLIC_DOCUMENTS_EMPTY'
   };
+}
+
+function fallbackBenefitLanding(
+  landingType: BenefitLandingType,
+  code: string | null,
+  campaignId: string | null,
+  variant: string | null
+): BenefitLanding {
+  const active = code?.toUpperCase() === 'BOG777';
+  const referral: ReferralContext = code
+    ? active
+      ? { code: 'BOG777', status: 'ACTIVE', sponsorPublicNameKey: 'public.referral.sponsor.maria' }
+      : { code, status: 'NOT_FOUND', messageCode: 'STR_MNEMO_REFERRAL_CODE_INVALID' }
+    : { status: 'NOT_FOUND' };
+  return {
+    landingType,
+    routePath: benefitRoute(landingType),
+    campaignId: campaignId ?? 'CMP-2026-05',
+    variant: variant ?? 'DEFAULT',
+    seo: {
+      titleKey: `public.benefits.${benefitKey(landingType)}.seo.title`,
+      descriptionKey: `public.benefits.${benefitKey(landingType)}.seo.description`,
+      canonicalUrl: benefitRoute(landingType)
+    },
+    referral,
+    blocks: benefitBlocks(landingType, referral)
+  };
+}
+
+function benefitBlocks(landingType: BenefitLandingType, referral: ReferralContext): BenefitLandingBlock[] {
+  const ctasByType: Record<BenefitLandingType, BenefitCtaType[]> = {
+    BEAUTY: ['REGISTER', 'OPEN_CATALOG', 'ACTIVATE_BENEFITS'],
+    BUSINESS: ['REGISTER_PARTNER', 'OPEN_CATALOG', 'CONTACT_SPONSOR'],
+    MEMBER: ['REGISTER', 'ACTIVATE_BENEFITS'],
+    VIP_CUSTOMER: ['REGISTER', 'OPEN_CATALOG'],
+    APP: ['INSTALL_APP', 'REGISTER']
+  };
+  return [
+    benefitBlock(landingType, 'hero', 'HERO', 10, ctasByType[landingType], { referralStatus: referral.status }),
+    benefitBlock(landingType, 'benefits', landingType === 'APP' ? 'APP_PROMO' : 'BENEFIT_CARD', 20, [], { items: ['welcome', 'cashback', 'catalogue'] }),
+    benefitBlock(landingType, 'disclaimer', 'DISCLAIMER', 80, [], {})
+  ];
+}
+
+function benefitBlock(
+  landingType: BenefitLandingType,
+  blockKey: string,
+  blockType: BenefitLandingBlockType,
+  sortOrder: number,
+  ctaTypes: BenefitCtaType[],
+  payload: Record<string, unknown>
+): BenefitLandingBlock {
+  const prefix = `public.benefits.${benefitKey(landingType)}.${blockKey}`;
+  return {
+    blockKey,
+    blockType,
+    titleKey: `${prefix}.title`,
+    bodyKey: `${prefix}.body`,
+    payload,
+    sortOrder,
+    ctas: ctaTypes.map((ctaType) => ({
+      ctaType,
+      labelKey: `public.benefits.cta.${ctaType.toLowerCase()}`,
+      targetRoute: benefitCtaTarget(ctaType),
+      preserveReferralContext: true
+    }))
+  };
+}
+
+function benefitRoute(landingType: BenefitLandingType): string {
+  if (landingType === 'BEAUTY') {
+    return '/beauty-benefits';
+  }
+  if (landingType === 'BUSINESS') {
+    return '/business-benefits';
+  }
+  if (landingType === 'MEMBER') {
+    return '/member-benefits';
+  }
+  if (landingType === 'VIP_CUSTOMER') {
+    return '/vip-customer-benefits';
+  }
+  return '/the-new-oriflame-app';
+}
+
+function benefitKey(landingType: BenefitLandingType): string {
+  if (landingType === 'VIP_CUSTOMER') {
+    return 'vipCustomer';
+  }
+  return landingType.toLowerCase();
+}
+
+function benefitCtaTarget(ctaType: BenefitCtaType): string {
+  if (ctaType === 'REGISTER_PARTNER') {
+    return '/register?type=partner';
+  }
+  if (ctaType === 'OPEN_CATALOG') {
+    return '/search';
+  }
+  if (ctaType === 'INSTALL_APP') {
+    return '/app';
+  }
+  if (ctaType === 'CONTACT_SPONSOR') {
+    return '/sponsor/contact';
+  }
+  if (ctaType === 'ACTIVATE_BENEFITS') {
+    return '/register?activateBenefits=true';
+  }
+  return '/register';
 }
 
 function breadcrumbs(currentLabelKey: string, route: string): Breadcrumb[] {

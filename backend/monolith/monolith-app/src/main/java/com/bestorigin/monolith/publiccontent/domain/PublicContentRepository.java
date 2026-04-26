@@ -1,6 +1,8 @@
 package com.bestorigin.monolith.publiccontent.domain;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingType;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
 import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
@@ -32,4 +34,22 @@ public interface PublicContentRepository {
     Optional<InfoSectionResponse> findInfoSection(String section, Audience audience);
 
     Optional<DocumentCollectionResponse> findDocuments(String documentType, Audience audience);
+
+    Optional<BenefitLandingResponse> findBenefitLanding(
+            BenefitLandingType landingType,
+            String code,
+            String campaignId,
+            String variant
+    );
+
+    void saveBenefitLandingConversion(
+            BenefitLandingType landingType,
+            String variant,
+            String referralCode,
+            String campaignId,
+            String ctaType,
+            String routePath,
+            String occurredAt,
+            String anonymousSessionId
+    );
 }

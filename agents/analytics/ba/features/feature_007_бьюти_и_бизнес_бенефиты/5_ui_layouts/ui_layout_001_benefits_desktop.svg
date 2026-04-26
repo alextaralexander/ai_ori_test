@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="920" viewBox="0 0 1280 920" role="img" aria-label="Схематичный desktop-макет лендингов бьюти и бизнес-бенефитов">
+  <rect x="0" y="0" width="1280" height="920" fill="#ffffff"/>
+  <text x="40" y="42" font-family="Arial" font-size="20">Бьюти и бизнес-бенефиты desktop</text>
+  <rect x="40" y="70" width="1200" height="64" fill="none" stroke="#222"/>
+  <text x="60" y="108" font-family="Arial" font-size="16">Шапка: логотип, каталог, преимущества, регистрация, профиль</text>
+  <rect x="40" y="158" width="760" height="260" fill="none" stroke="#222"/>
+  <text x="70" y="196" font-family="Arial" font-size="18">Hero: value proposition по типу лендинга</text>
+  <rect x="70" y="225" width="300" height="42" fill="none" stroke="#777"/>
+  <text x="92" y="252" font-family="Arial" font-size="14">CTA: регистрация / активация выгод</text>
+  <rect x="390" y="225" width="250" height="42" fill="none" stroke="#777"/>
+  <text x="420" y="252" font-family="Arial" font-size="14">CTA: перейти в каталог</text>
+  <rect x="70" y="295" width="560" height="76" fill="none" stroke="#777"/>
+  <text x="92" y="326" font-family="Arial" font-size="14">Referral context: код, публичное имя спонсора, campaignId</text>
+  <text x="92" y="350" font-family="Arial" font-size="13">Скрывается или заменяется состоянием ошибки, если код невалиден</text>
+  <rect x="830" y="158" width="410" height="260" fill="none" stroke="#222"/>
+  <text x="865" y="196" font-family="Arial" font-size="18">Медиа / промо-изображение</text>
+  <rect x="875" y="230" width="320" height="150" fill="none" stroke="#777"/>
+  <text x="962" y="310" font-family="Arial" font-size="14">lazy media area</text>
+  <rect x="40" y="450" width="1200" height="128" fill="none" stroke="#222"/>
+  <text x="70" y="482" font-family="Arial" font-size="16">Блоки преимуществ: welcome benefits, cashback, referral benefits, каталог</text>
+  <rect x="70" y="505" width="260" height="44" fill="none" stroke="#777"/>
+  <text x="102" y="532" font-family="Arial" font-size="13">Карточка выгоды 1</text>
+  <rect x="360" y="505" width="260" height="44" fill="none" stroke="#777"/>
+  <text x="392" y="532" font-family="Arial" font-size="13">Карточка выгоды 2</text>
+  <rect x="650" y="505" width="260" height="44" fill="none" stroke="#777"/>
+  <text x="682" y="532" font-family="Arial" font-size="13">Карточка выгоды 3</text>
+  <rect x="940" y="505" width="260" height="44" fill="none" stroke="#777"/>
+  <text x="972" y="532" font-family="Arial" font-size="13">Карточка выгоды 4</text>
+  <rect x="40" y="608" width="580" height="176" fill="none" stroke="#222"/>
+  <text x="70" y="640" font-family="Arial" font-size="16">Секция сценария</text>
+  <text x="70" y="670" font-family="Arial" font-size="14">Beauty: продукция, VIP, member benefits</text>
+  <text x="70" y="700" font-family="Arial" font-size="14">Business: community, offline sales, бонусы</text>
+  <rect x="70" y="725" width="250" height="38" fill="none" stroke="#777"/>
+  <text x="102" y="750" font-family="Arial" font-size="13">CTA сценария</text>
+  <rect x="660" y="608" width="580" height="176" fill="none" stroke="#222"/>
+  <text x="690" y="640" font-family="Arial" font-size="16">Дисклеймеры и условия</text>
+  <text x="690" y="670" font-family="Arial" font-size="14">Юридически аккуратный текст про бонусы и доход</text>
+  <text x="690" y="700" font-family="Arial" font-size="14">Ссылки на регистрацию, правила кампании и приложение</text>
+  <rect x="690" y="725" width="250" height="38" fill="none" stroke="#777"/>
+  <text x="722" y="750" font-family="Arial" font-size="13">CTA: скачать приложение</text>
+  <rect x="40" y="815" width="1200" height="64" fill="none" stroke="#222"/>
+  <text x="70" y="854" font-family="Arial" font-size="15">Footer: SEO links, legal links, i18n-controlled texts, analytics markers</text>
+</svg>

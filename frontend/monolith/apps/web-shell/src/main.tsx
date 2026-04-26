@@ -4,7 +4,8 @@ import { ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
+import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type BenefitLandingType, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
+import { BenefitLandingView } from './components/BenefitLandingView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { ProductCardView } from './components/ProductCardView';
@@ -82,7 +83,7 @@ function App() {
     return <div data-testid="session-ready">{role}</div>;
   }
 
-  if (path === '/catalog' || path === '/cart' || path === '/partner-office' || path === '/benefits' || path === '/register') {
+  if (path === '/catalog' || path === '/cart' || path === '/partner-office' || path === '/benefits' || path === '/register' || path === '/app' || path === '/sponsor/contact') {
     return <div data-testid="route-opened" />;
   }
 
@@ -99,6 +100,16 @@ function App() {
     contentView = infoPage === null ? <ContentUnavailableView /> : infoPage ? <InfoPageView page={infoPage} /> : undefined;
   } else if (path.startsWith('/documents/')) {
     contentView = documentsPage === null ? <ContentUnavailableView /> : documentsPage ? <DocumentsPageView collection={documentsPage} /> : undefined;
+  } else if (resolveBenefitRoute(path)) {
+    const benefitRoute = resolveBenefitRoute(path);
+    contentView = benefitRoute ? (
+      <BenefitLandingView
+        campaignId={params.get('campaignId')}
+        code={benefitRoute.code}
+        landingType={benefitRoute.landingType}
+        variant={params.get('variant')}
+      />
+    ) : undefined;
   } else if (path === '/products/digital-catalogue-current') {
     contentView = <DigitalCatalogueView audience={audience} kind="current" preview={params.get('preview') === 'true'} />;
   } else if (path === '/products/digital-catalogue-next') {
@@ -116,6 +127,31 @@ function App() {
       {page ? <PublicShell contentView={contentView} page={page} /> : null}
     </ConfigProvider>
   );
+}
+
+function resolveBenefitRoute(path: string): { landingType: BenefitLandingType; code: string | null } | null {
+  if (path === '/beauty-benefits') {
+    return { landingType: 'BEAUTY', code: null };
+  }
+  if (path.startsWith('/beauty-benefits/')) {
+    return { landingType: 'BEAUTY', code: decodeURIComponent(path.slice('/beauty-benefits/'.length)) };
+  }
+  if (path === '/business-benefits') {
+    return { landingType: 'BUSINESS', code: null };
+  }
+  if (path.startsWith('/business-benefits/')) {
+    return { landingType: 'BUSINESS', code: decodeURIComponent(path.slice('/business-benefits/'.length)) };
+  }
+  if (path === '/member-benefits') {
+    return { landingType: 'MEMBER', code: null };
+  }
+  if (path === '/vip-customer-benefits') {
+    return { landingType: 'VIP_CUSTOMER', code: null };
+  }
+  if (path === '/the-new-oriflame-app') {
+    return { landingType: 'APP', code: null };
+  }
+  return null;
 }
 
 createRoot(document.getElementById('root') as HTMLElement).render(

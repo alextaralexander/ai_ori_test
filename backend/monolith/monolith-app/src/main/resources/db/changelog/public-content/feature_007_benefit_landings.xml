@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-007-public-benefit-landing" author="codex">
+        <createTable tableName="public_benefit_landing">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_benefit_landing"/>
+            </column>
+            <column name="landing_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_path" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_variant" type="varchar(80)" defaultValue="DEFAULT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)"/>
+            <column name="seo_title_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seo_description_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="public_benefit_landing"
+                             columnNames="landing_type"
+                             constraintName="uk_public_benefit_landing_type"/>
+        <addUniqueConstraint tableName="public_benefit_landing"
+                             columnNames="route_path"
+                             constraintName="uk_public_benefit_landing_route"/>
+    </changeSet>
+
+    <changeSet id="feature-007-public-benefit-landing-block" author="codex">
+        <createTable tableName="public_benefit_landing_block">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_benefit_landing_block"/>
+            </column>
+            <column name="landing_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="block_key" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="block_type" type="varchar(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="variant" type="varchar(80)" defaultValue="DEFAULT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body_key" type="varchar(220)"/>
+            <column name="payload" type="jsonb"/>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_condition" type="varchar(80)" defaultValue="ALWAYS">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="public_benefit_landing_block"
+                                 baseColumnNames="landing_id"
+                                 constraintName="fk_public_benefit_block_landing"
+                                 referencedTableName="public_benefit_landing"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="public_benefit_landing_block"
+                             columnNames="landing_id, variant, block_key"
+                             constraintName="uk_public_benefit_block_variant_key"/>
+        <createIndex tableName="public_benefit_landing_block" indexName="idx_public_benefit_block_order">
+            <column name="landing_id"/>
+            <column name="variant"/>
+            <column name="sort_order"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-007-public-benefit-cta" author="codex">
+        <createTable tableName="public_benefit_cta">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_benefit_cta"/>
+            </column>
+            <column name="block_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cta_type" type="varchar(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_route" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="preserve_referral_context" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="public_benefit_cta"
+                                 baseColumnNames="block_id"
+                                 constraintName="fk_public_benefit_cta_block"
+                                 referencedTableName="public_benefit_landing_block"
+                                 referencedColumnNames="id"/>
+        <createIndex tableName="public_benefit_cta" indexName="idx_public_benefit_cta_order">
+            <column name="block_id"/>
+            <column name="sort_order"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-007-public-referral-code" author="codex">
+        <createTable tableName="public_referral_code">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_referral_code"/>
+            </column>
+            <column name="code" type="varchar(80)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_public_referral_code"/>
+            </column>
+            <column name="sponsor_public_name_key" type="varchar(220)"/>
+            <column name="status" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)"/>
+            <column name="valid_from" type="timestamp with time zone"/>
+            <column name="valid_to" type="timestamp with time zone"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-007-public-landing-conversion-event" author="codex">
+        <createTable tableName="public_landing_conversion_event">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_landing_conversion_event"/>
+            </column>
+            <column name="landing_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="variant" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="referral_code" type="varchar(80)"/>
+            <column name="campaign_id" type="varchar(80)"/>
+            <column name="cta_type" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_path" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="anonymous_session_id" type="varchar(160)"/>
+        </createTable>
+        <createIndex tableName="public_landing_conversion_event" indexName="idx_public_landing_event_campaign">
+            <column name="landing_type"/>
+            <column name="campaign_id"/>
+            <column name="occurred_at"/>
+        </createIndex>
+        <createIndex tableName="public_landing_conversion_event" indexName="idx_public_landing_event_referral">
+            <column name="referral_code"/>
+            <column name="occurred_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

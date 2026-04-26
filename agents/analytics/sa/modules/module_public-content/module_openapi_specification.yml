@@ -59,3 +59,67 @@ paths:
           description: Документы выбранного типа
         "404":
           description: Тип документов не найден
+  /api/public-content/benefit-landings/{landingType}:
+    get:
+      summary: Получить benefit-лендинг
+      parameters:
+        - name: landingType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [BEAUTY, BUSINESS, MEMBER, VIP_CUSTOMER, APP]
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: campaignId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: variant
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Benefit landing payload с SEO, referral context, blocks и CTA
+        "404":
+          description: Лендинг не опубликован
+  /api/public-content/benefit-landings/conversions:
+    post:
+      summary: Зарегистрировать conversion event benefit-лендинга
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [landingType, variant, ctaType, routePath, occurredAt]
+              properties:
+                landingType:
+                  type: string
+                  enum: [BEAUTY, BUSINESS, MEMBER, VIP_CUSTOMER, APP]
+                variant:
+                  type: string
+                referralCode:
+                  type: string
+                campaignId:
+                  type: string
+                ctaType:
+                  type: string
+                routePath:
+                  type: string
+                occurredAt:
+                  type: string
+                  format: date-time
+                anonymousSessionId:
+                  type: string
+      responses:
+        "202":
+          description: Conversion event принят
+        "400":
+          description: Некорректный payload conversion event

@@ -1,6 +1,10 @@
 package com.bestorigin.monolith.publiccontent.impl.service;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionRequest;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingConversionResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingType;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
 import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
@@ -33,4 +37,8 @@ public interface PublicContentService {
     InfoSectionResponse getInfoSection(String section, Audience audience);
 
     DocumentCollectionResponse getDocuments(String documentType, Audience audience);
+
+    BenefitLandingResponse getBenefitLanding(BenefitLandingType landingType, String code, String campaignId, String variant);
+
+    BenefitLandingConversionResponse registerBenefitLandingConversion(BenefitLandingConversionRequest request);
 }

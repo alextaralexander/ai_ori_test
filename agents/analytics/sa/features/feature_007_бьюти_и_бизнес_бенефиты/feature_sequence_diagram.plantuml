@@ -1,0 +1,46 @@
+@startuml
+title Feature 007. Последовательность benefit-лендинга с referral-кодом и conversion event
+
+actor "Гость / потенциальный партнер" as User
+participant "Frontend web-shell" as FE
+participant "public-content API" as PC
+database "public-content data" as DB
+participant "Registration flow" as REG
+participant "Catalog flow" as CAT
+participant "Analytics storage" as AN
+
+User -> FE : Открывает /beauty-benefits/{code}\nили /business-benefits/{code}
+FE -> PC : GET /api/public-content/benefit-landings/{landingType}\n?code={code}&campaignId={campaignId}&variant={variant}
+PC -> DB : Найти landing, блоки, CTA и referral-код
+DB --> PC : Landing payload, blocks, CTA, referral status
+alt referral-код активен
+  PC --> FE : 200 BenefitLandingResponse\nreferral.status=ACTIVE
+  FE -> User : Показывает персонализированный landing\nи разрешенный публичный контекст спонсора
+else referral-код отсутствует, истек или отключен
+  PC --> FE : 200 BenefitLandingResponse\nreferral.status=NOT_FOUND/EXPIRED/DISABLED\nmessageCode=STR_MNEMO_REFERRAL_CODE_INVALID
+  FE -> User : Показывает локализованное состояние\nи базовые CTA без персонализации
+end
+
+FE -> PC : POST /api/public-content/benefit-landings/conversions\nctaType=VIEW, landingType, variant, code, campaignId
+PC -> AN : Сохранить обезличенное событие просмотра
+AN --> PC : Accepted
+PC --> FE : 202 accepted=true
+
+alt пользователь выбирает регистрацию
+  User -> FE : Нажимает CTA регистрации
+  FE -> PC : POST conversions ctaType=REGISTER или REGISTER_PARTNER
+  PC -> AN : Сохранить событие CTA
+  FE -> REG : Передать landingType, variant, code, campaignId
+  REG -> User : Открыть регистрацию с referral-context
+else пользователь выбирает каталог
+  User -> FE : Нажимает CTA каталога
+  FE -> PC : POST conversions ctaType=OPEN_CATALOG
+  PC -> AN : Сохранить событие CTA
+  FE -> CAT : Открыть /search или digital catalogue\nс campaign/referral context
+else пользователь выбирает приложение или спонсора
+  User -> FE : Нажимает INSTALL_APP или CONTACT_SPONSOR
+  FE -> PC : POST conversions с выбранным ctaType
+  PC -> AN : Сохранить событие CTA
+  FE -> User : Открыть store-link или разрешенный канал связи
+end
+@enduml

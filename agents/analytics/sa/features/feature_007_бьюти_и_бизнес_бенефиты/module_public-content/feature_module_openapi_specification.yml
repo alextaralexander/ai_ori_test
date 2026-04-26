@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Benefit Landing API
+  version: 0.7.0
+  description: Feature 007 API contract for public benefit landing pages, referral context and conversion tracking.
+servers:
+  - url: /api/public-content
+tags:
+  - name: benefit-landings
+paths:
+  /benefit-landings/{landingType}:
+    get:
+      tags:
+        - benefit-landings
+      summary: Get public benefit landing payload
+      operationId: getBenefitLanding
+      parameters:
+        - name: landingType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/BenefitLandingType'
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+        - name: campaignId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+        - name: variant
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        '200':
+          description: Benefit landing payload is available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitLandingResponse'
+        '404':
+          description: Benefit landing is not published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicContentErrorResponse'
+  /benefit-landings/conversions:
+    post:
+      tags:
+        - benefit-landings
+      summary: Register benefit landing conversion event
+      operationId: registerBenefitLandingConversion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitLandingConversionRequest'
+      responses:
+        '202':
+          description: Conversion event is accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitLandingConversionResponse'
+        '400':
+          description: Conversion payload is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicContentErrorResponse'
+components:
+  schemas:
+    BenefitLandingType:
+      type: string
+      enum: [BEAUTY, BUSINESS, MEMBER, VIP_CUSTOMER, APP]
+    ReferralCodeStatus:
+      type: string
+      enum: [ACTIVE, EXPIRED, DISABLED, NOT_FOUND]
+    BenefitLandingBlockType:
+      type: string
+      enum: [HERO, BENEFIT_CARD, SCENARIO, DISCLAIMER, APP_PROMO, SEO_LINKS]
+    BenefitCtaType:
+      type: string
+      enum: [REGISTER, REGISTER_PARTNER, OPEN_CATALOG, INSTALL_APP, CONTACT_SPONSOR, ACTIVATE_BENEFITS]
+    BenefitLandingResponse:
+      type: object
+      required: [landingType, routePath, campaignId, variant, seo, blocks, referral]
+      properties:
+        landingType:
+          $ref: '#/components/schemas/BenefitLandingType'
+        routePath:
+          type: string
+        campaignId:
+          type: string
+        variant:
+          type: string
+        seo:
+          $ref: '#/components/schemas/SeoMetadata'
+        referral:
+          $ref: '#/components/schemas/ReferralContext'
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitLandingBlock'
+    SeoMetadata:
+      type: object
+      required: [titleKey, descriptionKey, canonicalPath]
+      properties:
+        titleKey:
+          type: string
+        descriptionKey:
+          type: string
+        canonicalPath:
+          type: string
+    ReferralContext:
+      type: object
+      required: [status]
+      properties:
+        code:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ReferralCodeStatus'
+        sponsorPublicNameKey:
+          type: string
+          nullable: true
+        messageCode:
+          type: string
+          nullable: true
+          example: STR_MNEMO_REFERRAL_CODE_INVALID
+    BenefitLandingBlock:
+      type: object
+      required: [blockKey, blockType, titleKey, sortOrder, ctas]
+      properties:
+        blockKey:
+          type: string
+        blockType:
+          $ref: '#/components/schemas/BenefitLandingBlockType'
+        titleKey:
+          type: string
+        bodyKey:
+          type: string
+          nullable: true
+        payload:
+          type: object
+          additionalProperties: true
+        sortOrder:
+          type: integer
+        ctas:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitCta'
+    BenefitCta:
+      type: object
+      required: [ctaType, labelKey, targetRoute, preserveReferralContext]
+      properties:
+        ctaType:
+          $ref: '#/components/schemas/BenefitCtaType'
+        labelKey:
+          type: string
+        targetRoute:
+          type: string
+        preserveReferralContext:
+          type: boolean
+    BenefitLandingConversionRequest:
+      type: object
+      required: [landingType, variant, ctaType, routePath, occurredAt]
+      properties:
+        landingType:
+          $ref: '#/components/schemas/BenefitLandingType'
+        variant:
+          type: string
+          maxLength: 64
+        referralCode:
+          type: string
+          nullable: true
+          maxLength: 64
+        campaignId:
+          type: string
+          nullable: true
+          maxLength: 64
+        ctaType:
+          type: string
+          maxLength: 64
+        routePath:
+          type: string
+          maxLength: 512
+        occurredAt:
+          type: string
+          format: date-time
+        anonymousSessionId:
+          type: string
+          nullable: true
+          maxLength: 128
+    BenefitLandingConversionResponse:
+      type: object
+      required: [accepted]
+      properties:
+        accepted:
+          type: boolean
+    PublicContentErrorResponse:
+      type: object
+      required: [code, messageCode]
+      properties:
+        code:
+          type: string
+        messageCode:
+          type: string
+          example: STR_MNEMO_PUBLIC_BENEFIT_LANDING_NOT_FOUND

@@ -1,6 +1,12 @@
 package com.bestorigin.monolith.publiccontent.impl.service;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
+import com.bestorigin.monolith.publiccontent.api.BenefitCtaType;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingBlockResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingBlockType;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingCtaResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingResponse;
+import com.bestorigin.monolith.publiccontent.api.BenefitLandingType;
 import com.bestorigin.monolith.publiccontent.api.BreadcrumbResponse;
 import com.bestorigin.monolith.publiccontent.api.ContentAttachmentResponse;
 import com.bestorigin.monolith.publiccontent.api.ContentBlockResponse;
@@ -23,6 +29,8 @@ import com.bestorigin.monolith.publiccontent.api.OfferHeroResponse;
 import com.bestorigin.monolith.publiccontent.api.OfferResponse;
 import com.bestorigin.monolith.publiccontent.api.ProductLinkResponse;
 import com.bestorigin.monolith.publiccontent.api.PublicPageResponse;
+import com.bestorigin.monolith.publiccontent.api.ReferralCodeStatus;
+import com.bestorigin.monolith.publiccontent.api.ReferralContextResponse;
 import com.bestorigin.monolith.publiccontent.api.SeoMetadataResponse;
 import com.bestorigin.monolith.publiccontent.domain.PublicContentRepository;
 import java.util.List;
@@ -247,6 +255,48 @@ public class InMemoryPublicContentRepository implements PublicContentRepository 
         ));
     }
 
+    @Override
+    public Optional<BenefitLandingResponse> findBenefitLanding(
+            BenefitLandingType landingType,
+            String code,
+            String campaignId,
+            String variant
+    ) {
+        if (landingType == null) {
+            return Optional.empty();
+        }
+        String resolvedCampaignId = (campaignId == null || campaignId.isBlank()) ? "CMP-2026-05" : campaignId;
+        String resolvedVariant = (variant == null || variant.isBlank()) ? "DEFAULT" : variant;
+        ReferralContextResponse referral = referralContext(code);
+        return Optional.of(new BenefitLandingResponse(
+                landingType,
+                routeFor(landingType),
+                resolvedCampaignId,
+                knownVariant(resolvedVariant) ? resolvedVariant : "DEFAULT",
+                new SeoMetadataResponse(
+                        "public.benefits." + landingKey(landingType) + ".seo.title",
+                        "public.benefits." + landingKey(landingType) + ".seo.description",
+                        routeFor(landingType)
+                ),
+                referral,
+                benefitBlocks(landingType, referral)
+        ));
+    }
+
+    @Override
+    public void saveBenefitLandingConversion(
+            BenefitLandingType landingType,
+            String variant,
+            String referralCode,
+            String campaignId,
+            String ctaType,
+            String routePath,
+            String occurredAt,
+            String anonymousSessionId
+    ) {
+        // In-memory implementation accepts the event; the target ER model defines persisted storage.
+    }
+
     private static InfoSectionResponse infoOverview(Audience audience) {
         return new InfoSectionResponse(
                 "overview",
@@ -272,6 +322,139 @@ public class InMemoryPublicContentRepository implements PublicContentRepository 
                 )),
                 ctasFor(audience, "public.info.overview.cta.faq", "/FAQ")
         );
+    }
+
+    private static ReferralContextResponse referralContext(String rawCode) {
+        if (rawCode == null || rawCode.isBlank()) {
+            return new ReferralContextResponse(null, ReferralCodeStatus.NOT_FOUND, null, null);
+        }
+        String normalizedCode = rawCode.trim().replaceAll("[^A-Za-z0-9_-]", "").toUpperCase(java.util.Locale.ROOT);
+        if ("BOG777".equals(normalizedCode)) {
+            return new ReferralContextResponse(
+                    normalizedCode,
+                    ReferralCodeStatus.ACTIVE,
+                    "public.referral.sponsor.maria",
+                    null
+            );
+        }
+        return new ReferralContextResponse(
+                normalizedCode,
+                ReferralCodeStatus.NOT_FOUND,
+                null,
+                "STR_MNEMO_REFERRAL_CODE_INVALID"
+        );
+    }
+
+    private static List<BenefitLandingBlockResponse> benefitBlocks(
+            BenefitLandingType landingType,
+            ReferralContextResponse referral
+    ) {
+        return switch (landingType) {
+            case BEAUTY -> List.of(
+                    benefitBlock(landingType, "hero", BenefitLandingBlockType.HERO, 10, List.of(
+                            BenefitCtaType.REGISTER,
+                            BenefitCtaType.OPEN_CATALOG
+                    ), Map.of("mediaKey", "beauty-hero", "referralStatus", referral.status().name())),
+                    benefitBlock(landingType, "welcome-benefits", BenefitLandingBlockType.BENEFIT_CARD, 20, List.of(
+                            BenefitCtaType.ACTIVATE_BENEFITS
+                    ), Map.of("benefitKeys", List.of("welcome", "cashback", "catalogue"))),
+                    benefitBlock(landingType, "seo-links", BenefitLandingBlockType.SEO_LINKS, 90, List.of(), Map.of())
+            );
+            case BUSINESS -> List.of(
+                    benefitBlock(landingType, "hero", BenefitLandingBlockType.HERO, 10, List.of(
+                            BenefitCtaType.REGISTER_PARTNER,
+                            BenefitCtaType.OPEN_CATALOG
+                    ), Map.of("mediaKey", "business-hero", "referralStatus", referral.status().name())),
+                    benefitBlock(landingType, "partner-model", BenefitLandingBlockType.SCENARIO, 20, List.of(
+                            BenefitCtaType.CONTACT_SPONSOR
+                    ), Map.of("benefitKeys", List.of("community", "offlineSales", "referralBenefits"))),
+                    benefitBlock(landingType, "income-disclaimer", BenefitLandingBlockType.DISCLAIMER, 80, List.of(), Map.of())
+            );
+            case MEMBER -> List.of(
+                    benefitBlock(landingType, "hero", BenefitLandingBlockType.HERO, 10, List.of(
+                            BenefitCtaType.REGISTER,
+                            BenefitCtaType.ACTIVATE_BENEFITS
+                    ), Map.of("benefitKeys", List.of("memberPrices", "welcome", "catalogue"))),
+                    benefitBlock(landingType, "member-benefits", BenefitLandingBlockType.BENEFIT_CARD, 20, List.of(), Map.of())
+            );
+            case VIP_CUSTOMER -> List.of(
+                    benefitBlock(landingType, "hero", BenefitLandingBlockType.HERO, 10, List.of(
+                            BenefitCtaType.REGISTER,
+                            BenefitCtaType.OPEN_CATALOG
+                    ), Map.of("benefitKeys", List.of("vipPrices", "cashback", "personalOffers"))),
+                    benefitBlock(landingType, "vip-benefits", BenefitLandingBlockType.BENEFIT_CARD, 20, List.of(), Map.of())
+            );
+            case APP -> List.of(
+                    benefitBlock(landingType, "hero", BenefitLandingBlockType.HERO, 10, List.of(
+                            BenefitCtaType.INSTALL_APP,
+                            BenefitCtaType.REGISTER
+                    ), Map.of("mediaKey", "app-hero")),
+                    benefitBlock(landingType, "app-capabilities", BenefitLandingBlockType.APP_PROMO, 20, List.of(),
+                            Map.of("capabilityKeys", List.of("catalogue", "orders", "notifications", "partnerTools")))
+            );
+        };
+    }
+
+    private static BenefitLandingBlockResponse benefitBlock(
+            BenefitLandingType landingType,
+            String blockKey,
+            BenefitLandingBlockType blockType,
+            int sortOrder,
+            List<BenefitCtaType> ctaTypes,
+            Map<String, Object> payload
+    ) {
+        String prefix = "public.benefits." + landingKey(landingType) + "." + blockKey;
+        return new BenefitLandingBlockResponse(
+                blockKey,
+                blockType,
+                prefix + ".title",
+                prefix + ".body",
+                payload,
+                sortOrder,
+                ctaTypes.stream()
+                        .map(type -> new BenefitLandingCtaResponse(
+                                type,
+                                "public.benefits.cta." + type.name().toLowerCase(java.util.Locale.ROOT),
+                                targetRoute(type),
+                                true
+                        ))
+                        .toList()
+        );
+    }
+
+    private static boolean knownVariant(String variant) {
+        return "DEFAULT".equals(variant) || "WELCOME_CASHBACK".equals(variant);
+    }
+
+    private static String routeFor(BenefitLandingType landingType) {
+        return switch (landingType) {
+            case BEAUTY -> "/beauty-benefits";
+            case BUSINESS -> "/business-benefits";
+            case MEMBER -> "/member-benefits";
+            case VIP_CUSTOMER -> "/vip-customer-benefits";
+            case APP -> "/the-new-oriflame-app";
+        };
+    }
+
+    private static String landingKey(BenefitLandingType landingType) {
+        return switch (landingType) {
+            case BEAUTY -> "beauty";
+            case BUSINESS -> "business";
+            case MEMBER -> "member";
+            case VIP_CUSTOMER -> "vipCustomer";
+            case APP -> "app";
+        };
+    }
+
+    private static String targetRoute(BenefitCtaType ctaType) {
+        return switch (ctaType) {
+            case REGISTER -> "/register";
+            case REGISTER_PARTNER -> "/register?type=partner";
+            case OPEN_CATALOG -> "/search";
+            case INSTALL_APP -> "/app";
+            case CONTACT_SPONSOR -> "/sponsor/contact";
+            case ACTIVATE_BENEFITS -> "/register?activateBenefits=true";
+        };
     }
 
     private static List<FaqItemResponse> faqItems() {
