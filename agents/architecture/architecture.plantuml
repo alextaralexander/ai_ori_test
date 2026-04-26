@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 003
+title Best Ori Gin. Архитектура платформы на feature 004
 
 skinparam componentStyle rectangle
 
@@ -11,26 +11,31 @@ actor "Редактор документов" as LegalEditor
 
 component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
 component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents" as PublicContent
+component "backend/monolith/catalog\nSpring Boot module\nsearch, filters, product cards, cart quick add" as Catalog
 database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents" as PublicDb
+database "PostgreSQL\ncatalog schema\ncategories, products, tags, promos, cart items" as CatalogDb
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
 component "Auth/Profile контур\nбудущие фичи" as AuthProfile
-component "Catalog контур\nбудущие фичи" as Catalog
+component "Cart/Order контур\nбудущие фичи" as CartOrder
 component "Partner контур\nбудущие фичи" as PartnerArea
 
-Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type
-Customer --> PublicWeb : HTTPS публичные и клиентские маршруты
-Partner --> PublicWeb : HTTPS публичные и партнерские маршруты
+Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, /search
+Customer --> PublicWeb : HTTPS публичные, клиентские маршруты и /search
+Partner --> PublicWeb : HTTPS публичные, партнерские маршруты и /search
 ContentManager --> CmsAdmin : HTTPS управление контентом
 LegalEditor --> CmsAdmin : HTTPS версии документов и архив
 
 PublicWeb --> PublicContent : REST pages, navigation, entry-points
 PublicWeb --> PublicContent : REST news, content, offers
 PublicWeb --> PublicContent : REST faq, info, documents
+PublicWeb --> Catalog : REST search, filters, product cards
+PublicWeb --> Catalog : REST cart quick add
 PublicContent --> PublicDb : JDBC / Liquibase XML target model
+Catalog --> CatalogDb : JDBC / Liquibase XML target model
 CmsAdmin --> PublicContent : REST управление CMS-контентом
 PublicWeb --> AuthProfile : REST вход, профиль, audience
-PublicWeb --> Catalog : route navigation в каталог
-PublicContent ..> Catalog : productRef / route references
+PublicContent ..> Catalog : productRef / route references to /search
+Catalog ..> CartOrder : future order/cart integration boundary
 PublicWeb --> PartnerArea : route navigation в партнерский офис
 
 @enduml

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-004-catalog-search-001" author="codex">
+        <createTable tableName="catalog_category">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="slug" type="varchar(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_i18n_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="uuid"/>
+            <column name="display_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_category"
+                                 baseColumnNames="parent_id"
+                                 referencedTableName="catalog_category"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_catalog_category_parent"/>
+        <createIndex tableName="catalog_category" indexName="idx_catalog_category_parent">
+            <column name="parent_id"/>
+        </createIndex>
+
+        <createTable tableName="catalog_product">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="slug" type="varchar(160)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_i18n_key" type="varchar(180)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="short_description_i18n_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_url" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_code" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_price" type="decimal(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="char(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="availability_status" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="popular_rank" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_product"
+                                 baseColumnNames="category_id"
+                                 referencedTableName="catalog_category"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_catalog_product_category"/>
+        <createIndex tableName="catalog_product" indexName="idx_catalog_product_search">
+            <column name="published"/>
+            <column name="campaign_code"/>
+            <column name="category_id"/>
+        </createIndex>
+        <createIndex tableName="catalog_product" indexName="idx_catalog_product_availability">
+            <column name="availability_status"/>
+        </createIndex>
+        <createIndex tableName="catalog_product" indexName="idx_catalog_product_popular">
+            <column name="popular_rank"/>
+        </createIndex>
+
+        <createTable tableName="catalog_product_tag">
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="catalog_product_tag" columnNames="product_id, tag_code" constraintName="pk_catalog_product_tag"/>
+        <addForeignKeyConstraint baseTableName="catalog_product_tag"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_tag_product"/>
+        <createIndex tableName="catalog_product_tag" indexName="idx_catalog_product_tag_code">
+            <column name="tag_code"/>
+        </createIndex>
+
+        <createTable tableName="catalog_product_promo">
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promo_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="catalog_product_promo" columnNames="product_id, promo_code" constraintName="pk_catalog_product_promo"/>
+        <addForeignKeyConstraint baseTableName="catalog_product_promo"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_catalog_product_promo_product"/>
+        <createIndex tableName="catalog_product_promo" indexName="idx_catalog_product_promo_code">
+            <column name="promo_code"/>
+        </createIndex>
+
+        <createTable tableName="catalog_cart_item">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_context_id" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_context" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="catalog_cart_item"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="catalog_product"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_catalog_cart_item_product"/>
+        <addCheckConstraint tableName="catalog_cart_item"
+                            constraintName="chk_catalog_cart_item_quantity_positive"
+                            checkConstraint="quantity > 0"/>
+        <createIndex tableName="catalog_cart_item" indexName="idx_catalog_cart_user_context">
+            <column name="user_context_id"/>
+        </createIndex>
+        <createIndex tableName="catalog_cart_item" indexName="idx_catalog_cart_product">
+            <column name="product_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

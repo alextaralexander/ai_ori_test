@@ -1,0 +1,58 @@
+@startuml
+title Feature 004. Module catalog. ER changes for product search and cart quick add
+
+entity "catalog_category" as category {
+  * id : uuid
+  --
+  * slug : varchar(120)
+  * name_i18n_key : varchar(160)
+  parent_id : uuid
+  * display_order : int
+  * published : boolean
+}
+
+entity "catalog_product" as product {
+  * id : uuid
+  --
+  * sku : varchar(64)
+  * slug : varchar(160)
+  * name_i18n_key : varchar(180)
+  * short_description_i18n_key : varchar(220)
+  * category_id : uuid
+  * image_url : varchar(500)
+  * campaign_code : varchar(40)
+  * base_price : decimal(12,2)
+  * currency : char(3)
+  * availability_status : varchar(40)
+  * published : boolean
+  * popular_rank : int
+  * created_at : timestamptz
+}
+
+entity "catalog_product_tag" as tag {
+  * product_id : uuid
+  * tag_code : varchar(80)
+}
+
+entity "catalog_product_promo" as promo {
+  * product_id : uuid
+  * promo_code : varchar(80)
+}
+
+entity "catalog_cart_item" as cart_item {
+  * id : uuid
+  --
+  * user_context_id : varchar(120)
+  * audience : varchar(40)
+  * product_id : uuid
+  * quantity : int
+  * partner_context : boolean
+  * created_at : timestamptz
+}
+
+category ||--o{ category : parent
+category ||--o{ product : contains
+product ||--o{ tag : has
+product ||--o{ promo : has
+product ||--o{ cart_item : added_to
+@enduml

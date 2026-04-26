@@ -1,0 +1,81 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin catalog module API
+  version: 1.0.0
+paths:
+  /api/catalog/search:
+    get:
+      summary: Получить поисковую выдачу каталога
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+            default: GUEST
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: priceMin
+          in: query
+          schema:
+            type: number
+            format: decimal
+        - name: priceMax
+          in: query
+          schema:
+            type: number
+            format: decimal
+        - name: availability
+          in: query
+          schema:
+            type: string
+            enum: [all, inStock, outOfStock]
+            default: all
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: promo
+          in: query
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [relevance, newest, priceAsc, priceDesc, popular]
+            default: relevance
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 60
+            default: 12
+      responses:
+        "200":
+          description: Search result or empty state with recommendations
+  /api/catalog/cart/items:
+    post:
+      summary: Добавить товар из выдачи в корзину
+      requestBody:
+        required: true
+      responses:
+        "200":
+          description: Cart summary after successful add
+        "409":
+          description: Product unavailable for cart add

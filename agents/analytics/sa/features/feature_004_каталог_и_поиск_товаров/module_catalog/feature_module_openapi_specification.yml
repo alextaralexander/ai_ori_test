@@ -1,0 +1,198 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin catalog feature 004 API
+  version: 1.0.0
+paths:
+  /api/catalog/search:
+    get:
+      summary: Получить поисковую выдачу каталога
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+            default: GUEST
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: priceMin
+          in: query
+          schema:
+            type: number
+            format: decimal
+        - name: priceMax
+          in: query
+          schema:
+            type: number
+            format: decimal
+        - name: availability
+          in: query
+          schema:
+            type: string
+            enum: [all, inStock, outOfStock]
+            default: all
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: promo
+          in: query
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [relevance, newest, priceAsc, priceDesc, popular]
+            default: relevance
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 60
+            default: 12
+      responses:
+        "200":
+          description: Search result or empty state with recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogSearchResponse"
+  /api/catalog/cart/items:
+    post:
+      summary: Добавить товар из выдачи в корзину
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequest"
+      responses:
+        "200":
+          description: Cart summary after successful add
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartSummaryResponse"
+        "409":
+          description: Product unavailable for cart add
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogErrorResponse"
+components:
+  schemas:
+    CatalogSearchResponse:
+      type: object
+      required: [items, recommendations, page, pageSize, totalItems, hasNextPage, messageCode]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogProductCardResponse"
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogProductCardResponse"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        hasNextPage:
+          type: boolean
+        messageCode:
+          type: string
+          nullable: true
+          example: STR_MNEMO_CATALOG_SEARCH_EMPTY
+    CatalogProductCardResponse:
+      type: object
+      required: [id, sku, slug, nameKey, descriptionKey, categorySlug, imageUrl, price, currency, availability, tags, promoBadges, canAddToCart]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        slug:
+          type: string
+        nameKey:
+          type: string
+        descriptionKey:
+          type: string
+        categorySlug:
+          type: string
+        imageUrl:
+          type: string
+        price:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        availability:
+          type: string
+          enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK]
+        tags:
+          type: array
+          items:
+            type: string
+        promoBadges:
+          type: array
+          items:
+            type: string
+        canAddToCart:
+          type: boolean
+        unavailableReasonCode:
+          type: string
+          nullable: true
+    AddToCartRequest:
+      type: object
+      required: [productId, quantity, audience, userContextId]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        audience:
+          type: string
+          enum: [CUSTOMER, PARTNER]
+        userContextId:
+          type: string
+        searchUrl:
+          type: string
+    CartSummaryResponse:
+      type: object
+      required: [itemsCount, totalQuantity, messageCode]
+      properties:
+        itemsCount:
+          type: integer
+        totalQuantity:
+          type: integer
+        messageCode:
+          type: string
+          example: STR_MNEMO_CATALOG_CART_ITEM_ADDED
+    CatalogErrorResponse:
+      type: object
+      required: [messageCode]
+      properties:
+        messageCode:
+          type: string
+          example: STR_MNEMO_CATALOG_ITEM_UNAVAILABLE

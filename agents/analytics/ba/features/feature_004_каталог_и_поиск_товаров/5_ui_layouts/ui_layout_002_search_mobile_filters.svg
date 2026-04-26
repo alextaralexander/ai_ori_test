@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="920" viewBox="0 0 390 920">
+  <title>Feature 004. Mobile каталог с панелью фильтров</title>
+  <rect x="12" y="12" width="366" height="896" fill="none" stroke="#222"/>
+  <text x="24" y="42" font-family="Arial" font-size="16">/search mobile</text>
+
+  <rect x="24" y="58" width="342" height="46" fill="none" stroke="#222"/>
+  <text x="38" y="86" font-family="Arial" font-size="13">Шапка: меню, логотип, профиль, корзина</text>
+
+  <rect x="24" y="120" width="342" height="76" fill="none" stroke="#222"/>
+  <text x="38" y="148" font-family="Arial" font-size="13">Поиск товаров</text>
+  <rect x="38" y="160" width="230" height="24" fill="none" stroke="#222"/>
+  <rect x="278" y="160" width="74" height="24" fill="none" stroke="#222"/>
+  <text x="292" y="177" font-family="Arial" font-size="11">Найти</text>
+
+  <rect x="24" y="210" width="342" height="46" fill="none" stroke="#222"/>
+  <rect x="38" y="222" width="112" height="24" fill="none" stroke="#222"/>
+  <text x="54" y="239" font-family="Arial" font-size="11">Фильтры</text>
+  <rect x="164" y="222" width="188" height="24" fill="none" stroke="#222"/>
+  <text x="180" y="239" font-family="Arial" font-size="11">Сортировка</text>
+
+  <rect x="24" y="274" width="342" height="410" fill="none" stroke="#222"/>
+  <text x="38" y="300" font-family="Arial" font-size="13">Список товаров одной колонкой</text>
+  <rect x="38" y="320" width="314" height="145" fill="none" stroke="#222"/>
+  <rect x="52" y="334" width="92" height="92" fill="none" stroke="#222"/>
+  <text x="158" y="352" font-family="Arial" font-size="11">Название, артикул</text>
+  <text x="158" y="378" font-family="Arial" font-size="11">Цена, наличие</text>
+  <text x="158" y="404" font-family="Arial" font-size="11">Теги, промо</text>
+  <rect x="158" y="428" width="128" height="24" fill="none" stroke="#222"/>
+  <text x="174" y="445" font-family="Arial" font-size="11">В корзину</text>
+  <rect x="38" y="488" width="314" height="145" fill="none" stroke="#222"/>
+  <text x="52" y="565" font-family="Arial" font-size="11">Следующая карточка товара</text>
+  <rect x="38" y="650" width="314" height="24" fill="none" stroke="#222"/>
+  <text x="132" y="667" font-family="Arial" font-size="11">Показать еще</text>
+
+  <rect x="44" y="250" width="302" height="520" fill="none" stroke="#222"/>
+  <text x="62" y="280" font-family="Arial" font-size="14">Выдвижная панель фильтров</text>
+  <rect x="62" y="305" width="266" height="34" fill="none" stroke="#222"/>
+  <text x="78" y="327" font-family="Arial" font-size="12">Категория</text>
+  <rect x="62" y="356" width="120" height="30" fill="none" stroke="#222"/>
+  <rect x="208" y="356" width="120" height="30" fill="none" stroke="#222"/>
+  <text x="78" y="376" font-family="Arial" font-size="11">Цена от</text>
+  <text x="224" y="376" font-family="Arial" font-size="11">Цена до</text>
+  <rect x="62" y="405" width="266" height="72" fill="none" stroke="#222"/>
+  <text x="78" y="432" font-family="Arial" font-size="12">Доступность и промо</text>
+  <rect x="62" y="494" width="266" height="92" fill="none" stroke="#222"/>
+  <text x="78" y="522" font-family="Arial" font-size="12">Теги и атрибуты</text>
+  <rect x="62" y="612" width="124" height="34" fill="none" stroke="#222"/>
+  <text x="82" y="634" font-family="Arial" font-size="11">Сбросить</text>
+  <rect x="204" y="612" width="124" height="34" fill="none" stroke="#222"/>
+  <text x="224" y="634" font-family="Arial" font-size="11">Применить</text>
+</svg>

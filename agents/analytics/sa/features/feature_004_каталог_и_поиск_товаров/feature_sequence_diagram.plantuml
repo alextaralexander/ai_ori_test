@@ -1,0 +1,39 @@
+@startuml
+title Feature 004. Каталог и поиск товаров. Sequence
+
+actor "Гость / клиент / партнер" as User
+participant "Web shell /search" as Frontend
+participant "catalog controller" as Controller
+participant "catalog service" as Service
+database "catalog repository" as Repository
+participant "cart summary" as Cart
+
+User -> Frontend : Открывает /search с query params
+Frontend -> Controller : GET /api/catalog/search?audience&q&filters&sort&page
+Controller -> Service : searchProducts(request)
+Service -> Repository : findPublishedProducts(activeCampaign, filters)
+Repository --> Service : products
+Service -> Service : применяет роль, сортировку, пагинацию, рекомендации
+Service --> Controller : CatalogSearchResponse
+Controller --> Frontend : 200 items / recommendations / messageCode
+Frontend --> User : Показывает выдачу, фильтры, сортировку или пустое состояние
+
+alt Авторизованный customer или partner добавляет доступный товар
+  User -> Frontend : Нажимает "В корзину"
+  Frontend -> Controller : POST /api/catalog/cart/items
+  Controller -> Service : addToCart(request)
+  Service -> Repository : findAvailableProduct(productId, audience)
+  Repository --> Service : product
+  Service -> Cart : saveCartItem(userContextId, productId, quantity, partnerContext)
+  Cart --> Service : CartSummaryResponse
+  Service --> Controller : STR_MNEMO_CATALOG_CART_ITEM_ADDED
+  Controller --> Frontend : 200 CartSummaryResponse
+  Frontend --> User : Обновляет счетчик корзины и подтверждение
+else Гость пытается добавить товар
+  Frontend --> User : Переводит к входу или регистрации с сохранением URL поиска
+else Товар недоступен
+  Service --> Controller : STR_MNEMO_CATALOG_ITEM_UNAVAILABLE
+  Controller --> Frontend : 409 CatalogErrorResponse
+  Frontend --> User : Показывает локализованную причину недоступности
+end
+@enduml

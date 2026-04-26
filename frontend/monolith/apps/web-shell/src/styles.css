@@ -185,6 +185,120 @@ body {
   background: #f6ffed;
 }
 
+.catalog-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.catalog-toolbar {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+}
+
+.catalog-toolbar form {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(150px, 1fr)) auto auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.catalog-toolbar label {
+  display: grid;
+  gap: 6px;
+  color: #1f1f1f;
+}
+
+.catalog-toolbar input,
+.catalog-toolbar select {
+  min-height: 34px;
+  border: 1px solid #bfbfbf;
+  padding: 4px 8px;
+  background: #ffffff;
+}
+
+.catalog-checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.catalog-context,
+.catalog-cart-message,
+.cart-summary {
+  margin-bottom: 16px;
+}
+
+.cart-summary {
+  width: 44px;
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #bfbfbf;
+  background: #ffffff;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.catalog-card {
+  min-height: 100%;
+}
+
+.catalog-card h3 {
+  margin-top: 12px;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.catalog-card p {
+  color: #595959;
+}
+
+.catalog-card-image {
+  aspect-ratio: 4 / 3;
+  border: 1px solid #d9d9d9;
+  background: linear-gradient(135deg, #f5f5f5, #ffffff);
+}
+
+.catalog-badges {
+  min-height: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.catalog-badges span,
+.catalog-context,
+.catalog-cart-message {
+  padding: 4px 8px;
+  border: 1px solid #bfbfbf;
+  background: #ffffff;
+}
+
+.catalog-empty,
+.catalog-recommendations {
+  margin-top: 24px;
+}
+
+.catalog-empty {
+  padding: 28px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+}
+
+.catalog-empty h1,
+.catalog-recommendations h2 {
+  margin-top: 0;
+  letter-spacing: 0;
+}
+
 .public-footer {
   background: #fafafa;
   border-top: 1px solid #d9d9d9;
@@ -211,5 +325,10 @@ body {
   .content-hero,
   .content-section {
     padding: 20px;
+  }
+
+  .catalog-toolbar form,
+  .catalog-grid {
+    grid-template-columns: 1fr;
   }
 }
