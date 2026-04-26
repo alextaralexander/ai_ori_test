@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin public-content feature 003 API
+  version: 1.0.0
+paths:
+  /api/public-content/faq:
+    get:
+      summary: Получить FAQ с фильтрацией по аудитории, категории и поиску
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: query
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: FAQ найден или возвращен пустой результат
+  /api/public-content/info/{section}:
+    get:
+      summary: Получить информационный раздел
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+      responses:
+        "200":
+          description: Раздел найден
+        "404":
+          description: Раздел не найден
+  /api/public-content/documents/{documentType}:
+    get:
+      summary: Получить документы выбранного типа
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [GUEST, CUSTOMER, PARTNER]
+      responses:
+        "200":
+          description: Документы найдены
+        "404":
+          description: Тип документов не найден

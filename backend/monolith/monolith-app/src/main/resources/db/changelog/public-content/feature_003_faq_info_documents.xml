@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-003-public-faq-category" author="codex">
+        <createTable tableName="public_faq_category">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_faq_category"/>
+            </column>
+            <column name="code" type="varchar(80)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_public_faq_category_code"/>
+            </column>
+            <column name="title_key" type="varchar(180)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="varchar(40)" defaultValue="ANY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-003-public-faq-item" author="codex">
+        <createTable tableName="public_faq_item">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_faq_item"/>
+            </column>
+            <column name="category_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="answer_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tags_json" type="jsonb"/>
+            <column name="related_info_section" type="varchar(120)"/>
+            <column name="related_document_type" type="varchar(120)"/>
+            <column name="audience" type="varchar(40)" defaultValue="ANY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="public_faq_item" indexName="idx_public_faq_item_category">
+            <column name="category_code"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-003-public-info-section" author="codex">
+        <createTable tableName="public_info_section">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_info_section"/>
+            </column>
+            <column name="section_code" type="varchar(120)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_public_info_section_code"/>
+            </column>
+            <column name="title_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_key" type="varchar(220)"/>
+            <column name="seo_title_key" type="varchar(220)"/>
+            <column name="seo_description_key" type="varchar(220)"/>
+            <column name="audience" type="varchar(40)" defaultValue="ANY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-003-public-document" author="codex">
+        <createTable tableName="public_document">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_public_document"/>
+            </column>
+            <column name="document_type" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_key" type="varchar(220)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_key" type="varchar(220)"/>
+            <column name="version_label" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="viewer_url" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="download_url" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="required" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="varchar(40)" defaultValue="ANY">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="public_document" indexName="idx_public_document_type_audience">
+            <column name="document_type"/>
+            <column name="audience"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

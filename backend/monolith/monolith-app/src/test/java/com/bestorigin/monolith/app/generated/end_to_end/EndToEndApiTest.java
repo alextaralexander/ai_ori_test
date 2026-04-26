@@ -10,5 +10,6 @@ public class EndToEndApiTest {
     void publicMarketplaceGreenPathAggregatesImplementedFeatureTests() throws Exception {
         new FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature002.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature003.FeatureApiTest().assertFeatureGreenPath();
     }
 }

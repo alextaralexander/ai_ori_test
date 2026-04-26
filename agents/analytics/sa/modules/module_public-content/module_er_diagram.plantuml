@@ -1,153 +1,76 @@
 @startuml
-title Module public-content. Полная ER диаграмма
+title Public-content module. Целевая ER-модель публичного контента и справки
 
-entity public_page_config {
+entity public_page {
   * id : uuid
   --
-  * page_key : varchar(64)
-  * route_path : varchar(128)
-  * title_i18n_key : varchar(128)
-  * status : varchar(32)
-  * active_from : timestamptz
-  active_to : timestamptz
-  * created_at : timestamptz
-  * updated_at : timestamptz
+  page_key : varchar
+  route_path : varchar
+  title_key : varchar
+  audience : varchar
 }
 
 entity public_content_block {
   * id : uuid
   --
-  * page_config_id : uuid
-  * block_key : varchar(64)
-  * block_type : varchar(32)
-  * sort_order : integer
-  * enabled : boolean
-  * payload_json : jsonb
-  * created_at : timestamptz
-  * updated_at : timestamptz
+  page_id : uuid
+  block_key : varchar
+  block_type : varchar
+  sort_order : int
+  payload : jsonb
 }
 
 entity public_navigation_item {
   * id : uuid
   --
-  parent_id : uuid
-  * area : varchar(32)
-  * item_key : varchar(64)
-  * label_i18n_key : varchar(128)
-  * target_type : varchar(32)
-  * target_value : varchar(256)
-  * sort_order : integer
-  * audience : varchar(32)
-  * enabled : boolean
-}
-
-entity public_entry_point {
-  * id : uuid
-  --
-  * entry_key : varchar(64)
-  * label_i18n_key : varchar(128)
-  description_i18n_key : varchar(128)
-  * target_route : varchar(256)
-  * audience : varchar(32)
-  * sort_order : integer
-  * enabled : boolean
-}
-
-entity public_news_item {
-  * id : uuid
-  --
-  * news_key : varchar(120)
-  * content_id : varchar(120)
-  * title_key : varchar(160)
-  summary_key : varchar(160)
-  image_url : varchar(512)
-  category_key : varchar(120)
-  * status : varchar(24)
-  * active_from : timestamptz
-  active_to : timestamptz
-  * sort_order : integer
-  * created_at : timestamptz
-  * updated_at : timestamptz
+  item_key : varchar
+  label_key : varchar
+  target_type : varchar
+  target_value : varchar
+  area : varchar
 }
 
 entity public_content_page {
   * id : uuid
   --
-  * content_id : varchar(120)
-  * template_code : varchar(60)
-  * title_key : varchar(160)
-  description_key : varchar(160)
-  seo_title_key : varchar(160)
-  seo_description_key : varchar(160)
-  canonical_url : varchar(512)
-  breadcrumb_key : varchar(160)
-  * status : varchar(24)
-  * active_from : timestamptz
-  active_to : timestamptz
-  * created_at : timestamptz
-  * updated_at : timestamptz
+  content_id : varchar
+  template_code : varchar
+  title_key : varchar
+  published : boolean
 }
 
-entity public_offer {
+entity public_faq_item {
   * id : uuid
   --
-  * offer_id : varchar(120)
-  * title_key : varchar(160)
-  summary_key : varchar(160)
-  hero_image_url : varchar(512)
-  primary_cta_label_key : varchar(160)
-  primary_cta_target : varchar(512)
-  * status : varchar(24)
-  * active_from : timestamptz
-  active_to : timestamptz
-  * created_at : timestamptz
-  * updated_at : timestamptz
+  category_code : varchar
+  question_key : varchar
+  answer_key : varchar
+  audience : varchar
+  published : boolean
 }
 
-entity public_content_section {
+entity public_info_section {
   * id : uuid
   --
-  * owner_type : varchar(24)
-  * owner_id : uuid
-  * section_key : varchar(120)
-  * section_type : varchar(40)
-  * sort_order : integer
-  * payload_json : jsonb
-  * enabled : boolean
+  section_code : varchar
+  title_key : varchar
+  audience : varchar
+  published : boolean
 }
 
-entity public_content_attachment {
+entity public_document {
   * id : uuid
   --
-  * owner_type : varchar(24)
-  * owner_id : uuid
-  * attachment_key : varchar(120)
-  * file_type : varchar(24)
-  * title_key : varchar(160)
-  * url : varchar(512)
-  file_size_bytes : bigint
-  * sort_order : integer
-  * enabled : boolean
+  document_type : varchar
+  title_key : varchar
+  version_label : varchar
+  current : boolean
+  audience : varchar
 }
 
-entity public_content_product_link {
-  * id : uuid
-  --
-  * owner_type : varchar(24)
-  * owner_id : uuid
-  * product_ref : varchar(120)
-  label_key : varchar(160)
-  * sort_order : integer
-  * enabled : boolean
-}
-
-public_page_config ||--o{ public_content_block
-public_navigation_item ||--o{ public_navigation_item
-public_news_item }o--|| public_content_page : "content_id -> content_id"
-public_content_page ||--o{ public_content_section : "owner_type=CONTENT_PAGE"
-public_offer ||--o{ public_content_section : "owner_type=OFFER"
-public_content_page ||--o{ public_content_attachment : "owner_type=CONTENT_PAGE"
-public_offer ||--o{ public_content_attachment : "owner_type=OFFER"
-public_content_page ||--o{ public_content_product_link : "owner_type=CONTENT_PAGE"
-public_offer ||--o{ public_content_product_link : "owner_type=OFFER"
+public_page ||--o{ public_content_block
+public_content_page ||--o{ public_document
+public_info_section ||--o{ public_document
+public_faq_item }o--|| public_info_section
+public_faq_item }o--|| public_document
 @enduml

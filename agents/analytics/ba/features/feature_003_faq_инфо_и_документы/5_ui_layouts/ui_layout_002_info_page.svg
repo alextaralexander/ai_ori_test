@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">Макет информационной страницы</title>
+  <desc id="desc">Схематичный макет страницы /info/delivery с якорями, rich text блоками и связанными документами.</desc>
+  <rect width="1280" height="900" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="72" fill="#f5f7fb"/>
+  <text x="48" y="44" font-family="Arial" font-size="24" fill="#111827">Best Ori Gin</text>
+  <text x="260" y="44" font-family="Arial" font-size="16" fill="#374151">Каталог</text>
+  <text x="360" y="44" font-family="Arial" font-size="16" fill="#374151">Новости</text>
+  <text x="460" y="44" font-family="Arial" font-size="16" fill="#374151">FAQ</text>
+  <text x="540" y="44" font-family="Arial" font-size="16" fill="#111827">Документы</text>
+  <text x="80" y="118" font-family="Arial" font-size="14" fill="#64748b">Главная / Информация / Доставка</text>
+  <rect x="80" y="148" width="1120" height="138" rx="8" fill="#f3f4f6"/>
+  <text x="112" y="202" font-family="Arial" font-size="34" fill="#111827">Доставка заказов</text>
+  <text x="112" y="242" font-family="Arial" font-size="18" fill="#4b5563">Сроки, способы получения, пункты выдачи и условия передачи заказа.</text>
+  <rect x="80" y="326" width="280" height="420" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="112" y="366" font-family="Arial" font-size="20" fill="#111827">Навигация по разделу</text>
+  <text x="112" y="414" font-family="Arial" font-size="15" fill="#1f7a5b">Сроки доставки</text>
+  <text x="112" y="456" font-family="Arial" font-size="15" fill="#374151">Пункты выдачи</text>
+  <text x="112" y="498" font-family="Arial" font-size="15" fill="#374151">Проблемы с заказом</text>
+  <text x="112" y="540" font-family="Arial" font-size="15" fill="#374151">Документы</text>
+  <rect x="400" y="326" width="800" height="420" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="432" y="376" font-family="Arial" font-size="24" fill="#111827">Сроки доставки</text>
+  <rect x="432" y="408" width="704" height="84" rx="6" fill="#f8fafc"/>
+  <text x="456" y="444" font-family="Arial" font-size="16" fill="#4b5563">Rich text блок с условиями доставки по регионам и способам получения.</text>
+  <text x="432" y="548" font-family="Arial" font-size="24" fill="#111827">Связанные документы</text>
+  <rect x="432" y="580" width="320" height="58" rx="6" fill="#eef6f2" stroke="#bbd7ca"/>
+  <text x="456" y="616" font-family="Arial" font-size="16" fill="#1f7a5b">Правила доставки PDF</text>
+</svg>

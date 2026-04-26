@@ -4,8 +4,8 @@ import { ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { loadContentPage, loadNews, loadOffer, loadPublicPage, type Audience, type ContentPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
-import { ContentPageView, ContentUnavailableView, NewsPage, OfferPageView } from './components/PublicContentViews';
+import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
+import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
 
 function resolveAudience(): Audience {
@@ -24,6 +24,9 @@ function App() {
   const [news, setNews] = useState<NewsFeed | null>(null);
   const [contentPage, setContentPage] = useState<ContentPage | null | undefined>(undefined);
   const [offerPage, setOfferPage] = useState<OfferPage | null | undefined>(undefined);
+  const [faqPage, setFaqPage] = useState<FaqPage | null>(null);
+  const [infoPage, setInfoPage] = useState<InfoPage | null | undefined>(undefined);
+  const [documentsPage, setDocumentsPage] = useState<DocumentCollection | null | undefined>(undefined);
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
   const loginRole = params.get('role');
@@ -38,6 +41,9 @@ function App() {
     setNews(null);
     setContentPage(undefined);
     setOfferPage(undefined);
+    setFaqPage(null);
+    setInfoPage(undefined);
+    setDocumentsPage(undefined);
     const shellPageKey = path === '/community' ? 'community' : 'home';
     loadPublicPage(shellPageKey, audience).then(setPage);
     if (path === '/news') {
@@ -48,6 +54,15 @@ function App() {
     }
     if (path.startsWith('/offer/')) {
       loadOffer(path.slice('/offer/'.length), audience).then(setOfferPage);
+    }
+    if (path === '/FAQ' || path === '/faq') {
+      loadFaq(audience, params.get('query') ?? '', params.get('category') ?? '').then(setFaqPage);
+    }
+    if (path === '/info' || path.startsWith('/info/')) {
+      loadInfoSection(path === '/info' ? 'overview' : path.slice('/info/'.length), audience).then(setInfoPage);
+    }
+    if (path.startsWith('/documents/')) {
+      loadDocuments(path.slice('/documents/'.length), audience).then(setDocumentsPage);
     }
   }, [audience, loginRole, path]);
 
@@ -69,6 +84,12 @@ function App() {
     contentView = contentPage === null ? <ContentUnavailableView /> : contentPage ? <ContentPageView page={contentPage} /> : undefined;
   } else if (path.startsWith('/offer/')) {
     contentView = offerPage === null ? <ContentUnavailableView /> : offerPage ? <OfferPageView offer={offerPage} /> : undefined;
+  } else if (path === '/FAQ' || path === '/faq') {
+    contentView = faqPage ? <FaqPageView faq={faqPage} /> : undefined;
+  } else if (path === '/info' || path.startsWith('/info/')) {
+    contentView = infoPage === null ? <ContentUnavailableView /> : infoPage ? <InfoPageView page={infoPage} /> : undefined;
+  } else if (path.startsWith('/documents/')) {
+    contentView = documentsPage === null ? <ContentUnavailableView /> : documentsPage ? <DocumentsPageView collection={documentsPage} /> : undefined;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

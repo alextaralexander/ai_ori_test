@@ -2,7 +2,10 @@ package com.bestorigin.monolith.publiccontent.impl.service;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
+import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
+import com.bestorigin.monolith.publiccontent.api.FaqResponse;
+import com.bestorigin.monolith.publiccontent.api.InfoSectionResponse;
 import com.bestorigin.monolith.publiccontent.api.NavigationItemResponse;
 import com.bestorigin.monolith.publiccontent.api.NewsFeedResponse;
 import com.bestorigin.monolith.publiccontent.api.OfferResponse;
@@ -57,6 +60,23 @@ public class DefaultPublicContentService implements PublicContentService {
     public OfferResponse getOffer(String offerId, Audience audience) {
         return repository.findOffer(offerId, normalize(audience))
                 .orElseThrow(() -> new PublicContentNotFoundException("STR_MNEMO_PUBLIC_CONTENT_NOT_FOUND"));
+    }
+
+    @Override
+    public FaqResponse getFaq(Audience audience, String category, String query) {
+        return repository.findFaq(normalize(audience), category, query);
+    }
+
+    @Override
+    public InfoSectionResponse getInfoSection(String section, Audience audience) {
+        return repository.findInfoSection(section, normalize(audience))
+                .orElseThrow(() -> new PublicContentNotFoundException("STR_MNEMO_PUBLIC_INFO_NOT_FOUND"));
+    }
+
+    @Override
+    public DocumentCollectionResponse getDocuments(String documentType, Audience audience) {
+        return repository.findDocuments(documentType, normalize(audience))
+                .orElseThrow(() -> new PublicContentNotFoundException("STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND"));
     }
 
     private static Audience normalize(Audience audience) {

@@ -1,6 +1,6 @@
-import { Button, Card, Col, Row, Space } from 'antd';
-import type { ReactElement } from 'react';
-import type { ContentCta, ContentPage, ContentSection, NewsFeed, OfferPage } from '../api/publicContent';
+import { Button, Card, Col, Input, Row, Space, Tag } from 'antd';
+import { useMemo, useState, type ReactElement } from 'react';
+import type { ContentCta, ContentPage, ContentSection, DocumentCollection, FaqPage, InfoPage, NewsFeed, OfferPage } from '../api/publicContent';
 import { t } from '../i18n';
 
 export function NewsPage({ feed }: { feed: NewsFeed }): ReactElement {
@@ -60,6 +60,142 @@ export function OfferPageView({ offer }: { offer: OfferPage }): ReactElement {
       <SectionList sections={offer.sections} />
       <Attachments items={offer.attachments} />
       <ProductLinks items={offer.productLinks} />
+    </div>
+  );
+}
+
+export function FaqPageView({ faq }: { faq: FaqPage }): ReactElement {
+  const [query, setQuery] = useState('');
+  const filteredItems = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) {
+      return faq.items;
+    }
+    return faq.items.filter((item) => (
+      t(item.questionKey).toLowerCase().includes(normalized)
+      || t(item.answerKey).toLowerCase().includes(normalized)
+      || item.tags.some((tag) => tag.toLowerCase().includes(normalized))
+    ));
+  }, [faq.items, query]);
+
+  return (
+    <div className="page-main" data-testid="faq-page">
+      <section className="content-hero">
+        <h1>{t('public.faq.title')}</h1>
+        <p>{t('public.faq.description')}</p>
+        <Input
+          allowClear
+          data-testid="faq-search"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t('public.faq.search.placeholder')}
+          value={query}
+        />
+      </section>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={7}>
+          <section className="content-list">
+            <h2>{t('public.faq.categories.title')}</h2>
+            {faq.categories.map((category) => (
+              <a href={`/FAQ?category=${category.categoryKey}`} key={category.categoryKey}>
+                {t(category.titleKey)} · {category.questionCount}
+              </a>
+            ))}
+          </section>
+        </Col>
+        <Col xs={24} md={17}>
+          {filteredItems.length === 0 ? (
+            <UnavailableView testId="faq-empty" messageKey={faq.emptyStateCode} />
+          ) : (
+            <section className="content-sections">
+              {filteredItems.map((item) => (
+                <article className="content-section" data-testid={`faq-item-${item.itemKey}`} key={item.itemKey}>
+                  <Tag>{t(`public.faq.category.${item.categoryKey}`)}</Tag>
+                  <h2>{t(item.questionKey)}</h2>
+                  <p>{t(item.answerKey)}</p>
+                  <Space wrap>
+                    {item.relatedInfoSection ? (
+                      <Button data-testid={`faq-related-info-${item.relatedInfoSection}`} href={`/info/${item.relatedInfoSection}`}>
+                        {t('public.faq.related.info')}
+                      </Button>
+                    ) : null}
+                    {item.relatedDocumentType ? (
+                      <Button href={`/documents/${item.relatedDocumentType}`}>{t('public.faq.related.documents')}</Button>
+                    ) : null}
+                  </Space>
+                </article>
+              ))}
+            </section>
+          )}
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
+export function InfoPageView({ page }: { page: InfoPage }): ReactElement {
+  return (
+    <div className="page-main" data-testid="info-page">
+      <Breadcrumbs items={page.breadcrumbs} />
+      <section className="content-hero">
+        <h1>{t(page.titleKey)}</h1>
+        {page.descriptionKey ? <p>{t(page.descriptionKey)}</p> : null}
+      </section>
+      <SectionList sections={page.sections} />
+      {page.documents.length > 0 ? (
+        <section className="content-list">
+          <h2>{t('public.info.relatedDocuments.title')}</h2>
+          {page.documents.map((document) => (
+            <a data-testid={`info-related-document-${document.documentType}`} href={document.targetRoute} key={document.documentType}>
+              {t(document.titleKey)}
+            </a>
+          ))}
+        </section>
+      ) : null}
+      <CtaList items={page.ctas} />
+    </div>
+  );
+}
+
+export function DocumentsPageView({ collection }: { collection: DocumentCollection }): ReactElement {
+  if (collection.documents.length === 0) {
+    return <UnavailableView testId="documents-empty" messageKey={collection.emptyStateCode} />;
+  }
+  return (
+    <div className="page-main" data-testid="documents-page">
+      <Breadcrumbs items={collection.breadcrumbs} />
+      <section className="content-hero">
+        <h1>{t(collection.titleKey)}</h1>
+        {collection.descriptionKey ? <p>{t(collection.descriptionKey)}</p> : null}
+      </section>
+      <Row gutter={[16, 16]}>
+        {collection.documents.map((document) => (
+          <Col xs={24} md={12} key={document.documentKey}>
+            <Card data-testid={`document-current-${document.documentKey}`}>
+              <Space direction="vertical" size="middle">
+                <div>
+                  <h2>{t(document.titleKey)}</h2>
+                  {document.descriptionKey ? <p>{t(document.descriptionKey)}</p> : null}
+                  <small>{t('public.documents.version')} {document.versionLabel} · {new Date(document.publishedAt).toLocaleDateString()}</small>
+                </div>
+                {document.required ? <Tag data-testid={`document-required-${document.documentKey}`}>{t('public.documents.required')}</Tag> : null}
+                <div className="document-viewer" data-testid={`document-viewer-${document.documentKey}`}>{t('public.documents.viewer')}</div>
+                <Space wrap>
+                  <Button href={document.viewerUrl}>{t('public.documents.view')}</Button>
+                  <Button href={document.downloadUrl} type="primary">{t('public.documents.download')}</Button>
+                </Space>
+                {document.archive.length > 0 ? (
+                  <div data-testid={`document-archive-${document.documentKey}`}>
+                    <strong>{t('public.documents.archive')}</strong>
+                    {document.archive.map((version) => (
+                      <a href={version.downloadUrl} key={version.versionLabel}>{version.versionLabel}</a>
+                    ))}
+                  </div>
+                ) : null}
+              </Space>
+            </Card>
+          </Col>
+        ))}
+      </Row>
     </div>
   );
 }

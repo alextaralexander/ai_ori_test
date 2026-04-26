@@ -1,0 +1,56 @@
+@startuml
+title Feature 003. Public-content ER изменения: FAQ, инфо и документы
+
+entity public_faq_category {
+  * id : uuid
+  --
+  code : varchar
+  title_key : varchar
+  audience : varchar
+  sort_order : int
+}
+
+entity public_faq_item {
+  * id : uuid
+  --
+  category_id : uuid
+  question_key : varchar
+  answer_key : varchar
+  tags : jsonb
+  related_info_section : varchar
+  related_document_type : varchar
+  audience : varchar
+  published : boolean
+  sort_order : int
+}
+
+entity public_info_section {
+  * id : uuid
+  --
+  section_code : varchar
+  title_key : varchar
+  description_key : varchar
+  seo_title_key : varchar
+  seo_description_key : varchar
+  audience : varchar
+  published : boolean
+}
+
+entity public_document {
+  * id : uuid
+  --
+  document_type : varchar
+  title_key : varchar
+  version_label : varchar
+  published_at : timestamptz
+  pdf_viewer_url : varchar
+  download_url : varchar
+  required : boolean
+  current : boolean
+  audience : varchar
+}
+
+public_faq_category ||--o{ public_faq_item
+public_info_section ||--o{ public_faq_item : related_info_section
+public_document ||--o{ public_faq_item : related_document_type
+@enduml

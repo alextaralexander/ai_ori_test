@@ -1,0 +1,25 @@
+@startuml
+title Feature 003. Последовательность FAQ, info и documents
+
+actor "Пользователь" as User
+participant "Web Shell" as Frontend
+participant "PublicContentController" as Controller
+participant "PublicContentService" as Service
+participant "PublicContentRepository" as Repository
+
+User -> Frontend : Открывает /FAQ, /info/{section} или /documents/{type}
+Frontend -> Controller : GET /api/public-content/faq|info|documents
+Controller -> Service : Запрос с audience и фильтрами
+Service -> Repository : Чтение опубликованных материалов
+Repository --> Service : DTO справочных данных
+Service --> Controller : Ответ с i18n-ключами и mnemonic-кодами
+Controller --> Frontend : JSON
+Frontend -> Frontend : Локализация через resources_ru/resources_en
+Frontend --> User : FAQ, информационный раздел или документы
+
+alt Материал не найден
+  Service --> Controller : PublicContentNotFoundException(STR_MNEMO_*)
+  Controller --> Frontend : 404 + ErrorResponse
+  Frontend --> User : Локализованное безопасное состояние
+end
+@enduml

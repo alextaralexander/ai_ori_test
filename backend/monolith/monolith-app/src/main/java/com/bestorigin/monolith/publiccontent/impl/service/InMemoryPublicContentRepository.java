@@ -7,7 +7,15 @@ import com.bestorigin.monolith.publiccontent.api.ContentBlockResponse;
 import com.bestorigin.monolith.publiccontent.api.ContentCtaResponse;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
 import com.bestorigin.monolith.publiccontent.api.ContentSectionResponse;
+import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
+import com.bestorigin.monolith.publiccontent.api.DocumentResponse;
+import com.bestorigin.monolith.publiccontent.api.DocumentVersionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
+import com.bestorigin.monolith.publiccontent.api.FaqCategoryResponse;
+import com.bestorigin.monolith.publiccontent.api.FaqItemResponse;
+import com.bestorigin.monolith.publiccontent.api.FaqResponse;
+import com.bestorigin.monolith.publiccontent.api.InfoRelatedDocumentResponse;
+import com.bestorigin.monolith.publiccontent.api.InfoSectionResponse;
 import com.bestorigin.monolith.publiccontent.api.NavigationItemResponse;
 import com.bestorigin.monolith.publiccontent.api.NewsFeedResponse;
 import com.bestorigin.monolith.publiccontent.api.NewsItemResponse;
@@ -47,7 +55,7 @@ public class InMemoryPublicContentRepository implements PublicContentRepository 
                 item("faq", "public.navigation.faq", "/faq", "HEADER"),
                 item("community", "public.navigation.community", "/community", "HEADER"),
                 item("benefits", "public.navigation.benefits", "/benefits", "HEADER"),
-                item("documents", "public.navigation.documents", "/documents", "FOOTER"),
+                item("documents", "public.navigation.documents", "/documents/terms", "FOOTER"),
                 item("contacts", "public.navigation.contacts", "/contacts", "FOOTER"),
                 item("register", "public.navigation.register", "/register", "HEADER"),
                 item("cart", "public.navigation.cart", "/cart", "HEADER")
@@ -155,6 +163,262 @@ public class InMemoryPublicContentRepository implements PublicContentRepository 
                 List.of(new ProductLinkResponse("spring-campaign", "public.offer.spring.products", "/catalog")),
                 ctasFor(audience, "public.offer.spring.cta", "/catalog")
         ));
+    }
+
+    @Override
+    public FaqResponse findFaq(Audience audience, String category, String query) {
+        List<FaqItemResponse> visibleItems = faqItems().stream()
+                .filter(item -> matchesAudience(audience, item.audience()))
+                .filter(item -> category == null || category.isBlank() || category.equals(item.categoryKey()))
+                .filter(item -> query == null || query.isBlank() || matchesFaqQuery(item, query))
+                .toList();
+        List<FaqCategoryResponse> categories = List.of(
+                faqCategory("all", "public.faq.category.all", faqItems().stream().filter(item -> matchesAudience(audience, item.audience())).toList().size()),
+                faqCategory("orders", "public.faq.category.orders", countFaq(audience, "orders")),
+                faqCategory("delivery", "public.faq.category.delivery", countFaq(audience, "delivery")),
+                faqCategory("partner", "public.faq.category.partner", countFaq(audience, "partner")),
+                faqCategory("returns", "public.faq.category.returns", countFaq(audience, "returns"))
+        );
+        return new FaqResponse(categories, visibleItems, "STR_MNEMO_PUBLIC_FAQ_EMPTY");
+    }
+
+    @Override
+    public Optional<InfoSectionResponse> findInfoSection(String section, Audience audience) {
+        if (section == null || section.isBlank() || "overview".equals(section)) {
+            return Optional.of(infoOverview(audience));
+        }
+        if (!"delivery".equals(section)) {
+            return Optional.empty();
+        }
+        return Optional.of(new InfoSectionResponse(
+                "delivery",
+                "public.info.delivery.title",
+                "public.info.delivery.description",
+                List.of(
+                        breadcrumb("public.navigation.home", "/"),
+                        breadcrumb("public.info.breadcrumb", "/info"),
+                        breadcrumb("public.info.delivery.breadcrumb", "/info/delivery")
+                ),
+                new SeoMetadataResponse(
+                        "public.info.delivery.seo.title",
+                        "public.info.delivery.seo.description",
+                        "/info/delivery"
+                ),
+                List.of(
+                        new ContentSectionResponse("delivery-time", "RICH_TEXT", 10, Map.of(
+                                "titleKey", "public.info.delivery.time.title",
+                                "bodyKey", "public.info.delivery.time.body",
+                                "anchor", "delivery-time"
+                        )),
+                        new ContentSectionResponse("pickup-points", "RICH_TEXT", 20, Map.of(
+                                "titleKey", "public.info.delivery.pickup.title",
+                                "bodyKey", "public.info.delivery.pickup.body",
+                                "anchor", "pickup-points"
+                        ))
+                ),
+                List.of(new InfoRelatedDocumentResponse(
+                        "terms",
+                        "public.documents.terms.title",
+                        "/documents/terms"
+                )),
+                ctasFor(audience, "public.info.delivery.cta.documents", "/documents/terms")
+        ));
+    }
+
+    @Override
+    public Optional<DocumentCollectionResponse> findDocuments(String documentType, Audience audience) {
+        List<DocumentResponse> documents = documents().stream()
+                .filter(document -> documentType.equals(document.documentType()))
+                .filter(document -> matchesAudience(audience, document.audience()))
+                .toList();
+        if (documents.isEmpty() && documents().stream().noneMatch(document -> documentType.equals(document.documentType()))) {
+            return Optional.empty();
+        }
+        return Optional.of(new DocumentCollectionResponse(
+                documentType,
+                "public.documents." + documentType + ".title",
+                "public.documents." + documentType + ".description",
+                List.of(
+                        breadcrumb("public.navigation.home", "/"),
+                        breadcrumb("public.navigation.documents", "/documents/" + documentType)
+                ),
+                documents,
+                "STR_MNEMO_PUBLIC_DOCUMENTS_EMPTY"
+        ));
+    }
+
+    private static InfoSectionResponse infoOverview(Audience audience) {
+        return new InfoSectionResponse(
+                "overview",
+                "public.info.overview.title",
+                "public.info.overview.description",
+                List.of(
+                        breadcrumb("public.navigation.home", "/"),
+                        breadcrumb("public.info.breadcrumb", "/info")
+                ),
+                new SeoMetadataResponse(
+                        "public.info.overview.seo.title",
+                        "public.info.overview.seo.description",
+                        "/info"
+                ),
+                List.of(new ContentSectionResponse("overview-links", "LINK_LIST", 10, Map.of(
+                        "titleKey", "public.info.overview.links.title",
+                        "deliveryRoute", "/info/delivery"
+                ))),
+                List.of(new InfoRelatedDocumentResponse(
+                        "terms",
+                        "public.documents.terms.title",
+                        "/documents/terms"
+                )),
+                ctasFor(audience, "public.info.overview.cta.faq", "/FAQ")
+        );
+    }
+
+    private static List<FaqItemResponse> faqItems() {
+        return List.of(
+                new FaqItemResponse(
+                        "delivery-time",
+                        "delivery",
+                        "public.faq.delivery.time.question",
+                        "public.faq.delivery.time.answer",
+                        List.of("delivery", "shipping", "timing"),
+                        "delivery",
+                        "terms",
+                        Audience.ANY
+                ),
+                new FaqItemResponse(
+                        "order-payment",
+                        "orders",
+                        "public.faq.orders.payment.question",
+                        "public.faq.orders.payment.answer",
+                        List.of("payment", "order", "checkout"),
+                        null,
+                        "terms",
+                        Audience.ANY
+                ),
+                new FaqItemResponse(
+                        "partner-documents",
+                        "partner",
+                        "public.faq.partner.documents.question",
+                        "public.faq.partner.documents.answer",
+                        List.of("partner", "documents", "agreement"),
+                        "overview",
+                        "partner",
+                        Audience.PARTNER
+                ),
+                new FaqItemResponse(
+                        "returns-claim",
+                        "returns",
+                        "public.faq.returns.claim.question",
+                        "public.faq.returns.claim.answer",
+                        List.of("return", "claim", "refund"),
+                        "delivery",
+                        "terms",
+                        Audience.CUSTOMER
+                )
+        );
+    }
+
+    private static List<DocumentResponse> documents() {
+        return List.of(
+                new DocumentResponse(
+                        "user-terms",
+                        "terms",
+                        "public.documents.userTerms.title",
+                        "public.documents.userTerms.description",
+                        "2.1",
+                        "2026-04-26T00:00:00Z",
+                        "/assets/documents/terms-v2-1.pdf",
+                        "/assets/documents/terms-v2-1.pdf",
+                        true,
+                        true,
+                        Audience.ANY,
+                        List.of(new DocumentVersionResponse(
+                                "2.0",
+                                "2026-04-01T00:00:00Z",
+                                "/assets/documents/terms-v2-0.pdf",
+                                "/assets/documents/terms-v2-0.pdf",
+                                false
+                        ))
+                ),
+                new DocumentResponse(
+                        "delivery-rules",
+                        "terms",
+                        "public.documents.deliveryRules.title",
+                        "public.documents.deliveryRules.description",
+                        "1.4",
+                        "2026-04-26T00:00:00Z",
+                        "/assets/documents/delivery-rules-v1-4.pdf",
+                        "/assets/documents/delivery-rules-v1-4.pdf",
+                        false,
+                        true,
+                        Audience.ANY,
+                        List.of()
+                ),
+                new DocumentResponse(
+                        "partner-public-guide",
+                        "partner",
+                        "public.documents.partnerPublicGuide.title",
+                        "public.documents.partnerPublicGuide.description",
+                        "1.0",
+                        "2026-04-26T00:00:00Z",
+                        "/assets/documents/partner-public-guide-v1-0.pdf",
+                        "/assets/documents/partner-public-guide-v1-0.pdf",
+                        false,
+                        true,
+                        Audience.ANY,
+                        List.of()
+                ),
+                new DocumentResponse(
+                        "partner-agreement",
+                        "partner",
+                        "public.documents.partnerAgreement.title",
+                        "public.documents.partnerAgreement.description",
+                        "3.2",
+                        "2026-04-26T00:00:00Z",
+                        "/assets/documents/partner-agreement-v3-2.pdf",
+                        "/assets/documents/partner-agreement-v3-2.pdf",
+                        true,
+                        true,
+                        Audience.PARTNER,
+                        List.of(new DocumentVersionResponse(
+                                "3.1",
+                                "2026-04-01T00:00:00Z",
+                                "/assets/documents/partner-agreement-v3-1.pdf",
+                                "/assets/documents/partner-agreement-v3-1.pdf",
+                                false
+                        ))
+                )
+        );
+    }
+
+    private static boolean matchesFaqQuery(FaqItemResponse item, String query) {
+        String normalized = query.toLowerCase(java.util.Locale.ROOT);
+        return item.questionKey().toLowerCase(java.util.Locale.ROOT).contains(normalized)
+                || item.answerKey().toLowerCase(java.util.Locale.ROOT).contains(normalized)
+                || item.tags().stream().anyMatch(tag -> tag.toLowerCase(java.util.Locale.ROOT).contains(normalized));
+    }
+
+    private static int countFaq(Audience audience, String category) {
+        return faqItems().stream()
+                .filter(item -> matchesAudience(audience, item.audience()))
+                .filter(item -> category.equals(item.categoryKey()))
+                .toList()
+                .size();
+    }
+
+    private static boolean matchesAudience(Audience requested, Audience itemAudience) {
+        if (Audience.ANY.equals(itemAudience)) {
+            return true;
+        }
+        if (Audience.AUTHENTICATED.equals(itemAudience)) {
+            return !Audience.GUEST.equals(requested);
+        }
+        return itemAudience.equals(requested);
+    }
+
+    private static FaqCategoryResponse faqCategory(String categoryKey, String titleKey, int questionCount) {
+        return new FaqCategoryResponse(categoryKey, titleKey, questionCount);
     }
 
     private static List<ContentBlockResponse> homeBlocks() {

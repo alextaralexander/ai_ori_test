@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860" role="img" aria-labelledby="title desc">
+  <title id="title">Макет FAQ desktop</title>
+  <desc id="desc">Схематичный макет страницы FAQ с поиском, категориями и списком вопросов.</desc>
+  <rect width="1280" height="860" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="72" fill="#f5f7fb"/>
+  <text x="48" y="44" font-family="Arial" font-size="24" fill="#111827">Best Ori Gin</text>
+  <text x="260" y="44" font-family="Arial" font-size="16" fill="#374151">Каталог</text>
+  <text x="360" y="44" font-family="Arial" font-size="16" fill="#374151">Новости</text>
+  <text x="460" y="44" font-family="Arial" font-size="16" fill="#111827">FAQ</text>
+  <text x="540" y="44" font-family="Arial" font-size="16" fill="#374151">Документы</text>
+  <rect x="80" y="112" width="1120" height="128" rx="8" fill="#eef6f2"/>
+  <text x="112" y="162" font-family="Arial" font-size="34" fill="#111827">FAQ и справка</text>
+  <text x="112" y="202" font-family="Arial" font-size="18" fill="#4b5563">Поиск по вопросам о покупке, доставке, возвратах и партнерстве.</text>
+  <rect x="80" y="272" width="760" height="54" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="108" y="306" font-family="Arial" font-size="16" fill="#64748b">Введите вопрос или тему</text>
+  <rect x="864" y="272" width="160" height="54" rx="6" fill="#1f7a5b"/>
+  <text x="914" y="306" font-family="Arial" font-size="16" fill="#ffffff">Искать</text>
+  <rect x="80" y="360" width="260" height="420" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="108" y="398" font-family="Arial" font-size="20" fill="#111827">Категории</text>
+  <rect x="108" y="426" width="204" height="40" rx="6" fill="#dbeafe"/>
+  <text x="124" y="452" font-family="Arial" font-size="15" fill="#1e3a8a">Все вопросы · 12</text>
+  <text x="124" y="506" font-family="Arial" font-size="15" fill="#374151">Покупка и заказ · 4</text>
+  <text x="124" y="552" font-family="Arial" font-size="15" fill="#374151">Доставка · 3</text>
+  <text x="124" y="598" font-family="Arial" font-size="15" fill="#374151">Партнерство · 3</text>
+  <text x="124" y="644" font-family="Arial" font-size="15" fill="#374151">Возвраты · 2</text>
+  <rect x="380" y="360" width="820" height="420" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="412" y="404" font-family="Arial" font-size="22" fill="#111827">Вопросы</text>
+  <line x1="412" y1="430" x2="1168" y2="430" stroke="#e5e7eb"/>
+  <text x="412" y="470" font-family="Arial" font-size="18" fill="#111827">Как узнать сроки доставки?</text>
+  <text x="412" y="504" font-family="Arial" font-size="15" fill="#4b5563">Ответ с кратким описанием и ссылкой на раздел доставки.</text>
+  <text x="412" y="536" font-family="Arial" font-size="15" fill="#1f7a5b">Открыть /info/delivery</text>
+  <line x1="412" y1="568" x2="1168" y2="568" stroke="#e5e7eb"/>
+  <text x="412" y="610" font-family="Arial" font-size="18" fill="#111827">Какие документы нужны партнеру?</text>
+  <text x="412" y="644" font-family="Arial" font-size="15" fill="#4b5563">Ответ со ссылкой на партнерские документы.</text>
+</svg>

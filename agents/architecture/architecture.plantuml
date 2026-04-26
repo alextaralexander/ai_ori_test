@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 002
+title Best Ori Gin. Архитектура платформы на feature 003
 
 skinparam componentStyle rectangle
 
@@ -7,27 +7,30 @@ actor "Гость" as Guest
 actor "Покупатель" as Customer
 actor "Партнер" as Partner
 actor "Контент-менеджер" as ContentManager
+actor "Редактор документов" as LegalEditor
 
 component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
-component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers" as PublicContent
-database "PostgreSQL\npublic-content schema\nCMS pages, news, offers" as PublicDb
+component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents" as PublicContent
+database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents" as PublicDb
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
 component "Auth/Profile контур\nбудущие фичи" as AuthProfile
 component "Catalog контур\nбудущие фичи" as Catalog
 component "Partner контур\nбудущие фичи" as PartnerArea
 
-Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:contentId, /offer/:offerId
-Customer --> PublicWeb : HTTPS публичные и личные маршруты
+Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type
+Customer --> PublicWeb : HTTPS публичные и клиентские маршруты
 Partner --> PublicWeb : HTTPS публичные и партнерские маршруты
 ContentManager --> CmsAdmin : HTTPS управление контентом
+LegalEditor --> CmsAdmin : HTTPS версии документов и архив
 
-PublicWeb --> PublicContent : HTTPS REST /api/public-content/pages/*, /navigation, /entry-points
-PublicWeb --> PublicContent : HTTPS REST /api/public-content/news, /content/{contentId}, /offers/{offerId}
-PublicContent --> PublicDb : JDBC
-CmsAdmin --> PublicContent : HTTPS REST управление CMS-контентом
-PublicWeb --> AuthProfile : HTTPS REST вход, профиль, audience
-PublicWeb --> Catalog : HTTPS REST переходы в каталог
-PublicContent ..> Catalog : productRef / route references для связанных товаров
-PublicWeb --> PartnerArea : HTTPS REST партнерский офис
+PublicWeb --> PublicContent : REST pages, navigation, entry-points
+PublicWeb --> PublicContent : REST news, content, offers
+PublicWeb --> PublicContent : REST faq, info, documents
+PublicContent --> PublicDb : JDBC / Liquibase XML target model
+CmsAdmin --> PublicContent : REST управление CMS-контентом
+PublicWeb --> AuthProfile : REST вход, профиль, audience
+PublicWeb --> Catalog : route navigation в каталог
+PublicContent ..> Catalog : productRef / route references
+PublicWeb --> PartnerArea : route navigation в партнерский офис
 
 @enduml

@@ -121,6 +121,78 @@ export interface OfferPage {
   ctas: ContentCta[];
 }
 
+export interface FaqCategory {
+  categoryKey: string;
+  titleKey: string;
+  questionCount: number;
+}
+
+export interface FaqItem {
+  itemKey: string;
+  categoryKey: string;
+  questionKey: string;
+  answerKey: string;
+  tags: string[];
+  relatedInfoSection?: string;
+  relatedDocumentType?: string;
+  audience: Audience | 'ANY';
+}
+
+export interface FaqPage {
+  categories: FaqCategory[];
+  items: FaqItem[];
+  emptyStateCode: string;
+}
+
+export interface InfoRelatedDocument {
+  documentType: string;
+  titleKey: string;
+  targetRoute: string;
+}
+
+export interface InfoPage {
+  sectionCode: string;
+  titleKey: string;
+  descriptionKey?: string;
+  breadcrumbs: Breadcrumb[];
+  seo: SeoMetadata;
+  sections: ContentSection[];
+  documents: InfoRelatedDocument[];
+  ctas: ContentCta[];
+}
+
+export interface DocumentVersion {
+  versionLabel: string;
+  publishedAt: string;
+  viewerUrl: string;
+  downloadUrl: string;
+  current: boolean;
+}
+
+export interface PublicDocument {
+  documentKey: string;
+  documentType: string;
+  titleKey: string;
+  descriptionKey?: string;
+  versionLabel: string;
+  publishedAt: string;
+  viewerUrl: string;
+  downloadUrl: string;
+  required: boolean;
+  current: boolean;
+  audience: Audience | 'ANY';
+  archive: DocumentVersion[];
+}
+
+export interface DocumentCollection {
+  documentType: string;
+  titleKey: string;
+  descriptionKey?: string;
+  breadcrumbs: Breadcrumb[];
+  documents: PublicDocument[];
+  emptyStateCode: string;
+}
+
 export async function loadPublicPage(page: 'home' | 'community', audience: Audience): Promise<PublicPage> {
   const response = await fetch(`/api/public-content/pages/${page}?audience=${audience}`, {
     headers: {
@@ -173,7 +245,7 @@ function fallbackPage(page: 'home' | 'community', audience: Audience): PublicPag
       nav('benefits', 'public.navigation.benefits', '/benefits', 'HEADER'),
       nav('register', 'public.navigation.register', '/register', 'HEADER'),
       nav('cart', 'public.navigation.cart', '/cart', 'HEADER'),
-      nav('documents', 'public.navigation.documents', '/documents', 'FOOTER'),
+      nav('documents', 'public.navigation.documents', '/documents/terms', 'FOOTER'),
       nav('contacts', 'public.navigation.contacts', '/contacts', 'FOOTER')
     ],
     entryPoints: [...commonEntryPoints, ...personalEntryPoints]
@@ -216,6 +288,44 @@ export async function loadOffer(offerId: string, audience: Audience): Promise<Of
     return offerId === 'spring-offer' ? fallbackOffer(audience) : null;
   }
   return response.json() as Promise<OfferPage>;
+}
+
+export async function loadFaq(audience: Audience, query = '', category = ''): Promise<FaqPage> {
+  const params = new URLSearchParams({ audience });
+  if (query) {
+    params.set('query', query);
+  }
+  if (category) {
+    params.set('category', category);
+  }
+  const response = await fetch(`/api/public-content/faq?${params.toString()}`, requestOptions());
+  if (!response.ok) {
+    return fallbackFaq(audience, query, category);
+  }
+  return response.json() as Promise<FaqPage>;
+}
+
+export async function loadInfoSection(section: string, audience: Audience): Promise<InfoPage | null> {
+  const target = section || 'overview';
+  const response = await fetch(`/api/public-content/info/${target}?audience=${audience}`, requestOptions());
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    return target === 'delivery' || target === 'overview' ? fallbackInfo(target, audience) : null;
+  }
+  return response.json() as Promise<InfoPage>;
+}
+
+export async function loadDocuments(documentType: string, audience: Audience): Promise<DocumentCollection | null> {
+  const response = await fetch(`/api/public-content/documents/${documentType}?audience=${audience}`, requestOptions());
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    return documentType === 'terms' || documentType === 'partner' ? fallbackDocuments(documentType, audience) : null;
+  }
+  return response.json() as Promise<DocumentCollection>;
 }
 
 function requestOptions(): RequestInit {
@@ -335,6 +445,118 @@ function fallbackOffer(audience: Audience): OfferPage {
     ],
     productLinks: [{ productRef: 'spring-campaign', labelKey: 'public.offer.spring.products', targetRoute: '/catalog' }],
     ctas: ctasFor(audience, 'public.offer.spring.cta', '/catalog')
+  };
+}
+
+function fallbackFaq(audience: Audience, query: string, category: string): FaqPage {
+  const items: FaqItem[] = [
+    {
+      itemKey: 'delivery-time',
+      categoryKey: 'delivery',
+      questionKey: 'public.faq.delivery.time.question',
+      answerKey: 'public.faq.delivery.time.answer',
+      tags: ['delivery', 'shipping', 'доставка'],
+      relatedInfoSection: 'delivery',
+      relatedDocumentType: 'terms',
+      audience: 'ANY'
+    },
+    {
+      itemKey: 'partner-documents',
+      categoryKey: 'partner',
+      questionKey: 'public.faq.partner.documents.question',
+      answerKey: 'public.faq.partner.documents.answer',
+      tags: ['partner', 'documents'],
+      relatedInfoSection: 'overview',
+      relatedDocumentType: 'partner',
+      audience: 'PARTNER'
+    }
+  ];
+  const filtered = items
+    .filter((item) => item.audience === 'ANY' || item.audience === audience)
+    .filter((item) => !category || item.categoryKey === category)
+    .filter((item) => !query || item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase())));
+  return {
+    categories: [
+      { categoryKey: 'all', titleKey: 'public.faq.category.all', questionCount: filtered.length },
+      { categoryKey: 'delivery', titleKey: 'public.faq.category.delivery', questionCount: filtered.filter((item) => item.categoryKey === 'delivery').length },
+      { categoryKey: 'partner', titleKey: 'public.faq.category.partner', questionCount: filtered.filter((item) => item.categoryKey === 'partner').length }
+    ],
+    items: filtered,
+    emptyStateCode: 'STR_MNEMO_PUBLIC_FAQ_EMPTY'
+  };
+}
+
+function fallbackInfo(section: string, audience: Audience): InfoPage {
+  return {
+    sectionCode: section || 'overview',
+    titleKey: section === 'delivery' ? 'public.info.delivery.title' : 'public.info.overview.title',
+    descriptionKey: section === 'delivery' ? 'public.info.delivery.description' : 'public.info.overview.description',
+    breadcrumbs: [
+      { labelKey: 'public.navigation.home', route: '/' },
+      { labelKey: 'public.info.breadcrumb', route: '/info' }
+    ],
+    seo: {
+      titleKey: section === 'delivery' ? 'public.info.delivery.seo.title' : 'public.info.overview.seo.title',
+      descriptionKey: section === 'delivery' ? 'public.info.delivery.seo.description' : 'public.info.overview.seo.description',
+      canonicalUrl: section === 'delivery' ? '/info/delivery' : '/info'
+    },
+    sections: [
+      {
+        sectionKey: 'delivery-time',
+        sectionType: 'RICH_TEXT',
+        sortOrder: 10,
+        payload: {
+          titleKey: 'public.info.delivery.time.title',
+          bodyKey: 'public.info.delivery.time.body',
+          anchor: 'delivery-time'
+        }
+      }
+    ],
+    documents: [{ documentType: 'terms', titleKey: 'public.documents.terms.title', targetRoute: '/documents/terms' }],
+    ctas: ctasFor(audience, 'public.info.delivery.cta.documents', '/documents/terms')
+  };
+}
+
+function fallbackDocuments(documentType: string, audience: Audience): DocumentCollection {
+  const terms: PublicDocument = {
+    documentKey: 'user-terms',
+    documentType: 'terms',
+    titleKey: 'public.documents.userTerms.title',
+    descriptionKey: 'public.documents.userTerms.description',
+    versionLabel: '2.1',
+    publishedAt: '2026-04-26T00:00:00Z',
+    viewerUrl: '/assets/documents/terms-v2-1.pdf',
+    downloadUrl: '/assets/documents/terms-v2-1.pdf',
+    required: true,
+    current: true,
+    audience: 'ANY',
+    archive: [{ versionLabel: '2.0', publishedAt: '2026-04-01T00:00:00Z', viewerUrl: '/assets/documents/terms-v2-0.pdf', downloadUrl: '/assets/documents/terms-v2-0.pdf', current: false }]
+  };
+  const partner: PublicDocument = {
+    documentKey: 'partner-agreement',
+    documentType: 'partner',
+    titleKey: 'public.documents.partnerAgreement.title',
+    descriptionKey: 'public.documents.partnerAgreement.description',
+    versionLabel: '3.2',
+    publishedAt: '2026-04-26T00:00:00Z',
+    viewerUrl: '/assets/documents/partner-agreement-v3-2.pdf',
+    downloadUrl: '/assets/documents/partner-agreement-v3-2.pdf',
+    required: true,
+    current: true,
+    audience: 'PARTNER',
+    archive: []
+  };
+  const documents = documentType === 'partner' && audience === 'PARTNER' ? [terms, partner] : [terms];
+  return {
+    documentType,
+    titleKey: `public.documents.${documentType}.title`,
+    descriptionKey: `public.documents.${documentType}.description`,
+    breadcrumbs: [
+      { labelKey: 'public.navigation.home', route: '/' },
+      { labelKey: 'public.navigation.documents', route: `/documents/${documentType}` }
+    ],
+    documents,
+    emptyStateCode: 'STR_MNEMO_PUBLIC_DOCUMENTS_EMPTY'
   };
 }
 

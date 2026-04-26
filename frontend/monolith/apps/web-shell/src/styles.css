@@ -167,6 +167,20 @@ body {
   background: #fafafa;
 }
 
+.content-list {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.document-viewer {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d9d9d9;
+  background: #f5f5f5;
+  color: #595959;
+}
+
 .offer-hero {
   background: #f6ffed;
 }

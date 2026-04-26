@@ -1,461 +1,61 @@
 openapi: 3.1.0
 info:
-  title: Public Content Module API
+  title: Best Ori Gin public-content module API
   version: 1.0.0
-  description: Полная OpenAPI спецификация модуля public-content.
-servers:
-  - url: /api/public-content
 paths:
-  /pages/home:
+  /api/public-content/pages/home:
     get:
-      summary: Получить главную страницу
-      operationId: getHomePage
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
+      summary: Получить публичную главную
       responses:
-        '200':
-          $ref: '#/components/responses/PublicPage'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /pages/community:
+        "200":
+          description: Главная страница
+  /api/public-content/navigation:
     get:
-      summary: Получить community-страницу
-      operationId: getCommunityPage
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
+      summary: Получить публичную навигацию
       responses:
-        '200':
-          $ref: '#/components/responses/PublicPage'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /navigation:
+        "200":
+          description: Header и footer навигация
+  /api/public-content/news:
     get:
-      summary: Получить навигацию
-      operationId: getNavigation
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
-        - $ref: '#/components/parameters/NavigationArea'
+      summary: Получить ленту новостей
       responses:
-        '200':
-          description: Навигация
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NavigationResponse'
-  /entry-points:
+        "200":
+          description: Лента новостей
+  /api/public-content/content/{contentId}:
     get:
-      summary: Получить entry points
-      operationId: getEntryPoints
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
+      summary: Получить контентную страницу
       responses:
-        '200':
-          description: Entry points
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EntryPointResponse'
-  /news:
+        "200":
+          description: Контентная страница
+        "404":
+          description: Материал не найден
+  /api/public-content/offers/{offerId}:
     get:
-      summary: Получить опубликованную ленту новостей
-      operationId: getNews
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
+      summary: Получить промо-оффер
       responses:
-        '200':
-          description: Лента опубликованных новостей
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NewsFeedResponse'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /content/{contentId}:
+        "200":
+          description: Оффер
+        "404":
+          description: Оффер не найден
+  /api/public-content/faq:
     get:
-      summary: Получить опубликованную динамическую контентную страницу
-      operationId: getContentPage
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
-        - name: contentId
-          in: path
-          required: true
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 120
+      summary: Получить FAQ
       responses:
-        '200':
-          description: Опубликованная контентная страница
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContentPageResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /offers/{offerId}:
+        "200":
+          description: FAQ
+  /api/public-content/info/{section}:
     get:
-      summary: Получить опубликованное промо-предложение
-      operationId: getOffer
-      parameters:
-        - $ref: '#/components/parameters/AcceptLanguage'
-        - $ref: '#/components/parameters/Audience'
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 120
+      summary: Получить информационный раздел
       responses:
-        '200':
-          description: Опубликованное промо-предложение
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfferResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-components:
-  parameters:
-    AcceptLanguage:
-      name: Accept-Language
-      in: header
-      required: false
-      schema:
-        type: string
-    Audience:
-      name: audience
-      in: query
-      required: false
-      schema:
-        $ref: '#/components/schemas/Audience'
-    NavigationArea:
-      name: area
-      in: query
-      required: false
-      schema:
-        type: string
-        enum: [HEADER, FOOTER, MOBILE_MENU]
-  responses:
-    NotFound:
-      description: Материал не найден или не опубликован
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    PublicPage:
-      description: Public page response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PublicPageResponse'
-    ServiceUnavailable:
-      description: Service unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-  schemas:
-    Audience:
-      type: string
-      enum: [GUEST, AUTHENTICATED, CUSTOMER, PARTNER, CONTENT_MANAGER, ANY]
-    PublicPageResponse:
-      type: object
-      required: [pageKey, routePath, titleKey, blocks, navigation, entryPoints]
-      properties:
-        pageKey:
-          type: string
-        routePath:
-          type: string
-        titleKey:
-          type: string
-        blocks:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentBlock'
-        navigation:
-          type: array
-          items:
-            $ref: '#/components/schemas/NavigationItem'
-        entryPoints:
-          type: array
-          items:
-            $ref: '#/components/schemas/EntryPoint'
-    ContentBlock:
-      type: object
-      required: [blockKey, blockType, sortOrder, payload]
-      properties:
-        blockKey:
-          type: string
-        blockType:
-          type: string
-          enum: [HERO, PROMO, QUICK_LINKS, COMMUNITY_FEED, FALLBACK]
-        sortOrder:
-          type: integer
-        payload:
-          type: object
-          additionalProperties: true
-    NavigationResponse:
-      type: object
-      required: [items]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/NavigationItem'
-    NavigationItem:
-      type: object
-      required: [itemKey, labelKey, targetType, targetValue, area, children]
-      properties:
-        itemKey:
-          type: string
-        labelKey:
-          type: string
-        targetType:
-          type: string
-          enum: [INTERNAL_ROUTE, EXTERNAL_URL]
-        targetValue:
-          type: string
-        area:
-          type: string
-          enum: [HEADER, FOOTER, MOBILE_MENU]
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/NavigationItem'
-    EntryPointResponse:
-      type: object
-      required: [items]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/EntryPoint'
-    EntryPoint:
-      type: object
-      required: [entryKey, labelKey, targetRoute, audience]
-      properties:
-        entryKey:
-          type: string
-        labelKey:
-          type: string
-        descriptionKey:
-          type: string
-          nullable: true
-        targetRoute:
-          type: string
-        audience:
-          $ref: '#/components/schemas/Audience'
-    NewsFeedResponse:
-      type: object
-      required: [items, featured, emptyStateCode]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/NewsItem'
-        featured:
-          oneOf:
-            - $ref: '#/components/schemas/NewsItem'
-            - type: 'null'
-        emptyStateCode:
-          type: string
-          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
-    NewsItem:
-      type: object
-      required: [newsKey, contentId, titleKey, publishedAt, targetRoute]
-      properties:
-        newsKey:
-          type: string
-        contentId:
-          type: string
-        titleKey:
-          type: string
-        summaryKey:
-          type: string
-          nullable: true
-        categoryKey:
-          type: string
-          nullable: true
-        imageUrl:
-          type: string
-          nullable: true
-        publishedAt:
-          type: string
-          format: date-time
-        targetRoute:
-          type: string
-    ContentPageResponse:
-      type: object
-      required: [contentId, templateCode, titleKey, breadcrumbs, seo, sections, attachments, productLinks, ctas]
-      properties:
-        contentId:
-          type: string
-        templateCode:
-          type: string
-          enum: [ARTICLE, LANDING, GUIDE]
-        titleKey:
-          type: string
-        descriptionKey:
-          type: string
-          nullable: true
-        breadcrumbs:
-          type: array
-          items:
-            $ref: '#/components/schemas/Breadcrumb'
-        seo:
-          $ref: '#/components/schemas/SeoMetadata'
-        sections:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentSection'
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentAttachment'
-        productLinks:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProductLink'
-        ctas:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentCta'
-    OfferResponse:
-      type: object
-      required: [offerId, titleKey, breadcrumbs, seo, hero, sections, attachments, productLinks, ctas]
-      properties:
-        offerId:
-          type: string
-        titleKey:
-          type: string
-        summaryKey:
-          type: string
-          nullable: true
-        breadcrumbs:
-          type: array
-          items:
-            $ref: '#/components/schemas/Breadcrumb'
-        seo:
-          $ref: '#/components/schemas/SeoMetadata'
-        hero:
-          $ref: '#/components/schemas/OfferHero'
-        sections:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentSection'
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentAttachment'
-        productLinks:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProductLink'
-        ctas:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentCta'
-    Breadcrumb:
-      type: object
-      required: [labelKey, route]
-      properties:
-        labelKey:
-          type: string
-        route:
-          type: string
-    SeoMetadata:
-      type: object
-      required: [titleKey, descriptionKey, canonicalUrl]
-      properties:
-        titleKey:
-          type: string
-        descriptionKey:
-          type: string
-        canonicalUrl:
-          type: string
-          nullable: true
-    OfferHero:
-      type: object
-      required: [titleKey, imageUrl]
-      properties:
-        titleKey:
-          type: string
-        summaryKey:
-          type: string
-          nullable: true
-        imageUrl:
-          type: string
-          nullable: true
-    ContentSection:
-      type: object
-      required: [sectionKey, sectionType, sortOrder, payload]
-      properties:
-        sectionKey:
-          type: string
-        sectionType:
-          type: string
-          enum: [HERO, RICH_TEXT, IMAGE, CTA, PDF, PRODUCT_LINKS, CONDITIONS]
-        sortOrder:
-          type: integer
-        payload:
-          type: object
-          additionalProperties: true
-    ContentAttachment:
-      type: object
-      required: [attachmentKey, fileType, titleKey, url]
-      properties:
-        attachmentKey:
-          type: string
-        fileType:
-          type: string
-          enum: [PDF]
-        titleKey:
-          type: string
-        url:
-          type: string
-        fileSizeBytes:
-          type: integer
-          format: int64
-          nullable: true
-    ProductLink:
-      type: object
-      required: [productRef, targetRoute]
-      properties:
-        productRef:
-          type: string
-        labelKey:
-          type: string
-          nullable: true
-        targetRoute:
-          type: string
-    ContentCta:
-      type: object
-      required: [labelKey, targetType, targetValue, audience]
-      properties:
-        labelKey:
-          type: string
-        targetType:
-          type: string
-          enum: [INTERNAL_ROUTE, EXTERNAL_URL]
-        targetValue:
-          type: string
-        audience:
-          $ref: '#/components/schemas/Audience'
-    ErrorResponse:
-      type: object
-      required: [code]
-      properties:
-        code:
-          type: string
-          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+        "200":
+          description: Информационный раздел
+        "404":
+          description: Раздел не найден
+  /api/public-content/documents/{documentType}:
+    get:
+      summary: Получить документы
+      responses:
+        "200":
+          description: Документы выбранного типа
+        "404":
+          description: Тип документов не найден

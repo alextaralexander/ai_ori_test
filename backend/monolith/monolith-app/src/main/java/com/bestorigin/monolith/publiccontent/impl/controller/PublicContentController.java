@@ -2,8 +2,11 @@ package com.bestorigin.monolith.publiccontent.impl.controller;
 
 import com.bestorigin.monolith.publiccontent.api.Audience;
 import com.bestorigin.monolith.publiccontent.api.ContentPageResponse;
+import com.bestorigin.monolith.publiccontent.api.DocumentCollectionResponse;
 import com.bestorigin.monolith.publiccontent.api.EntryPointResponse;
 import com.bestorigin.monolith.publiccontent.api.ErrorResponse;
+import com.bestorigin.monolith.publiccontent.api.FaqResponse;
+import com.bestorigin.monolith.publiccontent.api.InfoSectionResponse;
 import com.bestorigin.monolith.publiccontent.api.NavigationItemResponse;
 import com.bestorigin.monolith.publiccontent.api.NewsFeedResponse;
 import com.bestorigin.monolith.publiccontent.api.OfferResponse;
@@ -74,6 +77,31 @@ public class PublicContentController {
             @RequestParam(defaultValue = "GUEST") Audience audience
     ) {
         return service.getOffer(offerId, audience);
+    }
+
+    @GetMapping("/faq")
+    public FaqResponse getFaq(
+            @RequestParam(defaultValue = "GUEST") Audience audience,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String query
+    ) {
+        return service.getFaq(audience, category, query);
+    }
+
+    @GetMapping("/info/{section}")
+    public InfoSectionResponse getInfoSection(
+            @PathVariable String section,
+            @RequestParam(defaultValue = "GUEST") Audience audience
+    ) {
+        return service.getInfoSection(section, audience);
+    }
+
+    @GetMapping("/documents/{documentType}")
+    public DocumentCollectionResponse getDocuments(
+            @PathVariable String documentType,
+            @RequestParam(defaultValue = "GUEST") Audience audience
+    ) {
+        return service.getDocuments(documentType, audience);
     }
 
     @ExceptionHandler(PublicContentNotFoundException.class)

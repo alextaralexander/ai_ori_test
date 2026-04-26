@@ -1,46 +1,40 @@
-# Best Ori Gin. Описание архитектуры на feature 002
+# Best Ori Gin. Описание архитектуры на feature 003
 
 ## Version baseline
-На дату старта задачи 26.04.2026 целевой baseline: Java 25, Spring Boot 4.x stable, Maven 4.x stable, Hibernate 7.x stable, Liquibase 5.x stable, PostgreSQL 18.x stable, TypeScript 5.x stable, React 19.x stable, Ant Design 6.x stable, Docker 29.x stable, Docker Compose 5.x stable.
+На дату старта задачи 26.04.2026 используется совместимый baseline текущего монолита: Java 25, Spring Boot 4.0.6, Maven 3.9.13, React 19.2.0, TypeScript 5.9.3, Ant Design 6.0.0, Liquibase XML changelog policy и PostgreSQL-совместимая модель данных. В рамках feature #3 зависимости не обновляются, чтобы сохранить совместимость с уже реализованными feature #1 и #2.
 
 ## Модули
-- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId` и навигационных переходов.
-- `backend/monolith/public-content`: Spring Boot модуль, который отдает read-only API публичной CMS-конфигурации, ленты новостей, динамических контентных страниц и промо-офферов.
-- `PostgreSQL public-content schema`: хранение страниц, блоков, навигации, entry points, новостей, content pages, offers, sections, attachments и product links.
-- `CMS admin контур`: будущий административный контур для управления публичным контентом.
+- `frontend/public-web`: публичное React-приложение для маршрутов `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`, `/FAQ`, `/faq`, `/info/:section?`, `/documents/:documentType`.
+- `backend/monolith/public-content`: Spring Boot модуль read-only API для публичной CMS-конфигурации, новостей, контентных страниц, офферов, FAQ, информационных разделов и документов.
+- `PostgreSQL public-content schema`: целевое хранение страниц, блоков, навигации, новостей, content pages, offers, FAQ, info sections, documents и archive versions.
+- `CMS admin контур`: будущий административный контур для управления публичным контентом и справкой.
 - `Auth/Profile контур`: будущий контур входа, профиля и определения пользовательской аудитории.
 - `Catalog контур`: будущий каталог косметики и кампаний.
 - `Partner контур`: будущий партнерский офис, отчеты, бонусы и логистика.
 
 ## Связи
-- Пользователи -> `frontend/public-web`: HTTPS, browser routes `/`, `/home`, `/community`, `/news`, `/content/:contentId`, `/offer/:offerId`.
-- `frontend/public-web` -> `backend/monolith/public-content`: HTTPS REST `/api/public-content/pages/*`, `/api/public-content/navigation`, `/api/public-content/entry-points`.
-- `frontend/public-web` -> `backend/monolith/public-content`: HTTPS REST `/api/public-content/news`, `/api/public-content/content/{contentId}`, `/api/public-content/offers/{offerId}`.
-- `backend/monolith/public-content` -> PostgreSQL: JDBC.
-- `CMS admin контур` -> `backend/monolith/public-content`: HTTPS REST для будущего управления CMS-контентом.
-- `frontend/public-web` -> `Auth/Profile контур`: HTTPS REST для входа, профиля и определения audience.
-- `frontend/public-web` -> `Catalog контур`: HTTPS REST или route navigation к каталогу.
-- `backend/monolith/public-content` -> `Catalog контур`: ссылочная интеграция через `productRef` и route references для связанных товаров и категорий; feature #2 не требует синхронного backend-вызова каталога.
-- `frontend/public-web` -> `Partner контур`: HTTPS REST или route navigation к партнерскому офису.
+- Пользователи открывают публичные маршруты через `frontend/public-web`.
+- Frontend вызывает `backend/monolith/public-content` по REST для страниц, навигации, новостей, контента, офферов, FAQ, info и documents.
+- Backend возвращает DTO с i18n-ключами и mnemonic-кодами `STR_MNEMO_*`; пользовательские тексты локализуются на frontend.
+- `public-content` ссылается на каталог через `productRef` и route references без синхронного backend-вызова в рамках feature #3.
+- CMS admin в будущих фичах будет управлять теми же сущностями через модуль `public-content`.
 
 ## Ownership
-Backend module `public-content` должен соблюдать package policy:
+Backend module `public-content` соблюдает package policy:
 - `api`: REST DTO и внешние контракты.
-- `domain`: JPA entities и repository interfaces.
+- `domain`: repository interfaces и будущие JPA entities.
 - `db`: Liquibase XML changelog files.
 - `impl/controller`: REST controllers.
-- `impl/service`: service interfaces и implementations.
-- `impl/mapper`: MapStruct mappers.
-- `impl/validator`: validators для audience, route targets и payload.
-- `impl/config`: module config, OpenAPI group и seed data.
+- `impl/service`: service interfaces, implementations, in-memory repository и исключения.
+- `impl/config`: module config и seed/fallback configuration.
 
 ## Локализация и сообщения
-Frontend user-facing строки хранятся в i18n dictionaries всех поддерживаемых языков. Backend возвращает только i18n keys или mnemonic codes `STR_MNEMO_*`, если сообщение заранее определено и может попасть во frontend.
+Все новые frontend user-facing строки размещаются в `resources_ru.ts` и `resources_en.ts`. Backend не отправляет hardcoded пользовательские тексты в API responses; для предопределенных состояний используются `STR_MNEMO_PUBLIC_FAQ_EMPTY`, `STR_MNEMO_PUBLIC_INFO_NOT_FOUND`, `STR_MNEMO_PUBLIC_DOCUMENTS_NOT_FOUND` и существующие коды публичного контента.
 
-## Feature #2
-Контентные страницы и новости расширяют публичную витрину без выделения нового backend-модуля. `public-content` остается владельцем публичного CMS-контента и добавляет:
-- `GET /api/public-content/news` для ленты опубликованных новостей.
-- `GET /api/public-content/content/{contentId}` для динамических материалов.
-- `GET /api/public-content/offers/{offerId}` для промо-предложений.
+## Feature #3
+Feature #3 расширяет публичный контур справочным самообслуживанием:
+- `GET /api/public-content/faq` для FAQ с category/query/audience.
+- `GET /api/public-content/info/{section}` для информационных страниц.
+- `GET /api/public-content/documents/{documentType}` для документов, PDF viewer, скачивания и архива версий.
 
-Правила публикации одинаковы для новостей, контентных страниц и офферов: материал публичен только при `PUBLISHED`, наступившем `active_from` и пустом или будущем `active_to`. Недоступные материалы возвращают mnemonic-код `STR_MNEMO_PUBLIC_CONTENT_NOT_FOUND` без body контента. Пустая лента новостей возвращает `STR_MNEMO_PUBLIC_NEWS_EMPTY` для локализации во frontend.
+Реализация остается в модуле `public-content`, потому что FAQ, info и documents являются частью публичного CMS-контента и используют те же правила i18n, публикации, аудитории и безопасного fallback.
