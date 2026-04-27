@@ -1,7 +1,13 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 024
+title Best Ori Gin monolith architecture through feature 025
 
 package "frontend/monolith apps/web-shell" {
+  [I18nProvider]
+  [NotificationProvider]
+  [OfflineStatusProvider]
+  [AnalyticsProvider]
+  [ConsentPanel]
+  [AnalyticsDiagnostics UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -33,6 +39,7 @@ package "backend/monolith/monolith-app" {
   [mlm-structure]
   [partner-office]
   [employee]
+  [platform-experience]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -42,7 +49,16 @@ cloud "Payment" as pay
 cloud "Delivery" as delivery
 cloud "Bonus engine" as bonus
 cloud "Claims" as claims
+cloud "Yandex Metrika" as metrika
+cloud "Mindbox" as mindbox
+cloud "Hybrid Pixel" as hybrid
 
+[I18nProvider] --> [platform-experience] : HTTP/JSON /api/platform-experience/diagnostics/i18n-missing-keys
+[NotificationProvider] --> [platform-experience] : HTTP/JSON /api/platform-experience/notification/preferences
+[OfflineStatusProvider] --> [auth] : HTTP/JSON session check after reconnect
+[AnalyticsProvider] --> [platform-experience] : HTTP/JSON /runtime-config, /consent/preferences, /diagnostics/analytics-events
+[ConsentPanel] --> [platform-experience] : HTTP/JSON /api/platform-experience/consent/preferences
+[AnalyticsDiagnostics UI] --> [platform-experience] : HTTP/JSON /api/platform-experience/diagnostics/summary
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -58,6 +74,10 @@ cloud "Claims" as claims
 [auth] --> [authorization] : role, route policy, MFA/elevated policy checks
 [auth] --> [employee] : elevatedSessionId validation for controlled impersonation
 [auth] --> db : auth sessions, roles, route policies, active partner, impersonation and audit
+[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
+[AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
+[AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
+[AnalyticsProvider] --> hybrid : consent-aware pixel events
 [employee] --> [authorization] : role, scope, MFA, locks, supervisor checks
 [employee] --> [order] : order read links and elevated operation context
 [employee] --> [cart] : active cart/operator order context

@@ -122,6 +122,39 @@
     И audit trail содержит событие отзыва с actorUserId супервайзера
     И frontend показывает локализованный результат через mnemonic-код `STR_MNEMO_*`
 
+  Сценарий: Пользователь проходит заказ с локализованными уведомлениями и offline recovery
+    Допустим покупатель авторизован
+    И покупатель находится на маршруте `/checkout`
+    Когда соединение теряется во время оформления заказа
+    Тогда frontend показывает `platform-offline-popup` с текстом из i18n dictionaries
+    И checkout не повторяется автоматически без idempotency key
+    Когда соединение восстановлено и session context подтвержден
+    Тогда frontend показывает `platform-reconnect-notification`
+    И пользователь продолжает оформление без потери введенных данных
+    Когда заказ успешно подтвержден
+    Тогда frontend показывает success notification через `platform-notification-root`
+    И backend response не содержит hardcoded user-facing текста
+
+  Сценарий: Consent управляет аналитикой публичного и заказного пути
+    Допустим покупатель авторизован
+    И покупатель разрешил consent category `analytics`
+    И запретил consent category `marketing`
+    Когда покупатель открывает каталог и карточку товара
+    Тогда Yandex Metrika получает разрешенный pageview через AnalyticsProvider
+    И Mindbox не получает marketing payload без marketing consent
+    Когда покупатель оформляет заказ
+    Тогда conversion event сохраняет route, role, catalogCode и безопасные технические идентификаторы
+    И payload не содержит токены, пароли, полные платежные данные или документы
+
+  Сценарий: Администратор трекинга проверяет diagnostics без доступа обычных пользователей
+    Допустим администратор трекинга авторизован
+    Когда администратор открывает `/admin/analytics-diagnostics`
+    Тогда система показывает статусы Yandex Metrika, Mindbox и Hybrid pixel
+    И diagnostics содержит reasonCode для сбоев adapters или `CONSENT_DENIED`
+    Когда покупатель пытается открыть `/admin/analytics-diagnostics`
+    Тогда система возвращает HTTP 403
+    И frontend показывает forbidden state через i18n dictionaries
+
   Сценарий: Администратор управляет платформой без нарушения пользовательских потоков
     Допустим администратор авторизован
     Когда администратор обновляет контент, каталог, кампанию, WMS-настройки или пользователей

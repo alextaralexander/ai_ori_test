@@ -23,3 +23,4 @@ import '../feature_021_сотрудник_претензии/feature_ui_flow';
 import '../feature_022_сотрудник_карточка_партнера_и_отчеты/feature_ui_flow';
 import '../feature_023_сотрудник_настройки_и_повышенные_права/feature_ui_flow';
 import '../feature_024_аутентификация_роли_и_имперсонация/feature_ui_flow';
+import '../feature_025_уведомления_офлайн_i18n_и_аналитика/feature_ui_flow';

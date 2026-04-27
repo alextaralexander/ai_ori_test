@@ -9,6 +9,77 @@ body {
   font-family: Arial, sans-serif;
 }
 
+.platform-page {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.platform-language-panel,
+.platform-notification-root {
+  width: min(1180px, calc(100% - 32px));
+  margin: 16px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.platform-language-options {
+  margin-left: 4px;
+}
+
+.platform-message {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #91caff;
+  background: #e6f4ff;
+  color: #1f1f1f;
+}
+
+.platform-offline-popup,
+.platform-reconnect-notification {
+  width: min(1180px, calc(100% - 32px));
+  margin: 12px auto 0;
+}
+
+.platform-offline-popup {
+  padding: 12px;
+  border: 1px solid #ffd666;
+  background: #fffbe6;
+}
+
+.platform-consent-state {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  background: #fafafa;
+}
+
+.platform-checkbox {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.platform-diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.platform-diagnostics-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+}
+
 .public-shell {
   min-height: 100vh;
   background: #ffffff;

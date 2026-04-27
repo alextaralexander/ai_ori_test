@@ -1,0 +1,106 @@
+# language: ru
+Функция: Feature 025. Уведомления, офлайн, i18n и аналитика
+  Сквозной слой Best Ori Gin показывает локализованные уведомления и offline-состояния,
+  применяет i18n dictionaries и отправляет analytics/marketing events только через consent-ready adapters.
+
+  Предыстория:
+    Дано существует пользователь "USR-025-CUST" с ролью "customer"
+    И существует партнер "USR-025-PARTNER" с ролью "partner"
+    И существует сотрудник "EMP-025-SUPPORT" с ролью "employee-support"
+    И существует администратор трекинга "ADM-025-TRACKING" с ролью "tracking-admin"
+    И для платформы настроены analytics adapters "YANDEX_METRIKA", "MINDBOX" и "HYBRID_PIXEL"
+    И frontend dictionaries содержат ключи feature #25 для всех поддерживаемых языков
+
+  Сценарий: Пользователь получает локализованное успешное уведомление после действия
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь находится на маршруте "/profile-settings"
+    Когда пользователь успешно сохраняет уведомительные предпочтения
+    Тогда frontend показывает notification root с test id "platform-notification-root"
+    И notification имеет severity "success"
+    И текст notification получен из i18n key "notifications.preferences.saved"
+    И backend response не содержит hardcoded user-facing текста
+    И analytics получает событие "NOTIFICATION_SHOWN" без персональных данных
+
+  Сценарий: Backend mnemonic-код преобразуется в локализованное сообщение frontend
+    Дано пользователь залогинен с ролью "partner"
+    И пользователь находится на маршруте "/business"
+    Когда backend возвращает ошибку с кодом "STR_MNEMO_NOTIFICATION_OPERATION_RETRY_LATER"
+    Тогда frontend разрешает код через resources текущего языка
+    И notification имеет severity "warning"
+    И UI не показывает raw-код вместо пользовательского текста
+    И в React-компоненте нет hardcoded user-facing строки для этого сообщения
+
+  Сценарий: Offline popup появляется при потере соединения и не повторяет неидемпотентную операцию
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь находится на маршруте "/checkout"
+    Когда браузер переходит в offline state во время отправки заказа
+    Тогда frontend показывает popup с test id "platform-offline-popup"
+    И popup содержит локализованное сообщение о потере соединения
+    И операция checkout не повторяется автоматически без backend idempotency key
+    И analytics получает техническое событие "OFFLINE_STATE_ENTERED"
+
+  Сценарий: Reconnect notification появляется после восстановления соединения
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь находится в offline state на маршруте "/orders"
+    Когда соединение восстановлено и текущий session context подтвержден backend
+    Тогда frontend закрывает popup с test id "platform-offline-popup"
+    И frontend показывает notification с test id "platform-reconnect-notification"
+    И notification содержит локализованное сообщение о восстановлении соединения
+    И analytics получает техническое событие "OFFLINE_STATE_RESTORED"
+
+  Сценарий: Переключение языка обновляет notification и offline UI без reload
+    Дано пользователь залогинен с ролью "partner"
+    И пользователь находится на маршруте "/business"
+    И открыт language switcher с test id "platform-language-switcher"
+    Когда пользователь переключает язык интерфейса
+    Тогда текущие notification, modal и offline popup используют переводы нового языка
+    И missing i18n keys не отображаются как пустая строка
+    И hardcoded user-facing строки в проверяемом UI отсутствуют
+
+  Сценарий: Pageview отправляется после consent-разрешения analytics
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь разрешил consent category "analytics"
+    И пользователь находится на маршруте "/catalog"
+    Когда пользователь переходит на маршрут "/product/PRD-025-001"
+    Тогда AnalyticsProvider отправляет событие "PAGEVIEW"
+    И событие содержит route "/product/PRD-025-001" и role "customer"
+    И Yandex Metrika adapter получает pageview payload
+    И payload не содержит token, password, full payment data или document data
+
+  Сценарий: Marketing conversion не отправляется без marketing consent
+    Дано пользователь залогинен с ролью "partner"
+    И пользователь запретил consent category "marketing"
+    И пользователь находится на маршруте "/business/offline-sales"
+    Когда пользователь фиксирует офлайн-продажу "OFF-025-001"
+    Тогда AnalyticsProvider не отправляет conversion в Mindbox
+    И Hybrid pixel не получает marketing payload
+    И локальная diagnostics запись содержит reasonCode "CONSENT_DENIED"
+    И пользовательский flow офлайн-продажи завершается успешно
+
+  Сценарий: Администратор трекинга видит diagnostics по каналам
+    Дано пользователь залогинен с ролью "tracking-admin"
+    И пользователь находится на маршруте "/admin/analytics-diagnostics"
+    Когда пользователь открывает панель диагностики
+    Тогда UI содержит test id "platform-analytics-diagnostics"
+    И панель показывает статус каналов "YANDEX_METRIKA", "MINDBOX" и "HYBRID_PIXEL"
+    И технические counter ids видны только пользователю с ролью "tracking-admin"
+    И обычные пользователи не получают доступ к этому маршруту
+
+  Сценарий: Сбой одного analytics adapter не ломает пользовательский сценарий
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь разрешил consent categories "analytics" и "marketing"
+    И Yandex Metrika adapter временно недоступен
+    Когда пользователь оформляет заказ "ORD-025-001"
+    Тогда пользователь видит локализованное success notification по заказу
+    И Mindbox adapter получает conversion event "CHECKOUT_COMPLETED"
+    И Hybrid pixel получает conversion event "CHECKOUT_COMPLETED"
+    И diagnostics содержит ошибку канала "YANDEX_METRIKA" без блокировки UI
+
+  Сценарий: Обычный пользователь не видит техническую diagnostics панель
+    Дано пользователь залогинен с ролью "customer"
+    И пользователь находится на маршруте "/profile-settings"
+    Когда пользователь пытается открыть маршрут "/admin/analytics-diagnostics"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_ANALYTICS_DIAGNOSTICS_FORBIDDEN"
+    И frontend показывает forbidden state через i18n dictionaries
+    И analytics не отправляет forbidden payload в marketing channels без consent

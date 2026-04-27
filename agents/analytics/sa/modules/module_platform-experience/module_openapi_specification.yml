@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Platform Experience API - Feature 025
+  version: 1.0.0
+  description: API contract for platform notifications, offline/i18n support, consent preferences and analytics diagnostics.
+servers:
+  - url: /api/platform-experience
+tags:
+  - name: PlatformExperience
+paths:
+  /runtime-config:
+    get:
+      tags: [PlatformExperience]
+      summary: Get frontend runtime config for platform experience providers
+      operationId: getPlatformRuntimeConfig
+      parameters:
+        - name: X-User-Role
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Runtime config without localized UI text
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRuntimeConfigResponse'
+  /consent/preferences:
+    get:
+      tags: [PlatformExperience]
+      summary: Get current consent preferences
+      operationId: getConsentPreferences
+      parameters:
+        - name: subjectUserId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: policyVersion
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current consent state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentPreferenceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [PlatformExperience]
+      summary: Update consent preferences
+      operationId: updateConsentPreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentPreferenceUpdateRequest'
+      responses:
+        '200':
+          description: Updated consent state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentPreferenceResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /notification/preferences:
+    get:
+      tags: [PlatformExperience]
+      summary: Get notification preferences for current user and locale
+      operationId: getNotificationPreferences
+      parameters:
+        - name: subjectUserId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification preference state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferenceResponse'
+  /diagnostics/analytics-events:
+    post:
+      tags: [PlatformExperience]
+      summary: Record analytics adapter diagnostic event
+      operationId: recordAnalyticsDiagnosticEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsDiagnosticEventRequest'
+      responses:
+        '202':
+          description: Diagnostic event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticAcceptedResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /diagnostics/i18n-missing-keys:
+    post:
+      tags: [PlatformExperience]
+      summary: Record missing i18n key diagnostic event
+      operationId: recordI18nMissingKeyEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/I18nMissingKeyEventRequest'
+      responses:
+        '202':
+          description: Diagnostic event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticAcceptedResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /diagnostics/summary:
+    get:
+      tags: [PlatformExperience]
+      summary: Get analytics diagnostics summary for tracking administrators
+      operationId: getAnalyticsDiagnosticsSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: channelCode
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Diagnostic summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsDiagnosticsSummaryResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  responses:
+    Unauthorized:
+      description: Session is missing or expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Current role is not allowed to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Version conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    PlatformRuntimeConfigResponse:
+      type: object
+      required:
+        - moduleKey
+        - environmentCode
+        - consentPolicyVersion
+        - analyticsChannels
+        - diagnosticsEnabled
+        - messageCode
+      properties:
+        moduleKey:
+          type: string
+          example: platform-experience
+        environmentCode:
+          type: string
+          example: test
+        consentPolicyVersion:
+          type: string
+          example: consent-2026-04
+        analyticsChannels:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsChannelConfig'
+        diagnosticsEnabled:
+          type: boolean
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_EXPERIENCE_CONFIG_READY
+    AnalyticsChannelConfig:
+      type: object
+      required: [channelCode, enabled, consentCategory, diagnosticsVisible]
+      properties:
+        channelCode:
+          type: string
+          enum: [YANDEX_METRIKA, MINDBOX, HYBRID_PIXEL]
+        enabled:
+          type: boolean
+        consentCategory:
+          type: string
+          enum: [analytics, marketing]
+        diagnosticsVisible:
+          type: boolean
+    ConsentPreferenceUpdateRequest:
+      type: object
+      required:
+        - subjectUserId
+        - subjectRole
+        - policyVersion
+        - analyticsAllowed
+        - marketingAllowed
+        - sourceRoute
+        - version
+      properties:
+        subjectUserId:
+          type: string
+        subjectRole:
+          type: string
+        policyVersion:
+          type: string
+        analyticsAllowed:
+          type: boolean
+        marketingAllowed:
+          type: boolean
+        sourceRoute:
+          type: string
+        version:
+          type: integer
+    ConsentPreferenceResponse:
+      type: object
+      required:
+        - subjectUserId
+        - subjectRole
+        - policyVersion
+        - functionalAllowed
+        - analyticsAllowed
+        - marketingAllowed
+        - version
+        - messageCode
+      properties:
+        subjectUserId:
+          type: string
+        subjectRole:
+          type: string
+        policyVersion:
+          type: string
+        functionalAllowed:
+          type: boolean
+        analyticsAllowed:
+          type: boolean
+        marketingAllowed:
+          type: boolean
+        version:
+          type: integer
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_CONSENT_UPDATED
+    NotificationPreferenceResponse:
+      type: object
+      required:
+        - subjectUserId
+        - locale
+        - toastEnabled
+        - modalEnabled
+        - offlinePopupEnabled
+        - criticalNotificationsRequired
+        - messageCode
+      properties:
+        subjectUserId:
+          type: string
+        locale:
+          type: string
+        toastEnabled:
+          type: boolean
+        modalEnabled:
+          type: boolean
+        offlinePopupEnabled:
+          type: boolean
+        criticalNotificationsRequired:
+          type: boolean
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_NOTIFICATION_PREFERENCES_READY
+    AnalyticsDiagnosticEventRequest:
+      type: object
+      required:
+        - channelCode
+        - eventCode
+        - eventStatus
+        - sourceRoute
+        - subjectRole
+        - correlationId
+        - occurredAt
+      properties:
+        channelCode:
+          type: string
+        eventCode:
+          type: string
+        eventStatus:
+          type: string
+        reasonCode:
+          type: string
+        sourceRoute:
+          type: string
+        subjectRole:
+          type: string
+        correlationId:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    I18nMissingKeyEventRequest:
+      type: object
+      required:
+        - i18nKey
+        - locale
+        - sourceRoute
+        - componentKey
+        - environmentCode
+        - correlationId
+        - occurredAt
+      properties:
+        i18nKey:
+          type: string
+        locale:
+          type: string
+        sourceRoute:
+          type: string
+        componentKey:
+          type: string
+        environmentCode:
+          type: string
+        correlationId:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    DiagnosticAcceptedResponse:
+      type: object
+      required: [accepted, messageCode, correlationId]
+      properties:
+        accepted:
+          type: boolean
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_DIAGNOSTIC_ACCEPTED
+        correlationId:
+          type: string
+    AnalyticsDiagnosticsSummaryResponse:
+      type: object
+      required: [from, to, channelSummaries, messageCode]
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        channelSummaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsChannelSummary'
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_DIAGNOSTICS_READY
+    AnalyticsChannelSummary:
+      type: object
+      required: [channelCode, sentCount, skippedCount, failedCount, lastReasonCode]
+      properties:
+        channelCode:
+          type: string
+        sentCount:
+          type: integer
+        skippedCount:
+          type: integer
+        failedCount:
+          type: integer
+        lastReasonCode:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [messageCode, correlationId]
+      properties:
+        messageCode:
+          type: string
+          example: STR_MNEMO_PLATFORM_EXPERIENCE_VALIDATION_FAILED
+        correlationId:
+          type: string

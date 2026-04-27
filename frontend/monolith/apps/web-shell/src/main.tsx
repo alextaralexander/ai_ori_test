@@ -24,10 +24,37 @@ import { PartnerReportsView } from './components/PartnerReportsView';
 import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
 import { OrderHistoryView } from './components/OrderHistoryView';
+import { PlatformAnalyticsDiagnosticsView, PlatformConsentState, PlatformConsentView, PlatformExperienceShell } from './components/PlatformExperienceViews';
 import { ProductCardView } from './components/ProductCardView';
 import { ProfileSettingsView } from './components/ProfileSettingsView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
+
+const testLoginRoles = new Set([
+  'customer',
+  'partner',
+  'partner-leader',
+  'business-manager',
+  'mlm-analyst',
+  'content-manager',
+  'catalog-manager',
+  'guest',
+  'sponsor',
+  'invited-partner',
+  'employee-support',
+  'order-support',
+  'support',
+  'supervisor',
+  'backoffice',
+  'finance',
+  'accountant',
+  'finance-controller',
+  'partner-office',
+  'partner-office-foreign',
+  'logistics-operator',
+  'regional-manager',
+  'tracking-admin',
+]);
 
 function resolveAudience(): Audience {
   const stored = window.localStorage.getItem('bestorigin.role');
@@ -60,7 +87,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'employee-support' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'supervisor' || loginRole === 'backoffice' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller' || loginRole === 'partner-office' || loginRole === 'partner-office-foreign' || loginRole === 'logistics-operator' || loginRole === 'regional-manager')) {
+  if (path === '/test-login' && loginRole && testLoginRoles.has(loginRole)) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       window.localStorage.setItem('bestorigin.authToken', `test-token-${loginRole}`);
       const invitationCode = params.get('invitationCode') ?? params.get('code');
@@ -99,7 +126,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'employee-support' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'supervisor' || loginRole === 'backoffice' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller' || loginRole === 'partner-office' || loginRole === 'partner-office-foreign' || loginRole === 'logistics-operator' || loginRole === 'regional-manager'
+    const role = loginRole && testLoginRoles.has(loginRole)
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -163,7 +190,12 @@ function App() {
   } else if (path === '/search') {
     contentView = <CatalogSearchView audience={audience} />;
   } else if (path.startsWith('/product/')) {
-    contentView = <ProductCardView audience={audience} productCode={decodeURIComponent(path.slice('/product/'.length))} />;
+    contentView = (
+      <>
+        <PlatformConsentState />
+        <ProductCardView audience={audience} productCode={decodeURIComponent(path.slice('/product/'.length))} />
+      </>
+    );
   } else if (path === '/cart') {
     contentView = <CartView seed={params.get('seed')} />;
   } else if (path === '/cart/shopping-offers') {
@@ -172,8 +204,12 @@ function App() {
     contentView = <CartView cartType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path === '/cart/supplementary/shopping-offers') {
     contentView = <CartView cartType="SUPPLEMENTARY" mode="offers" />;
-  } else if (path === '/order') {
-    contentView = <OrderCheckoutView seed={params.get('seed')} />;
+  } else if (path === '/order' || path === '/checkout') {
+    contentView = (
+      <PlatformExperienceShell>
+        <OrderCheckoutView seed={params.get('seed')} />
+      </PlatformExperienceShell>
+    );
   } else if (path === '/order/supplementary') {
     contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path === '/order/order-history') {
@@ -263,7 +299,11 @@ function App() {
   } else if (path.startsWith('/profile/transactions/')) {
     contentView = <BonusWalletView params={params} transactionType={decodeURIComponent(path.slice('/profile/transactions/'.length))} />;
   } else if (path === '/business') {
-    contentView = <PartnerGrowthView mode="dashboard" params={params} />;
+    contentView = (
+      <PlatformExperienceShell showLanguageSwitcher>
+        <PartnerGrowthView mode="dashboard" params={params} />
+      </PlatformExperienceShell>
+    );
   } else if (path === '/business/beauty-community') {
     contentView = <PartnerGrowthView mode="community" params={params} />;
   } else if (path === '/business/conversion') {
@@ -276,6 +316,10 @@ function App() {
     contentView = <PartnerGrowthView mode="partner-card" params={params} personNumber={decodeURIComponent(path.slice('/business/partner-card/'.length))} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
+  } else if (path === '/privacy/consent') {
+    contentView = <PlatformConsentView />;
+  } else if (path === '/admin/analytics-diagnostics') {
+    contentView = <PlatformAnalyticsDiagnosticsView />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

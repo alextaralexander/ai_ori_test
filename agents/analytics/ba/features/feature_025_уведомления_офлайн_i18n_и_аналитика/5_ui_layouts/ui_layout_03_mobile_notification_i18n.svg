@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="860" viewBox="0 0 390 860" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 025 mobile notification i18n layout</title>
+  <desc id="desc">Схематичный мобильный макет notification, offline popup, language switcher и consent controls.</desc>
+  <rect x="12" y="12" width="366" height="836" fill="#ffffff" stroke="#222222" stroke-width="2"/>
+  <rect x="24" y="32" width="342" height="56" fill="#f5f5f5" stroke="#555555"/>
+  <text x="40" y="66" font-family="Arial" font-size="18">mobile app shell</text>
+  <rect x="24" y="112" width="342" height="92" fill="#fffbe6" stroke="#aa8a00"/>
+  <text x="40" y="146" font-family="Arial" font-size="16">platform-notification-root</text>
+  <text x="40" y="174" font-family="Arial" font-size="13">localized toast stack</text>
+  <rect x="24" y="228" width="342" height="126" fill="#fff1f0" stroke="#aa3333"/>
+  <text x="40" y="262" font-family="Arial" font-size="16">platform-offline-popup</text>
+  <text x="40" y="292" font-family="Arial" font-size="13">message from resources_*.ts</text>
+  <rect x="40" y="314" width="140" height="28" fill="#ffffff" stroke="#777777"/>
+  <text x="56" y="334" font-family="Arial" font-size="12">retry status</text>
+  <rect x="24" y="378" width="342" height="88" fill="#f6ffed" stroke="#447744"/>
+  <text x="40" y="412" font-family="Arial" font-size="16">platform-reconnect-notification</text>
+  <text x="40" y="440" font-family="Arial" font-size="13">shown after session check</text>
+  <rect x="24" y="490" width="342" height="92" fill="#ffffff" stroke="#555555"/>
+  <text x="40" y="524" font-family="Arial" font-size="16">platform-language-switcher</text>
+  <rect x="40" y="544" width="72" height="28" fill="#e8f1ff" stroke="#3366aa"/>
+  <text x="62" y="564" font-family="Arial" font-size="12">RU</text>
+  <rect x="124" y="544" width="72" height="28" fill="#ffffff" stroke="#777777"/>
+  <text x="146" y="564" font-family="Arial" font-size="12">EN</text>
+  <rect x="24" y="606" width="342" height="176" fill="#ffffff" stroke="#555555"/>
+  <text x="40" y="640" font-family="Arial" font-size="16">platform-consent-panel</text>
+  <rect x="40" y="666" width="300" height="32" fill="#f7f7f7" stroke="#777777"/>
+  <text x="56" y="688" font-family="Arial" font-size="13">functional required</text>
+  <rect x="40" y="710" width="300" height="32" fill="#ffffff" stroke="#777777"/>
+  <text x="56" y="732" font-family="Arial" font-size="13">analytics toggle</text>
+  <rect x="40" y="754" width="300" height="32" fill="#ffffff" stroke="#777777"/>
+  <text x="56" y="776" font-family="Arial" font-size="13">marketing toggle</text>
+  <rect x="24" y="804" width="342" height="28" fill="#f7f7f7" stroke="#777777"/>
+  <text x="40" y="824" font-family="Arial" font-size="12">safe-area aware bottom spacing</text>
+</svg>

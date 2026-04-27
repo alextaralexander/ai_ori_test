@@ -1,0 +1,70 @@
+@startuml
+title Feature 025 - уведомления, offline, i18n и аналитика - sequence
+
+actor "Пользователь" as User
+participant "Frontend App Shell" as Shell
+participant "I18nProvider" as I18n
+participant "NotificationProvider" as Notification
+participant "OfflineStatusProvider" as Offline
+participant "AnalyticsProvider" as Analytics
+participant "Auth API" as Auth
+participant "platform-experience API" as Platform
+participant "Yandex Metrika Adapter" as Metrika
+participant "Mindbox Adapter" as Mindbox
+participant "Hybrid Pixel Adapter" as Hybrid
+
+User -> Shell: открывает маршрут платформы
+Shell -> I18n: load resources_*.ts для текущей локали
+Shell -> Notification: mount platform-notification-root
+Shell -> Offline: subscribe browser online/offline events
+Shell -> Auth: restore current session
+Auth --> Shell: session context, role, route policies, active partner
+Shell -> Platform: GET /runtime-config
+Platform --> Shell: analytics channels, consentPolicyVersion, diagnostics flags, STR_MNEMO_PLATFORM_EXPERIENCE_CONFIG_READY
+Shell -> Platform: GET /consent/preferences
+Platform --> Shell: functional/analytics/marketing flags
+
+User -> Shell: выполняет бизнес-действие
+Shell -> Notification: show success/warning/error by i18n key or STR_MNEMO_*
+Notification -> I18n: resolve message key/code
+I18n --> Notification: localized text
+Notification --> User: toast/modal без hardcoded текста
+Notification -> Analytics: track NOTIFICATION_SHOWN
+
+alt analytics consent allowed
+  Analytics -> Metrika: pageview/conversion payload
+  Analytics -> Mindbox: conversion payload if marketing consent allowed
+  Analytics -> Hybrid: conversion payload if marketing consent allowed
+else consent denied
+  Analytics -> Platform: POST /diagnostics/analytics-events reason CONSENT_DENIED
+end
+
+alt adapter failed
+  Metrika --> Analytics: adapter error
+  Analytics -> Platform: POST /diagnostics/analytics-events status FAILED
+  Analytics -> Mindbox: continue other allowed adapters
+  Analytics -> Hybrid: continue other allowed adapters
+end
+
+Offline -> Shell: browser offline event
+Shell -> Notification: show platform-offline-popup
+Notification -> I18n: resolve offline message
+Notification --> User: локализованный offline popup
+Offline -> Analytics: track OFFLINE_STATE_ENTERED
+
+Offline -> Shell: browser online event
+Shell -> Auth: verify session after reconnect
+Auth --> Shell: session valid
+Shell -> Notification: show platform-reconnect-notification
+Offline -> Analytics: track OFFLINE_STATE_RESTORED
+
+alt missing i18n key detected
+  I18n -> Platform: POST /diagnostics/i18n-missing-keys
+  Platform --> I18n: STR_MNEMO_PLATFORM_DIAGNOSTIC_ACCEPTED
+end
+
+User -> Shell: tracking-admin opens /admin/analytics-diagnostics
+Shell -> Platform: GET /diagnostics/summary
+Platform --> Shell: channel summaries or STR_MNEMO_ANALYTICS_DIAGNOSTICS_FORBIDDEN
+Shell --> User: diagnostics panel or localized forbidden state
+@enduml

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-025-platform-consent-preference" author="codex">
+        <createTable tableName="platform_consent_preference">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subject_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_allowed" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="analytics_allowed" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="marketing_allowed" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_route" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="policy_version" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="platform_consent_preference"
+                             columnNames="subject_user_id, policy_version"
+                             constraintName="ux_platform_consent_subject_policy"/>
+    </changeSet>
+
+    <changeSet id="feature-025-platform-notification-preference" author="codex">
+        <createTable tableName="platform_notification_preference">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subject_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locale" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="toast_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modal_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offline_popup_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="critical_notifications_required" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="platform_notification_preference"
+                             columnNames="subject_user_id, locale"
+                             constraintName="ux_platform_notification_subject_locale"/>
+    </changeSet>
+
+    <changeSet id="feature-025-platform-diagnostics" author="codex">
+        <createTable tableName="platform_analytics_diagnostic_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="channel_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_code" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_code" type="varchar(96)"/>
+            <column name="source_route" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="correlation_id" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="platform_analytics_diagnostic_event" indexName="ix_platform_analytics_diag_channel_time">
+            <column name="channel_code"/>
+            <column name="occurred_at"/>
+        </createIndex>
+        <createIndex tableName="platform_analytics_diagnostic_event" indexName="ix_platform_analytics_diag_correlation">
+            <column name="correlation_id"/>
+        </createIndex>
+
+        <createTable tableName="platform_i18n_missing_key_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="i18n_key" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locale" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_route" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="component_key" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="environment_code" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="correlation_id" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="platform_i18n_missing_key_event" indexName="ix_platform_i18n_missing_key_locale">
+            <column name="i18n_key"/>
+            <column name="locale"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-025-platform-runtime-config" author="codex">
+        <createTable tableName="platform_runtime_config_snapshot">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="environment_code" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="yandex_metrika_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mindbox_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hybrid_pixel_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="diagnostics_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="config_version" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_from" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="platform_runtime_config_snapshot"
+                             columnNames="environment_code, config_version"
+                             constraintName="ux_platform_runtime_config_env_version"/>
+    </changeSet>
+</databaseChangeLog>

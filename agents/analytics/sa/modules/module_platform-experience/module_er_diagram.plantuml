@@ -1,0 +1,74 @@
+@startuml
+title Module platform-experience - full ER diagram
+
+entity "platform_consent_preference" as consent {
+  * id : uuid <<PK>>
+  --
+  * subject_user_id : varchar(64)
+  * subject_role : varchar(64)
+  * functional_allowed : boolean
+  * analytics_allowed : boolean
+  * marketing_allowed : boolean
+  * source_route : varchar(256)
+  * policy_version : varchar(64)
+  * version : integer
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "platform_notification_preference" as notif {
+  * id : uuid <<PK>>
+  --
+  * subject_user_id : varchar(64)
+  * locale : varchar(16)
+  * toast_enabled : boolean
+  * modal_enabled : boolean
+  * offline_popup_enabled : boolean
+  * critical_notifications_required : boolean
+  * version : integer
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "platform_analytics_diagnostic_event" as diag {
+  * id : uuid <<PK>>
+  --
+  * channel_code : varchar(64)
+  * event_code : varchar(96)
+  * event_status : varchar(32)
+  * reason_code : varchar(96)
+  * source_route : varchar(256)
+  * subject_role : varchar(64)
+  * correlation_id : varchar(96)
+  * occurred_at : timestamptz
+}
+
+entity "platform_i18n_missing_key_event" as missing {
+  * id : uuid <<PK>>
+  --
+  * i18n_key : varchar(256)
+  * locale : varchar(16)
+  * source_route : varchar(256)
+  * component_key : varchar(128)
+  * environment_code : varchar(32)
+  * correlation_id : varchar(96)
+  * occurred_at : timestamptz
+}
+
+entity "platform_runtime_config_snapshot" as config {
+  * id : uuid <<PK>>
+  --
+  * environment_code : varchar(32)
+  * yandex_metrika_enabled : boolean
+  * mindbox_enabled : boolean
+  * hybrid_pixel_enabled : boolean
+  * diagnostics_enabled : boolean
+  * config_version : varchar(64)
+  * effective_from : timestamptz
+  * created_at : timestamptz
+}
+
+consent ||--o{ diag : "consent gates diagnostics"
+notif ||--o{ missing : "locale preference informs diagnostics"
+config ||--o{ diag : "published config creates diagnostics context"
+@enduml
