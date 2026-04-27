@@ -1,0 +1,70 @@
+@startuml
+title Feature 021: employee claims sequence
+
+actor "Сотрудник сервиса" as Employee
+actor "Супервизор сервиса" as Supervisor
+participant "web-shell\nemployee claims routes" as FE
+participant "EmployeeController" as Controller
+participant "EmployeeService" as Service
+database "employee_claim_*" as DB
+participant "Order module" as Order
+participant "WMS/1C" as WMS
+participant "Payment/Finance" as Finance
+participant "Customer support" as Support
+
+Employee -> FE : открывает /employee/submit-claim
+FE -> Controller : POST /api/employee/submit-claim\nIdempotency-Key
+Controller -> Service : submitEmployeeClaim(userContext, request, key)
+Service -> Service : validate employee role, supportReasonCode,\norder, items, limit and idempotency
+Service -> Order : resolve order, items, claimAvailable,\nclaim/payment/bonus context
+Order --> Service : order claim context
+Service -> DB : insert employee_claim_case,\nitems, attachments, audit event
+Service --> Controller : EmployeeClaimDetailsResponse
+Controller --> FE : 201/200 details with STR_MNEMO_* codes
+FE --> Employee : показывает claimNumber, SLA,\ncompensation preview, next actions
+
+Employee -> FE : открывает /employee/claims-history
+FE -> Controller : GET /api/employee/claims?filters
+Controller -> Service : searchEmployeeClaims(userContext, filters)
+Service -> Service : validate filters and scope
+Service -> DB : select page by status/SLA/assignee/query
+Service -> DB : insert EMPLOYEE_CLAIM_LIST_VIEWED audit
+Service --> Controller : EmployeeClaimPageResponse
+Controller --> FE : page with masked contacts and actions
+
+Employee -> FE : открывает /employee/claims-history/{claimId}
+FE -> Controller : GET /api/employee/claims/{claimId}?supportReasonCode
+Controller -> Service : getEmployeeClaimDetails(userContext, claimId, reason)
+Service -> DB : load case, items, attachments,\nroute tasks, audit
+Service -> Order : refresh order/claim links if needed
+Service -> DB : insert EMPLOYEE_CLAIM_DETAILS_VIEWED audit
+Service --> Controller : EmployeeClaimDetailsResponse
+Controller --> FE : details
+
+Employee -> FE : выполняет transition\nSEND_TO_WAREHOUSE_REVIEW
+FE -> Controller : POST /api/employee/claims/{claimId}/transitions
+Controller -> Service : transitionEmployeeClaim(...)
+Service -> Service : validate transition availability
+Service -> WMS : create warehouse review task
+WMS --> Service : warehouse task id and status
+Service -> DB : update route task, status,\naudit event
+Service --> Controller : updated details
+
+Employee -> FE : выполняет transition\nSEND_TO_FINANCE_REFUND
+FE -> Controller : POST /api/employee/claims/{claimId}/transitions
+Service -> Finance : create refund/compensation task
+Finance --> Service : finance task id and status
+Service -> Support : publish customer support nextAction\nwith publicReasonMnemonic
+Service -> DB : update status and audit
+Service --> FE : updated details
+
+alt compensation exceeds employee limit
+  Supervisor -> FE : открывает details
+  FE -> Controller : POST /api/employee/claims/{claimId}/transitions\nAPPROVE_COMPENSATION
+  Controller -> Service : transitionEmployeeClaim(supervisor)
+  Service -> DB : record supervisor approval
+  Service -> Finance : create approved finance task
+  Service --> FE : updated details
+end
+
+@enduml

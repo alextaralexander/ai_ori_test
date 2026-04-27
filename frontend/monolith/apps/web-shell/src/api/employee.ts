@@ -174,6 +174,77 @@ export interface EmployeeLinkedEventResponse {
   messageCode: string;
 }
 
+export interface EmployeeClaimItemResponse {
+  sku: string;
+  productCode: string;
+  productName: string;
+  quantity: number;
+  problemType: string;
+  requestedResolution: string;
+  approvedResolution: string;
+  compensationAmount: string;
+}
+
+export interface EmployeeClaimRouteTaskResponse {
+  taskId: string;
+  taskType: string;
+  status: string;
+  assigneeRole: string;
+  assigneeId?: string;
+  dueAt: string;
+  completedAt?: string;
+  resultCode: string;
+}
+
+export interface EmployeeClaimDetailsResponse {
+  claimId: string;
+  claimNumber: string;
+  orderNumber: string;
+  customerId: string;
+  partnerId: string;
+  status: string;
+  slaState: string;
+  slaDueAt: string;
+  requestedResolution: string;
+  approvedResolution: string;
+  compensationAmount: string;
+  currencyCode: string;
+  publicReasonMnemonic: string;
+  supervisorRequired: boolean;
+  items: EmployeeClaimItemResponse[];
+  attachments: Array<{ attachmentId: string; filename: string; mimeType: string; sizeBytes: number; accessPolicy: string }>;
+  routeTasks: EmployeeClaimRouteTaskResponse[];
+  auditEvents: Array<{ auditEventId: string; actorUserId: string; actorRole: string; actionType: string; supportReasonCode: string; sourceRoute: string; occurredAt: string }>;
+  availableActions: string[];
+}
+
+export interface EmployeeClaimSummaryResponse {
+  claimId: string;
+  claimNumber: string;
+  orderNumber: string;
+  customerOrPartnerLabel: string;
+  maskedContact: string;
+  status: string;
+  slaState: string;
+  slaDueAt: string;
+  resolutionType: string;
+  compensationAmount: string;
+  currencyCode: string;
+  assignee: string;
+  responsibleRole: string;
+  updatedAt: string;
+  availableActions: string[];
+}
+
+export interface EmployeeClaimPageResponse {
+  items: EmployeeClaimSummaryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  auditRecorded: boolean;
+  availableFilters: string[];
+}
+
 interface ErrorResponse {
   code: string;
 }
@@ -271,4 +342,43 @@ export async function getEmployeeOrderHistory(params: URLSearchParams): Promise<
 export async function getEmployeeOrderHistoryDetails(orderId: string): Promise<EmployeeOrderHistoryDetailsResponse> {
   const response = await fetch(`/api/employee/order-history/${encodeURIComponent(orderId)}`, { headers: authHeaders() });
   return readJson<EmployeeOrderHistoryDetailsResponse>(response);
+}
+
+export async function submitEmployeeClaim(orderNumber: string, supportReasonCode: string): Promise<EmployeeClaimDetailsResponse> {
+  const response = await fetch('/api/employee/submit-claim', {
+    method: 'POST',
+    headers: jsonHeaders(`employee-claim-${orderNumber}`),
+    body: JSON.stringify({
+      customerId: 'CUST-021-001',
+      partnerId: 'PART-021-001',
+      orderNumber,
+      sourceChannel: 'PHONE',
+      supportReasonCode,
+      requestedResolution: 'REFUND',
+      comment: 'STR_MNEMO_EMPLOYEE_CLAIM_CREATED',
+      items: [{ sku: 'SKU-021-001', productCode: 'PRD-021-001', quantity: 1, problemType: 'DAMAGED_ITEM', requestedResolution: 'REFUND' }],
+      attachments: [{ fileId: 'ATT-021-001', filename: 'claim-photo.jpg', mimeType: 'image/jpeg', sizeBytes: 512000, accessPolicy: 'INTERNAL' }],
+    }),
+  });
+  return readJson<EmployeeClaimDetailsResponse>(response);
+}
+
+export async function getEmployeeClaims(params: URLSearchParams): Promise<EmployeeClaimPageResponse> {
+  const query = new URLSearchParams(params);
+  const response = await fetch(`/api/employee/claims?${query.toString()}`, { headers: authHeaders() });
+  return readJson<EmployeeClaimPageResponse>(response);
+}
+
+export async function getEmployeeClaimDetails(claimId: string): Promise<EmployeeClaimDetailsResponse> {
+  const response = await fetch(`/api/employee/claims/${encodeURIComponent(claimId)}?supportReasonCode=EMPLOYEE_CLAIM_VIEW`, { headers: authHeaders() });
+  return readJson<EmployeeClaimDetailsResponse>(response);
+}
+
+export async function transitionEmployeeClaim(claimId: string, transitionCode: string): Promise<EmployeeClaimDetailsResponse> {
+  const response = await fetch(`/api/employee/claims/${encodeURIComponent(claimId)}/transitions`, {
+    method: 'POST',
+    headers: jsonHeaders(`employee-claim-transition-${claimId}-${transitionCode}`),
+    body: JSON.stringify({ transitionCode, supportReasonCode: transitionCode === 'APPROVE_COMPENSATION' ? 'SUPERVISOR_REVIEW' : 'CUSTOMER_CALL', approvedCompensationAmount: transitionCode === 'APPROVE_COMPENSATION' ? 2500 : 1250 }),
+  });
+  return readJson<EmployeeClaimDetailsResponse>(response);
 }

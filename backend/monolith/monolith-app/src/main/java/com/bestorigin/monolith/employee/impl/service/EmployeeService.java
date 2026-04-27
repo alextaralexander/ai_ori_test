@@ -1,6 +1,10 @@
 package com.bestorigin.monolith.employee.impl.service;
 
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeConfirmOrderRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimDetailsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimPageResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimTransitionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderCreateRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderResponse;
@@ -34,4 +38,12 @@ public interface EmployeeService {
     EmployeeOrderHistoryPageResponse orderHistory(String userContext, EmployeeOrderHistoryFilterRequest request);
 
     EmployeeOrderHistoryDetailsResponse orderHistoryDetails(String userContext, String orderId);
+
+    EmployeeClaimDetailsResponse submitClaim(String userContext, EmployeeClaimCreateRequest request, String idempotencyKey);
+
+    EmployeeClaimPageResponse claims(String userContext, String claimStatus, String dateFrom, String dateTo, String slaState, String responsibleRole, String assigneeId, String resolutionType, String sourceChannel, String warehouseCode, String financeStatus, String query, int page, int size, String sort);
+
+    EmployeeClaimDetailsResponse claimDetails(String userContext, String claimId, String supportReasonCode);
+
+    EmployeeClaimDetailsResponse transitionClaim(String userContext, String claimId, EmployeeClaimTransitionRequest request, String idempotencyKey);
 }

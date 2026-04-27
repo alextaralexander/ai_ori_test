@@ -106,9 +106,99 @@ entity employee_order_history_audit_event {
   occurred_at : timestamptz
 }
 
+entity employee_claim_case {
+  * claim_id : varchar(64)
+  --
+  claim_number : varchar(64)
+  order_id : varchar(64)
+  order_number : varchar(64)
+  customer_id : varchar(64)
+  partner_id : varchar(64)
+  source_channel : varchar(32)
+  support_reason_code : varchar(64)
+  status : varchar(32)
+  sla_state : varchar(32)
+  sla_due_at : timestamptz
+  breached_at : timestamptz
+  requested_resolution : varchar(32)
+  approved_resolution : varchar(32)
+  compensation_amount : numeric(19,2)
+  currency_code : char(3)
+  public_reason_mnemonic : varchar(128)
+  responsible_role : varchar(64)
+  assignee_id : varchar(64)
+  supervisor_required : boolean
+  idempotency_key : varchar(128)
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity employee_claim_item {
+  * claim_item_id : varchar(64)
+  --
+  claim_id : varchar(64)
+  sku : varchar(128)
+  product_code : varchar(128)
+  product_name_snapshot : varchar(512)
+  quantity : integer
+  problem_type : varchar(64)
+  requested_resolution : varchar(32)
+  approved_resolution : varchar(32)
+  unit_price : numeric(19,2)
+  compensation_amount : numeric(19,2)
+  claim_available : boolean
+}
+
+entity employee_claim_attachment {
+  * attachment_id : varchar(64)
+  --
+  claim_id : varchar(64)
+  filename : varchar(255)
+  mime_type : varchar(128)
+  size_bytes : bigint
+  uploaded_by : varchar(64)
+  uploaded_at : timestamptz
+  access_policy : varchar(64)
+  public_token : varchar(128)
+}
+
+entity employee_claim_route_task {
+  * task_id : varchar(64)
+  --
+  claim_id : varchar(64)
+  task_type : varchar(32)
+  external_task_id : varchar(128)
+  status : varchar(32)
+  assignee_role : varchar(64)
+  assignee_id : varchar(64)
+  due_at : timestamptz
+  completed_at : timestamptz
+  result_code : varchar(64)
+  result_payload_json : jsonb
+}
+
+entity employee_claim_audit_event {
+  * audit_event_id : varchar(64)
+  --
+  claim_id : varchar(64)
+  order_id : varchar(64)
+  actor_user_id : varchar(64)
+  actor_role : varchar(64)
+  action_type : varchar(64)
+  support_reason_code : varchar(64)
+  changed_fields_json : jsonb
+  source_route : varchar(255)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
 employee_support_session ||--o{ employee_operator_order
 employee_support_session ||--o{ employee_support_action
 employee_support_session ||--o{ employee_audit_event
 employee_order_history_snapshot ||--o{ employee_order_history_item_snapshot
 employee_order_history_snapshot ||--o{ employee_order_history_audit_event
+employee_claim_case ||--o{ employee_claim_item
+employee_claim_case ||--o{ employee_claim_attachment
+employee_claim_case ||--o{ employee_claim_route_task
+employee_claim_case ||--o{ employee_claim_audit_event
 @enduml

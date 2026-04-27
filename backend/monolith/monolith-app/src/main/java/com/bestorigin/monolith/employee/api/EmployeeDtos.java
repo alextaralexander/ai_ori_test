@@ -284,6 +284,148 @@ public final class EmployeeDtos {
     ) {
     }
 
+    public record EmployeeClaimCreateRequest(
+            String customerId,
+            String partnerId,
+            String orderId,
+            String orderNumber,
+            String sourceChannel,
+            String supportReasonCode,
+            String requestedResolution,
+            String comment,
+            List<EmployeeClaimItemRequest> items,
+            List<EmployeeClaimAttachmentRequest> attachments
+    ) {
+    }
+
+    public record EmployeeClaimItemRequest(
+            String sku,
+            String productCode,
+            int quantity,
+            String problemType,
+            String requestedResolution,
+            String internalComment
+    ) {
+    }
+
+    public record EmployeeClaimAttachmentRequest(
+            String fileId,
+            String filename,
+            String mimeType,
+            long sizeBytes,
+            String accessPolicy
+    ) {
+    }
+
+    public record EmployeeClaimTransitionRequest(
+            String transitionCode,
+            String supportReasonCode,
+            String assigneeId,
+            String resultCode,
+            String comment,
+            BigDecimal approvedCompensationAmount
+    ) {
+    }
+
+    public record EmployeeClaimPageResponse(
+            List<EmployeeClaimSummaryResponse> items,
+            int page,
+            int size,
+            long totalElements,
+            boolean auditRecorded,
+            List<String> availableFilters
+    ) {
+    }
+
+    public record EmployeeClaimSummaryResponse(
+            String claimId,
+            String claimNumber,
+            String orderNumber,
+            String customerOrPartnerLabel,
+            String maskedContact,
+            String status,
+            String slaState,
+            String slaDueAt,
+            String resolutionType,
+            BigDecimal compensationAmount,
+            String currencyCode,
+            String assignee,
+            String responsibleRole,
+            String updatedAt,
+            List<String> availableActions
+    ) {
+    }
+
+    public record EmployeeClaimDetailsResponse(
+            String claimId,
+            String claimNumber,
+            String orderNumber,
+            String customerId,
+            String partnerId,
+            String status,
+            String slaState,
+            String slaDueAt,
+            String requestedResolution,
+            String approvedResolution,
+            BigDecimal compensationAmount,
+            String currencyCode,
+            String publicReasonMnemonic,
+            boolean supervisorRequired,
+            List<EmployeeClaimItemResponse> items,
+            List<EmployeeClaimAttachmentResponse> attachments,
+            List<EmployeeClaimRouteTaskResponse> routeTasks,
+            List<EmployeeClaimAuditEventResponse> auditEvents,
+            List<String> availableActions
+    ) {
+    }
+
+    public record EmployeeClaimItemResponse(
+            String sku,
+            String productCode,
+            String productName,
+            int quantity,
+            String problemType,
+            String requestedResolution,
+            String approvedResolution,
+            BigDecimal compensationAmount
+    ) {
+    }
+
+    public record EmployeeClaimAttachmentResponse(
+            String attachmentId,
+            String filename,
+            String mimeType,
+            long sizeBytes,
+            String uploadedBy,
+            String uploadedAt,
+            String accessPolicy
+    ) {
+    }
+
+    public record EmployeeClaimRouteTaskResponse(
+            String taskId,
+            String taskType,
+            String status,
+            String assigneeRole,
+            String assigneeId,
+            String dueAt,
+            String completedAt,
+            String resultCode
+    ) {
+    }
+
+    public record EmployeeClaimAuditEventResponse(
+            String auditEventId,
+            String actorUserId,
+            String actorRole,
+            String actionType,
+            String supportReasonCode,
+            String sourceRoute,
+            String correlationId,
+            String occurredAt
+    ) {
+    }
+
     public record EmployeeErrorResponse(
             String code,
             List<EmployeeWarningResponse> details,

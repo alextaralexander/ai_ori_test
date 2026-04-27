@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture with employee order history
+title Best Ori Gin monolith architecture with employee order history and claims
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
   [Catalog UI]
@@ -8,6 +8,7 @@ package "frontend/monolith apps/web-shell" {
   [Partner UI]
   [EmployeeWorkspace UI]
   [EmployeeOrderHistory UI]
+  [EmployeeClaims UI]
 }
 package "backend/monolith/monolith-app" {
   [public-content]
@@ -31,6 +32,8 @@ cloud "Claims" as claims
 [EmployeeWorkspace UI] --> [employee] : /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history
 [EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history/{orderId}
+[EmployeeClaims UI] --> [employee] : /api/employee/submit-claim
+[EmployeeClaims UI] --> [employee] : /api/employee/claims, /claims/{claimId}, /claims/{claimId}/transitions
 [employee] --> [order] : order read links
 [employee] --> [cart] : active cart/operator order context
 [employee] --> [profile] : masked customer/partner profile
@@ -38,6 +41,9 @@ cloud "Claims" as claims
 [employee] --> claims : claim ids and claim deep links
 [employee] --> pay : payment event ids/statuses
 [employee] --> wms : WMS batch and fulfillment events
+[employee] --> claims : employee claim creation/claim context
+[employee] --> pay : refund/compensation tasks
+[employee] --> wms : warehouse claim review tasks
 [order] --> pay
 [order] --> delivery
 [order] --> wms

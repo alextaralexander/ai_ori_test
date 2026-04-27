@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <title>Feature 021. История претензий сотрудника</title>
+  <desc>Схематичный wireframe маршрута /employee/claims-history без визуальных стилей.</desc>
+  <rect x="20" y="20" width="1160" height="720" fill="white" stroke="black"/>
+  <text x="48" y="60" font-family="Arial" font-size="24">/employee/claims-history — история employee claims</text>
+  <rect x="48" y="90" width="1104" height="86" fill="none" stroke="black"/>
+  <text x="70" y="124" font-family="Arial" font-size="17">Фильтры: статус, период, SLA, ответственный, тип решения, источник, склад, financeStatus, поиск</text>
+  <text x="70" y="152" font-family="Arial" font-size="15">Состояния: loading, empty, forbidden, validation error через i18n</text>
+  <rect x="48" y="200" width="1104" height="64" fill="none" stroke="black"/>
+  <text x="70" y="238" font-family="Arial" font-size="17">SLA tabs: все / просроченные / на риске / требуют супервизора / склад / финансы / support</text>
+  <rect x="48" y="286" width="1104" height="330" fill="none" stroke="black"/>
+  <line x1="48" y1="338" x2="1152" y2="338" stroke="black"/>
+  <line x1="210" y1="286" x2="210" y2="616" stroke="black"/>
+  <line x1="370" y1="286" x2="370" y2="616" stroke="black"/>
+  <line x1="530" y1="286" x2="530" y2="616" stroke="black"/>
+  <line x1="690" y1="286" x2="690" y2="616" stroke="black"/>
+  <line x1="850" y1="286" x2="850" y2="616" stroke="black"/>
+  <line x1="1010" y1="286" x2="1010" y2="616" stroke="black"/>
+  <text x="66" y="320" font-family="Arial" font-size="14">Claim</text>
+  <text x="228" y="320" font-family="Arial" font-size="14">Заказ</text>
+  <text x="388" y="320" font-family="Arial" font-size="14">Клиент/партнер</text>
+  <text x="548" y="320" font-family="Arial" font-size="14">Статус/SLA</text>
+  <text x="708" y="320" font-family="Arial" font-size="14">Компенсация</text>
+  <text x="868" y="320" font-family="Arial" font-size="14">Ответственный</text>
+  <text x="1028" y="320" font-family="Arial" font-size="14">Действия</text>
+  <text x="66" y="382" font-family="Arial" font-size="14">BOG-CLM-021-001</text>
+  <text x="228" y="382" font-family="Arial" font-size="14">BOG-ORD-021-001</text>
+  <text x="388" y="382" font-family="Arial" font-size="14">masked contact</text>
+  <text x="548" y="382" font-family="Arial" font-size="14">IN_REVIEW / AT_RISK</text>
+  <text x="708" y="382" font-family="Arial" font-size="14">1250 RUB</text>
+  <text x="868" y="382" font-family="Arial" font-size="14">service agent</text>
+  <text x="1028" y="382" font-family="Arial" font-size="14">open / route</text>
+  <rect x="48" y="642" width="1104" height="48" fill="none" stroke="black"/>
+  <text x="70" y="672" font-family="Arial" font-size="15">Пагинация, сортировка, сохранение фильтров, audit события просмотра списка</text>
+</svg>

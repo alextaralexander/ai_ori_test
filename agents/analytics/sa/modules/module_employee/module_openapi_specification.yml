@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Best Ori Gin Employee API
-  version: 0.20.0
-  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа и истории заказов сотрудника.
+  version: 0.21.0
+  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа, истории заказов сотрудника и employee-претензий.
 servers:
   - url: /api/employee
 paths:
@@ -86,6 +86,69 @@ paths:
         '200': { description: Расширенная карточка заказа }
         '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
         '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
+  /submit-claim:
+    post:
+      summary: Создать претензию сотрудником от имени клиента или партнера
+      parameters:
+        - { in: header, name: Idempotency-Key, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeClaimCreateRequest' }
+      responses:
+        '201': { description: Создана employee-претензия }
+        '200': { description: Возвращена претензия для того же idempotency key }
+        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_VALIDATION_FAILED }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+  /claims:
+    get:
+      summary: Получить историю employee claims
+      parameters:
+        - { in: query, name: claimStatus, schema: { type: string } }
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo, schema: { type: string, format: date } }
+        - { in: query, name: slaState, schema: { type: string } }
+        - { in: query, name: responsibleRole, schema: { type: string } }
+        - { in: query, name: assigneeId, schema: { type: string } }
+        - { in: query, name: resolutionType, schema: { type: string } }
+        - { in: query, name: sourceChannel, schema: { type: string } }
+        - { in: query, name: warehouseCode, schema: { type: string } }
+        - { in: query, name: financeStatus, schema: { type: string } }
+        - { in: query, name: query, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, default: 0 } }
+        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
+        - { in: query, name: sort, schema: { type: string } }
+      responses:
+        '200': { description: Страница employee claims }
+        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_FILTER_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+  /claims/{claimId}:
+    get:
+      summary: Получить детальную карточку employee claim
+      parameters:
+        - { in: path, name: claimId, required: true, schema: { type: string } }
+        - { in: query, name: supportReasonCode, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Детальная карточка employee claim }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND }
+  /claims/{claimId}/transitions:
+    post:
+      summary: Выполнить transition employee claim
+      parameters:
+        - { in: path, name: claimId, required: true, schema: { type: string } }
+        - { in: header, name: Idempotency-Key, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeClaimTransitionRequest' }
+      responses:
+        '200': { description: Обновленная карточка employee claim }
+        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_TRANSITION_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND }
 components:
   schemas:
     EmployeeOperatorOrderCreateRequest:
@@ -131,4 +194,79 @@ components:
             wmsEvents: { type: array, items: { type: object } }
             supportCaseIds: { type: array, items: { type: string } }
             claimIds: { type: array, items: { type: string } }
+            auditEvents: { type: array, items: { type: object } }
+    EmployeeClaimCreateRequest:
+      type: object
+      required: [supportReasonCode, orderNumber, items, requestedResolution]
+      properties:
+        customerId: { type: string }
+        partnerId: { type: string }
+        orderId: { type: string }
+        orderNumber: { type: string }
+        sourceChannel: { type: string }
+        supportReasonCode: { type: string }
+        requestedResolution: { type: string }
+        comment: { type: string }
+        attachments: { type: array, items: { type: object } }
+        items: { type: array, items: { $ref: '#/components/schemas/EmployeeClaimItemRequest' } }
+    EmployeeClaimItemRequest:
+      type: object
+      required: [sku, productCode, quantity, problemType, requestedResolution]
+      properties:
+        sku: { type: string }
+        productCode: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        problemType: { type: string }
+        requestedResolution: { type: string }
+        internalComment: { type: string }
+    EmployeeClaimTransitionRequest:
+      type: object
+      required: [transitionCode, supportReasonCode]
+      properties:
+        transitionCode: { type: string }
+        supportReasonCode: { type: string }
+        assigneeId: { type: string }
+        resultCode: { type: string }
+        comment: { type: string }
+        approvedCompensationAmount: { type: number }
+    EmployeeClaimPageResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/EmployeeClaimSummaryResponse' } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+    EmployeeClaimSummaryResponse:
+      type: object
+      properties:
+        claimId: { type: string }
+        claimNumber: { type: string }
+        orderNumber: { type: string }
+        customerOrPartnerLabel: { type: string }
+        maskedContact: { type: string }
+        status: { type: string }
+        slaState: { type: string }
+        slaDueAt: { type: string, format: date-time }
+        resolutionType: { type: string }
+        compensationAmount: { type: number }
+        currencyCode: { type: string }
+        assignee: { type: string }
+        responsibleRole: { type: string }
+        updatedAt: { type: string, format: date-time }
+        availableActions: { type: array, items: { type: string } }
+    EmployeeClaimDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EmployeeClaimSummaryResponse'
+        - type: object
+          properties:
+            customerId: { type: string }
+            partnerId: { type: string }
+            requestedResolution: { type: string }
+            approvedResolution: { type: string }
+            publicReasonMnemonic: { type: string }
+            supervisorRequired: { type: boolean }
+            items: { type: array, items: { type: object } }
+            attachments: { type: array, items: { type: object } }
+            routeTasks: { type: array, items: { type: object } }
             auditEvents: { type: array, items: { type: object } }

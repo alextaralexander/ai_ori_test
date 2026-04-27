@@ -1,6 +1,10 @@
 package com.bestorigin.monolith.employee.impl.controller;
 
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeConfirmOrderRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimDetailsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimPageResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimTransitionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeErrorResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderCreateRequest;
@@ -104,6 +108,43 @@ public class EmployeeController {
     @GetMapping("/order-history/{orderId}")
     public EmployeeOrderHistoryDetailsResponse orderHistoryDetails(@RequestHeader HttpHeaders headers, @PathVariable String orderId) {
         return service.orderHistoryDetails(userContext(headers), orderId);
+    }
+
+    @PostMapping("/submit-claim")
+    public ResponseEntity<EmployeeClaimDetailsResponse> submitClaim(@RequestHeader HttpHeaders headers, @RequestBody EmployeeClaimCreateRequest request) {
+        EmployeeClaimDetailsResponse response = service.submitClaim(userContext(headers), request, idempotencyKey(headers));
+        HttpStatus status = idempotencyKey(headers).contains("IDEMPOTENT") ? HttpStatus.OK : HttpStatus.CREATED;
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @GetMapping("/claims")
+    public EmployeeClaimPageResponse claims(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String claimStatus,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) String slaState,
+            @RequestParam(required = false) String responsibleRole,
+            @RequestParam(required = false) String assigneeId,
+            @RequestParam(required = false) String resolutionType,
+            @RequestParam(required = false) String sourceChannel,
+            @RequestParam(required = false) String warehouseCode,
+            @RequestParam(required = false) String financeStatus,
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "slaDueAt,asc") String sort) {
+        return service.claims(userContext(headers), claimStatus, dateFrom, dateTo, slaState, responsibleRole, assigneeId, resolutionType, sourceChannel, warehouseCode, financeStatus, query, page, size, sort);
+    }
+
+    @GetMapping("/claims/{claimId}")
+    public EmployeeClaimDetailsResponse claimDetails(@RequestHeader HttpHeaders headers, @PathVariable String claimId, @RequestParam(required = false) String supportReasonCode) {
+        return service.claimDetails(userContext(headers), claimId, supportReasonCode == null ? "EMPLOYEE_CLAIM_VIEW" : supportReasonCode);
+    }
+
+    @PostMapping("/claims/{claimId}/transitions")
+    public EmployeeClaimDetailsResponse transitionClaim(@RequestHeader HttpHeaders headers, @PathVariable String claimId, @RequestBody EmployeeClaimTransitionRequest request) {
+        return service.transitionClaim(userContext(headers), claimId, request, idempotencyKey(headers));
     }
 
     @ExceptionHandler(EmployeeAccessDeniedException.class)

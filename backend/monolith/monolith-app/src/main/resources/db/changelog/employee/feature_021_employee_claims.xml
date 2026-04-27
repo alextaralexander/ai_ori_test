@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-021-employee-claim-case" author="codex">
+        <createTable tableName="employee_claim_case">
+            <column name="claim_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_number" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="varchar(64)"/>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="varchar(64)"/>
+            <column name="partner_id" type="varchar(64)"/>
+            <column name="source_channel" type="varchar(32)"/>
+            <column name="support_reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sla_state" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sla_due_at" type="timestamp with time zone"/>
+            <column name="breached_at" type="timestamp with time zone"/>
+            <column name="requested_resolution" type="varchar(32)"/>
+            <column name="approved_resolution" type="varchar(32)"/>
+            <column name="compensation_amount" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="char(3)" defaultValue="RUB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="public_reason_mnemonic" type="varchar(128)"/>
+            <column name="responsible_role" type="varchar(64)"/>
+            <column name="assignee_id" type="varchar(64)"/>
+            <column name="supervisor_required" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="varchar(128)"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addCheckConstraint tableName="employee_claim_case" constraintName="chk_employee_claim_case_owner" checkConstraint="customer_id is not null or partner_id is not null"/>
+        <createIndex tableName="employee_claim_case" indexName="idx_employee_claim_case_queue">
+            <column name="status"/>
+            <column name="sla_state"/>
+            <column name="sla_due_at"/>
+        </createIndex>
+        <createIndex tableName="employee_claim_case" indexName="idx_employee_claim_case_order_number">
+            <column name="order_number"/>
+        </createIndex>
+        <createIndex tableName="employee_claim_case" indexName="idx_employee_claim_case_customer">
+            <column name="customer_id"/>
+        </createIndex>
+        <createIndex tableName="employee_claim_case" indexName="idx_employee_claim_case_partner">
+            <column name="partner_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-021-employee-claim-children" author="codex">
+        <createTable tableName="employee_claim_item">
+            <column name="claim_item_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_code" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_name_snapshot" type="varchar(512)"/>
+            <column name="quantity" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="problem_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_resolution" type="varchar(32)"/>
+            <column name="approved_resolution" type="varchar(32)"/>
+            <column name="unit_price" type="numeric(19,2)" defaultValueNumeric="0.00"/>
+            <column name="compensation_amount" type="numeric(19,2)" defaultValueNumeric="0.00"/>
+            <column name="claim_available" type="boolean" defaultValueBoolean="true"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_claim_item" baseColumnNames="claim_id" referencedTableName="employee_claim_case" referencedColumnNames="claim_id" constraintName="fk_employee_claim_item_case"/>
+        <addCheckConstraint tableName="employee_claim_item" constraintName="chk_employee_claim_item_quantity" checkConstraint="quantity &gt; 0"/>
+
+        <createTable tableName="employee_claim_attachment">
+            <column name="attachment_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="filename" type="varchar(255)"/>
+            <column name="mime_type" type="varchar(128)"/>
+            <column name="size_bytes" type="bigint"/>
+            <column name="uploaded_by" type="varchar(64)"/>
+            <column name="uploaded_at" type="timestamp with time zone"/>
+            <column name="access_policy" type="varchar(64)"/>
+            <column name="public_token" type="varchar(128)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_claim_attachment" baseColumnNames="claim_id" referencedTableName="employee_claim_case" referencedColumnNames="claim_id" constraintName="fk_employee_claim_attachment_case"/>
+
+        <createTable tableName="employee_claim_route_task">
+            <column name="task_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_type" type="varchar(32)"/>
+            <column name="external_task_id" type="varchar(128)"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="assignee_role" type="varchar(64)"/>
+            <column name="assignee_id" type="varchar(64)"/>
+            <column name="due_at" type="timestamp with time zone"/>
+            <column name="completed_at" type="timestamp with time zone"/>
+            <column name="result_code" type="varchar(64)"/>
+            <column name="result_payload_json" type="jsonb"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_claim_route_task" baseColumnNames="claim_id" referencedTableName="employee_claim_case" referencedColumnNames="claim_id" constraintName="fk_employee_claim_route_task_case"/>
+
+        <createTable tableName="employee_claim_audit_event">
+            <column name="audit_event_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="varchar(64)"/>
+            <column name="actor_user_id" type="varchar(64)"/>
+            <column name="actor_role" type="varchar(64)"/>
+            <column name="action_type" type="varchar(64)"/>
+            <column name="support_reason_code" type="varchar(64)"/>
+            <column name="changed_fields_json" type="jsonb"/>
+            <column name="source_route" type="varchar(255)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_claim_audit_event" baseColumnNames="claim_id" referencedTableName="employee_claim_case" referencedColumnNames="claim_id" constraintName="fk_employee_claim_audit_event_case"/>
+    </changeSet>
+</databaseChangeLog>

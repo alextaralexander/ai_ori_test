@@ -14,8 +14,19 @@
 - `employee_order_history_item_snapshot` хранит позиции заказа для employee details: SKU, название, количество, цены, promo, bonus points и reserve status.
 - `employee_order_history_audit_event` хранит audit просмотров списка, открытия деталей и deep links: actorUserId, actorRole, actionType, supportReasonCode, sourceRoute, metadata и occurredAt.
 
+## Feature 021 entities
+- `employee_claim_case` хранит operator-facing претензию: claim/order/customer/partner identifiers, source channel, support reason, status, SLA, requested/approved resolution, compensation, public mnemonic, responsible role, assignee, supervisor flag, idempotency key и технические даты.
+- `employee_claim_item` хранит позиции претензии: SKU, productCode, productName snapshot, quantity, problem type, requested/approved resolution, unit price, compensation amount и claimAvailable snapshot.
+- `employee_claim_attachment` хранит metadata вложений: filename, mimeType, size, uploadedBy, uploadedAt, accessPolicy и public token без приватных S3/MinIO paths.
+- `employee_claim_route_task` хранит маршрутные задачи склада, финансов, customer support и supervisor approval: task type, external task id, status, assignee, due/completed dates, result code и result payload.
+- `employee_claim_audit_event` хранит audit employee-действий по претензии: actor, role, action type, support reason, changed fields, source route, correlation id и occurredAt.
+
 ## Ограничения и индексы
-`employee_order_history_snapshot.order_number` уникален. Для списка требуются индексы по `customer_id`, `partner_id`, `created_at`, статусам и GIN-индекс по `problem_flags_json`. Для audit требуются индексы по `order_id`, `actor_user_id` и `occurred_at`. Количество позиции заказа всегда больше нуля.
+`employee_order_history_snapshot.order_number` уникален. Для списка заказов требуются индексы по `customer_id`, `partner_id`, `created_at`, статусам и GIN-индекс по `problem_flags_json`. Для order-history audit требуются индексы по `order_id`, `actor_user_id` и `occurred_at`. Количество позиции заказа всегда больше нуля.
+
+Для feature #21 `employee_claim_case.claim_number` уникален, `idempotency_key` имеет unique partial index для непустых значений, а очередь претензий требует индексы по `(status, sla_state, sla_due_at)`, `order_number`, `customer_id`, `partner_id`, `assignee_id` и `updated_at`. `employee_claim_item.quantity` всегда больше нуля. Для вложений нужен index по `claim_id` и `access_policy`; для route tasks - index по `claim_id`, `(task_type, status)` и `due_at`; для claim audit - index по `claim_id`, `actor_user_id`, `action_type`, `occurred_at` и `correlation_id`.
+
+`employee_claim_case` должен иметь check на обязательность customer или partner контекста. Предопределенные публичные причины хранятся только как `public_reason_mnemonic` в формате `STR_MNEMO_*`; hardcoded пользовательские тексты в backend не допускаются.
 
 ## Package ownership
 DTO и enum-контракты находятся в `api`. Domain snapshot и repository interface находятся в `domain`. Liquibase XML находится в `db`/resources changelog employee. Контроллеры, сервисы, validators, exceptions и in-memory repository находятся в role-specific подпакетах `impl`, а не в root `impl`.

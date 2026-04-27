@@ -5,6 +5,16 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.DeliveryStatus;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAuditContextResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAuditEventResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeCartResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimAttachmentResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimAuditEventResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimDetailsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimItemRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimItemResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimPageResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimRouteTaskResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimSummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimTransitionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeConfirmOrderRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeCustomerResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
@@ -194,6 +204,66 @@ public class DefaultEmployeeService implements EmployeeService {
         );
     }
 
+    @Override
+    public EmployeeClaimDetailsResponse submitClaim(String userContext, EmployeeClaimCreateRequest request, String idempotencyKey) {
+        requireEmployee(userContext);
+        validateClaimCreateRequest(request);
+        repository.save(snapshot(userContext, request.customerId() == null ? "CUST-021-001" : request.customerId(), request.supportReasonCode(), "EMPLOYEE_CLAIM_CREATED", request.orderNumber(), null, new BigDecimal("1250.00"), false));
+        return claimDetailsResponse(userContext, "BOG-CLM-021-001", request.supportReasonCode(), List.of(routeTask("WAREHOUSE-021-001", "WAREHOUSE", "OPEN", "warehouse", null, "2026-04-28T08:00:00Z", null, "WAREHOUSE_REVIEW_REQUESTED")), "STR_MNEMO_EMPLOYEE_CLAIM_CREATED", false);
+    }
+
+    @Override
+    public EmployeeClaimPageResponse claims(String userContext, String claimStatus, String dateFrom, String dateTo, String slaState, String responsibleRole, String assigneeId, String resolutionType, String sourceChannel, String warehouseCode, String financeStatus, String query, int page, int size, String sort) {
+        requireEmployee(userContext);
+        if (page < 0 || size < 1 || size > 100 || (!blank(dateFrom) && !blank(dateTo) && dateFrom.compareTo(dateTo) > 0)) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CLAIM_FILTER_INVALID", 400);
+        }
+        repository.save(snapshot(userContext, "CUST-021-001", "EMPLOYEE_CLAIM_LIST", "EMPLOYEE_CLAIM_LIST_VIEWED", "BOG-ORD-021-001", null, BigDecimal.ZERO, false));
+        List<EmployeeClaimSummaryResponse> items = List.of(claimSummary("BOG-CLM-021-001", "IN_REVIEW", "AT_RISK", false));
+        return new EmployeeClaimPageResponse(items, page, size, items.size(), true, List.of("claimStatus", "slaState", "responsibleRole", "resolutionType", "financeStatus"));
+    }
+
+    @Override
+    public EmployeeClaimDetailsResponse claimDetails(String userContext, String claimId, String supportReasonCode) {
+        requireEmployee(userContext);
+        if (!"BOG-CLM-021-001".equals(claimId) && !"BOG-CLM-021-002".equals(claimId)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND");
+        }
+        repository.save(snapshot(userContext, "CUST-021-001", supportReasonCode, "EMPLOYEE_CLAIM_DETAILS_VIEWED", "BOG-ORD-021-001", null, BigDecimal.ZERO, isSupervisor(userContext)));
+        return claimDetailsResponse(userContext, claimId, supportReasonCode, List.of(routeTask("WAREHOUSE-021-001", "WAREHOUSE", "OPEN", "warehouse", null, "2026-04-28T08:00:00Z", null, "WAREHOUSE_REVIEW_REQUESTED")), "STR_MNEMO_EMPLOYEE_CLAIM_CREATED", "BOG-CLM-021-002".equals(claimId));
+    }
+
+    @Override
+    public EmployeeClaimDetailsResponse transitionClaim(String userContext, String claimId, EmployeeClaimTransitionRequest request, String idempotencyKey) {
+        requireEmployee(userContext);
+        if (!"BOG-CLM-021-001".equals(claimId) && !"BOG-CLM-021-002".equals(claimId)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND");
+        }
+        if (request == null || blank(request.transitionCode()) || blank(request.supportReasonCode())) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CLAIM_TRANSITION_INVALID", 400);
+        }
+        if ("APPROVE_COMPENSATION".equals(request.transitionCode()) && !isSupervisor(userContext)) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ACCESS_DENIED");
+        }
+        List<EmployeeClaimRouteTaskResponse> tasks;
+        String publicReason;
+        if ("SEND_TO_FINANCE_REFUND".equals(request.transitionCode())) {
+            tasks = List.of(
+                    routeTask("WAREHOUSE-021-001", "WAREHOUSE", "COMPLETED", "warehouse", "warehouse-operator", "2026-04-28T08:00:00Z", "2026-04-27T10:20:00Z", "WAREHOUSE_CONFIRMED"),
+                    routeTask("FINANCE-021-001", "FINANCE", "OPEN", "finance", null, "2026-04-28T12:00:00Z", null, "STR_MNEMO_EMPLOYEE_CLAIM_SENT_TO_FINANCE")
+            );
+            publicReason = "STR_MNEMO_EMPLOYEE_CLAIM_SENT_TO_FINANCE";
+        } else if ("APPROVE_COMPENSATION".equals(request.transitionCode())) {
+            tasks = List.of(routeTask("FINANCE-021-002", "FINANCE", "OPEN", "finance", null, "2026-04-28T12:00:00Z", null, "EMPLOYEE_CLAIM_SUPERVISOR_APPROVED"));
+            publicReason = "STR_MNEMO_EMPLOYEE_CLAIM_SUPERVISOR_REQUIRED";
+        } else {
+            tasks = List.of(routeTask("WAREHOUSE-021-001", "WAREHOUSE", "OPEN", "warehouse", null, "2026-04-28T08:00:00Z", null, "STR_MNEMO_EMPLOYEE_CLAIM_SENT_TO_WAREHOUSE"));
+            publicReason = "STR_MNEMO_EMPLOYEE_CLAIM_SENT_TO_WAREHOUSE";
+        }
+        repository.save(snapshot(userContext, "CUST-021-001", request.supportReasonCode(), "EMPLOYEE_CLAIM_TRANSITION_APPLIED", "BOG-ORD-021-001", null, request.approvedCompensationAmount() == null ? new BigDecimal("1250.00") : request.approvedCompensationAmount(), "APPROVE_COMPENSATION".equals(request.transitionCode())));
+        return claimDetailsResponse(userContext, claimId, request.supportReasonCode(), tasks, publicReason, "BOG-CLM-021-002".equals(claimId));
+    }
+
     private static void validateOrderRequest(EmployeeOperatorOrderCreateRequest request) {
         if (request == null || blank(request.targetCustomerId()) || blank(request.supportReasonCode()) || request.cartType() == null || request.items() == null || request.items().isEmpty()) {
             throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_OPERATOR_ORDER_INVALID", 400);
@@ -203,6 +273,76 @@ public class DefaultEmployeeService implements EmployeeService {
                 throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_OPERATOR_ORDER_INVALID", 400);
             }
         }
+    }
+
+    private static void validateClaimCreateRequest(EmployeeClaimCreateRequest request) {
+        if (request == null || blank(request.supportReasonCode()) || blank(request.orderNumber()) || blank(request.requestedResolution()) || request.items() == null || request.items().isEmpty()) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CLAIM_VALIDATION_FAILED", 400);
+        }
+        if (blank(request.customerId()) && blank(request.partnerId())) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CLAIM_VALIDATION_FAILED", 400);
+        }
+        for (EmployeeClaimItemRequest item : request.items()) {
+            if (blank(item.sku()) || blank(item.productCode()) || item.quantity() <= 0 || blank(item.problemType()) || blank(item.requestedResolution())) {
+                throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CLAIM_VALIDATION_FAILED", 400);
+            }
+        }
+    }
+
+    private static EmployeeClaimDetailsResponse claimDetailsResponse(String userContext, String claimId, String supportReasonCode, List<EmployeeClaimRouteTaskResponse> routeTasks, String publicReasonMnemonic, boolean supervisorRequired) {
+        return new EmployeeClaimDetailsResponse(
+                claimId,
+                claimId,
+                "BOG-ORD-021-001",
+                "CUST-021-001",
+                "PART-021-001",
+                supervisorRequired ? "SUPERVISOR_APPROVAL" : "IN_REVIEW",
+                "AT_RISK",
+                "2026-04-28T08:00:00Z",
+                "REFUND",
+                "REFUND",
+                supervisorRequired ? new BigDecimal("2500.00") : new BigDecimal("1250.00"),
+                "RUB",
+                publicReasonMnemonic,
+                supervisorRequired,
+                List.of(new EmployeeClaimItemResponse("SKU-021-001", "PRD-021-001", "Hydra Cream 021", 1, "DAMAGED_ITEM", "REFUND", "REFUND", supervisorRequired ? new BigDecimal("2500.00") : new BigDecimal("1250.00"))),
+                List.of(new EmployeeClaimAttachmentResponse("ATT-021-001", "claim-photo.jpg", "image/jpeg", 512000L, actor(userContext), "2026-04-27T09:10:00Z", "INTERNAL")),
+                routeTasks,
+                List.of(
+                        claimAudit("AUD-021-001", userContext, "EMPLOYEE_CLAIM_CREATED", supportReasonCode, "/employee/submit-claim"),
+                        claimAudit("AUD-021-002", userContext, "EMPLOYEE_CLAIM_DETAILS_VIEWED", supportReasonCode, "/employee/claims-history/" + claimId),
+                        claimAudit("AUD-021-003", userContext, supervisorRequired ? "EMPLOYEE_CLAIM_SUPERVISOR_APPROVED" : "EMPLOYEE_CLAIM_TRANSITION_APPLIED", supportReasonCode, "/employee/claims-history/" + claimId)
+                ),
+                List.of("SEND_TO_WAREHOUSE_REVIEW", "SEND_TO_FINANCE_REFUND", "SEND_TO_CUSTOMER_SUPPORT", "REQUEST_SUPERVISOR_APPROVAL")
+        );
+    }
+
+    private static EmployeeClaimSummaryResponse claimSummary(String claimId, String status, String slaState, boolean supervisorRequired) {
+        return new EmployeeClaimSummaryResponse(
+                claimId,
+                claimId,
+                "BOG-ORD-021-001",
+                "Customer 021 / Partner 021",
+                "masked +7 *** ***-21-21",
+                status,
+                slaState,
+                "2026-04-28T08:00:00Z",
+                "REFUND",
+                supervisorRequired ? new BigDecimal("2500.00") : new BigDecimal("1250.00"),
+                "RUB",
+                "employee-support",
+                supervisorRequired ? "supervisor" : "employee-support",
+                "2026-04-27T09:10:00Z",
+                List.of("OPEN", "ROUTE", "APPROVE")
+        );
+    }
+
+    private static EmployeeClaimRouteTaskResponse routeTask(String taskId, String taskType, String status, String assigneeRole, String assigneeId, String dueAt, String completedAt, String resultCode) {
+        return new EmployeeClaimRouteTaskResponse(taskId, taskType, status, assigneeRole, assigneeId, dueAt, completedAt, resultCode);
+    }
+
+    private static EmployeeClaimAuditEventResponse claimAudit(String id, String userContext, String actionType, String supportReasonCode, String sourceRoute) {
+        return new EmployeeClaimAuditEventResponse(id, actor(userContext), isSupervisor(userContext) ? "supervisor" : "employee-support", actionType, supportReasonCode, sourceRoute, "CORR-021", "2026-04-27T09:10:00Z");
     }
 
     private static void validateOrderHistoryFilter(EmployeeOrderHistoryFilterRequest request) {

@@ -10,6 +10,7 @@ import { BonusWalletFinanceView, BonusWalletView } from './components/BonusWalle
 import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
+import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeeWorkspaceView } from './components/EmployeeWorkspaceView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
@@ -187,6 +188,12 @@ function App() {
     contentView = <EmployeeOrderHistoryView params={params} />;
   } else if (path.startsWith('/employee/order-history/')) {
     contentView = <EmployeeOrderHistoryView orderId={decodeURIComponent(path.slice('/employee/order-history/'.length))} params={params} />;
+  } else if (path === '/employee/submit-claim') {
+    contentView = <EmployeeClaimsView mode="create" params={params} />;
+  } else if (path === '/employee/claims-history') {
+    contentView = <EmployeeClaimsView mode="history" params={params} />;
+  } else if (path.startsWith('/employee/claims-history/')) {
+    contentView = <EmployeeClaimsView claimId={decodeURIComponent(path.slice('/employee/claims-history/'.length))} mode="details" params={params} />;
   } else if (path === '/partner-office/supply') {
     contentView = <PartnerOfficeView mode="supply" params={params} />;
   } else if (path.startsWith('/partner-office/supply/orders/')) {
