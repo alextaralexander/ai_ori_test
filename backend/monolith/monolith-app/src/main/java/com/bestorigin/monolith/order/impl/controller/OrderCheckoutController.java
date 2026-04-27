@@ -8,8 +8,11 @@ import com.bestorigin.monolith.order.api.OrderDtos.ConfirmCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.ErrorResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.StartCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.ValidationReasonResponse;
 import com.bestorigin.monolith.order.impl.service.OrderCheckoutAccessDeniedException;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -90,6 +94,33 @@ public class OrderCheckoutController {
     @GetMapping("/orders/{orderNumber}")
     public OrderConfirmationResponse order(@RequestHeader HttpHeaders headers, @PathVariable String orderNumber) {
         return service.getOrder(userContext(headers), orderNumber);
+    }
+
+    @GetMapping("/order-history")
+    public OrderHistoryPageResponse orderHistory(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String campaignId,
+            @RequestParam(required = false) String orderType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return service.searchOrderHistory(userContext(headers), query, campaignId, orderType, page, size);
+    }
+
+    @GetMapping("/order-history/{orderNumber}")
+    public OrderDetailsResponse orderDetails(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String orderNumber,
+            @RequestParam(required = false) String supportCustomerId,
+            @RequestParam(required = false) String reason
+    ) {
+        return service.getOrderHistoryDetails(userContext(headers), orderNumber, supportCustomerId, reason);
+    }
+
+    @PostMapping("/order-history/{orderNumber}/repeat")
+    public RepeatOrderResponse repeatOrder(@RequestHeader HttpHeaders headers, @PathVariable String orderNumber) {
+        return service.repeatOrder(userContext(headers), orderNumber, idempotencyKey(headers));
     }
 
     @ExceptionHandler(OrderCheckoutValidationException.class)

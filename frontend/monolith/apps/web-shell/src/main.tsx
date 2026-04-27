@@ -11,6 +11,7 @@ import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
+import { OrderHistoryView } from './components/OrderHistoryView';
 import { ProductCardView } from './components/ProductCardView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
@@ -157,6 +158,10 @@ function App() {
     contentView = <OrderCheckoutView seed={params.get('seed')} />;
   } else if (path === '/order/supplementary') {
     contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
+  } else if (path === '/order/order-history') {
+    contentView = <OrderHistoryView params={params} />;
+  } else if (path.startsWith('/order/order-history/')) {
+    contentView = <OrderHistoryView orderNumber={decodeURIComponent(path.slice('/order/order-history/'.length))} params={params} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {

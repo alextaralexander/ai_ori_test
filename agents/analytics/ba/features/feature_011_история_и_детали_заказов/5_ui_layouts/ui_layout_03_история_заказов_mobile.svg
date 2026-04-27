@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="1120" viewBox="0 0 390 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 011 mobile layout: история и детали заказов</title>
+  <desc id="desc">Схематичный mobile-макет истории заказов с компактными фильтрами, карточками и свернутым блоком деталей.</desc>
+  <rect width="390" height="1120" fill="#f7f8fa"/>
+  <rect x="0" y="0" width="390" height="64" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="20" y="40" font-family="Arial" font-size="18" fill="#20242c">Best Ori Gin</text>
+  <rect x="322" y="18" width="36" height="28" rx="6" fill="#eef2f7" stroke="#cfd6e1"/>
+  <text x="334" y="38" font-family="Arial" font-size="16" fill="#20242c">≡</text>
+
+  <text x="20" y="104" font-family="Arial" font-size="24" fill="#111827">История заказов</text>
+  <text x="20" y="130" font-family="Arial" font-size="13" fill="#5f6b7a">Ваши заказы, статусы и действия</text>
+
+  <rect x="20" y="154" width="350" height="46" rx="8" fill="#ffffff" stroke="#cfd6e1"/>
+  <text x="38" y="183" font-family="Arial" font-size="14" fill="#697386">Поиск по номеру или товару</text>
+  <rect x="20" y="214" width="168" height="40" rx="8" fill="#ffffff" stroke="#cfd6e1"/>
+  <text x="42" y="239" font-family="Arial" font-size="13" fill="#20242c">Фильтры</text>
+  <rect x="202" y="214" width="168" height="40" rx="8" fill="#ffffff" stroke="#cfd6e1"/>
+  <text x="224" y="239" font-family="Arial" font-size="13" fill="#20242c">Сортировка</text>
+
+  <rect x="20" y="278" width="350" height="154" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="38" y="310" font-family="Arial" font-size="17" fill="#111827">ORD-011-MAIN</text>
+  <text x="38" y="334" font-family="Arial" font-size="13" fill="#697386">12.04.2026 · CMP-2026-05 · MAIN</text>
+  <text x="38" y="360" font-family="Arial" font-size="13" fill="#20242c">Крем, подарок, 4 позиции</text>
+  <rect x="38" y="378" width="86" height="26" rx="13" fill="#e8f5ee"/>
+  <text x="55" y="395" font-family="Arial" font-size="11" fill="#147a3f">Оплачен</text>
+  <rect x="132" y="378" width="102" height="26" rx="13" fill="#eef4ff"/>
+  <text x="150" y="395" font-family="Arial" font-size="11" fill="#1f5fbf">В доставке</text>
+  <text x="282" y="396" font-family="Arial" font-size="15" fill="#111827">8 450 ₽</text>
+  <rect x="38" y="444" width="350" height="1" fill="#e5e9f0" opacity="0"/>
+  <rect x="38" y="410" width="306" height="32" rx="6" fill="#ffffff" stroke="#1f6feb"/>
+  <text x="165" y="431" font-family="Arial" font-size="13" fill="#1f6feb">Детали</text>
+
+  <rect x="20" y="454" width="350" height="154" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="38" y="486" font-family="Arial" font-size="17" fill="#111827">ORD-011-PAY</text>
+  <text x="38" y="510" font-family="Arial" font-size="13" fill="#697386">13.04.2026 · CMP-2026-05 · MAIN</text>
+  <text x="38" y="536" font-family="Arial" font-size="13" fill="#20242c">Сыворотка и уход, 2 позиции</text>
+  <rect x="38" y="554" width="122" height="26" rx="13" fill="#fff4df"/>
+  <text x="54" y="571" font-family="Arial" font-size="11" fill="#8a5a00">Ожидает оплаты</text>
+  <rect x="168" y="554" width="82" height="26" rx="13" fill="#f1f3f6"/>
+  <text x="190" y="571" font-family="Arial" font-size="11" fill="#5f6b7a">Создан</text>
+  <text x="282" y="572" font-family="Arial" font-size="15" fill="#111827">4 210 ₽</text>
+  <rect x="38" y="586" width="306" height="32" rx="6" fill="#1f6feb"/>
+  <text x="168" y="607" font-family="Arial" font-size="13" fill="#ffffff">Оплатить</text>
+
+  <rect x="20" y="630" width="350" height="360" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="38" y="664" font-family="Arial" font-size="18" fill="#111827">Детали выбранного заказа</text>
+  <text x="38" y="692" font-family="Arial" font-size="13" fill="#697386">ORD-011-MAIN · обновлено 14.04.2026</text>
+  <line x1="38" y1="714" x2="344" y2="714" stroke="#e5e9f0"/>
+  <text x="38" y="744" font-family="Arial" font-size="14" fill="#111827">Состав</text>
+  <text x="38" y="770" font-family="Arial" font-size="13" fill="#20242c">Крем BOG-CREAM-001 · 2 шт · 3 200 ₽</text>
+  <text x="38" y="794" font-family="Arial" font-size="13" fill="#20242c">Подарочный набор · 1 шт · 0 ₽</text>
+  <line x1="38" y1="818" x2="344" y2="818" stroke="#e5e9f0"/>
+  <text x="38" y="848" font-family="Arial" font-size="14" fill="#111827">Timeline</text>
+  <circle cx="46" cy="878" r="5" fill="#1f6feb"/>
+  <text x="62" y="882" font-family="Arial" font-size="12" fill="#20242c">Заказ создан</text>
+  <circle cx="46" cy="910" r="5" fill="#147a3f"/>
+  <text x="62" y="914" font-family="Arial" font-size="12" fill="#20242c">Оплата подтверждена</text>
+  <circle cx="46" cy="942" r="5" fill="#087a7d"/>
+  <text x="62" y="946" font-family="Arial" font-size="12" fill="#20242c">Передан в доставку</text>
+  <rect x="38" y="966" width="140" height="34" rx="6" fill="#1f6feb"/>
+  <text x="64" y="988" font-family="Arial" font-size="12" fill="#ffffff">Повторить</text>
+  <rect x="192" y="966" width="152" height="34" rx="6" fill="#ffffff" stroke="#1f6feb"/>
+  <text x="216" y="988" font-family="Arial" font-size="12" fill="#1f6feb">Претензия</text>
+</svg>

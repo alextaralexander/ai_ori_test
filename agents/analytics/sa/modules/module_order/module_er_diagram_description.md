@@ -1,7 +1,7 @@
-# Feature 010. Module order. Описание ER-диаграммы
+# Module order. Описание ER-диаграммы
 
 ## Назначение модуля
-`module_order` отвечает за оформление основной корзины и supplementary order после успешной validation корзины. Модуль владеет checkout draft, снимком строк, получателем, адресом, доставкой, оплатой, примененными выгодами, резервами, итоговым заказом и audit trail. Модуль не хранит каталог товаров, настройки промо, учетные записи и фактический WMS-остаток; эти данные приходят через контракты соседних модулей и внешних интеграций.
+`module_order` отвечает за оформление основной корзины и supplementary order после успешной validation корзины, а также за личную историю и детали заказов. Модуль владеет checkout draft, снимком строк, получателем, адресом, доставкой, оплатой, примененными выгодами, резервами, итоговым заказом, order-history snapshots, timeline events, warnings, repeat order requests и audit trail. Модуль не хранит каталог товаров, настройки промо, учетные записи и фактический WMS-остаток; эти данные приходят через контракты соседних модулей и внешних интеграций.
 
 ## Таблица `order_checkout_draft`
 Черновик оформления заказа.
@@ -176,6 +176,19 @@ Audit trail checkout и заказа.
 События:
 - `CHECKOUT_STARTED`, `RECIPIENT_UPDATED`, `ADDRESS_UPDATED`, `DELIVERY_SELECTED`, `PAYMENT_SELECTED`, `BENEFIT_APPLIED`, `VALIDATION_FAILED`, `ORDER_CONFIRMED`, `RESERVATION_FAILED`, `PAYMENT_STATUS_CHANGED`, `SUPPORT_VIEWED`.
 
+## Таблицы истории заказов feature #11
+История заказов использует `order_order` как корневой aggregate и добавляет read-optimized snapshots:
+- `order_history_item_snapshot` — строки заказа, SKU, цены, gift flag, repeat/claim eligibility и `limitation_reason_mnemo`.
+- `order_history_event` — публичный timeline событий заказа с `description_mnemo`.
+- `order_history_warning` — активные предупреждения по заказу через `STR_MNEMO_*`.
+- `order_repeat_request` — идемпотентный след repeat order для основной корзины или supplementary cart.
+
+Индексы feature #11:
+- `idx_order_history_item_order(order_id)`.
+- `idx_order_history_event_order_time(order_id, occurred_at)`.
+- `idx_order_history_warning_order_active(order_id, active)`.
+- `idx_order_repeat_order_actor(order_id, actor_user_id)`.
+
 ## Backend package ownership
 - `api`: DTO checkout/order endpoints, enums contract, request/response classes.
 - `domain`: JPA entities и repository interfaces для таблиц `order_*`.
@@ -188,3 +201,10 @@ Audit trail checkout и заказа.
 
 ## Версионная база
 Новые технологии не вводятся. Используется текущий Spring Boot monolith, Java/Maven baseline, Hibernate/JPA, Liquibase XML, MapStruct/Lombok при наличии в baseline, PostgreSQL-compatible schema и runtime Swagger через springdoc-openapi monolith grouping.
+
+## Дополнение feature #11 по ownership
+- `api`: DTO order-history list/details/repeat endpoints, enum order/payment/delivery/action status и request/response contracts.
+- `domain`: JPA entities и repository interfaces для order history snapshots, timeline events, warnings и repeat requests.
+- `db`: dedicated Liquibase XML changelog feature #11.
+- `impl/controller`: REST controllers для order history, order details и repeat order.
+- `impl/service`: history search/details, ownership checks, support audit и repeat order orchestration.

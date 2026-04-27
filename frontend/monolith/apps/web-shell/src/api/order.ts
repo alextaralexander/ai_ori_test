@@ -115,6 +115,85 @@ export interface OrderConfirmationResponse {
   reasons: ValidationReasonResponse[];
 }
 
+export interface OrderHistoryLineResponse {
+  productCode: string;
+  sku: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  discountAmount: number;
+  totalPrice: number;
+  gift: boolean;
+  repeatAvailable: boolean;
+  claimAvailable: boolean;
+  limitationReasonMnemo?: string | null;
+}
+
+export interface OrderHistoryItemResponse {
+  orderNumber: string;
+  orderType: CheckoutType;
+  campaignId: string;
+  createdAt: string;
+  orderStatus: string;
+  paymentStatus: PaymentStatus;
+  deliveryStatus: string;
+  grandTotalAmount: number;
+  currencyCode: string;
+  summaryItems: OrderHistoryLineResponse[];
+  warnings: ValidationReasonResponse[];
+}
+
+export interface OrderHistoryPageResponse {
+  items: OrderHistoryItemResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface OrderDetailsResponse extends OrderHistoryItemResponse {
+  items: OrderHistoryLineResponse[];
+  totals: CheckoutTotalsResponse;
+  delivery: {
+    deliveryTargetType: string;
+    maskedRecipientName: string;
+    maskedPhone: string;
+    city: string;
+    addressLine: string;
+    expectedInterval: string;
+    trackingNumber: string;
+  };
+  payment: {
+    paymentMethodCode: string;
+    paymentStatus: PaymentStatus;
+    amountToPay: number;
+    paidAmount: number;
+    paymentActionAvailable: boolean;
+  };
+  events: Array<{
+    eventType: string;
+    publicStatus: string;
+    sourceSystem: string;
+    descriptionMnemo?: string | null;
+    occurredAt: string;
+  }>;
+  actions: {
+    paymentAvailable: boolean;
+    repeatOrderAvailable: boolean;
+    claimAvailable: boolean;
+  };
+  auditRecorded?: boolean;
+  businessVolume?: number | null;
+}
+
+export interface RepeatOrderResponse {
+  status: 'COMPLETED' | 'PARTIAL' | 'REJECTED';
+  targetCartType: CheckoutType;
+  addedItems: OrderHistoryLineResponse[];
+  rejectedItems: OrderHistoryLineResponse[];
+  reasonMnemo?: string | null;
+}
+
 interface ErrorResponse {
   code: string;
   details?: ValidationReasonResponse[];
@@ -229,4 +308,28 @@ export async function confirmCheckout(checkoutId: string, checkoutVersion: numbe
     body: JSON.stringify({ checkoutVersion }),
   });
   return readJson<OrderConfirmationResponse>(response);
+}
+
+export async function searchOrderHistory(params: URLSearchParams): Promise<OrderHistoryPageResponse> {
+  const query = params.toString();
+  const response = await fetch(`/api/order/order-history${query ? `?${query}` : ''}`, {
+    headers: authHeaders(),
+  });
+  return readJson<OrderHistoryPageResponse>(response);
+}
+
+export async function getOrderDetails(orderNumber: string): Promise<OrderDetailsResponse> {
+  const response = await fetch(`/api/order/order-history/${encodeURIComponent(orderNumber)}`, {
+    headers: authHeaders(),
+  });
+  return readJson<OrderDetailsResponse>(response);
+}
+
+export async function repeatOrder(orderNumber: string): Promise<RepeatOrderResponse> {
+  const response = await fetch(`/api/order/order-history/${encodeURIComponent(orderNumber)}/repeat`, {
+    method: 'POST',
+    headers: jsonHeaders(`repeat-${orderNumber}`),
+    body: '{}',
+  });
+  return readJson<RepeatOrderResponse>(response);
 }

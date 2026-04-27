@@ -1,5 +1,5 @@
 @startuml
-title Feature 010. Module order. ER diagram for checkout and supplementary order
+title Module order. ER diagram for checkout, supplementary order, order history and details
 
 entity "order_checkout_draft" as checkout {
   * id : uuid <<PK>>
@@ -116,8 +116,58 @@ entity "order_order" as orderEntity {
   * status : varchar(32)
   payment_status : varchar(32)
   delivery_status : varchar(32)
+  delivery_method_code : varchar(64)
   grand_total_amount : numeric(19,2)
+  currency_code : varchar(3)
   * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "order_history_item_snapshot" as historyItem {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * product_code : varchar(64)
+  * sku : varchar(64)
+  * product_name_snapshot : varchar(255)
+  * quantity : int
+  * unit_price : numeric(19,2)
+  total_price : numeric(19,2)
+  gift : boolean
+  repeat_available : boolean
+  claim_available : boolean
+  limitation_reason_mnemo : varchar(128)
+}
+
+entity "order_history_event" as historyEvent {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * event_type : varchar(64)
+  * public_status : varchar(64)
+  * source_system : varchar(64)
+  description_mnemo : varchar(128)
+  * occurred_at : timestamptz
+}
+
+entity "order_history_warning" as historyWarning {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * severity : varchar(32)
+  * warning_mnemo : varchar(128)
+  active : boolean
+}
+
+entity "order_repeat_request" as repeatRequest {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * actor_user_id : varchar(64)
+  * target_cart_type : varchar(32)
+  idempotency_key : varchar(128)
+  status : varchar(32)
+  created_at : timestamptz
 }
 
 entity "order_audit_event" as audit {
@@ -142,4 +192,8 @@ item ||--o{ reservation
 checkout ||--o| orderEntity
 checkout ||--o{ audit
 orderEntity ||--o{ audit
+orderEntity ||--o{ historyItem
+orderEntity ||--o{ historyEvent
+orderEntity ||--o{ historyWarning
+orderEntity ||--o{ repeatRequest
 @enduml

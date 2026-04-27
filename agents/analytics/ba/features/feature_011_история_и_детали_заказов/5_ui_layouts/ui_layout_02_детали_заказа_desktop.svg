@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 011 desktop layout: детали заказа</title>
+  <desc id="desc">Схематичный desktop-макет деталей заказа с составом, статусами, предупреждениями, timeline и действиями.</desc>
+  <rect width="1440" height="1040" fill="#f7f8fa"/>
+  <rect x="0" y="0" width="1440" height="72" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="48" y="44" font-family="Arial" font-size="22" fill="#20242c">Best Ori Gin</text>
+  <text x="470" y="44" font-family="Arial" font-size="16" fill="#111827">История заказов</text>
+
+  <text x="72" y="124" font-family="Arial" font-size="15" fill="#1f6feb">← К списку заказов</text>
+  <text x="72" y="164" font-family="Arial" font-size="30" fill="#111827">Заказ ORD-011-MAIN</text>
+  <text x="72" y="194" font-family="Arial" font-size="15" fill="#5f6b7a">Кампания CMP-2026-05 · MAIN · создан 12.04.2026</text>
+
+  <rect x="72" y="224" width="846" height="118" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="100" y="262" font-family="Arial" font-size="18" fill="#111827">Статусы</text>
+  <rect x="100" y="284" width="120" height="30" rx="15" fill="#e8f5ee"/>
+  <text x="124" y="304" font-family="Arial" font-size="13" fill="#147a3f">Оплачен</text>
+  <rect x="236" y="284" width="140" height="30" rx="15" fill="#eef4ff"/>
+  <text x="260" y="304" font-family="Arial" font-size="13" fill="#1f5fbf">В доставке</text>
+  <rect x="392" y="284" width="136" height="30" rx="15" fill="#e9f7f8"/>
+  <text x="414" y="304" font-family="Arial" font-size="13" fill="#087a7d">Собран</text>
+  <text x="620" y="304" font-family="Arial" font-size="13" fill="#697386">Обновлено 14.04.2026 10:20</text>
+
+  <rect x="946" y="224" width="422" height="118" rx="8" fill="#fffdf7" stroke="#f0d898"/>
+  <text x="974" y="260" font-family="Arial" font-size="17" fill="#111827">Предупреждения</text>
+  <text x="974" y="292" font-family="Arial" font-size="14" fill="#6d4b00">Часть позиций недоступна для повторного заказа.</text>
+  <text x="974" y="318" font-family="Arial" font-size="13" fill="#6d4b00">STR_MNEMO_ORDER_REPEAT_PARTIAL</text>
+
+  <rect x="72" y="374" width="846" height="326" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="100" y="412" font-family="Arial" font-size="18" fill="#111827">Состав заказа</text>
+  <line x1="100" y1="438" x2="890" y2="438" stroke="#e5e9f0"/>
+  <text x="100" y="464" font-family="Arial" font-size="13" fill="#697386">Товар</text>
+  <text x="502" y="464" font-family="Arial" font-size="13" fill="#697386">Кол-во</text>
+  <text x="610" y="464" font-family="Arial" font-size="13" fill="#697386">Цена</text>
+  <text x="738" y="464" font-family="Arial" font-size="13" fill="#697386">Действие</text>
+  <line x1="100" y1="478" x2="890" y2="478" stroke="#e5e9f0"/>
+  <text x="100" y="514" font-family="Arial" font-size="15" fill="#111827">Крем для лица BOG-CREAM-001</text>
+  <text x="100" y="538" font-family="Arial" font-size="13" fill="#697386">SKU 100-011 · доступен для повтора</text>
+  <text x="520" y="524" font-family="Arial" font-size="15" fill="#20242c">2</text>
+  <text x="610" y="524" font-family="Arial" font-size="15" fill="#20242c">3 200 ₽</text>
+  <rect x="738" y="500" width="120" height="32" rx="6" fill="#ffffff" stroke="#1f6feb"/>
+  <text x="762" y="521" font-family="Arial" font-size="13" fill="#1f6feb">Повторить</text>
+  <line x1="100" y1="562" x2="890" y2="562" stroke="#e5e9f0"/>
+  <text x="100" y="598" font-family="Arial" font-size="15" fill="#111827">Подарочный набор</text>
+  <text x="100" y="622" font-family="Arial" font-size="13" fill="#697386">Подарок кампании · повтор недоступен</text>
+  <text x="520" y="608" font-family="Arial" font-size="15" fill="#20242c">1</text>
+  <text x="610" y="608" font-family="Arial" font-size="15" fill="#20242c">0 ₽</text>
+  <rect x="738" y="584" width="120" height="32" rx="6" fill="#f1f3f6" stroke="#cfd6e1"/>
+  <text x="756" y="605" font-family="Arial" font-size="13" fill="#697386">Недоступно</text>
+  <line x1="100" y1="646" x2="890" y2="646" stroke="#e5e9f0"/>
+  <text x="100" y="676" font-family="Arial" font-size="15" fill="#111827">Итого с учетом выгод</text>
+  <text x="760" y="676" font-family="Arial" font-size="18" fill="#111827">8 450 ₽</text>
+
+  <rect x="946" y="374" width="422" height="326" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="974" y="412" font-family="Arial" font-size="18" fill="#111827">Доставка и оплата</text>
+  <text x="974" y="454" font-family="Arial" font-size="14" fill="#697386">Получатель</text>
+  <text x="1118" y="454" font-family="Arial" font-size="14" fill="#20242c">Ирина П.</text>
+  <text x="974" y="488" font-family="Arial" font-size="14" fill="#697386">Контакты</text>
+  <text x="1118" y="488" font-family="Arial" font-size="14" fill="#20242c">+7 *** *** 00 11</text>
+  <text x="974" y="522" font-family="Arial" font-size="14" fill="#697386">Доставка</text>
+  <text x="1118" y="522" font-family="Arial" font-size="14" fill="#20242c">Пункт выдачи</text>
+  <text x="974" y="556" font-family="Arial" font-size="14" fill="#697386">Адрес</text>
+  <text x="1118" y="556" font-family="Arial" font-size="14" fill="#20242c">Москва, ПВЗ 011</text>
+  <text x="974" y="590" font-family="Arial" font-size="14" fill="#697386">Оплата</text>
+  <text x="1118" y="590" font-family="Arial" font-size="14" fill="#20242c">Онлайн-карта</text>
+  <line x1="974" y1="620" x2="1340" y2="620" stroke="#e5e9f0"/>
+  <rect x="974" y="646" width="154" height="36" rx="6" fill="#1f6feb"/>
+  <text x="1002" y="669" font-family="Arial" font-size="13" fill="#ffffff">Повторить заказ</text>
+  <rect x="1144" y="646" width="172" height="36" rx="6" fill="#ffffff" stroke="#1f6feb"/>
+  <text x="1172" y="669" font-family="Arial" font-size="13" fill="#1f6feb">Создать претензию</text>
+
+  <rect x="72" y="732" width="1296" height="244" rx="8" fill="#ffffff" stroke="#d9dde5"/>
+  <text x="100" y="770" font-family="Arial" font-size="18" fill="#111827">Timeline событий</text>
+  <circle cx="120" cy="820" r="8" fill="#1f6feb"/>
+  <line x1="120" y1="828" x2="120" y2="934" stroke="#cfd6e1"/>
+  <text x="148" y="824" font-family="Arial" font-size="15" fill="#111827">Заказ создан</text>
+  <text x="148" y="848" font-family="Arial" font-size="13" fill="#697386">12.04.2026 09:10 · checkout · STR_MNEMO_ORDER_CREATED</text>
+  <circle cx="120" cy="876" r="8" fill="#147a3f"/>
+  <text x="148" y="880" font-family="Arial" font-size="15" fill="#111827">Оплата подтверждена</text>
+  <text x="148" y="904" font-family="Arial" font-size="13" fill="#697386">12.04.2026 09:14 · payment · STR_MNEMO_PAYMENT_PAID</text>
+  <circle cx="120" cy="932" r="8" fill="#087a7d"/>
+  <text x="148" y="936" font-family="Arial" font-size="15" fill="#111827">Передан в доставку</text>
+  <text x="148" y="960" font-family="Arial" font-size="13" fill="#697386">14.04.2026 10:20 · logistics · STR_MNEMO_DELIVERY_IN_TRANSIT</text>
+</svg>

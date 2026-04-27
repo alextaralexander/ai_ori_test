@@ -7,8 +7,11 @@ import com.bestorigin.monolith.order.api.OrderDtos.CheckoutValidationResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.ConfirmCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.StartCheckoutRequest;
 import java.util.UUID;
 
@@ -33,4 +36,10 @@ public interface OrderCheckoutService {
     OrderConfirmationResponse confirm(String userContextId, UUID checkoutId, ConfirmCheckoutRequest request, String idempotencyKey);
 
     OrderConfirmationResponse getOrder(String userContextId, String orderNumber);
+
+    OrderHistoryPageResponse searchOrderHistory(String userContextId, String query, String campaignId, String orderType, int page, int size);
+
+    OrderDetailsResponse getOrderHistoryDetails(String userContextId, String orderNumber, String supportCustomerId, String reason);
+
+    RepeatOrderResponse repeatOrder(String userContextId, String orderNumber, String idempotencyKey);
 }

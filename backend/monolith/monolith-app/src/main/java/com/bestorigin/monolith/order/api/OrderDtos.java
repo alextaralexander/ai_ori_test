@@ -39,6 +39,12 @@ public final class OrderDtos {
         FIX_CHECKOUT
     }
 
+    public enum RepeatOrderStatus {
+        COMPLETED,
+        PARTIAL,
+        REJECTED
+    }
+
     public record StartCheckoutRequest(
             String cartId,
             CheckoutType checkoutType,
@@ -176,6 +182,112 @@ public final class OrderDtos {
             CheckoutTotalsResponse totals,
             NextAction nextAction,
             List<ValidationReasonResponse> reasons
+    ) {
+    }
+
+    public record OrderHistoryPageResponse(
+            List<OrderHistoryItemResponse> items,
+            int page,
+            int size,
+            long totalElements,
+            boolean hasNext
+    ) {
+    }
+
+    public record OrderHistoryItemResponse(
+            String orderNumber,
+            CheckoutType orderType,
+            String campaignId,
+            String createdAt,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            String deliveryStatus,
+            BigDecimal grandTotalAmount,
+            String currencyCode,
+            List<OrderHistoryLineResponse> summaryItems,
+            List<ValidationReasonResponse> warnings
+    ) {
+    }
+
+    public record OrderDetailsResponse(
+            String orderNumber,
+            CheckoutType orderType,
+            String campaignId,
+            String createdAt,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            String deliveryStatus,
+            BigDecimal grandTotalAmount,
+            String currencyCode,
+            List<OrderHistoryLineResponse> items,
+            CheckoutTotalsResponse totals,
+            OrderDeliveryResponse delivery,
+            OrderPaymentResponse payment,
+            List<OrderHistoryEventResponse> events,
+            List<ValidationReasonResponse> warnings,
+            OrderActionsResponse actions,
+            Boolean auditRecorded,
+            BigDecimal businessVolume
+    ) {
+    }
+
+    public record OrderHistoryLineResponse(
+            String productCode,
+            String sku,
+            String productName,
+            int quantity,
+            BigDecimal unitPrice,
+            BigDecimal discountAmount,
+            BigDecimal totalPrice,
+            boolean gift,
+            boolean repeatAvailable,
+            boolean claimAvailable,
+            String limitationReasonMnemo
+    ) {
+    }
+
+    public record OrderDeliveryResponse(
+            String deliveryTargetType,
+            String maskedRecipientName,
+            String maskedPhone,
+            String city,
+            String addressLine,
+            String expectedInterval,
+            String trackingNumber
+    ) {
+    }
+
+    public record OrderPaymentResponse(
+            String paymentMethodCode,
+            PaymentStatus paymentStatus,
+            BigDecimal amountToPay,
+            BigDecimal paidAmount,
+            boolean paymentActionAvailable
+    ) {
+    }
+
+    public record OrderHistoryEventResponse(
+            String eventType,
+            String publicStatus,
+            String sourceSystem,
+            String descriptionMnemo,
+            String occurredAt
+    ) {
+    }
+
+    public record OrderActionsResponse(
+            boolean paymentAvailable,
+            boolean repeatOrderAvailable,
+            boolean claimAvailable
+    ) {
+    }
+
+    public record RepeatOrderResponse(
+            RepeatOrderStatus status,
+            CheckoutType targetCartType,
+            List<OrderHistoryLineResponse> addedItems,
+            List<OrderHistoryLineResponse> rejectedItems,
+            String reasonMnemo
     ) {
     }
 

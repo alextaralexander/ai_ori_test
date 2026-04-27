@@ -1,0 +1,48 @@
+@startuml
+title Feature 011. Order history and order details sequence
+
+actor "Покупатель/партнер" as User
+participant "Web-shell /order/order-history" as UI
+participant "OrderHistoryController" as Controller
+participant "OrderHistoryService" as Service
+participant "OrderHistoryRepository" as Repo
+participant "Cart context" as Cart
+participant "Audit trail" as Audit
+
+User -> UI : Открывает список истории заказов
+UI -> Controller : GET /api/order/order-history?filters
+Controller -> Service : searchHistory(currentUser, filters, page)
+Service -> Repo : findOwnedOrders(currentUser.id, filters, page)
+Repo --> Service : OrderHistoryPage
+Service --> Controller : page with statuses, warnings, summary items
+Controller --> UI : OrderHistoryPageResponse
+UI --> User : Показывает список, фильтры, поиск и статусы
+
+User -> UI : Открывает детали ORD-011-MAIN
+UI -> Controller : GET /api/order/order-history/ORD-011-MAIN
+Controller -> Service : getDetails(currentUser, orderNumber)
+Service -> Repo : findOwnedOrderDetails(orderNumber, currentUser.id)
+alt Заказ принадлежит пользователю
+  Repo --> Service : OrderDetails
+  Service --> Controller : Details with items, delivery, payment, events, actions
+  Controller --> UI : OrderDetailsResponse
+  UI --> User : Показывает детали, timeline, предупреждения и действия
+else Чужой заказ
+  Repo --> Service : not owned
+  Service -> Audit : record security denial
+  Service --> Controller : STR_MNEMO_ORDER_HISTORY_ACCESS_DENIED
+  Controller --> UI : 403 ErrorResponse
+  UI --> User : Безопасное состояние доступа запрещено
+end
+
+User -> UI : Выбирает repeat order
+UI -> Controller : POST /api/order/order-history/ORD-011-MAIN/repeat
+Controller -> Service : repeatOrder(currentUser, orderNumber, idempotencyKey)
+Service -> Repo : get repeatable lines and order type
+Service -> Cart : add allowed lines to MAIN or SUPPLEMENTARY cart
+Cart --> Service : added/rejected lines
+Service -> Audit : record repeat order action
+Service --> Controller : RepeatOrderResponse
+Controller --> UI : repeat result
+UI --> User : Показывает добавленные и недоступные позиции
+@enduml

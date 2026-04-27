@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-011-order-history-001" author="codex">
+        <createTable tableName="order_history_item_snapshot">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_name_snapshot" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_amount" type="numeric(19,2)" defaultValueNumeric="0.00"/>
+            <column name="total_price" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gift" type="boolean" defaultValueBoolean="false"/>
+            <column name="repeat_available" type="boolean" defaultValueBoolean="false"/>
+            <column name="claim_available" type="boolean" defaultValueBoolean="false"/>
+            <column name="limitation_reason_mnemo" type="varchar(128)"/>
+        </createTable>
+        <createIndex tableName="order_history_item_snapshot" indexName="idx_order_history_item_order">
+            <column name="order_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-011-order-history-002" author="codex">
+        <createTable tableName="order_history_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="public_status" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_mnemo" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="order_history_event" indexName="idx_order_history_event_order_time">
+            <column name="order_id"/>
+            <column name="occurred_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-011-order-history-003" author="codex">
+        <createTable tableName="order_history_warning">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="severity" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warning_mnemo" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target" type="varchar(128)"/>
+            <column name="active" type="boolean" defaultValueBoolean="true"/>
+        </createTable>
+        <createIndex tableName="order_history_warning" indexName="idx_order_history_warning_order_active">
+            <column name="order_id"/>
+            <column name="active"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-011-order-history-004" author="codex">
+        <createTable tableName="order_repeat_request">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_cart_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="varchar(128)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="order_repeat_request" indexName="idx_order_repeat_order_actor">
+            <column name="order_id"/>
+            <column name="actor_user_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

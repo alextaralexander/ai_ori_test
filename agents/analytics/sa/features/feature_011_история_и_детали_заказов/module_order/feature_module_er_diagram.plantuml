@@ -1,0 +1,114 @@
+@startuml
+title Feature 011. Module order. ER diagram for order history and details
+
+entity "order_order" as orderEntity {
+  * id : uuid <<PK>>
+  --
+  * order_number : varchar(64) <<UK>>
+  * checkout_id : uuid <<FK>>
+  * owner_user_id : varchar(64)
+  * order_type : varchar(32)
+  * campaign_id : varchar(64)
+  * status : varchar(32)
+  payment_status : varchar(32)
+  delivery_status : varchar(32)
+  delivery_method_code : varchar(64)
+  grand_total_amount : numeric(19,2)
+  currency_code : varchar(3)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "order_history_item_snapshot" as item {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * product_code : varchar(64)
+  * sku : varchar(64)
+  * product_name_snapshot : varchar(255)
+  * quantity : int
+  * unit_price : numeric(19,2)
+  discount_amount : numeric(19,2)
+  total_price : numeric(19,2)
+  gift : boolean
+  repeat_available : boolean
+  claim_available : boolean
+  limitation_reason_mnemo : varchar(128)
+}
+
+entity "order_history_delivery_snapshot" as delivery {
+  * order_id : uuid <<PK, FK>>
+  --
+  * delivery_target_type : varchar(32)
+  address_id : varchar(64)
+  pickup_point_id : varchar(64)
+  masked_recipient_name : varchar(255)
+  masked_phone : varchar(64)
+  city : varchar(128)
+  address_line_snapshot : varchar(512)
+  expected_interval : varchar(128)
+  tracking_number : varchar(128)
+}
+
+entity "order_history_payment_snapshot" as payment {
+  * order_id : uuid <<PK, FK>>
+  --
+  * payment_method_code : varchar(64)
+  * payment_status : varchar(32)
+  payment_session_id : varchar(128)
+  amount_to_pay : numeric(19,2)
+  paid_amount : numeric(19,2)
+  payment_action_available : boolean
+}
+
+entity "order_history_event" as event {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * event_type : varchar(64)
+  * public_status : varchar(64)
+  * source_system : varchar(64)
+  description_mnemo : varchar(128)
+  * occurred_at : timestamptz
+}
+
+entity "order_history_warning" as warning {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * severity : varchar(32)
+  * warning_mnemo : varchar(128)
+  target : varchar(128)
+  active : boolean
+}
+
+entity "order_repeat_request" as repeat {
+  * id : uuid <<PK>>
+  --
+  * order_id : uuid <<FK>>
+  * actor_user_id : varchar(64)
+  * target_cart_type : varchar(32)
+  idempotency_key : varchar(128)
+  status : varchar(32)
+  created_at : timestamptz
+}
+
+entity "order_audit_event" as audit {
+  * id : uuid <<PK>>
+  --
+  * aggregate_id : uuid
+  * event_type : varchar(64)
+  * actor_user_id : varchar(64)
+  actor_role : varchar(64)
+  mnemo_code : varchar(128)
+  created_at : timestamptz
+}
+
+orderEntity ||--o{ item
+orderEntity ||--|| delivery
+orderEntity ||--|| payment
+orderEntity ||--o{ event
+orderEntity ||--o{ warning
+orderEntity ||--o{ repeat
+orderEntity ||--o{ audit
+@enduml

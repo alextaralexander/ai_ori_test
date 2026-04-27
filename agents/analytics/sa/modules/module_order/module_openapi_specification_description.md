@@ -1,7 +1,7 @@
-# Feature 010. Module order. Описание OpenAPI
+# Module order. Описание OpenAPI
 
 ## Назначение API
-OpenAPI описывает внешний REST-контракт checkout для маршрутов frontend `/order` и `/order/supplementary`. Backend module `order` принимает валидированную корзину, создает или возвращает checkout draft, обновляет шаги оформления, применяет выгоды, выполняет validation, подтверждает заказ идемпотентно и отдает результат заказа.
+OpenAPI описывает внешний REST-контракт checkout для маршрутов frontend `/order` и `/order/supplementary`, а также историю и детали заказов для `/order/order-history` и `/order/order-history/:orderId`. Backend module `order` принимает валидированную корзину, создает или возвращает checkout draft, обновляет шаги оформления, применяет выгоды, выполняет validation, подтверждает заказ идемпотентно, отдает результат заказа, показывает список/детали собственных заказов и запускает repeat order.
 
 ## Endpoint groups
 
@@ -131,6 +131,24 @@ Mnemonics:
 ### `GET /api/order/orders/{orderNumber}`
 Чтение результата созданного заказа. Используется для success page и повторного открытия результата после оплаты.
 
+### `GET /api/order/order-history`
+Постраничный список заказов текущего пользователя с поиском по номеру, названию товара или SKU и фильтрами по кампании, типу заказа и статусам.
+
+Mnemonics:
+- `STR_MNEMO_ORDER_HISTORY_EMPTY`.
+- `STR_MNEMO_ORDER_HISTORY_FILTER_INVALID`.
+
+### `GET /api/order/order-history/{orderNumber}`
+Детали заказа владельца или сотрудника поддержки с permission context. Ответ содержит состав, gifts, repeat/claim eligibility, totals, payment/delivery snapshots, timeline events, warnings и actions.
+
+Mnemonics:
+- `STR_MNEMO_ORDER_HISTORY_ACCESS_DENIED`.
+- `STR_MNEMO_ORDER_REPEAT_PARTIAL`.
+- `STR_MNEMO_ORDER_PAYMENT_PENDING`.
+
+### `POST /api/order/order-history/{orderNumber}/repeat`
+Запуск repeat order для доступных строк заказа. Для `MAIN` переносит доступные строки в основную корзину. Для `SUPPLEMENTARY` проверяет partner status и переносит строки в supplementary cart. Header `Idempotency-Key` защищает от повторного добавления.
+
 ## DTO policy
 - DTO находятся в backend package `api`.
 - DTO не содержат hardcoded user-facing текст.
@@ -140,7 +158,7 @@ Mnemonics:
 ## Security
 - Все endpoints требуют авторизации.
 - `checkoutId`, `cartId`, `addressId`, `pickupPointId`, `orderNumber`, `paymentSessionId` считаются untrusted input.
-- Доступ к чужому checkout/order разрешен только support role с audit trail.
+- Доступ к чужому checkout/order/order-history разрешен только support role с audit trail.
 - Логи не должны содержать полные платежные реквизиты, token, session identifiers и лишние персональные данные.
 
 ## Runtime Swagger

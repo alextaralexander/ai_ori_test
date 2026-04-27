@@ -14,10 +14,20 @@ import com.bestorigin.monolith.order.api.OrderDtos.DeliveryOptionResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.NextAction;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderActionsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderDeliveryResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryEventResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryItemResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryLineResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderPaymentResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentStatus;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderStatus;
 import com.bestorigin.monolith.order.api.OrderDtos.StartCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.ValidationReasonResponse;
 import com.bestorigin.monolith.order.domain.OrderCheckoutRepository;
@@ -43,6 +53,12 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
     private static final String PARTIAL_RESERVE = "STR_MNEMO_ORDER_PARTIAL_RESERVE";
     private static final String PAYMENT_FAILED = "STR_MNEMO_ORDER_PAYMENT_FAILED";
     private static final String VERSION_CONFLICT = "STR_MNEMO_ORDER_CHECKOUT_VERSION_CONFLICT";
+    private static final String HISTORY_ACCESS_DENIED = "STR_MNEMO_ORDER_HISTORY_ACCESS_DENIED";
+    private static final String PAYMENT_PENDING = "STR_MNEMO_ORDER_PAYMENT_PENDING";
+    private static final String ORDER_CREATED = "STR_MNEMO_ORDER_CREATED";
+    private static final String PAYMENT_PAID = "STR_MNEMO_PAYMENT_PAID";
+    private static final String DELIVERY_IN_TRANSIT = "STR_MNEMO_DELIVERY_IN_TRANSIT";
+    private static final String REPEAT_PARTIAL = "STR_MNEMO_ORDER_REPEAT_PARTIAL";
 
     private final OrderCheckoutRepository repository;
     private final ConcurrentMap<String, OrderConfirmationResponse> confirmationsByKey = new ConcurrentHashMap<>();
@@ -195,6 +211,64 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
                 .orElseThrow(() -> new OrderCheckoutNotFoundException("STR_MNEMO_ORDER_NOT_FOUND"));
     }
 
+    @Override
+    public OrderHistoryPageResponse searchOrderHistory(String userContextId, String query, String campaignId, String orderType, int page, int size) {
+        List<OrderHistoryItemResponse> orders = seededHistory(userContextId).stream()
+                .filter(order -> blank(query) || order.orderNumber().contains(query) || order.summaryItems().stream().anyMatch(item -> item.productName().toLowerCase().contains(query.toLowerCase()) || item.sku().contains(query)))
+                .filter(order -> blank(campaignId) || order.campaignId().equals(campaignId))
+                .filter(order -> blank(orderType) || order.orderType().name().equals(orderType))
+                .toList();
+        return new OrderHistoryPageResponse(orders, Math.max(page, 0), Math.max(size, 1), orders.size(), false);
+    }
+
+    @Override
+    public OrderDetailsResponse getOrderHistoryDetails(String userContextId, String orderNumber, String supportCustomerId, String reason) {
+        if ("ORD-011-OTHER".equals(orderNumber) && !role(userContextId).equals("order-support")) {
+            throw new OrderCheckoutAccessDeniedException(HISTORY_ACCESS_DENIED);
+        }
+        OrderHistoryItemResponse item = seededHistory(userContextId).stream()
+                .filter(order -> order.orderNumber().equals(orderNumber))
+                .findFirst()
+                .orElseGet(() -> "ORD-011-PAY".equals(orderNumber) ? pendingPaymentOrder() : null);
+        if (item == null && role(userContextId).equals("order-support") && "ORD-011-MAIN".equals(orderNumber)) {
+            item = mainOrder();
+        }
+        if (item == null) {
+            throw new OrderCheckoutNotFoundException("STR_MNEMO_ORDER_NOT_FOUND");
+        }
+        boolean support = role(userContextId).equals("order-support");
+        boolean pending = item.paymentStatus() == PaymentStatus.PENDING;
+        List<ValidationReasonResponse> warnings = pending ? List.of(reason(PAYMENT_PENDING, "WARNING", "payment")) : item.warnings();
+        return new OrderDetailsResponse(
+                item.orderNumber(),
+                item.orderType(),
+                item.campaignId(),
+                item.createdAt(),
+                item.orderStatus(),
+                item.paymentStatus(),
+                item.deliveryStatus(),
+                item.grandTotalAmount(),
+                item.currencyCode(),
+                item.summaryItems(),
+                totals(item.grandTotalAmount()),
+                delivery(item.orderType()),
+                new OrderPaymentResponse("ONLINE_CARD", item.paymentStatus(), pending ? item.grandTotalAmount() : BigDecimal.ZERO, pending ? BigDecimal.ZERO : item.grandTotalAmount(), pending),
+                events(item.paymentStatus()),
+                warnings,
+                new OrderActionsResponse(pending, true, item.orderType() == CheckoutType.MAIN),
+                support,
+                item.orderType() == CheckoutType.SUPPLEMENTARY ? money("23.50") : null
+        );
+    }
+
+    @Override
+    public RepeatOrderResponse repeatOrder(String userContextId, String orderNumber, String idempotencyKey) {
+        OrderDetailsResponse details = getOrderHistoryDetails(userContextId, orderNumber, null, null);
+        List<OrderHistoryLineResponse> added = details.items().stream().filter(OrderHistoryLineResponse::repeatAvailable).toList();
+        List<OrderHistoryLineResponse> rejected = details.items().stream().filter(item -> !item.repeatAvailable()).toList();
+        return new RepeatOrderResponse(rejected.isEmpty() ? RepeatOrderStatus.COMPLETED : RepeatOrderStatus.PARTIAL, details.orderType(), added, rejected, rejected.isEmpty() ? null : REPEAT_PARTIAL);
+    }
+
     private OrderCheckoutSnapshot owned(String userContextId, UUID checkoutId) {
         OrderCheckoutSnapshot checkout = repository.findById(checkoutId)
                 .orElseThrow(() -> new OrderCheckoutAccessDeniedException(FORBIDDEN));
@@ -226,6 +300,84 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
             return List.of(new CheckoutItemResponse("BOG-SERUM-002", "Сыворотка Best Ori Gin", 3, money("1390.00"), money("4170.00"), "AVAILABLE", "RESERVED", null));
         }
         return List.of(new CheckoutItemResponse("BOG-CREAM-001", "Увлажняющий крем Best Ori Gin", 2, money("990.00"), money("1980.00"), "AVAILABLE", "RESERVED", null));
+    }
+
+    private static List<OrderHistoryItemResponse> seededHistory(String userContextId) {
+        if (role(userContextId).equals("partner")) {
+            return List.of(supplementaryOrder(), mainOrder());
+        }
+        return List.of(mainOrder(), pendingPaymentOrder());
+    }
+
+    private static OrderHistoryItemResponse mainOrder() {
+        return new OrderHistoryItemResponse(
+                "ORD-011-MAIN",
+                CheckoutType.MAIN,
+                CAMPAIGN,
+                "2026-04-12T09:10:00Z",
+                "CREATED",
+                PaymentStatus.PAID,
+                "IN_TRANSIT",
+                money("8450.00"),
+                "RUB",
+                List.of(
+                        new OrderHistoryLineResponse("BOG-CREAM-001", "100-011", "Увлажняющий крем Best Ori Gin", 2, money("3200.00"), money("0.00"), money("6400.00"), false, true, true, null),
+                        new OrderHistoryLineResponse("BOG-GIFT-011", "GIFT-011", "Подарочный набор", 1, money("0.00"), money("0.00"), money("0.00"), true, false, false, REPEAT_PARTIAL)
+                ),
+                List.of(reason(REPEAT_PARTIAL, "WARNING", "repeat"))
+        );
+    }
+
+    private static OrderHistoryItemResponse pendingPaymentOrder() {
+        return new OrderHistoryItemResponse(
+                "ORD-011-PAY",
+                CheckoutType.MAIN,
+                CAMPAIGN,
+                "2026-04-13T11:00:00Z",
+                "PAYMENT_PENDING",
+                PaymentStatus.PENDING,
+                "CREATED",
+                money("4210.00"),
+                "RUB",
+                List.of(new OrderHistoryLineResponse("BOG-SERUM-002", "200-011", "Сыворотка Best Ori Gin", 1, money("4210.00"), money("0.00"), money("4210.00"), false, true, true, null)),
+                List.of(reason(PAYMENT_PENDING, "WARNING", "payment"))
+        );
+    }
+
+    private static OrderHistoryItemResponse supplementaryOrder() {
+        return new OrderHistoryItemResponse(
+                "ORD-011-SUPP",
+                CheckoutType.SUPPLEMENTARY,
+                CAMPAIGN,
+                "2026-04-14T12:30:00Z",
+                "ASSEMBLY_PENDING",
+                PaymentStatus.PAID,
+                "ASSEMBLY",
+                money("11300.00"),
+                "RUB",
+                List.of(new OrderHistoryLineResponse("BOG-SERUM-002", "SUPP-011", "Партнерская сыворотка Best Ori Gin", 3, money("1390.00"), money("250.00"), money("3920.00"), false, true, false, null)),
+                List.of()
+        );
+    }
+
+    private static OrderDeliveryResponse delivery(CheckoutType type) {
+        return type == CheckoutType.SUPPLEMENTARY
+                ? new OrderDeliveryResponse("PICKUP_POINT", "Partner 011", "+7 *** *** 00 12", "Москва", "ПВЗ 011", "1-2 дня", "TRK-011-SUPP")
+                : new OrderDeliveryResponse("ADDRESS", "Customer 011", "+7 *** *** 00 11", "Москва", "Москва, Тверская, 10", "2-4 дня", "TRK-011-MAIN");
+    }
+
+    private static List<OrderHistoryEventResponse> events(PaymentStatus paymentStatus) {
+        List<OrderHistoryEventResponse> events = new ArrayList<>();
+        events.add(new OrderHistoryEventResponse("ORDER_CREATED", "CREATED", "checkout", ORDER_CREATED, "2026-04-12T09:10:00Z"));
+        if (paymentStatus == PaymentStatus.PAID) {
+            events.add(new OrderHistoryEventResponse("PAYMENT_PAID", "PAID", "payment", PAYMENT_PAID, "2026-04-12T09:14:00Z"));
+            events.add(new OrderHistoryEventResponse("DELIVERY_IN_TRANSIT", "IN_TRANSIT", "logistics", DELIVERY_IN_TRANSIT, "2026-04-14T10:20:00Z"));
+        }
+        return events;
+    }
+
+    private static CheckoutTotalsResponse totals(BigDecimal grandTotal) {
+        return new CheckoutTotalsResponse(grandTotal, money("0.00"), money("0.00"), money("0.00"), money("0.00"), grandTotal);
     }
 
     private static List<DeliveryOptionResponse> deliveryOptions(CheckoutType type) {

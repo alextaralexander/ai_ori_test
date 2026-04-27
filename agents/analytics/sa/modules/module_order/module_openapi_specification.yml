@@ -1,13 +1,15 @@
 openapi: 3.0.3
 info:
-  title: Best Ori Gin module_order API for feature 010
+  title: Best Ori Gin module_order API
   version: 1.0.0
-  description: Checkout and supplementary order contracts for feature 010.
+  description: Checkout, supplementary order, order result, order history and order details contracts.
 servers:
   - url: /api
 tags:
   - name: OrderCheckout
     description: Checkout draft, delivery, payment, benefits and confirmation.
+  - name: OrderHistory
+    description: Personal order history, order details, timeline, warnings and repeat order actions.
 paths:
   /order/checkouts:
     post:
@@ -220,6 +222,95 @@ paths:
                 $ref: '#/components/schemas/OrderConfirmationResponse'
         '404':
           $ref: '#/components/responses/NotFound'
+  /order/order-history:
+    get:
+      tags: [OrderHistory]
+      operationId: searchOrderHistory
+      summary: Search personal order history
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 128
+        - name: campaignId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: orderType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CheckoutType'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Page of orders owned by the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderHistoryPageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /order/order-history/{orderNumber}:
+    get:
+      tags: [OrderHistory]
+      operationId: getOrderHistoryDetails
+      summary: Read personal order details
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details with items, totals, delivery, payment, events, warnings and actions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailsResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /order/order-history/{orderNumber}/repeat:
+    post:
+      tags: [OrderHistory]
+      operationId: repeatOrder
+      summary: Repeat available order lines into the matching cart context
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Repeat order result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepeatOrderResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
   parameters:
     CheckoutId:
@@ -533,6 +624,131 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ValidationReasonResponse'
+    OrderHistoryPageResponse:
+      type: object
+      required: [items, page, size, totalElements, hasNext]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderHistoryItemResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        hasNext:
+          type: boolean
+    OrderHistoryItemResponse:
+      type: object
+      required: [orderNumber, orderType, campaignId, createdAt, orderStatus, paymentStatus, deliveryStatus, grandTotalAmount]
+      properties:
+        orderNumber:
+          type: string
+        orderType:
+          $ref: '#/components/schemas/CheckoutType'
+        campaignId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        orderStatus:
+          type: string
+        paymentStatus:
+          type: string
+        deliveryStatus:
+          type: string
+        grandTotalAmount:
+          type: number
+        summaryItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderHistoryLineResponse'
+    OrderDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/OrderHistoryItemResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderHistoryLineResponse'
+            events:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderHistoryEventResponse'
+            warnings:
+              type: array
+              items:
+                $ref: '#/components/schemas/ValidationReasonResponse'
+            paymentActionAvailable:
+              type: boolean
+            repeatOrderAvailable:
+              type: boolean
+            claimAvailable:
+              type: boolean
+    OrderHistoryLineResponse:
+      type: object
+      required: [productCode, sku, productName, quantity, unitPrice, totalPrice]
+      properties:
+        productCode:
+          type: string
+        sku:
+          type: string
+        productName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+        gift:
+          type: boolean
+        repeatAvailable:
+          type: boolean
+        claimAvailable:
+          type: boolean
+        limitationReasonMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+    OrderHistoryEventResponse:
+      type: object
+      required: [eventType, publicStatus, sourceSystem, occurredAt]
+      properties:
+        eventType:
+          type: string
+        publicStatus:
+          type: string
+        sourceSystem:
+          type: string
+        descriptionMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+        occurredAt:
+          type: string
+          format: date-time
+    RepeatOrderResponse:
+      type: object
+      required: [status, targetCartType, addedItems, rejectedItems]
+      properties:
+        status:
+          type: string
+          enum: [COMPLETED, PARTIAL, REJECTED]
+        targetCartType:
+          $ref: '#/components/schemas/CheckoutType'
+        addedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderHistoryLineResponse'
+        rejectedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderHistoryLineResponse'
+        reasonMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
     ErrorResponse:
       type: object
       required: [code]
