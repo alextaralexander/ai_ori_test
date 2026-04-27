@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860">
+  <title>Feature 027 admin CMS documents versions SEO layout</title>
+  <rect width="1280" height="860" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="64" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="32" y="40" font-family="Arial" font-size="22">CMS documents, versions, publication and SEO</text>
+  <rect x="36" y="96" width="380" height="704" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="60" y="130" font-family="Arial" font-size="16">Document metadata</text>
+  <g font-family="Arial" font-size="12">
+    <rect x="60" y="154" width="332" height="34" fill="#ffffff" stroke="#6b7280"/><text x="72" y="176">documentType</text>
+    <rect x="60" y="202" width="160" height="34" fill="#ffffff" stroke="#6b7280"/><text x="72" y="224">versionLabel</text>
+    <rect x="232" y="202" width="160" height="34" fill="#ffffff" stroke="#6b7280"/><text x="244" y="224">effectiveFrom</text>
+    <rect x="60" y="250" width="332" height="58" fill="#ffffff" stroke="#6b7280"/><text x="72" y="282">attachmentFileId / checksum / mimeType</text>
+    <rect x="60" y="328" width="152" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="92" y="350">Upload</text>
+    <rect x="240" y="328" width="152" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="270" y="350">Replace</text>
+  </g>
+  <text x="60" y="414" font-family="Arial" font-size="16">Version history</text>
+  <rect x="60" y="440" width="332" height="60" fill="#f9fafb" stroke="#9ca3af"/><text x="78" y="474" font-family="Arial" font-size="12">v3 draft - current edit</text>
+  <rect x="60" y="512" width="332" height="60" fill="#f9fafb" stroke="#9ca3af"/><text x="78" y="546" font-family="Arial" font-size="12">v2 published - active</text>
+  <rect x="60" y="584" width="332" height="60" fill="#f9fafb" stroke="#9ca3af"/><text x="78" y="618" font-family="Arial" font-size="12">v1 archived</text>
+  <rect x="452" y="96" width="380" height="704" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="476" y="130" font-family="Arial" font-size="16">Publication schedule</text>
+  <rect x="476" y="158" width="332" height="70" fill="#ffffff" stroke="#6b7280"/><text x="494" y="198" font-family="Arial" font-size="12">publishAt / unpublishAt / timezone</text>
+  <rect x="476" y="258" width="332" height="94" fill="#f9fafb" stroke="#9ca3af"/><text x="494" y="292" font-family="Arial" font-size="12">Status timeline with allowed transitions</text><text x="494" y="322" font-family="Arial" font-size="12">DRAFT, REVIEW, SCHEDULED, PUBLISHED</text>
+  <text x="476" y="410" font-family="Arial" font-size="16">SEO panel</text>
+  <g font-family="Arial" font-size="12">
+    <rect x="476" y="438" width="332" height="34" fill="#ffffff" stroke="#6b7280"/><text x="488" y="460">slug</text>
+    <rect x="476" y="486" width="332" height="34" fill="#ffffff" stroke="#6b7280"/><text x="488" y="508">title</text>
+    <rect x="476" y="534" width="332" height="54" fill="#ffffff" stroke="#6b7280"/><text x="488" y="566">description</text>
+    <rect x="476" y="602" width="332" height="34" fill="#ffffff" stroke="#6b7280"/><text x="488" y="624">canonicalUrl</text>
+    <rect x="476" y="650" width="160" height="34" fill="#ffffff" stroke="#6b7280"/><text x="488" y="672">robotsPolicy</text>
+  </g>
+  <rect x="868" y="96" width="360" height="704" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="892" y="130" font-family="Arial" font-size="16">Relations and public impact</text>
+  <rect x="892" y="158" width="312" height="72" fill="#f9fafb" stroke="#9ca3af"/><text x="910" y="192" font-family="Arial" font-size="12">products, catalogs, campaign, related materials</text>
+  <rect x="892" y="260" width="312" height="136" fill="#ffffff" stroke="#6b7280"/><text x="910" y="292" font-family="Arial" font-size="12">Public render checks</text><text x="910" y="322" font-family="Arial" font-size="12">News, FAQ, documents, home blocks</text>
+  <rect x="892" y="430" width="312" height="180" fill="#f9fafb" stroke="#9ca3af"/><text x="910" y="464" font-family="Arial" font-size="12">Audit trail: actor, actionCode, old/new, comment</text>
+  <rect x="892" y="650" width="142" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="918" y="672" font-family="Arial" font-size="12">Schedule</text>
+  <rect x="1062" y="650" width="142" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="1092" y="672" font-family="Arial" font-size="12">Archive</text>
+</svg>

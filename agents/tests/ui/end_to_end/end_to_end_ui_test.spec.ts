@@ -24,3 +24,4 @@ import '../feature_023_сотрудник_настройки_и_повышенн
 import '../feature_024_аутентификация_роли_и_имперсонация/feature_ui_flow';
 import '../feature_025_уведомления_офлайн_i18n_и_аналитика/feature_ui_flow';
 import '../feature_026_админ_rbac_и_учетные_записи/feature_ui_flow';
+import '../feature_027_админ_cms_контент_новости_faq_документы/feature_ui_flow';

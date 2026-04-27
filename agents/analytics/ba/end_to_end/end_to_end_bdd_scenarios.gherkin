@@ -205,3 +205,16 @@
     Когда администратор обновляет контент, каталог, кампанию, WMS-настройки или пользователей
     Тогда публичные, заказные, партнерские и employee-сценарии используют актуальные данные
     И предопределенные сообщения API остаются mnemonic-кодами `STR_MNEMO_*`
+
+  Сценарий: Контент-администратор публикует CMS-материалы для публичного сайта
+    Допустим контент-администратор авторизован и имеет permission scope `ADMIN_CMS_MANAGE`
+    И юридический reviewer авторизован и имеет permission scope `ADMIN_CMS_LEGAL_REVIEW`
+    Когда контент-администратор открывает `/admin/cms`
+    И создает новость, FAQ-запись и документ с SEO metadata, structured blocks и publication window
+    И отправляет материалы на editorial и legal review
+    И reviewer подтверждает версии
+    И CMS публикует approved versions через immediate publish или scheduler
+    Тогда публичная главная, лента новостей, FAQ и документы получают только published render models
+    И пользователь не видит draft, rejected, archived или future scheduled материалы
+    И audit trail содержит создание, review decision, публикацию, materialId, versionId, actorUserId и correlationId
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_CMS_*` для предопределенных сообщений

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <title>Feature 027 admin CMS materials table layout</title>
+  <rect x="0" y="0" width="1280" height="820" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="64" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="32" y="40" font-family="Arial" font-size="22">Admin CMS: материалы, новости, FAQ, документы</text>
+  <rect x="0" y="64" width="244" height="756" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="24" y="112" font-family="Arial" font-size="16">Навигация admin</text>
+  <text x="24" y="154" font-family="Arial" font-size="14">RBAC</text>
+  <text x="24" y="184" font-family="Arial" font-size="14">CMS</text>
+  <text x="24" y="214" font-family="Arial" font-size="14">PIM</text>
+  <text x="24" y="244" font-family="Arial" font-size="14">Каталоги</text>
+  <rect x="276" y="96" width="950" height="88" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="300" y="126" font-family="Arial" font-size="16">Фильтры: тип, статус, язык, аудитория, reviewer, publishAt, теги, поиск</text>
+  <rect x="300" y="144" width="140" height="28" fill="#ffffff" stroke="#6b7280"/><text x="312" y="164" font-family="Arial" font-size="12">materialType</text>
+  <rect x="452" y="144" width="120" height="28" fill="#ffffff" stroke="#6b7280"/><text x="464" y="164" font-family="Arial" font-size="12">status</text>
+  <rect x="584" y="144" width="120" height="28" fill="#ffffff" stroke="#6b7280"/><text x="596" y="164" font-family="Arial" font-size="12">language</text>
+  <rect x="716" y="144" width="180" height="28" fill="#ffffff" stroke="#6b7280"/><text x="728" y="164" font-family="Arial" font-size="12">search title/slug</text>
+  <rect x="1038" y="142" width="160" height="32" fill="#e5e7eb" stroke="#6b7280"/><text x="1062" y="164" font-family="Arial" font-size="13">Создать материал</text>
+  <rect x="276" y="216" width="950" height="496" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="300" y="250" font-family="Arial" font-size="15">Таблица материалов</text>
+  <line x1="300" y1="276" x2="1198" y2="276" stroke="#9ca3af"/>
+  <text x="300" y="302" font-family="Arial" font-size="12">Тип</text>
+  <text x="404" y="302" font-family="Arial" font-size="12">Заголовок / slug</text>
+  <text x="642" y="302" font-family="Arial" font-size="12">Статус</text>
+  <text x="760" y="302" font-family="Arial" font-size="12">Публикация</text>
+  <text x="902" y="302" font-family="Arial" font-size="12">Reviewer</text>
+  <text x="1056" y="302" font-family="Arial" font-size="12">Действия</text>
+  <g font-family="Arial" font-size="12">
+    <rect x="300" y="322" width="898" height="52" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="310" y="352">NEWS</text><text x="404" y="352">Весенняя кампания / spring-campaign-editorial</text><text x="642" y="352">PUBLISHED</text><text x="760" y="352">27.04-18.05</text><text x="902" y="352">Мария</text><text x="1056" y="352">edit preview audit</text>
+    <rect x="300" y="384" width="898" height="52" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="310" y="414">DOCUMENT</text><text x="404" y="414">Правила продажи / terms-of-sale</text><text x="642" y="414">LEGAL_REVIEW</text><text x="760" y="414">scheduled</text><text x="902" y="414">Юрист</text><text x="1056" y="414">review diff</text>
+    <rect x="300" y="446" width="898" height="52" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="310" y="476">FAQ_ITEM</text><text x="404" y="476">Доставка / delivery-faq</text><text x="642" y="476">DRAFT</text><text x="760" y="476">not set</text><text x="902" y="476">-</text><text x="1056" y="476">edit submit</text>
+  </g>
+  <rect x="276" y="732" width="950" height="48" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="300" y="762" font-family="Arial" font-size="13">Bulk actions: submit to review, schedule, archive, export audit</text>
+</svg>

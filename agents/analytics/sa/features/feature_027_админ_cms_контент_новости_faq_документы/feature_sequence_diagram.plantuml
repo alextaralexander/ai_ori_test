@@ -1,0 +1,86 @@
+@startuml
+title Feature 027 admin CMS sequence
+
+actor "Контент-администратор" as Admin
+actor "Редактор" as Editor
+actor "Юридический reviewer" as Legal
+participant "Frontend AdminCmsView" as FE
+participant "Auth/RBAC context" as Auth
+participant "admin-cms controller" as Controller
+participant "admin-cms service" as Service
+participant "admin-cms validator" as Validator
+database "admin-cms storage" as DB
+collections "S3/MinIO file references" as S3
+participant "public-content projection" as Public
+
+Admin -> FE: opens /admin/cms
+FE -> Auth: read session permissions
+Auth --> FE: ADMIN_CMS_MANAGE, ADMIN_CMS_REVIEW
+FE -> Controller: GET /api/admin-cms/materials
+Controller -> Service: searchMaterials(filters, actor)
+Service -> DB: query materials allowed by scope
+DB --> Service: material summaries
+Service --> Controller: AdminCmsMaterialListResponse
+Controller --> FE: 200 list
+
+Editor -> FE: create NEWS/FAQ/DOCUMENT draft
+FE -> Controller: POST /api/admin-cms/materials
+Controller -> Service: createMaterial(request, actor, correlationId)
+Service -> Validator: validate type, slug, blocks, SEO, document metadata
+Validator --> Service: valid or mnemonic error
+Service -> DB: insert material, version, blocks, seo, relations, audit
+DB --> Service: persisted draft
+Service --> Controller: detail + STR_MNEMO_ADMIN_CMS_MATERIAL_SAVED
+Controller --> FE: 201 detail
+
+FE -> Controller: POST /api/admin-cms/materials/{id}/preview
+Controller -> Service: buildPreview(materialId, actor)
+Service -> DB: read draft version and blocks
+Service --> Controller: preview render model
+Controller --> FE: 200 preview without publication
+
+Editor -> FE: submit to review
+FE -> Controller: POST /materials/{id}/submit-review
+Controller -> Service: submitReview(materialId, actor)
+Service -> Validator: validate lifecycle and required fields
+Service -> DB: update status IN_REVIEW or LEGAL_REVIEW, write audit
+DB --> Service: updated material
+Service --> Controller: detail
+Controller --> FE: 200 detail
+
+Legal -> FE: approve legal document
+FE -> Controller: POST /materials/{id}/review
+Controller -> Service: applyReview(APPROVED, comment, actor)
+Service -> Validator: validate reviewer scope and legal requirements
+Service -> DB: insert review decision, update version APPROVED, audit
+DB --> Service: approved version
+Service --> Controller: STR_MNEMO_ADMIN_CMS_REVIEW_APPROVED
+Controller --> FE: 200 detail
+
+Admin -> FE: schedule or publish
+FE -> Controller: POST /materials/{id}/publish
+Controller -> Service: publish(materialId, publishAt, unpublishAt, actor)
+Service -> Validator: validate approved version and publication window
+Service -> DB: update material SCHEDULED or PUBLISHED, audit
+Service -> Public: expose published render model only when active
+Public --> Service: projection updated
+Service --> Controller: STR_MNEMO_ADMIN_CMS_MATERIAL_PUBLISHED
+Controller --> FE: 200 detail
+
+Admin -> FE: rollback previous version
+FE -> Controller: POST /materials/{id}/versions/{versionId}/rollback
+Controller -> Service: rollback(materialId, versionId, actor)
+Service -> DB: copy previous version to new DRAFT, audit
+DB --> Service: new draft version
+Service --> Controller: 201 detail
+Controller --> FE: detail
+
+Admin -> FE: open audit
+FE -> Controller: GET /api/admin-cms/audit
+Controller -> Service: searchAudit(filters, actor)
+Service -> DB: query immutable audit events
+DB --> Service: events without secrets/private paths
+Service --> Controller: AdminCmsAuditResponse
+Controller --> FE: 200 audit
+
+@enduml

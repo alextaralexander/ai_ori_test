@@ -11,6 +11,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
+import { AdminCmsView } from './components/AdminCmsView';
 import { AdminRbacView } from './components/AdminRbacView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
@@ -59,6 +60,9 @@ const testLoginRoles = new Set([
   'security-admin',
   'hr-admin',
   'auditor',
+  'content-admin',
+  'cms-editor',
+  'legal-reviewer',
 ]);
 
 function resolveAudience(): Audience {
@@ -333,6 +337,12 @@ function App() {
     contentView = <AdminRbacView section="service-accounts" />;
   } else if (path === '/admin/rbac/audit') {
     contentView = <AdminRbacView section="audit" />;
+  } else if (path === '/admin/cms') {
+    contentView = <AdminCmsView />;
+  } else if (path === '/admin/cms/review') {
+    contentView = <AdminCmsView section="review" />;
+  } else if (path === '/admin/cms/audit') {
+    contentView = <AdminCmsView section="audit" />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

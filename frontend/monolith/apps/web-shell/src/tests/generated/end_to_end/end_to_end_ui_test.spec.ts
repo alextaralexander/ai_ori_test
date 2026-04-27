@@ -1,4 +1,4 @@
-// GENERATED FROM agents/tests/ui/end_to_end/end_to_end_ui_test.spec.ts - DO NOT EDIT MANUALLY.
+// GENERATED FROM agents/tests/. Do not edit this runtime copy manually.
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
 import '../feature_002_контентные_страницы_и_новости/feature_ui_flow';
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
@@ -25,3 +25,4 @@ import '../feature_023_сотрудник_настройки_и_повышенн
 import '../feature_024_аутентификация_роли_и_имперсонация/feature_ui_flow';
 import '../feature_025_уведомления_офлайн_i18n_и_аналитика/feature_ui_flow';
 import '../feature_026_админ_rbac_и_учетные_записи/feature_ui_flow';
+import '../feature_027_админ_cms_контент_новости_faq_документы/feature_ui_flow';

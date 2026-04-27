@@ -1,0 +1,81 @@
+# language: ru
+Функция: Feature 027. Админ CMS управляет контентом, новостями, FAQ и документами
+  Чтобы публичные разделы Best Ori Gin показывали актуальный согласованный контент
+  Как контент-администратор, редактор и юридический reviewer
+  Я хочу создавать, согласовывать, планировать, публиковать и архивировать CMS-материалы с audit trail
+
+  Предыстория:
+    Допустим пользователь логинится как контент-администратор с permission scope "ADMIN_CMS_MANAGE"
+    И backend выдал активную admin session с доступом к material types "NEWS, ARTICLE, CONTENT_PAGE, FAQ_ITEM, DOCUMENT, OFFER_PAGE, HOME_BLOCK"
+    И в CMS существуют опубликованные публичные материалы feature #001, #002 и #003
+
+  Сценарий: Контент-администратор создает новость и публикует ее после review
+    Когда контент-администратор создает материал типа "NEWS" с уникальным slug "spring-campaign-editorial"
+    И добавляет блоки "HERO", "RICH_TEXT", "CTA" и связь с catalogId "CAT-SPRING-2026"
+    И отправляет материал в review
+    И reviewer подтверждает версию с комментарием "Готово к публикации"
+    И контент-администратор публикует утвержденную версию
+    Тогда backend возвращает статус материала "PUBLISHED"
+    И публичная лента новостей получает опубликованную render model без draft полей
+    И audit trail содержит события "ADMIN_CMS_MATERIAL_CREATED", "ADMIN_CMS_REVIEW_APPROVED" и "ADMIN_CMS_MATERIAL_PUBLISHED"
+
+  Сценарий: Редактор получает конфликт slug до отправки материала на review
+    Когда редактор создает материал типа "CONTENT_PAGE" со slug, который уже используется в том же языке
+    Тогда backend отклоняет сохранение с HTTP 409
+    И response содержит mnemonic "STR_MNEMO_ADMIN_CMS_SLUG_CONFLICT"
+    И frontend показывает локализованное сообщение из i18n dictionaries
+    И новая версия материала не создается
+
+  Сценарий: Юридический reviewer отклоняет документ без актуального вложения
+    Когда редактор создает материал типа "DOCUMENT" с documentType "TERMS_OF_SALE"
+    И не указывает attachmentFileId или effectiveFrom
+    И отправляет документ на legal review
+    Тогда backend отклоняет переход с HTTP 400
+    И response содержит mnemonic "STR_MNEMO_ADMIN_CMS_DOCUMENT_INVALID"
+    И audit trail фиксирует validation failure без приватных storage paths
+
+  Сценарий: Публикация юридического документа требует legal approval
+    Когда редактор создает документ "PARTNER_AGREEMENT" с attachmentFileId "file-legal-001" и versionLabel "2026.04"
+    И отправляет документ на legal review
+    И юридический reviewer подтверждает версию
+    И контент-администратор планирует публикацию на будущую дату
+    Тогда материал получает статус "SCHEDULED"
+    И scheduler публикует документ при наступлении publishAt
+    И публичный раздел документов показывает новую актуальную версию и дату вступления в силу
+
+  Сценарий: Preview draft версии не меняет публичный контент
+    Когда редактор обновляет опубликованную FAQ-запись и добавляет новый блок ответа
+    И открывает preview draft версии в desktop и mobile режимах
+    Тогда preview endpoint возвращает render model draft версии
+    И публичный FAQ продолжает показывать ранее опубликованную версию
+    И статус материала остается "DRAFT" или "IN_REVIEW"
+
+  Сценарий: Контент-администратор откатывает опубликованную страницу к предыдущей версии
+    Когда контент-администратор открывает список версий опубликованной страницы
+    И выбирает предыдущую версию для rollback
+    Тогда backend создает новую draft version на основе выбранной версии
+    И исходные версии остаются неизменяемыми
+    И audit trail содержит событие "ADMIN_CMS_VERSION_ROLLED_BACK" с oldValue и newValue
+
+  Сценарий: Пользователь без CMS scope не может изменить материал
+    Допустим пользователь логинится как администратор без permission scope "ADMIN_CMS_MANAGE"
+    Когда пользователь пытается архивировать опубликованную новость
+    Тогда backend возвращает HTTP 403
+    И response содержит mnemonic "STR_MNEMO_ADMIN_CMS_ACCESS_DENIED"
+    И статус новости не меняется
+    И audit trail фиксирует forbidden attempt с correlationId
+
+  Сценарий: SEO validation запрещает публикацию материала с некорректными метаданными
+    Когда SEO-специалист задает canonical URL "not-a-valid-url" для offer page
+    И отправляет материал на публикацию
+    Тогда backend возвращает HTTP 400
+    И response содержит mnemonic "STR_MNEMO_ADMIN_CMS_SEO_INVALID"
+    И frontend подсвечивает SEO panel через локализованные validation messages
+
+  Сценарий: End-to-end контентный поток от CMS до публичного сайта
+    Когда контент-администратор создает новость, FAQ и документ для текущей кампании
+    И reviewer подтверждает материалы
+    И scheduler публикует материалы в активное окно публикации
+    Тогда публичные маршруты главной, новостей, FAQ и документов получают опубликованные render models
+    И пользователь не видит draft, rejected, archived или future scheduled материалы
+    И audit trail содержит полную цепочку создания, review, публикации и публичной доступности

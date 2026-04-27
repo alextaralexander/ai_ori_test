@@ -1,0 +1,421 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Admin CMS API - Feature 027
+  version: 1.0.0
+  description: Admin CMS endpoints for content, news, FAQ, documents, offer pages, review, publication, preview, versions and audit.
+servers:
+  - url: /api/admin-cms
+paths:
+  /materials:
+    get:
+      tags: [Admin CMS Materials]
+      summary: Search CMS materials
+      parameters:
+        - $ref: '#/components/parameters/MaterialType'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: CMS material list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Admin CMS Materials]
+      summary: Create CMS material draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCmsMaterialUpsertRequest'
+      responses:
+        '201':
+          description: Created material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /materials/{materialId}:
+    get:
+      tags: [Admin CMS Materials]
+      summary: Get material detail
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '200':
+          description: Material detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Admin CMS Materials]
+      summary: Update material and create or update draft version
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCmsMaterialUpsertRequest'
+      responses:
+        '200':
+          description: Updated material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /materials/{materialId}/submit-review:
+    post:
+      tags: [Admin CMS Workflow]
+      summary: Submit draft version to review
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '200':
+          description: Submitted material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+  /materials/{materialId}/review:
+    post:
+      tags: [Admin CMS Workflow]
+      summary: Approve or reject material version
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCmsReviewRequest'
+      responses:
+        '200':
+          description: Review decision applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /materials/{materialId}/publish:
+    post:
+      tags: [Admin CMS Workflow]
+      summary: Publish approved material version immediately or schedule it
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCmsPublishRequest'
+      responses:
+        '200':
+          description: Published or scheduled material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /materials/{materialId}/archive:
+    post:
+      tags: [Admin CMS Workflow]
+      summary: Archive material
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '204':
+          description: Material archived
+  /materials/{materialId}/preview:
+    post:
+      tags: [Admin CMS Preview]
+      summary: Build preview render model for draft version
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '200':
+          description: Preview render model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsPreviewResponse'
+  /materials/{materialId}/versions:
+    get:
+      tags: [Admin CMS Versions]
+      summary: List material versions
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '200':
+          description: Version list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsVersionListResponse'
+  /materials/{materialId}/versions/{versionId}/rollback:
+    post:
+      tags: [Admin CMS Versions]
+      summary: Create draft version from previous version
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+        - $ref: '#/components/parameters/VersionId'
+      responses:
+        '201':
+          description: Rollback draft version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsMaterialDetailResponse'
+  /audit:
+    get:
+      tags: [Admin CMS Audit]
+      summary: Search CMS audit trail
+      parameters:
+        - name: materialId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: CMS audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCmsAuditResponse'
+components:
+  parameters:
+    MaterialId:
+      name: materialId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    VersionId:
+      name: versionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    MaterialType:
+      name: materialType
+      in: query
+      schema:
+        $ref: '#/components/schemas/AdminCmsMaterialType'
+    Status:
+      name: status
+      in: query
+      schema:
+        $ref: '#/components/schemas/AdminCmsMaterialStatus'
+    Language:
+      name: language
+      in: query
+      schema: { type: string, example: ru }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+  responses:
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminCmsErrorResponse'
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminCmsErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminCmsErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminCmsErrorResponse'
+  schemas:
+    AdminCmsMaterialType:
+      type: string
+      enum: [NEWS, ARTICLE, CONTENT_PAGE, FAQ_ITEM, DOCUMENT, OFFER_PAGE, HOME_BLOCK]
+    AdminCmsMaterialStatus:
+      type: string
+      enum: [DRAFT, IN_REVIEW, LEGAL_REVIEW, APPROVED, SCHEDULED, PUBLISHED, ARCHIVED, REJECTED]
+    AdminCmsMaterialListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCmsMaterialSummary'
+        total: { type: integer, format: int64 }
+    AdminCmsMaterialSummary:
+      type: object
+      required: [materialId, materialType, language, slug, title, status, updatedAt]
+      properties:
+        materialId: { type: string, format: uuid }
+        materialType: { $ref: '#/components/schemas/AdminCmsMaterialType' }
+        language: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        status: { $ref: '#/components/schemas/AdminCmsMaterialStatus' }
+        publishAt: { type: string, format: date-time, nullable: true }
+        unpublishAt: { type: string, format: date-time, nullable: true }
+        reviewerUserId: { type: string, format: uuid, nullable: true }
+        updatedAt: { type: string, format: date-time }
+    AdminCmsMaterialDetailResponse:
+      type: object
+      required: [material, activeVersion, auditRecorded]
+      properties:
+        material:
+          $ref: '#/components/schemas/AdminCmsMaterialSummary'
+        activeVersion:
+          $ref: '#/components/schemas/AdminCmsMaterialVersion'
+        auditRecorded: { type: boolean }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_CMS_MATERIAL_SAVED }
+    AdminCmsMaterialVersion:
+      type: object
+      required: [versionId, versionNumber, blocks, seo]
+      properties:
+        versionId: { type: string, format: uuid }
+        versionNumber: { type: integer }
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCmsContentBlock'
+        seo:
+          $ref: '#/components/schemas/AdminCmsSeoMetadata'
+        document:
+          $ref: '#/components/schemas/AdminCmsDocumentMetadata'
+    AdminCmsContentBlock:
+      type: object
+      required: [blockType, sortOrder, payload]
+      properties:
+        blockType:
+          type: string
+          enum: [RICH_TEXT, HERO, IMAGE, FAQ_GROUP, DOCUMENT_LINK, PRODUCT_LINK, CATALOG_LINK, CTA, LEGAL_NOTICE]
+        sortOrder: { type: integer }
+        payload: { type: object, additionalProperties: true }
+    AdminCmsSeoMetadata:
+      type: object
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        canonicalUrl: { type: string }
+        robotsPolicy: { type: string }
+        breadcrumbTitle: { type: string }
+    AdminCmsDocumentMetadata:
+      type: object
+      properties:
+        documentType: { type: string }
+        versionLabel: { type: string }
+        effectiveFrom: { type: string, format: date }
+        required: { type: boolean }
+        attachmentFileId: { type: string }
+        checksum: { type: string }
+    AdminCmsMaterialUpsertRequest:
+      type: object
+      required: [materialType, language, slug, title, audience, blocks, seo]
+      properties:
+        materialType: { $ref: '#/components/schemas/AdminCmsMaterialType' }
+        language: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        audience: { type: string }
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCmsContentBlock'
+        seo:
+          $ref: '#/components/schemas/AdminCmsSeoMetadata'
+        document:
+          $ref: '#/components/schemas/AdminCmsDocumentMetadata'
+    AdminCmsReviewRequest:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED, RETURNED_TO_DRAFT]
+        comment: { type: string }
+    AdminCmsPublishRequest:
+      type: object
+      properties:
+        publishAt: { type: string, format: date-time, nullable: true }
+        unpublishAt: { type: string, format: date-time, nullable: true }
+    AdminCmsPreviewResponse:
+      type: object
+      required: [materialId, versionId, renderModel]
+      properties:
+        materialId: { type: string, format: uuid }
+        versionId: { type: string, format: uuid }
+        renderModel: { type: object, additionalProperties: true }
+    AdminCmsVersionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCmsMaterialVersion'
+    AdminCmsAuditResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              eventId: { type: string, format: uuid }
+              actionCode: { type: string }
+              materialId: { type: string, format: uuid }
+              versionId: { type: string, format: uuid }
+              actorUserId: { type: string, format: uuid }
+              correlationId: { type: string }
+              occurredAt: { type: string, format: date-time }
+    AdminCmsErrorResponse:
+      type: object
+      required: [messageCode]
+      properties:
+        messageCode:
+          type: string
+          enum:
+            - STR_MNEMO_ADMIN_CMS_ACCESS_DENIED
+            - STR_MNEMO_ADMIN_CMS_SLUG_CONFLICT
+            - STR_MNEMO_ADMIN_CMS_CONTENT_INVALID
+            - STR_MNEMO_ADMIN_CMS_DOCUMENT_INVALID
+            - STR_MNEMO_ADMIN_CMS_SEO_INVALID
+            - STR_MNEMO_ADMIN_CMS_VERSION_CONFLICT
+            - STR_MNEMO_ADMIN_CMS_PUBLICATION_INVALID
+        details:
+          type: array
+          items: { type: string }

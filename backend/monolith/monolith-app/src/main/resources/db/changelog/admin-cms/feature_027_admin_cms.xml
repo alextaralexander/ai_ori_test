@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-027-admin-cms-documentation-baseline" author="codex">
+        <comment>Feature 027 target schema baseline for admin CMS materials, versions, blocks, SEO, review and audit. Runtime uses in-memory storage until persistence wiring is enabled.</comment>
+        <createTable tableName="admin_cms_material">
+            <column name="material_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="material_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_code" type="varchar(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="slug" type="varchar(180)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(240)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summary" type="varchar(1000)"/>
+            <column name="audience" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="uuid"/>
+            <column name="reviewer_user_id" type="uuid"/>
+            <column name="active_version_id" type="uuid"/>
+            <column name="publish_at" type="timestamp with time zone"/>
+            <column name="unpublish_at" type="timestamp with time zone"/>
+            <column name="archived_at" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+            <column name="version_number" type="bigint"/>
+        </createTable>
+        <createTable tableName="admin_cms_material_version">
+            <column name="version_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="material_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(240)"/>
+            <column name="summary" type="varchar(1000)"/>
+            <column name="document_type" type="varchar(64)"/>
+            <column name="document_version_label" type="varchar(64)"/>
+            <column name="document_effective_from" type="date"/>
+            <column name="document_required" type="boolean"/>
+            <column name="attachment_file_id" type="varchar(120)"/>
+            <column name="checksum" type="varchar(128)"/>
+            <column name="created_by_user_id" type="uuid"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="approved_by_user_id" type="uuid"/>
+            <column name="approved_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_cms_content_block">
+            <column name="block_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="version_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="block_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload_json" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_cms_seo_metadata">
+            <column name="seo_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="version_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seo_slug" type="varchar(180)"/>
+            <column name="seo_title" type="varchar(240)"/>
+            <column name="seo_description" type="varchar(500)"/>
+            <column name="canonical_url" type="varchar(500)"/>
+            <column name="robots_policy" type="varchar(64)"/>
+            <column name="breadcrumb_title" type="varchar(180)"/>
+            <column name="social_image_file_id" type="varchar(120)"/>
+        </createTable>
+        <createTable tableName="admin_cms_audit_event">
+            <column name="event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="material_id" type="uuid"/>
+            <column name="version_id" type="uuid"/>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="action_code" type="varchar(80)"/>
+            <column name="old_value_json" type="jsonb"/>
+            <column name="new_value_json" type="jsonb"/>
+            <column name="source_route" type="varchar(240)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <createIndex tableName="admin_cms_material" indexName="ux_admin_cms_material_type_lang_slug" unique="true">
+            <column name="material_type"/>
+            <column name="language_code"/>
+            <column name="slug"/>
+        </createIndex>
+        <createIndex tableName="admin_cms_audit_event" indexName="ix_admin_cms_audit_material">
+            <column name="material_id"/>
+            <column name="occurred_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

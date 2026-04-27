@@ -1,0 +1,110 @@
+@startuml
+title Feature 027 admin-cms ER changes
+
+entity admin_cms_material {
+  * material_id : uuid <<PK>>
+  --
+  material_type : varchar(32)
+  language_code : varchar(8)
+  slug : varchar(180)
+  title : varchar(240)
+  summary : varchar(1000)
+  audience : varchar(64)
+  status : varchar(32)
+  owner_user_id : uuid
+  reviewer_user_id : uuid
+  active_version_id : uuid <<FK>>
+  publish_at : timestamptz
+  unpublish_at : timestamptz
+  archived_at : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
+  version_number : bigint
+}
+
+entity admin_cms_material_version {
+  * version_id : uuid <<PK>>
+  --
+  material_id : uuid <<FK>>
+  version_number : int
+  status : varchar(32)
+  title : varchar(240)
+  summary : varchar(1000)
+  document_type : varchar(64)
+  document_version_label : varchar(64)
+  document_effective_from : date
+  document_required : boolean
+  attachment_file_id : varchar(120)
+  checksum : varchar(128)
+  created_by_user_id : uuid
+  created_at : timestamptz
+  approved_by_user_id : uuid
+  approved_at : timestamptz
+}
+
+entity admin_cms_content_block {
+  * block_id : uuid <<PK>>
+  --
+  version_id : uuid <<FK>>
+  block_type : varchar(32)
+  sort_order : int
+  payload_json : jsonb
+  created_at : timestamptz
+}
+
+entity admin_cms_seo_metadata {
+  * seo_id : uuid <<PK>>
+  --
+  version_id : uuid <<FK>>
+  seo_slug : varchar(180)
+  seo_title : varchar(240)
+  seo_description : varchar(500)
+  canonical_url : varchar(500)
+  robots_policy : varchar(64)
+  breadcrumb_title : varchar(180)
+  social_image_file_id : varchar(120)
+}
+
+entity admin_cms_relation {
+  * relation_id : uuid <<PK>>
+  --
+  material_id : uuid <<FK>>
+  relation_type : varchar(32)
+  target_id : varchar(120)
+  sort_order : int
+}
+
+entity admin_cms_review_decision {
+  * decision_id : uuid <<PK>>
+  --
+  version_id : uuid <<FK>>
+  reviewer_user_id : uuid
+  decision : varchar(32)
+  comment : varchar(1000)
+  decided_at : timestamptz
+}
+
+entity admin_cms_audit_event {
+  * event_id : uuid <<PK>>
+  --
+  material_id : uuid <<FK>>
+  version_id : uuid <<FK>>
+  actor_user_id : uuid
+  action_code : varchar(80)
+  old_value_json : jsonb
+  new_value_json : jsonb
+  comment : varchar(1000)
+  source_route : varchar(240)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+admin_cms_material ||--o{ admin_cms_material_version : versions
+admin_cms_material_version ||--o{ admin_cms_content_block : blocks
+admin_cms_material_version ||--|| admin_cms_seo_metadata : seo
+admin_cms_material ||--o{ admin_cms_relation : relations
+admin_cms_material_version ||--o{ admin_cms_review_decision : review decisions
+admin_cms_material ||--o{ admin_cms_audit_event : audit events
+admin_cms_material_version ||--o{ admin_cms_audit_event : version events
+
+@enduml

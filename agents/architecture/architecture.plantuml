@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 026
+title Best Ori Gin monolith architecture through feature 027
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -11,6 +11,10 @@ package "frontend/monolith apps/web-shell" {
   [AdminRbac UI]
   [AdminRbacAudit UI]
   [AdminRbacServiceAccounts UI]
+  [AdminCms UI]
+  [AdminCmsEditor UI]
+  [AdminCmsReview UI]
+  [AdminCmsAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -44,6 +48,7 @@ package "backend/monolith/monolith-app" {
   [employee]
   [platform-experience]
   [admin-rbac]
+  [admin-cms]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -66,6 +71,10 @@ cloud "Hybrid Pixel" as hybrid
 [AdminRbac UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/accounts, /roles, /security-policies
 [AdminRbacServiceAccounts UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/service-accounts, /rotate-secret
 [AdminRbacAudit UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/audit-events, /emergency-deactivations
+[AdminCms UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials, /materials/{materialId}
+[AdminCmsEditor UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials, /preview, /publish, /archive
+[AdminCmsReview UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials/{materialId}/review
+[AdminCmsAudit UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/audit
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -89,6 +98,11 @@ cloud "Hybrid Pixel" as hybrid
 [admin-rbac] --> pay : service account scope for payment integration access
 [admin-rbac] --> delivery : service account scope for delivery integration access
 [admin-rbac] --> bonus : service account scope for bonus integration access
+[admin-cms] --> [authorization] : admin CMS permission, scope and elevated checks
+[admin-cms] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-cms] --> [public-content] : published render model projection for home/news/FAQ/documents/offers
+[admin-cms] --> s3 : document/image fileReferenceId metadata, no private storage paths
+[admin-cms] --> db : CMS materials, versions, blocks, SEO, relations, review decisions and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

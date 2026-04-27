@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900">
+  <title>Feature 027 admin CMS editor preview review layout</title>
+  <rect width="1280" height="900" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="64" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="32" y="40" font-family="Arial" font-size="22">CMS editor: draft, blocks, preview, review</text>
+  <rect x="32" y="92" width="370" height="760" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="56" y="126" font-family="Arial" font-size="16">Поля материала</text>
+  <g font-family="Arial" font-size="12">
+    <rect x="56" y="150" width="318" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="172">title</text>
+    <rect x="56" y="196" width="318" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="218">slug</text>
+    <rect x="56" y="242" width="150" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="264">type</text>
+    <rect x="224" y="242" width="150" height="34" fill="#ffffff" stroke="#6b7280"/><text x="236" y="264">language</text>
+    <rect x="56" y="288" width="318" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="310">audience / tags</text>
+    <rect x="56" y="334" width="318" height="54" fill="#ffffff" stroke="#6b7280"/><text x="68" y="364">summary</text>
+  </g>
+  <text x="56" y="430" font-family="Arial" font-size="16">Content blocks</text>
+  <rect x="56" y="452" width="318" height="48" fill="#f9fafb" stroke="#9ca3af"/><text x="72" y="482" font-family="Arial" font-size="12">HERO block</text>
+  <rect x="56" y="512" width="318" height="48" fill="#f9fafb" stroke="#9ca3af"/><text x="72" y="542" font-family="Arial" font-size="12">RICH_TEXT block</text>
+  <rect x="56" y="572" width="318" height="48" fill="#f9fafb" stroke="#9ca3af"/><text x="72" y="602" font-family="Arial" font-size="12">CTA + PRODUCT_LINK block</text>
+  <rect x="56" y="646" width="148" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="82" y="668" font-family="Arial" font-size="12">Add block</text>
+  <rect x="226" y="646" width="148" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="252" y="668" font-family="Arial" font-size="12">Validate</text>
+  <rect x="438" y="92" width="478" height="760" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="462" y="126" font-family="Arial" font-size="16">Preview render model</text>
+  <rect x="462" y="150" width="430" height="56" fill="#f9fafb" stroke="#d1d5db"/><text x="482" y="184" font-family="Arial" font-size="13">Desktop / Mobile segmented control</text>
+  <rect x="462" y="230" width="430" height="222" fill="#ffffff" stroke="#6b7280"/><text x="490" y="266" font-family="Arial" font-size="18">Hero preview</text><text x="490" y="306" font-family="Arial" font-size="13">Заголовок, изображение, CTA, breadcrumb</text>
+  <rect x="462" y="476" width="430" height="180" fill="#ffffff" stroke="#6b7280"/><text x="490" y="512" font-family="Arial" font-size="13">Rich content blocks preview without executable HTML</text>
+  <rect x="462" y="690" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="492" y="712" font-family="Arial" font-size="12">Save draft</text>
+  <rect x="610" y="690" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="636" y="712" font-family="Arial" font-size="12">Submit</text>
+  <rect x="760" y="690" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="788" y="712" font-family="Arial" font-size="12">Publish</text>
+  <rect x="952" y="92" width="296" height="760" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="976" y="126" font-family="Arial" font-size="16">Review queue</text>
+  <rect x="976" y="154" width="248" height="92" fill="#f9fafb" stroke="#9ca3af"/><text x="994" y="186" font-family="Arial" font-size="12">Status timeline</text><text x="994" y="214" font-family="Arial" font-size="12">DRAFT -> IN_REVIEW -> APPROVED</text>
+  <rect x="976" y="274" width="248" height="132" fill="#ffffff" stroke="#6b7280"/><text x="994" y="306" font-family="Arial" font-size="12">Reviewer comment</text>
+  <rect x="976" y="432" width="116" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="1002" y="454" font-family="Arial" font-size="12">Approve</text>
+  <rect x="1108" y="432" width="116" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="1138" y="454" font-family="Arial" font-size="12">Reject</text>
+  <text x="976" y="518" font-family="Arial" font-size="16">Audit side panel</text>
+  <rect x="976" y="542" width="248" height="180" fill="#f9fafb" stroke="#9ca3af"/><text x="994" y="574" font-family="Arial" font-size="12">actionCode, actor, diff, correlationId</text>
+</svg>
