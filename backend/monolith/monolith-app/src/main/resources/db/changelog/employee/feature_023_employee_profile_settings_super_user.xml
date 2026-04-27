@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-023-employee-profile-settings" author="codex">
+        <createTable tableName="employee_profile_settings">
+            <column name="employee_id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="display_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_title" type="varchar(128)"/>
+            <column name="department_code" type="varchar(64)"/>
+            <column name="preferred_language" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timezone" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_channel" type="varchar(32)"/>
+            <column name="employee_status" type="varchar(32)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-023-employee-profile-child-tables" author="codex">
+        <createTable tableName="employee_contact">
+            <column name="contact_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_value_encrypted" type="text"/>
+            <column name="masked_value" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_flag" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verification_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_contact" baseColumnNames="employee_id"
+                                 constraintName="fk_employee_contact_profile"
+                                 referencedTableName="employee_profile_settings" referencedColumnNames="employee_id"/>
+        <createIndex tableName="employee_contact" indexName="idx_employee_contact_employee">
+            <column name="employee_id"/>
+        </createIndex>
+
+        <createTable tableName="employee_address">
+            <column name="address_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_code" type="varchar(32)"/>
+            <column name="city" type="varchar(128)"/>
+            <column name="address_line" type="varchar(512)"/>
+            <column name="postal_code" type="varchar(32)"/>
+            <column name="active_flag" type="boolean" defaultValueBoolean="true"/>
+            <column name="valid_from" type="date"/>
+            <column name="valid_to" type="date"/>
+            <column name="version" type="bigint" defaultValueNumeric="1"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_address" baseColumnNames="employee_id"
+                                 constraintName="fk_employee_address_profile"
+                                 referencedTableName="employee_profile_settings" referencedColumnNames="employee_id"/>
+        <createIndex tableName="employee_address" indexName="idx_employee_address_employee_region">
+            <column name="employee_id"/>
+            <column name="region_code"/>
+        </createIndex>
+
+        <createTable tableName="employee_document_metadata">
+            <column name="document_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="masked_number" type="varchar(128)"/>
+            <column name="issued_at" type="date"/>
+            <column name="expires_at" type="date"/>
+            <column name="verification_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linked_policy_code" type="varchar(96)"/>
+            <column name="file_reference_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="1"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_document_metadata" baseColumnNames="employee_id"
+                                 constraintName="fk_employee_document_profile"
+                                 referencedTableName="employee_profile_settings" referencedColumnNames="employee_id"/>
+        <createIndex tableName="employee_document_metadata" indexName="idx_employee_document_employee_policy">
+            <column name="employee_id"/>
+            <column name="linked_policy_code"/>
+            <column name="verification_status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-023-employee-security-and-elevated" author="codex">
+        <createTable tableName="employee_security_event">
+            <column name="security_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_route" type="varchar(256)"/>
+            <column name="risk_level" type="varchar(32)"/>
+            <column name="metadata_json" type="jsonb"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="employee_security_event" indexName="idx_employee_security_event_employee_time">
+            <column name="employee_id"/>
+            <column name="occurred_at" descending="true"/>
+        </createIndex>
+
+        <createTable tableName="employee_elevated_request">
+            <column name="elevated_request_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="policy_code" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_text" type="varchar(1000)"/>
+            <column name="target_scope" type="varchar(256)"/>
+            <column name="requested_duration_minutes" type="integer"/>
+            <column name="linked_document_id" type="uuid"/>
+            <column name="status" type="varchar(48)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_at" type="timestamp with time zone"/>
+            <column name="decided_by" type="varchar(64)"/>
+            <column name="decided_at" type="timestamp with time zone"/>
+            <column name="decision_comment" type="varchar(1000)"/>
+            <column name="version" type="bigint" defaultValueNumeric="1"/>
+        </createTable>
+        <createIndex tableName="employee_elevated_request" indexName="idx_employee_elevated_request_employee_status">
+            <column name="employee_id"/>
+            <column name="status"/>
+            <column name="requested_at" descending="true"/>
+        </createIndex>
+
+        <createTable tableName="employee_elevated_session">
+            <column name="elevated_session_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="elevated_request_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="policy_code" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_scope" type="varchar(256)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="timestamp with time zone"/>
+            <column name="expires_at" type="timestamp with time zone"/>
+            <column name="closed_at" type="timestamp with time zone"/>
+            <column name="closed_by" type="varchar(64)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="version" type="bigint" defaultValueNumeric="1"/>
+        </createTable>
+        <createIndex tableName="employee_elevated_session" indexName="idx_employee_elevated_session_employee_status">
+            <column name="employee_id"/>
+            <column name="status"/>
+            <column name="expires_at" descending="true"/>
+        </createIndex>
+
+        <createTable tableName="employee_elevated_audit">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_employee_id" type="varchar(64)"/>
+            <column name="elevated_request_id" type="uuid"/>
+            <column name="elevated_session_id" type="uuid"/>
+            <column name="action_code" type="varchar(96)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="policy_code" type="varchar(96)"/>
+            <column name="source_route" type="varchar(256)"/>
+            <column name="target_entity_type" type="varchar(64)"/>
+            <column name="target_entity_id" type="varchar(128)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="employee_elevated_audit" indexName="idx_employee_elevated_audit_target_time">
+            <column name="target_employee_id"/>
+            <column name="occurred_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

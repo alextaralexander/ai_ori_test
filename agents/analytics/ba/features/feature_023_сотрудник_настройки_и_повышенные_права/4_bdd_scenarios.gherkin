@@ -1,0 +1,99 @@
+# language: ru
+Функция: Feature 023. Сотрудник: настройки и повышенные права
+  Настройки employee-профиля и контролируемый режим повышенных прав позволяют сотруднику Best Ori Gin
+  поддерживать рабочие реквизиты, управлять безопасностью учетной записи и выполнять критичные операции
+  только в рамках утвержденных policy и audit trail.
+
+  Предыстория:
+    Дано существует сотрудник "EMP-023-001" с ролью "employee-support" и включенным MFA
+    И существует супервайзер "EMP-023-SUP" с ролью "supervisor"
+    И для сотрудника доступна policy "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS" с максимальным сроком 30 минут
+
+  Сценарий: Сотрудник открывает настройки профиля и видит доступные разделы
+    Дано пользователь залогинен с ролью "employee-support"
+    И пользователь находится на маршруте "/employee/profile-settings"
+    Когда frontend запрашивает summary настроек сотрудника "EMP-023-001"
+    Тогда backend возвращает разделы "general", "contacts", "addresses", "documents" и "security"
+    И summary содержит readiness-флаги и security warnings
+    И ответ содержит auditRecorded "true"
+    И backend не передает hardcoded user-facing текст вместо mnemonic-кодов `STR_MNEMO_*`
+
+  Сценарий: Сотрудник обновляет общие настройки профиля
+    Дано пользователь залогинен с ролью "employee-support"
+    И пользователь открыл маршрут "/employee/profile-settings/general"
+    Когда пользователь меняет preferredLanguage на "ru" и timezone на "Europe/Moscow"
+    Тогда backend сохраняет изменения профиля сотрудника "EMP-023-001"
+    И возвращает обновленную версию general-раздела с новым version
+    И audit trail содержит событие "EMPLOYEE_PROFILE_GENERAL_UPDATED"
+    И UI показывает успешное состояние через i18n dictionaries
+
+  Сценарий: Сотрудник обновляет контакты, адреса и документы
+    Дано пользователь залогинен с ролью "employee-support"
+    Когда пользователь добавляет рабочий телефон в разделе contacts
+    И пользователь добавляет адрес удаленной локации в разделе addresses
+    И пользователь добавляет metadata документа "POWER_OF_ATTORNEY" в разделе documents
+    Тогда backend возвращает обновленные списки contacts, addresses и documents
+    И контактное значение в ответе отображается как maskedValue
+    И document metadata содержит verificationStatus "PENDING"
+    И audit trail содержит события обновления контакта, адреса и документа
+
+  Сценарий: Сотрудник просматривает security-раздел
+    Дано пользователь залогинен с ролью "employee-support"
+    И пользователь находится на маршруте "/employee/profile-settings/security"
+    Когда frontend запрашивает security summary
+    Тогда система показывает MFA-статус, активные сессии, последние security-события и доступные security-действия
+    И ответ не содержит секретные MFA-токены или session secrets
+    И UI содержит test id "employee-profile-security-panel"
+
+  Сценарий: Сотрудник создает запрос на повышенные права с подтверждением супервайзера
+    Дано пользователь залогинен с ролью "employee-support"
+    И пользователь находится на маршруте "/employee/super-user"
+    Когда пользователь выбирает policy "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS"
+    И указывает reasonCode "SUPPORT_ESCALATION" и срок 20 минут
+    Тогда backend создает elevated request со статусом "PENDING_SUPERVISOR_APPROVAL"
+    И возвращает requestId, policyCode, targetScope, requestedDurationMinutes и auditRecorded "true"
+    И UI показывает состояние ожидания подтверждения через i18n dictionaries
+
+  Сценарий: Супервайзер одобряет запрос и сотрудник видит активный elevated mode
+    Дано пользователь залогинен с ролью "supervisor"
+    И существует elevated request сотрудника "EMP-023-001" со статусом "PENDING_SUPERVISOR_APPROVAL"
+    Когда супервайзер одобряет запрос с комментарием "Проверено основание обращения"
+    Тогда backend создает elevated session со статусом "ACTIVE"
+    И session содержит elevatedSessionId, startedAt, expiresAt, remainingSeconds и approvedBy "EMP-023-SUP"
+    И audit trail содержит событие "EMPLOYEE_ELEVATED_SESSION_APPROVED"
+    Когда пользователь залогинен с ролью "employee-support"
+    И пользователь открывает "/employee/super-user"
+    Тогда UI показывает индикатор активного elevated mode с test id "employee-elevated-session-banner"
+
+  Сценарий: Сотрудник завершает активный повышенный режим
+    Дано пользователь залогинен с ролью "employee-support"
+    И у сотрудника активна elevated session "ELS-023-001"
+    Когда пользователь нажимает завершение режима
+    Тогда backend завершает session "ELS-023-001"
+    И дальнейшее использование session для impersonation запрещено
+    И audit trail содержит событие "EMPLOYEE_ELEVATED_SESSION_CLOSED"
+    И UI больше не показывает активный elevated banner
+
+  Сценарий: Недопустимый запрос повышенных прав отклоняется
+    Дано пользователь залогинен с ролью "employee-support"
+    Когда пользователь запрашивает policy "EMPLOYEE_ELEVATED_FINANCE_OVERRIDE" без доступного scope
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_EMPLOYEE_ELEVATED_POLICY_DENIED"
+    И elevated session не создается
+    И audit trail содержит отказ policy без раскрытия лишних данных
+
+  Сценарий: Гость не может открыть employee settings или super-user
+    Дано пользователь залогинен с ролью "guest"
+    Когда пользователь открывает "/employee/profile-settings"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_EMPLOYEE_ACCESS_DENIED"
+    Когда пользователь открывает "/employee/super-user"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_EMPLOYEE_SUPER_USER_FORBIDDEN"
+
+  Сценарий: Некорректные данные настроек не сохраняются
+    Дано пользователь залогинен с ролью "employee-support"
+    Когда пользователь отправляет контакт без типа и значения
+    Тогда backend возвращает HTTP 400
+    И код ошибки равен "STR_MNEMO_EMPLOYEE_CONTACT_INVALID"
+    И audit trail не содержит успешного события обновления контакта

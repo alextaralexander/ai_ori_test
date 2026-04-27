@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <title>Feature 023 - employee profile settings layout</title>
+  <rect x="20" y="20" width="1240" height="780" fill="white" stroke="black"/>
+  <text x="48" y="58" font-size="24">/employee/profile-settings - настройки профиля сотрудника</text>
+
+  <rect x="48" y="88" width="210" height="670" fill="none" stroke="black"/>
+  <text x="68" y="122" font-size="18">Левая навигация</text>
+  <rect x="68" y="150" width="160" height="34" fill="none" stroke="black"/><text x="82" y="172" font-size="14">General</text>
+  <rect x="68" y="198" width="160" height="34" fill="none" stroke="black"/><text x="82" y="220" font-size="14">Contacts</text>
+  <rect x="68" y="246" width="160" height="34" fill="none" stroke="black"/><text x="82" y="268" font-size="14">Addresses</text>
+  <rect x="68" y="294" width="160" height="34" fill="none" stroke="black"/><text x="82" y="316" font-size="14">Documents</text>
+  <rect x="68" y="342" width="160" height="34" fill="none" stroke="black"/><text x="82" y="364" font-size="14">Security</text>
+  <rect x="68" y="410" width="160" height="70" fill="none" stroke="black"/>
+  <text x="82" y="438" font-size="13">readiness flags</text>
+  <text x="82" y="462" font-size="13">security warnings</text>
+
+  <rect x="288" y="88" width="920" height="86" fill="none" stroke="black"/>
+  <text x="312" y="120" font-size="18">Summary employee profile</text>
+  <text x="312" y="150" font-size="14">employeeId, status, department, active elevated mode, audit state</text>
+
+  <rect x="288" y="202" width="430" height="250" fill="none" stroke="black"/>
+  <text x="312" y="232" font-size="18">General form</text>
+  <rect x="312" y="258" width="170" height="28" fill="none" stroke="black"/><text x="496" y="278" font-size="13">displayName</text>
+  <rect x="312" y="300" width="170" height="28" fill="none" stroke="black"/><text x="496" y="320" font-size="13">jobTitle / department</text>
+  <rect x="312" y="342" width="170" height="28" fill="none" stroke="black"/><text x="496" y="362" font-size="13">language / timezone</text>
+  <rect x="312" y="390" width="110" height="34" fill="none" stroke="black"/><text x="438" y="412" font-size="13">save general</text>
+
+  <rect x="778" y="202" width="430" height="250" fill="none" stroke="black"/>
+  <text x="802" y="232" font-size="18">Contacts and addresses</text>
+  <rect x="802" y="258" width="360" height="48" fill="none" stroke="black"/><text x="818" y="288" font-size="13">contact row: type, maskedValue, primary, verification</text>
+  <rect x="802" y="322" width="360" height="48" fill="none" stroke="black"/><text x="818" y="352" font-size="13">address row: type, region, city, active</text>
+  <rect x="802" y="388" width="116" height="34" fill="none" stroke="black"/><text x="932" y="410" font-size="13">add contact/address</text>
+
+  <rect x="288" y="486" width="430" height="226" fill="none" stroke="black"/>
+  <text x="312" y="516" font-size="18">Documents</text>
+  <rect x="312" y="542" width="360" height="48" fill="none" stroke="black"/><text x="328" y="572" font-size="13">document metadata: type, maskedNumber, status</text>
+  <rect x="312" y="610" width="138" height="34" fill="none" stroke="black"/><text x="466" y="632" font-size="13">upload via S3/MinIO</text>
+
+  <rect x="778" y="486" width="430" height="226" fill="none" stroke="black"/>
+  <text x="802" y="516" font-size="18">Security panel</text>
+  <rect x="802" y="542" width="360" height="48" fill="none" stroke="black"/><text x="818" y="572" font-size="13">MFA, password age, active sessions</text>
+  <rect x="802" y="606" width="360" height="48" fill="none" stroke="black"/><text x="818" y="636" font-size="13">security events, risk flags, allowed actions</text>
+  <rect x="802" y="674" width="146" height="34" fill="none" stroke="black"/><text x="964" y="696" font-size="13">security action</text>
+</svg>

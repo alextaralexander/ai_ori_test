@@ -13,6 +13,7 @@ import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeePartnerCardView } from './components/EmployeePartnerCardView';
+import { EmployeeProfileSettingsView } from './components/EmployeeProfileSettingsView';
 import { EmployeeWorkspaceView } from './components/EmployeeWorkspaceView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { PartnerGrowthView } from './components/PartnerGrowthView';
@@ -199,6 +200,20 @@ function App() {
     contentView = <EmployeePartnerCardView mode="card" params={params} />;
   } else if (path === '/employee/report/order-history') {
     contentView = <EmployeePartnerCardView mode="report" params={params} />;
+  } else if (path === '/employee/profile-settings') {
+    contentView = <EmployeeProfileSettingsView section="overview" />;
+  } else if (path === '/employee/profile-settings/general') {
+    contentView = <EmployeeProfileSettingsView section="general" />;
+  } else if (path === '/employee/profile-settings/contacts') {
+    contentView = <EmployeeProfileSettingsView section="contacts" />;
+  } else if (path === '/employee/profile-settings/addresses') {
+    contentView = <EmployeeProfileSettingsView section="addresses" />;
+  } else if (path === '/employee/profile-settings/documents') {
+    contentView = <EmployeeProfileSettingsView section="documents" />;
+  } else if (path === '/employee/profile-settings/security') {
+    contentView = <EmployeeProfileSettingsView section="security" />;
+  } else if (path === '/employee/super-user') {
+    contentView = <EmployeeProfileSettingsView section="super-user" />;
   } else if (path === '/partner-office/supply') {
     contentView = <PartnerOfficeView mode="supply" params={params} />;
   } else if (path.startsWith('/partner-office/supply/orders/')) {

@@ -505,6 +505,144 @@ public final class EmployeeDtos {
     ) {
     }
 
+    public record EmployeeProfileSettingsSummaryResponse(
+            String employeeId,
+            String displayName,
+            String employeeStatus,
+            List<EmployeeProfileSectionResponse> sections,
+            EmployeeElevatedSessionResponse activeElevatedSession,
+            List<String> securityWarnings,
+            EmployeeAuditContextResponse auditContext
+    ) {
+    }
+
+    public record EmployeeProfileSectionResponse(String sectionCode, String route, String readinessState, List<String> warningCodes) {
+    }
+
+    public record EmployeeProfileGeneralResponse(
+            String employeeId,
+            String displayName,
+            String jobTitle,
+            String departmentCode,
+            String preferredLanguage,
+            String timezone,
+            String notificationChannel,
+            String employeeStatus,
+            long version,
+            String updatedAt,
+            boolean auditRecorded
+    ) {
+    }
+
+    public record EmployeeProfileGeneralUpdateRequest(
+            String displayName,
+            String jobTitle,
+            String departmentCode,
+            String preferredLanguage,
+            String timezone,
+            String notificationChannel,
+            long version
+    ) {
+    }
+
+    public record EmployeeContactsResponse(List<EmployeeContactResponse> items, boolean auditRecorded) {
+    }
+
+    public record EmployeeContactResponse(UUID contactId, String contactType, String maskedValue, boolean primary, String verificationStatus, long version) {
+    }
+
+    public record EmployeeContactUpsertRequest(String contactType, String value, Boolean primary, Long version) {
+    }
+
+    public record EmployeeAddressesResponse(List<EmployeeAddressResponse> items, boolean auditRecorded) {
+    }
+
+    public record EmployeeAddressResponse(UUID addressId, String addressType, String regionCode, String city, String addressLine, String postalCode, boolean active, String validFrom, String validTo, long version) {
+    }
+
+    public record EmployeeAddressUpsertRequest(String addressType, String regionCode, String city, String addressLine, String postalCode, Boolean active, String validFrom, String validTo, Long version) {
+    }
+
+    public record EmployeeDocumentsResponse(List<EmployeeDocumentResponse> items, boolean auditRecorded) {
+    }
+
+    public record EmployeeDocumentResponse(UUID documentId, String documentType, String maskedNumber, String issuedAt, String expiresAt, String verificationStatus, String linkedPolicyCode, String fileReferenceId, long version) {
+    }
+
+    public record EmployeeDocumentCreateRequest(String documentType, String maskedNumber, String issuedAt, String expiresAt, String linkedPolicyCode, String fileReferenceId) {
+    }
+
+    public record EmployeeSecuritySummaryResponse(
+            boolean mfaEnabled,
+            String lastPasswordChangedAt,
+            int activeSessionCount,
+            List<String> riskFlags,
+            List<EmployeeSecurityEventResponse> recentEvents,
+            List<String> allowedActions,
+            boolean auditRecorded
+    ) {
+    }
+
+    public record EmployeeSecurityEventResponse(String eventType, String riskLevel, String occurredAt, String sourceRoute) {
+    }
+
+    public record EmployeeSuperUserDashboardResponse(
+            String employeeId,
+            List<EmployeeElevatedPolicyResponse> policies,
+            EmployeeElevatedSessionResponse activeSession,
+            List<EmployeeElevatedRequestResponse> pendingRequests,
+            List<EmployeeElevatedAuditResponse> history,
+            boolean auditRecorded
+    ) {
+    }
+
+    public record EmployeeElevatedPolicyResponse(String policyCode, boolean allowed, boolean requiresSupervisorApproval, int maxDurationMinutes, String deniedCode) {
+    }
+
+    public record EmployeeElevatedRequestCreateRequest(String policyCode, String reasonCode, String reasonText, String targetScope, int requestedDurationMinutes, UUID linkedDocumentId) {
+    }
+
+    public record EmployeeElevatedRequestResponse(
+            UUID requestId,
+            String employeeId,
+            String policyCode,
+            String reasonCode,
+            String targetScope,
+            int requestedDurationMinutes,
+            String status,
+            String requestedAt,
+            String decidedBy,
+            String decidedAt,
+            boolean auditRecorded
+    ) {
+    }
+
+    public record EmployeeElevatedDecisionRequest(String comment) {
+    }
+
+    public record EmployeeElevatedSessionResponse(
+            UUID elevatedSessionId,
+            String policyCode,
+            String targetScope,
+            String status,
+            String startedAt,
+            String expiresAt,
+            int remainingSeconds,
+            String approvedBy,
+            List<String> allowedLinkedOperations
+    ) {
+    }
+
+    public record EmployeeElevatedAuditResponse(
+            String actionCode,
+            String policyCode,
+            String targetEntityType,
+            String targetEntityId,
+            String correlationId,
+            String occurredAt
+    ) {
+    }
+
     public record EmployeeErrorResponse(
             String code,
             List<EmployeeWarningResponse> details,

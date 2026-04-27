@@ -5,7 +5,20 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimCreateRequ
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimDetailsResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimTransitionRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressUpsertRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressesResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactUpsertRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentsResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeErrorResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedDecisionRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedRequestCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedRequestResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedSessionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderCreateRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderResponse;
@@ -15,6 +28,11 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryPag
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSupportResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerCardResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderReportResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileGeneralResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileGeneralUpdateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileSettingsSummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSecuritySummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSuperUserDashboardResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeWarningResponse;
@@ -33,6 +51,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -183,6 +202,82 @@ public class EmployeeController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "updatedAt,desc") String sort) {
         return service.partnerOrderReport(userContext(headers), partnerId, personNumber, dateFrom, dateTo, campaignCode, orderStatus, paymentStatus, deliveryStatus, problemOnly, regionCode, page, size, sort);
+    }
+
+    @GetMapping("/profile-settings")
+    public EmployeeProfileSettingsSummaryResponse profileSettings(@RequestHeader HttpHeaders headers) {
+        return service.profileSettings(userContext(headers));
+    }
+
+    @GetMapping("/profile-settings/general")
+    public EmployeeProfileGeneralResponse profileGeneral(@RequestHeader HttpHeaders headers) {
+        return service.profileGeneral(userContext(headers));
+    }
+
+    @PutMapping("/profile-settings/general")
+    public EmployeeProfileGeneralResponse updateProfileGeneral(@RequestHeader HttpHeaders headers, @RequestBody EmployeeProfileGeneralUpdateRequest request) {
+        return service.updateProfileGeneral(userContext(headers), request);
+    }
+
+    @GetMapping("/profile-settings/contacts")
+    public EmployeeContactsResponse contacts(@RequestHeader HttpHeaders headers) {
+        return service.contacts(userContext(headers));
+    }
+
+    @PostMapping("/profile-settings/contacts")
+    public ResponseEntity<EmployeeContactResponse> createContact(@RequestHeader HttpHeaders headers, @RequestBody EmployeeContactUpsertRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createContact(userContext(headers), request));
+    }
+
+    @GetMapping("/profile-settings/addresses")
+    public EmployeeAddressesResponse addresses(@RequestHeader HttpHeaders headers) {
+        return service.addresses(userContext(headers));
+    }
+
+    @PostMapping("/profile-settings/addresses")
+    public ResponseEntity<EmployeeAddressResponse> createAddress(@RequestHeader HttpHeaders headers, @RequestBody EmployeeAddressUpsertRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createAddress(userContext(headers), request));
+    }
+
+    @GetMapping("/profile-settings/documents")
+    public EmployeeDocumentsResponse documents(@RequestHeader HttpHeaders headers) {
+        return service.documents(userContext(headers));
+    }
+
+    @PostMapping("/profile-settings/documents")
+    public ResponseEntity<EmployeeDocumentResponse> createDocument(@RequestHeader HttpHeaders headers, @RequestBody EmployeeDocumentCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createDocument(userContext(headers), request));
+    }
+
+    @GetMapping("/profile-settings/security")
+    public EmployeeSecuritySummaryResponse security(@RequestHeader HttpHeaders headers) {
+        return service.security(userContext(headers));
+    }
+
+    @GetMapping("/super-user")
+    public EmployeeSuperUserDashboardResponse superUser(@RequestHeader HttpHeaders headers) {
+        return service.superUser(userContext(headers));
+    }
+
+    @PostMapping("/super-user/requests")
+    public ResponseEntity<EmployeeElevatedRequestResponse> createElevatedRequest(@RequestHeader HttpHeaders headers, @RequestBody EmployeeElevatedRequestCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createElevatedRequest(userContext(headers), request));
+    }
+
+    @PostMapping("/super-user/requests/{requestId}/approve")
+    public EmployeeElevatedSessionResponse approveElevatedRequest(@RequestHeader HttpHeaders headers, @PathVariable UUID requestId, @RequestBody(required = false) EmployeeElevatedDecisionRequest request) {
+        return service.approveElevatedRequest(userContext(headers), requestId, request);
+    }
+
+    @PostMapping("/super-user/requests/{requestId}/reject")
+    public EmployeeElevatedRequestResponse rejectElevatedRequest(@RequestHeader HttpHeaders headers, @PathVariable UUID requestId, @RequestBody(required = false) EmployeeElevatedDecisionRequest request) {
+        return service.rejectElevatedRequest(userContext(headers), requestId, request);
+    }
+
+    @PostMapping("/super-user/sessions/{sessionId}/close")
+    public ResponseEntity<Void> closeElevatedSession(@RequestHeader HttpHeaders headers, @PathVariable UUID sessionId, @RequestBody(required = false) EmployeeElevatedDecisionRequest request) {
+        service.closeElevatedSession(userContext(headers), sessionId, request);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(EmployeeAccessDeniedException.class)

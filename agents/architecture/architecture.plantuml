@@ -1,5 +1,6 @@
 @startuml
-title Best Ori Gin monolith architecture with employee partner card, reports, order history and claims
+title Best Ori Gin monolith architecture through feature 023
+
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
   [Catalog UI]
@@ -7,53 +8,61 @@ package "frontend/monolith apps/web-shell" {
   [Order UI]
   [Partner UI]
   [EmployeeWorkspace UI]
-  [EmployeePartnerCard UI]
-  [EmployeePartnerReport UI]
   [EmployeeOrderHistory UI]
   [EmployeeClaims UI]
+  [EmployeePartnerCard UI]
+  [EmployeePartnerReport UI]
+  [EmployeeProfileSettings UI]
+  [EmployeeSuperUser UI]
 }
+
 package "backend/monolith/monolith-app" {
   [public-content]
   [catalog]
   [cart]
   [order]
   [profile]
+  [authorization]
   [bonus-wallet]
   [partner-reporting]
   [mlm-structure]
   [partner-office]
   [employee]
 }
+
 database "Postgres/Liquibase XML" as db
+cloud "S3/MinIO documents" as s3
 cloud "WMS/1C" as wms
 cloud "Payment" as pay
 cloud "Delivery" as delivery
 cloud "Bonus engine" as bonus
 cloud "Claims" as claims
 
-[EmployeeWorkspace UI] --> [employee] : /api/employee/workspace, /operator-orders, /order-support
-[EmployeePartnerCard UI] --> [employee] : /api/employee/partner-card, /partner-card/{partnerId}
-[EmployeePartnerReport UI] --> [employee] : /api/employee/report/order-history
-[EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history
-[EmployeePartnerCard UI] --> [employee] : /api/employee/partner-card, /partner-card/{partnerId}
-[EmployeePartnerReport UI] --> [employee] : /api/employee/report/order-history
-[EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history/{orderId}
-[EmployeeClaims UI] --> [employee] : /api/employee/submit-claim
-[EmployeeClaims UI] --> [employee] : /api/employee/claims, /claims/{claimId}, /claims/{claimId}/transitions
-[employee] --> [order] : order read links
+[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
+[EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
+[EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
+[EmployeePartnerCard UI] --> [employee] : HTTP/JSON /api/employee/partner-card, /partner-card/{partnerId}
+[EmployeePartnerReport UI] --> [employee] : HTTP/JSON /api/employee/report/order-history
+[EmployeeProfileSettings UI] --> [employee] : HTTP/JSON /api/employee/profile-settings/*
+[EmployeeSuperUser UI] --> [employee] : HTTP/JSON /api/employee/super-user/*
+
+[employee] --> [authorization] : role, scope, MFA, locks, supervisor checks
+[employee] --> [order] : order read links and elevated operation context
 [employee] --> [cart] : active cart/operator order context
-[employee] --> [profile] : masked customer/partner profile
-[employee] --> [partner-reporting] : partner context links, KPI and reports
+[employee] --> [profile] : masked customer, partner and employee profile data
+[employee] --> [partner-reporting] : partner KPI/report links
 [employee] --> [bonus-wallet] : partner bonus balance and volume links
-[employee] --> claims : claim ids and claim deep links
-[employee] --> pay : payment event ids/statuses
-[employee] --> wms : WMS batch and fulfillment events
-[employee] --> claims : employee claim creation/claim context
-[employee] --> pay : refund/compensation tasks
-[employee] --> wms : warehouse claim review tasks
-[order] --> pay
-[order] --> delivery
-[order] --> wms
-[bonus-wallet] --> bonus
-[employee] --> db : support/order-history/partner-card/report read model and audit tables
+[employee] --> claims : claim ids, claim creation and claim deep links
+[employee] --> pay : payment events, refund and compensation tasks
+[employee] --> wms : WMS batch, fulfillment and warehouse review tasks
+[employee] --> delivery : delivery tracking links and delayed delivery signals
+[employee] --> s3 : employee document fileReferenceId verification
+[employee] --> db : employee support/order-history/claims/partner/profile/elevated read models and audit tables
+
+[order] --> pay : payment protocol
+[order] --> delivery : delivery protocol
+[order] --> wms : fulfillment protocol
+[bonus-wallet] --> bonus : bonus protocol
+[partner-office] --> wms : supply and acceptance protocol
+
 @enduml

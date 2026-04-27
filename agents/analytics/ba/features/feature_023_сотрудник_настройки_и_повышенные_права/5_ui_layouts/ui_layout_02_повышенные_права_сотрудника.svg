@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <title>Feature 023 - employee super-user layout</title>
+  <rect x="20" y="20" width="1240" height="780" fill="white" stroke="black"/>
+  <text x="48" y="58" font-size="24">/employee/super-user - повышенные права сотрудника</text>
+
+  <rect x="48" y="88" width="1160" height="70" fill="none" stroke="black"/>
+  <text x="72" y="118" font-size="18">Elevated session banner</text>
+  <text x="72" y="142" font-size="14">active/pending/expired state, elevatedSessionId, remainingSeconds, finish action</text>
+
+  <rect x="48" y="190" width="350" height="540" fill="none" stroke="black"/>
+  <text x="72" y="224" font-size="18">Allowed policies</text>
+  <rect x="72" y="252" width="286" height="58" fill="none" stroke="black"/><text x="88" y="286" font-size="13">policy row: code, scope, max duration</text>
+  <rect x="72" y="328" width="286" height="58" fill="none" stroke="black"/><text x="88" y="362" font-size="13">requires supervisor approval</text>
+  <rect x="72" y="404" width="286" height="58" fill="none" stroke="black"/><text x="88" y="438" font-size="13">denied policy with STR_MNEMO code</text>
+
+  <rect x="430" y="190" width="370" height="540" fill="none" stroke="black"/>
+  <text x="454" y="224" font-size="18">Request form</text>
+  <rect x="454" y="252" width="156" height="30" fill="none" stroke="black"/><text x="628" y="273" font-size="13">policyCode</text>
+  <rect x="454" y="300" width="156" height="30" fill="none" stroke="black"/><text x="628" y="321" font-size="13">reasonCode</text>
+  <rect x="454" y="348" width="156" height="30" fill="none" stroke="black"/><text x="628" y="369" font-size="13">reasonText</text>
+  <rect x="454" y="396" width="156" height="30" fill="none" stroke="black"/><text x="628" y="417" font-size="13">duration minutes</text>
+  <rect x="454" y="444" width="156" height="30" fill="none" stroke="black"/><text x="628" y="465" font-size="13">targetScope</text>
+  <rect x="454" y="504" width="118" height="36" fill="none" stroke="black"/><text x="590" y="527" font-size="13">create request</text>
+  <rect x="454" y="560" width="286" height="84" fill="none" stroke="black"/><text x="470" y="592" font-size="13">validation / MFA / policy warning area</text>
+
+  <rect x="832" y="190" width="376" height="250" fill="none" stroke="black"/>
+  <text x="856" y="224" font-size="18">Supervisor decisions</text>
+  <rect x="856" y="252" width="296" height="48" fill="none" stroke="black"/><text x="872" y="282" font-size="13">pending request: employee, reason, scope</text>
+  <rect x="856" y="318" width="94" height="34" fill="none" stroke="black"/><text x="966" y="340" font-size="13">approve</text>
+  <rect x="856" y="368" width="94" height="34" fill="none" stroke="black"/><text x="966" y="390" font-size="13">reject / revoke</text>
+
+  <rect x="832" y="480" width="376" height="250" fill="none" stroke="black"/>
+  <text x="856" y="514" font-size="18">Elevated history and audit</text>
+  <rect x="856" y="542" width="296" height="48" fill="none" stroke="black"/><text x="872" y="572" font-size="13">session row: status, startedAt, expiresAt</text>
+  <rect x="856" y="610" width="296" height="48" fill="none" stroke="black"/><text x="872" y="640" font-size="13">audit row: actionCode, correlationId</text>
+</svg>

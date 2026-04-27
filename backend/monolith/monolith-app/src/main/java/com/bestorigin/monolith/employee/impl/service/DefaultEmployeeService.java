@@ -2,6 +2,9 @@ package com.bestorigin.monolith.employee.impl.service;
 
 import com.bestorigin.monolith.employee.api.EmployeeDtos.CartType;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.DeliveryStatus;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressUpsertRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAddressesResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAuditContextResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeAuditEventResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeCartResponse;
@@ -16,7 +19,19 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimRouteTaskR
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimSummaryResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeClaimTransitionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeConfirmOrderRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactUpsertRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeContactsResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeCustomerResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeDocumentsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedAuditResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedDecisionRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedPolicyResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedRequestCreateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedRequestResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeElevatedSessionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderCreateRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderResponse;
@@ -35,6 +50,13 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerKpiRespo
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderReportResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderSummaryResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerReportAggregateResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileGeneralResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileGeneralUpdateRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileSectionResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeProfileSettingsSummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSecurityEventResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSecuritySummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSuperUserDashboardResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeTimelineEventResponse;
@@ -317,6 +339,195 @@ public class DefaultEmployeeService implements EmployeeService {
                 ? List.of(partnerOrderSummary())
                 : List.of(partnerOrderSummary(), partnerOrderSummaryDelivered());
         return new EmployeePartnerOrderReportResponse(items, partnerReportAggregates(), page, size, items.size(), true, filters);
+    }
+
+    @Override
+    public EmployeeProfileSettingsSummaryResponse profileSettings(String userContext) {
+        requireEmployee(userContext);
+        return new EmployeeProfileSettingsSummaryResponse(
+                "EMP-023-001",
+                "Employee 023",
+                "ACTIVE",
+                List.of(
+                        new EmployeeProfileSectionResponse("general", "/employee/profile-settings/general", "READY", List.of()),
+                        new EmployeeProfileSectionResponse("contacts", "/employee/profile-settings/contacts", "READY", List.of()),
+                        new EmployeeProfileSectionResponse("addresses", "/employee/profile-settings/addresses", "READY", List.of()),
+                        new EmployeeProfileSectionResponse("documents", "/employee/profile-settings/documents", "WARNING", List.of("STR_MNEMO_EMPLOYEE_DOCUMENT_VERIFICATION_PENDING")),
+                        new EmployeeProfileSectionResponse("security", "/employee/profile-settings/security", "READY", List.of())
+                ),
+                activeElevatedSessionOrNull(userContext),
+                List.of("MFA_ENABLED", "PASSWORD_RECENT"),
+                new EmployeeAuditContextResponse(actor(userContext), "EMPLOYEE_PROFILE_SETTINGS_VIEW", "EMPLOYEE_PROFILE", true)
+        );
+    }
+
+    @Override
+    public EmployeeProfileGeneralResponse profileGeneral(String userContext) {
+        requireEmployee(userContext);
+        return general("Employee 023", "Europe/Moscow", 1L);
+    }
+
+    @Override
+    public EmployeeProfileGeneralResponse updateProfileGeneral(String userContext, EmployeeProfileGeneralUpdateRequest request) {
+        requireEmployee(userContext);
+        if (request == null || blank(request.displayName()) || blank(request.preferredLanguage()) || blank(request.timezone()) || request.version() < 1) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_PROFILE_INVALID", 400);
+        }
+        return general(request.displayName(), request.timezone(), request.version() + 1);
+    }
+
+    @Override
+    public EmployeeContactsResponse contacts(String userContext) {
+        requireEmployee(userContext);
+        return new EmployeeContactsResponse(List.of(contact("WORK_PHONE", "+7 *** ***-23-23", true)), true);
+    }
+
+    @Override
+    public EmployeeContactResponse createContact(String userContext, EmployeeContactUpsertRequest request) {
+        requireEmployee(userContext);
+        if (request == null || blank(request.contactType()) || blank(request.value())) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_CONTACT_INVALID", 400);
+        }
+        return contact(request.contactType(), maskContact(request.value()), Boolean.TRUE.equals(request.primary()));
+    }
+
+    @Override
+    public EmployeeAddressesResponse addresses(String userContext) {
+        requireEmployee(userContext);
+        return new EmployeeAddressesResponse(List.of(new EmployeeAddressResponse(UUID.fromString("02300000-0000-0000-0000-000000000001"), "REMOTE_WORK", "RU-MOW", "Москва", "Удаленная рабочая локация", "101000", true, "2026-04-01", null, 1L)), true);
+    }
+
+    @Override
+    public EmployeeAddressResponse createAddress(String userContext, EmployeeAddressUpsertRequest request) {
+        requireEmployee(userContext);
+        if (request == null || blank(request.addressType()) || blank(request.regionCode()) || blank(request.city()) || blank(request.addressLine())) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_ADDRESS_INVALID", 400);
+        }
+        long version = request.version() == null ? 1L : request.version() + 1L;
+        return new EmployeeAddressResponse(UUID.fromString("02300000-0000-0000-0000-000000000002"), request.addressType(), request.regionCode(), request.city(), request.addressLine(), request.postalCode(), Boolean.TRUE.equals(request.active()), request.validFrom(), request.validTo(), version);
+    }
+
+    @Override
+    public EmployeeDocumentsResponse documents(String userContext) {
+        requireEmployee(userContext);
+        return new EmployeeDocumentsResponse(List.of(document("POWER_OF_ATTORNEY", "fileReferenceId-023")), true);
+    }
+
+    @Override
+    public EmployeeDocumentResponse createDocument(String userContext, EmployeeDocumentCreateRequest request) {
+        requireEmployee(userContext);
+        if (request == null || blank(request.documentType()) || blank(request.maskedNumber()) || blank(request.fileReferenceId())) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_DOCUMENT_INVALID", 400);
+        }
+        return new EmployeeDocumentResponse(UUID.fromString("02300000-0000-0000-0000-000000000004"), request.documentType(), request.maskedNumber(), request.issuedAt(), request.expiresAt(), "PENDING", request.linkedPolicyCode(), request.fileReferenceId(), 1L);
+    }
+
+    @Override
+    public EmployeeSecuritySummaryResponse security(String userContext) {
+        requireEmployee(userContext);
+        return new EmployeeSecuritySummaryResponse(
+                true,
+                "2026-04-20T08:00:00Z",
+                2,
+                List.of("MFA_ENABLED"),
+                List.of(new EmployeeSecurityEventResponse("MFA_ENABLED", "LOW", "2026-04-20T08:00:00Z", "/employee/profile-settings/security")),
+                List.of("CHANGE_PASSWORD", "CLOSE_OTHER_SESSIONS"),
+                true
+        );
+    }
+
+    @Override
+    public EmployeeSuperUserDashboardResponse superUser(String userContext) {
+        requireSuperUserActor(userContext);
+        return new EmployeeSuperUserDashboardResponse(
+                "EMP-023-001",
+                List.of(
+                        new EmployeeElevatedPolicyResponse("EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS", true, true, 30, null),
+                        new EmployeeElevatedPolicyResponse("EMPLOYEE_ELEVATED_FINANCE_OVERRIDE", false, true, 0, "STR_MNEMO_EMPLOYEE_ELEVATED_POLICY_DENIED")
+                ),
+                activeElevatedSessionOrNull(userContext),
+                List.of(pendingRequest()),
+                List.of(new EmployeeElevatedAuditResponse("EMPLOYEE_SUPER_USER_DASHBOARD_VIEWED", "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS", "EMPLOYEE", "EMP-023-001", "CORR-023", "2026-04-27T08:00:00Z")),
+                true
+        );
+    }
+
+    @Override
+    public EmployeeElevatedRequestResponse createElevatedRequest(String userContext, EmployeeElevatedRequestCreateRequest request) {
+        requireSuperUserActor(userContext);
+        validateElevatedRequest(request);
+        if (!"EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS".equals(request.policyCode())) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ELEVATED_POLICY_DENIED");
+        }
+        return pendingRequest();
+    }
+
+    @Override
+    public EmployeeElevatedSessionResponse approveElevatedRequest(String userContext, UUID requestId, EmployeeElevatedDecisionRequest request) {
+        if (!isSupervisor(userContext)) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ACCESS_DENIED");
+        }
+        return activeElevatedSession("supervisor");
+    }
+
+    @Override
+    public EmployeeElevatedRequestResponse rejectElevatedRequest(String userContext, UUID requestId, EmployeeElevatedDecisionRequest request) {
+        if (!isSupervisor(userContext)) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ACCESS_DENIED");
+        }
+        return new EmployeeElevatedRequestResponse(requestId, "EMP-023-001", "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS", "SUPPORT_ESCALATION", "ORDER_SUPPORT", 20, "REJECTED", "2026-04-27T08:00:00Z", actor(userContext), "2026-04-27T08:05:00Z", true);
+    }
+
+    @Override
+    public void closeElevatedSession(String userContext, UUID sessionId, EmployeeElevatedDecisionRequest request) {
+        requireSuperUserActor(userContext);
+    }
+
+    private static EmployeeProfileGeneralResponse general(String displayName, String timezone, long version) {
+        return new EmployeeProfileGeneralResponse("EMP-023-001", displayName, "Support specialist", "SUPPORT", "ru", timezone, "WORK_EMAIL", "ACTIVE", version, "2026-04-27T08:00:00Z", true);
+    }
+
+    private static EmployeeContactResponse contact(String contactType, String maskedValue, boolean primary) {
+        return new EmployeeContactResponse(UUID.fromString("02300000-0000-0000-0000-000000000003"), contactType, maskedValue, primary, "VERIFIED", 1L);
+    }
+
+    private static EmployeeDocumentResponse document(String documentType, String fileReferenceId) {
+        return new EmployeeDocumentResponse(UUID.fromString("02300000-0000-0000-0000-000000000004"), documentType, "DOC-***-023", "2026-04-01", "2027-04-01", "PENDING", "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS", fileReferenceId, 1L);
+    }
+
+    private static EmployeeElevatedRequestResponse pendingRequest() {
+        return new EmployeeElevatedRequestResponse(UUID.fromString("02300000-0000-0000-0000-000000000005"), "EMP-023-001", "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS", "SUPPORT_ESCALATION", "ORDER_SUPPORT", 20, "PENDING_SUPERVISOR_APPROVAL", "2026-04-27T08:00:00Z", null, null, true);
+    }
+
+    private static EmployeeElevatedSessionResponse activeElevatedSessionOrNull(String userContext) {
+        return isSupervisor(userContext) ? activeElevatedSession("supervisor") : null;
+    }
+
+    private static EmployeeElevatedSessionResponse activeElevatedSession(String approvedBy) {
+        return new EmployeeElevatedSessionResponse(
+                UUID.fromString("02300000-0000-0000-0000-000000000006"),
+                "EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS",
+                "ORDER_SUPPORT",
+                "ACTIVE",
+                "2026-04-27T08:05:00Z",
+                "2026-04-27T08:25:00Z",
+                1200,
+                approvedBy,
+                List.of("ORDER_SUPPORT", "CLAIM_REVIEW", "PARTNER_CARD_VIEW")
+        );
+    }
+
+    private static void validateElevatedRequest(EmployeeElevatedRequestCreateRequest request) {
+        if (request == null || blank(request.policyCode()) || blank(request.reasonCode()) || blank(request.reasonText()) || blank(request.targetScope()) || request.requestedDurationMinutes() < 1 || request.requestedDurationMinutes() > 480) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_ELEVATED_REQUEST_INVALID", 400);
+        }
+    }
+
+    private static String maskContact(String value) {
+        if (value == null || value.length() < 4) {
+            return "***";
+        }
+        return value.charAt(0) + "***" + value.substring(value.length() - 2);
     }
 
     private static EmployeePartnerCardResponse partnerCardResponse(String userContext, String supportReasonCode) {
@@ -620,6 +831,12 @@ public class DefaultEmployeeService implements EmployeeService {
     private static void requireEmployee(String userContext) {
         if (!(isEmployee(userContext) || isSupervisor(userContext))) {
             throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ACCESS_DENIED");
+        }
+    }
+
+    private static void requireSuperUserActor(String userContext) {
+        if (!(isEmployee(userContext) || isSupervisor(userContext))) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_SUPER_USER_FORBIDDEN");
         }
     }
 

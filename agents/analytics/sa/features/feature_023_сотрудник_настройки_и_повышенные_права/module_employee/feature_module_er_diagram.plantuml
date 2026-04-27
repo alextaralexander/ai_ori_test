@@ -1,0 +1,138 @@
+@startuml
+title Feature 023. Module employee - ER изменения настроек сотрудника и повышенных прав
+
+entity employee_profile_settings {
+  * employee_id : varchar(64)
+  --
+  display_name : varchar(255)
+  job_title : varchar(128)
+  department_code : varchar(64)
+  preferred_language : varchar(16)
+  timezone : varchar(64)
+  notification_channel : varchar(32)
+  employee_status : varchar(32)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity employee_contact {
+  * contact_id : uuid
+  --
+  employee_id : varchar(64)
+  contact_type : varchar(32)
+  contact_value_encrypted : text
+  masked_value : varchar(128)
+  primary_flag : boolean
+  verification_status : varchar(32)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity employee_address {
+  * address_id : uuid
+  --
+  employee_id : varchar(64)
+  address_type : varchar(32)
+  region_code : varchar(32)
+  city : varchar(128)
+  address_line : varchar(512)
+  postal_code : varchar(32)
+  active_flag : boolean
+  valid_from : date
+  valid_to : date
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity employee_document_metadata {
+  * document_id : uuid
+  --
+  employee_id : varchar(64)
+  document_type : varchar(64)
+  masked_number : varchar(128)
+  issued_at : date
+  expires_at : date
+  verification_status : varchar(32)
+  linked_policy_code : varchar(96)
+  file_reference_id : varchar(128)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity employee_security_event {
+  * security_event_id : uuid
+  --
+  employee_id : varchar(64)
+  event_type : varchar(64)
+  source_route : varchar(256)
+  risk_level : varchar(32)
+  metadata_json : jsonb
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+entity employee_elevated_request {
+  * elevated_request_id : uuid
+  --
+  employee_id : varchar(64)
+  policy_code : varchar(96)
+  reason_code : varchar(64)
+  reason_text : varchar(1000)
+  target_scope : varchar(256)
+  requested_duration_minutes : integer
+  linked_document_id : uuid
+  status : varchar(48)
+  requested_at : timestamptz
+  decided_by : varchar(64)
+  decided_at : timestamptz
+  decision_comment : varchar(1000)
+  version : bigint
+}
+
+entity employee_elevated_session {
+  * elevated_session_id : uuid
+  --
+  elevated_request_id : uuid
+  employee_id : varchar(64)
+  policy_code : varchar(96)
+  target_scope : varchar(256)
+  status : varchar(32)
+  started_at : timestamptz
+  expires_at : timestamptz
+  closed_at : timestamptz
+  closed_by : varchar(64)
+  correlation_id : varchar(128)
+  version : bigint
+}
+
+entity employee_elevated_audit {
+  * audit_event_id : uuid
+  --
+  actor_user_id : varchar(64)
+  target_employee_id : varchar(64)
+  elevated_request_id : uuid
+  elevated_session_id : uuid
+  action_code : varchar(96)
+  policy_code : varchar(96)
+  source_route : varchar(256)
+  target_entity_type : varchar(64)
+  target_entity_id : varchar(128)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+employee_profile_settings ||--o{ employee_contact : employee_id
+employee_profile_settings ||--o{ employee_address : employee_id
+employee_profile_settings ||--o{ employee_document_metadata : employee_id
+employee_profile_settings ||--o{ employee_security_event : employee_id
+employee_profile_settings ||--o{ employee_elevated_request : employee_id
+employee_elevated_request ||--o| employee_elevated_session : request
+employee_document_metadata ||--o{ employee_elevated_request : linked_document
+employee_elevated_request ||--o{ employee_elevated_audit : request_audit
+employee_elevated_session ||--o{ employee_elevated_audit : session_audit
+
+@enduml

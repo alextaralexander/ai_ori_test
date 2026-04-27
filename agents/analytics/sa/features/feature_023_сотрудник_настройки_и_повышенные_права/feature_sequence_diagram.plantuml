@@ -1,0 +1,93 @@
+@startuml
+title Feature 023. Employee profile settings and elevated access sequence
+
+actor "Сотрудник" as Employee
+actor "Супервайзер" as Supervisor
+participant "Frontend employee app" as FE
+participant "EmployeeProfileSettingsController" as ProfileController
+participant "EmployeeSuperUserController" as SuperController
+participant "EmployeeProfileService" as ProfileService
+participant "EmployeeElevatedAccessService" as ElevatedService
+participant "EmployeePolicyService" as PolicyService
+database "employee module DB" as EmployeeDb
+participant "Authorization/MFA" as Auth
+participant "S3/MinIO document storage" as Storage
+participant "Audit publisher" as Audit
+participant "Linked employee flows" as LinkedFlows
+
+Employee -> FE: Открывает /employee/profile-settings
+FE -> ProfileController: GET /api/employee/profile-settings
+ProfileController -> ProfileService: loadSummary(actor)
+ProfileService -> Auth: verifyEmployeeActor(actor)
+ProfileService -> EmployeeDb: load profile sections, active elevated session, warnings
+ProfileService -> Audit: record EMPLOYEE_PROFILE_SETTINGS_VIEWED
+ProfileController --> FE: EmployeeProfileSettingsSummaryResponse
+
+Employee -> FE: Обновляет general/contact/address/document/security settings
+FE -> ProfileController: PUT/POST /profile-settings/*
+ProfileController -> ProfileService: validate and save section command
+ProfileService -> Auth: verify scope, locks, MFA when required
+alt document metadata with fileReferenceId
+  ProfileService -> Storage: verify fileReferenceId ownership/availability
+end
+ProfileService -> EmployeeDb: save section with optimistic version
+ProfileService -> Audit: record section actionCode with correlationId
+ProfileController --> FE: Updated section response or STR_MNEMO_* error
+
+Employee -> FE: Открывает /employee/super-user
+FE -> SuperController: GET /api/employee/super-user
+SuperController -> ElevatedService: loadDashboard(actor)
+ElevatedService -> PolicyService: resolve allowed policies and denied codes
+ElevatedService -> EmployeeDb: load activeSession, pendingRequests, history
+ElevatedService -> Audit: record EMPLOYEE_SUPER_USER_DASHBOARD_VIEWED
+SuperController --> FE: EmployeeSuperUserDashboardResponse
+
+Employee -> FE: Создает elevated request
+FE -> SuperController: POST /super-user/requests
+SuperController -> ElevatedService: createRequest(policyCode, scope, duration, reason)
+ElevatedService -> Auth: verify employee actor, MFA, active locks
+ElevatedService -> PolicyService: validate policy, max duration, document requirement
+alt policy denied or invalid request
+  ElevatedService -> Audit: record EMPLOYEE_ELEVATED_REQUEST_DENIED
+  SuperController --> FE: 400/403 EmployeeErrorResponse STR_MNEMO_*
+else policy requires supervisor approval
+  ElevatedService -> EmployeeDb: save request PENDING_SUPERVISOR_APPROVAL
+  ElevatedService -> Audit: record EMPLOYEE_ELEVATED_REQUEST_CREATED
+  SuperController --> FE: EmployeeElevatedRequestResponse PENDING
+else self activation allowed
+  ElevatedService -> EmployeeDb: save approved request and active session
+  ElevatedService -> Audit: record EMPLOYEE_ELEVATED_SESSION_STARTED
+  SuperController --> FE: EmployeeElevatedSessionResponse ACTIVE
+end
+
+Supervisor -> FE: Одобряет или отклоняет pending request
+FE -> SuperController: POST /super-user/requests/{id}/approve|reject
+SuperController -> ElevatedService: decideRequest(supervisor, requestId, decision)
+ElevatedService -> Auth: verify supervisor role and scope
+ElevatedService -> EmployeeDb: lock request by version/state
+alt approve
+  ElevatedService -> EmployeeDb: create active elevated session
+  ElevatedService -> Audit: record EMPLOYEE_ELEVATED_SESSION_APPROVED
+  SuperController --> FE: EmployeeElevatedSessionResponse ACTIVE
+else reject
+  ElevatedService -> EmployeeDb: mark request REJECTED
+  ElevatedService -> Audit: record EMPLOYEE_ELEVATED_REQUEST_REJECTED
+  SuperController --> FE: EmployeeElevatedRequestResponse REJECTED
+end
+
+Employee -> FE: Выполняет связанную сервисную операцию
+FE -> LinkedFlows: request with elevatedSessionId and correlationId
+LinkedFlows -> ElevatedService: validateActiveSession(elevatedSessionId, operation, scope)
+ElevatedService -> EmployeeDb: check session ACTIVE and expiresAt > now
+ElevatedService -> PolicyService: validate linked operation scope
+ElevatedService -> Audit: record EMPLOYEE_ELEVATED_LINKED_OPERATION_USED
+LinkedFlows --> FE: operation result or STR_MNEMO_EMPLOYEE_ELEVATED_SESSION_EXPIRED
+
+Employee -> FE: Завершает elevated mode
+FE -> SuperController: POST /super-user/sessions/{sessionId}/close
+SuperController -> ElevatedService: closeSession(actor, sessionId)
+ElevatedService -> EmployeeDb: mark session CLOSED or REVOKED
+ElevatedService -> Audit: record EMPLOYEE_ELEVATED_SESSION_CLOSED
+SuperController --> FE: 204 No Content
+
+@enduml

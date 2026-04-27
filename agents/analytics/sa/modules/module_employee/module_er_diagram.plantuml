@@ -1,206 +1,133 @@
 @startuml
-title Employee module ER diagram
+title Module employee - full ER overview through feature 023
 
 entity employee_support_session {
-  * session_id : uuid
-  --
-  actor_user_id : varchar
-  target_customer_id : varchar
-  target_partner_person_number : varchar
-  support_reason_code : varchar
-  source_channel : varchar
-  started_at : timestamp
-  closed_at : timestamp
+  * support_session_id : uuid
+  actor_user_id : varchar(64)
+  target_customer_id : varchar(64)
+  target_partner_id : varchar(64)
+  support_reason_code : varchar(64)
+  status : varchar(32)
+  started_at : timestamptz
+  closed_at : timestamptz
 }
 
 entity employee_operator_order {
   * operator_order_id : uuid
-  --
-  session_id : uuid
-  checkout_id : uuid
-  order_number : varchar
-  cart_type : varchar
-  payment_status : varchar
-  delivery_status : varchar
-  idempotency_key : varchar
-  audit_recorded : boolean
+  support_session_id : uuid
+  checkout_id : varchar(64)
+  order_number : varchar(64)
+  cart_type : varchar(32)
+  payment_status : varchar(32)
+  delivery_status : varchar(32)
+  idempotency_key : varchar(128)
+  created_at : timestamptz
 }
 
 entity employee_support_action {
-  * action_id : uuid
-  --
-  session_id : uuid
-  order_number : varchar
-  action_type : varchar
-  reason_code : varchar
-  amount : decimal
-  supervisor_required : boolean
-  created_at : timestamp
+  * support_action_id : uuid
+  support_session_id : uuid
+  order_number : varchar(64)
+  action_type : varchar(64)
+  payload_json : jsonb
+  created_at : timestamptz
 }
 
 entity employee_audit_event {
   * audit_event_id : uuid
-  --
-  actor_user_id : varchar
-  target_entity_type : varchar
-  target_entity_id : varchar
-  event_type : varchar
-  metadata_json : jsonb
-  occurred_at : timestamp
-}
-
-entity employee_order_history_snapshot {
-  * order_id : varchar(64)
-  --
-  order_number : varchar(64) <<unique>>
-  campaign_code : varchar(32)
-  customer_id : varchar(64)
-  partner_id : varchar(64)
-  customer_display_name : varchar(255)
-  partner_display_name : varchar(255)
-  masked_phone : varchar(64)
-  masked_email : varchar(255)
-  order_status : varchar(32)
-  payment_status : varchar(32)
-  delivery_status : varchar(32)
-  fulfillment_status : varchar(32)
-  total_amount : numeric(19,2)
-  currency_code : varchar(3)
-  problem_flags_json : jsonb
-  support_case_ids_json : jsonb
-  claim_ids_json : jsonb
-  payment_event_ids_json : jsonb
-  wms_batch_id : varchar(64)
-  delivery_tracking_id : varchar(128)
-  manual_adjustment_present : boolean
-  supervisor_required : boolean
-  source_channel : varchar(64)
-  created_at : timestamptz
-  updated_at : timestamptz
-}
-
-entity employee_order_history_item_snapshot {
-  * item_id : uuid
-  --
-  order_id : varchar(64)
-  sku : varchar(64)
-  product_name : varchar(255)
-  quantity : integer
-  unit_price : numeric(19,2)
-  total_price : numeric(19,2)
-  promo_code : varchar(64)
-  bonus_points : integer
-  reserve_status : varchar(32)
-}
-
-entity employee_order_history_audit_event {
-  * audit_event_id : uuid
-  --
-  order_id : varchar(64)
   actor_user_id : varchar(64)
-  actor_role : varchar(64)
   action_type : varchar(64)
-  support_reason_code : varchar(64)
-  source_route : varchar(255)
-  metadata_json : jsonb
+  target_entity_type : varchar(64)
+  target_entity_id : varchar(128)
+  correlation_id : varchar(128)
   occurred_at : timestamptz
 }
 
-entity employee_claim_case {
-  * claim_id : varchar(64)
-  --
-  claim_number : varchar(64)
+entity employee_order_history_snapshot {
+  * order_snapshot_id : uuid
   order_id : varchar(64)
   order_number : varchar(64)
   customer_id : varchar(64)
   partner_id : varchar(64)
-  source_channel : varchar(32)
-  support_reason_code : varchar(64)
-  status : varchar(32)
-  sla_state : varchar(32)
-  sla_due_at : timestamptz
-  breached_at : timestamptz
-  requested_resolution : varchar(32)
-  approved_resolution : varchar(32)
-  compensation_amount : numeric(19,2)
-  currency_code : char(3)
-  public_reason_mnemonic : varchar(128)
-  responsible_role : varchar(64)
-  assignee_id : varchar(64)
-  supervisor_required : boolean
-  idempotency_key : varchar(128)
-  created_at : timestamptz
+  campaign_code : varchar(32)
+  order_status : varchar(32)
+  payment_status : varchar(32)
+  delivery_status : varchar(32)
+  total_amount : numeric(19,2)
+  problem_flags_json : jsonb
   updated_at : timestamptz
 }
 
+entity employee_order_history_item_snapshot {
+  * item_snapshot_id : uuid
+  order_snapshot_id : uuid
+  sku : varchar(64)
+  product_name : varchar(255)
+  quantity : integer
+  unit_price : numeric(19,2)
+  bonus_points : numeric(19,2)
+}
+
+entity employee_order_history_audit_event {
+  * audit_event_id : uuid
+  order_id : varchar(64)
+  actor_user_id : varchar(64)
+  action_type : varchar(64)
+  support_reason_code : varchar(64)
+  occurred_at : timestamptz
+}
+
+entity employee_claim_case {
+  * claim_id : uuid
+  claim_number : varchar(64)
+  order_number : varchar(64)
+  customer_id : varchar(64)
+  partner_id : varchar(64)
+  status : varchar(32)
+  sla_due_at : timestamptz
+  public_reason_mnemonic : varchar(128)
+  idempotency_key : varchar(128)
+}
+
 entity employee_claim_item {
-  * claim_item_id : varchar(64)
-  --
-  claim_id : varchar(64)
-  sku : varchar(128)
-  product_code : varchar(128)
-  product_name_snapshot : varchar(512)
+  * claim_item_id : uuid
+  claim_id : uuid
+  sku : varchar(64)
   quantity : integer
   problem_type : varchar(64)
-  requested_resolution : varchar(32)
-  approved_resolution : varchar(32)
-  unit_price : numeric(19,2)
   compensation_amount : numeric(19,2)
-  claim_available : boolean
 }
 
 entity employee_claim_attachment {
-  * attachment_id : varchar(64)
-  --
-  claim_id : varchar(64)
+  * attachment_id : uuid
+  claim_id : uuid
+  file_reference_id : varchar(128)
   filename : varchar(255)
-  mime_type : varchar(128)
-  size_bytes : bigint
-  uploaded_by : varchar(64)
-  uploaded_at : timestamptz
   access_policy : varchar(64)
-  public_token : varchar(128)
 }
 
 entity employee_claim_route_task {
-  * task_id : varchar(64)
-  --
-  claim_id : varchar(64)
-  task_type : varchar(32)
-  external_task_id : varchar(128)
+  * route_task_id : uuid
+  claim_id : uuid
+  task_type : varchar(64)
   status : varchar(32)
-  assignee_role : varchar(64)
-  assignee_id : varchar(64)
   due_at : timestamptz
-  completed_at : timestamptz
-  result_code : varchar(64)
-  result_payload_json : jsonb
 }
 
 entity employee_claim_audit_event {
-  * audit_event_id : varchar(64)
-  --
-  claim_id : varchar(64)
-  order_id : varchar(64)
+  * audit_event_id : uuid
+  claim_id : uuid
   actor_user_id : varchar(64)
-  actor_role : varchar(64)
   action_type : varchar(64)
-  support_reason_code : varchar(64)
-  changed_fields_json : jsonb
-  source_route : varchar(255)
   correlation_id : varchar(128)
   occurred_at : timestamptz
 }
 
 entity employee_partner_card_audit {
   * audit_event_id : uuid
-  --
   actor_user_id : varchar(128)
-  actor_role : varchar(64)
   support_reason_code : varchar(64)
-  source_route : varchar(256)
   target_entity_type : varchar(64)
-  target_entity_id : varchar(128)
   partner_id : varchar(64)
   person_number : varchar(64)
   correlation_id : varchar(128)
@@ -209,29 +136,114 @@ entity employee_partner_card_audit {
 
 entity employee_partner_report_snapshot {
   * report_snapshot_id : uuid
-  --
   partner_id : varchar(64)
   person_number : varchar(64)
   campaign_code : varchar(32)
-  region_code : varchar(32)
   total_orders : integer
   total_amount : numeric(19,2)
-  paid_amount : numeric(19,2)
-  returned_amount : numeric(19,2)
   personal_volume : numeric(19,2)
   group_volume : numeric(19,2)
-  open_claim_count : integer
-  delayed_delivery_count : integer
   generated_at : timestamptz
 }
-employee_support_session ||--o{ employee_operator_order
-employee_support_session ||--o{ employee_support_action
-employee_support_session ||--o{ employee_audit_event
-employee_order_history_snapshot ||--o{ employee_order_history_item_snapshot
-employee_order_history_snapshot ||--o{ employee_order_history_audit_event
-employee_claim_case ||--o{ employee_claim_item
-employee_claim_case ||--o{ employee_claim_attachment
-employee_claim_case ||--o{ employee_claim_route_task
-employee_claim_case ||--o{ employee_claim_audit_event
-employee_partner_report_snapshot ||--o{ employee_partner_card_audit
+
+entity employee_profile_settings {
+  * employee_id : varchar(64)
+  display_name : varchar(255)
+  job_title : varchar(128)
+  department_code : varchar(64)
+  preferred_language : varchar(16)
+  timezone : varchar(64)
+  employee_status : varchar(32)
+  version : bigint
+}
+
+entity employee_contact {
+  * contact_id : uuid
+  employee_id : varchar(64)
+  contact_type : varchar(32)
+  contact_value_encrypted : text
+  masked_value : varchar(128)
+  verification_status : varchar(32)
+}
+
+entity employee_address {
+  * address_id : uuid
+  employee_id : varchar(64)
+  address_type : varchar(32)
+  region_code : varchar(32)
+  city : varchar(128)
+  address_line : varchar(512)
+  active_flag : boolean
+}
+
+entity employee_document_metadata {
+  * document_id : uuid
+  employee_id : varchar(64)
+  document_type : varchar(64)
+  masked_number : varchar(128)
+  verification_status : varchar(32)
+  linked_policy_code : varchar(96)
+  file_reference_id : varchar(128)
+}
+
+entity employee_security_event {
+  * security_event_id : uuid
+  employee_id : varchar(64)
+  event_type : varchar(64)
+  risk_level : varchar(32)
+  metadata_json : jsonb
+  occurred_at : timestamptz
+}
+
+entity employee_elevated_request {
+  * elevated_request_id : uuid
+  employee_id : varchar(64)
+  policy_code : varchar(96)
+  reason_code : varchar(64)
+  target_scope : varchar(256)
+  status : varchar(48)
+  requested_at : timestamptz
+  decided_by : varchar(64)
+}
+
+entity employee_elevated_session {
+  * elevated_session_id : uuid
+  elevated_request_id : uuid
+  employee_id : varchar(64)
+  policy_code : varchar(96)
+  target_scope : varchar(256)
+  status : varchar(32)
+  started_at : timestamptz
+  expires_at : timestamptz
+  correlation_id : varchar(128)
+}
+
+entity employee_elevated_audit {
+  * audit_event_id : uuid
+  actor_user_id : varchar(64)
+  target_employee_id : varchar(64)
+  elevated_request_id : uuid
+  elevated_session_id : uuid
+  action_code : varchar(96)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+employee_support_session ||--o{ employee_operator_order : support_session_id
+employee_support_session ||--o{ employee_support_action : support_session_id
+employee_order_history_snapshot ||--o{ employee_order_history_item_snapshot : order_snapshot_id
+employee_claim_case ||--o{ employee_claim_item : claim_id
+employee_claim_case ||--o{ employee_claim_attachment : claim_id
+employee_claim_case ||--o{ employee_claim_route_task : claim_id
+employee_claim_case ||--o{ employee_claim_audit_event : claim_id
+employee_profile_settings ||--o{ employee_contact : employee_id
+employee_profile_settings ||--o{ employee_address : employee_id
+employee_profile_settings ||--o{ employee_document_metadata : employee_id
+employee_profile_settings ||--o{ employee_security_event : employee_id
+employee_profile_settings ||--o{ employee_elevated_request : employee_id
+employee_elevated_request ||--o| employee_elevated_session : request
+employee_document_metadata ||--o{ employee_elevated_request : linked_document
+employee_elevated_request ||--o{ employee_elevated_audit : request_audit
+employee_elevated_session ||--o{ employee_elevated_audit : session_audit
+
 @enduml

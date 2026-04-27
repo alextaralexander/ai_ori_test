@@ -1,0 +1,530 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin employee module - feature 023 profile settings and elevated access
+  version: 2026.04.27-feature-023
+  description: Контракт employee module для настроек сотрудника и контролируемого режима повышенных прав.
+servers:
+  - url: /api/employee
+paths:
+  /profile-settings:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить summary настроек сотрудника
+      responses:
+        '200':
+          description: Summary настроек employee-профиля
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeProfileSettingsSummaryResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/general:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить general-раздел employee-профиля
+      responses:
+        '200':
+          description: General settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeProfileGeneralResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [employee-profile-settings]
+      summary: Обновить general-раздел employee-профиля
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeProfileGeneralUpdateRequest' }
+      responses:
+        '200':
+          description: Обновленный general-раздел
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeProfileGeneralResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /profile-settings/contacts:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить контакты сотрудника
+      responses:
+        '200':
+          description: Контакты сотрудника
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeContactsResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Добавить контакт сотрудника
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeContactUpsertRequest' }
+      responses:
+        '201':
+          description: Контакт создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeContactResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/contacts/{contactId}:
+    put:
+      tags: [employee-profile-settings]
+      summary: Обновить контакт сотрудника
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeContactUpsertRequest' }
+      responses:
+        '200':
+          description: Контакт обновлен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeContactResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /profile-settings/addresses:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить адреса сотрудника
+      responses:
+        '200':
+          description: Адреса сотрудника
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeAddressesResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Добавить адрес сотрудника
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeAddressUpsertRequest' }
+      responses:
+        '201':
+          description: Адрес создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeAddressResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/documents:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить metadata документов сотрудника
+      responses:
+        '200':
+          description: Документы сотрудника
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeDocumentsResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Создать metadata документа сотрудника
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeDocumentCreateRequest' }
+      responses:
+        '201':
+          description: Metadata документа создана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeDocumentResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/security:
+    get:
+      tags: [employee-profile-settings]
+      summary: Получить security summary сотрудника
+      responses:
+        '200':
+          description: Security summary без секретов
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeSecuritySummaryResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user:
+    get:
+      tags: [employee-super-user]
+      summary: Получить состояние elevated mode и доступные policies
+      responses:
+        '200':
+          description: Super-user dashboard
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeSuperUserDashboardResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user/requests:
+    post:
+      tags: [employee-super-user]
+      summary: Создать elevated request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeElevatedRequestCreateRequest' }
+      responses:
+        '201':
+          description: Elevated request создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user/requests/{requestId}/approve:
+    post:
+      tags: [employee-super-user]
+      summary: Одобрить elevated request супервайзером
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeElevatedDecisionRequest' }
+      responses:
+        '200':
+          description: Request одобрен, session активирована
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /super-user/requests/{requestId}/reject:
+    post:
+      tags: [employee-super-user]
+      summary: Отклонить elevated request супервайзером
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeElevatedDecisionRequest' }
+      responses:
+        '200':
+          description: Request отклонен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /super-user/sessions/{sessionId}/close:
+    post:
+      tags: [employee-super-user]
+      summary: Завершить или отозвать elevated session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeElevatedDecisionRequest' }
+      responses:
+        '204': { description: Elevated session завершена }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  responses:
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+    Forbidden:
+      description: Нет доступа
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+    NotFound:
+      description: Запись не найдена
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+    Conflict:
+      description: Конфликт версии или состояния
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+  schemas:
+    EmployeeProfileSettingsSummaryResponse:
+      type: object
+      required: [employeeId, sections, auditContext]
+      properties:
+        employeeId: { type: string }
+        displayName: { type: string }
+        employeeStatus: { type: string }
+        sections:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeProfileSectionResponse' }
+        activeElevatedSession: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' }
+        securityWarnings:
+          type: array
+          items: { type: string }
+        auditContext: { $ref: '#/components/schemas/EmployeeAuditContextResponse' }
+    EmployeeProfileSectionResponse:
+      type: object
+      properties:
+        sectionCode: { type: string }
+        route: { type: string }
+        readinessState: { type: string }
+        warningCodes:
+          type: array
+          items: { type: string }
+    EmployeeProfileGeneralResponse:
+      type: object
+      properties:
+        employeeId: { type: string }
+        displayName: { type: string }
+        jobTitle: { type: string }
+        departmentCode: { type: string }
+        preferredLanguage: { type: string }
+        timezone: { type: string }
+        notificationChannel: { type: string }
+        employeeStatus: { type: string }
+        version: { type: integer, format: int64 }
+        updatedAt: { type: string, format: date-time }
+        auditRecorded: { type: boolean }
+    EmployeeProfileGeneralUpdateRequest:
+      type: object
+      required: [displayName, preferredLanguage, timezone, version]
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 255 }
+        jobTitle: { type: string, maxLength: 128 }
+        departmentCode: { type: string, maxLength: 64 }
+        preferredLanguage: { type: string, minLength: 2, maxLength: 16 }
+        timezone: { type: string, minLength: 1, maxLength: 64 }
+        notificationChannel: { type: string, maxLength: 32 }
+        version: { type: integer, format: int64 }
+    EmployeeContactsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeContactResponse' }
+        auditRecorded: { type: boolean }
+    EmployeeContactResponse:
+      type: object
+      properties:
+        contactId: { type: string, format: uuid }
+        contactType: { type: string }
+        maskedValue: { type: string }
+        primary: { type: boolean }
+        verificationStatus: { type: string }
+        version: { type: integer, format: int64 }
+    EmployeeContactUpsertRequest:
+      type: object
+      required: [contactType, value, version]
+      properties:
+        contactType: { type: string }
+        value: { type: string, minLength: 1 }
+        primary: { type: boolean }
+        version: { type: integer, format: int64 }
+    EmployeeAddressesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeAddressResponse' }
+        auditRecorded: { type: boolean }
+    EmployeeAddressResponse:
+      type: object
+      properties:
+        addressId: { type: string, format: uuid }
+        addressType: { type: string }
+        regionCode: { type: string }
+        city: { type: string }
+        addressLine: { type: string }
+        postalCode: { type: string }
+        active: { type: boolean }
+        validFrom: { type: string, format: date }
+        validTo: { type: string, format: date }
+        version: { type: integer, format: int64 }
+    EmployeeAddressUpsertRequest:
+      type: object
+      required: [addressType, regionCode, city, addressLine, version]
+      properties:
+        addressType: { type: string }
+        regionCode: { type: string }
+        city: { type: string }
+        addressLine: { type: string }
+        postalCode: { type: string }
+        active: { type: boolean }
+        validFrom: { type: string, format: date }
+        validTo: { type: string, format: date }
+        version: { type: integer, format: int64 }
+    EmployeeDocumentsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeDocumentResponse' }
+        auditRecorded: { type: boolean }
+    EmployeeDocumentResponse:
+      type: object
+      properties:
+        documentId: { type: string, format: uuid }
+        documentType: { type: string }
+        maskedNumber: { type: string }
+        issuedAt: { type: string, format: date }
+        expiresAt: { type: string, format: date }
+        verificationStatus: { type: string }
+        linkedPolicyCode: { type: string }
+        fileReferenceId: { type: string }
+        version: { type: integer, format: int64 }
+    EmployeeDocumentCreateRequest:
+      type: object
+      required: [documentType, maskedNumber, fileReferenceId]
+      properties:
+        documentType: { type: string }
+        maskedNumber: { type: string }
+        issuedAt: { type: string, format: date }
+        expiresAt: { type: string, format: date }
+        linkedPolicyCode: { type: string }
+        fileReferenceId: { type: string }
+    EmployeeSecuritySummaryResponse:
+      type: object
+      properties:
+        mfaEnabled: { type: boolean }
+        lastPasswordChangedAt: { type: string, format: date-time }
+        activeSessionCount: { type: integer }
+        riskFlags:
+          type: array
+          items: { type: string }
+        recentEvents:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeSecurityEventResponse' }
+        allowedActions:
+          type: array
+          items: { type: string }
+        auditRecorded: { type: boolean }
+    EmployeeSecurityEventResponse:
+      type: object
+      properties:
+        eventType: { type: string }
+        riskLevel: { type: string }
+        occurredAt: { type: string, format: date-time }
+        sourceRoute: { type: string }
+    EmployeeSuperUserDashboardResponse:
+      type: object
+      properties:
+        employeeId: { type: string }
+        policies:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeElevatedPolicyResponse' }
+        activeSession: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' }
+        pendingRequests:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' }
+        history:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeElevatedAuditResponse' }
+        auditRecorded: { type: boolean }
+    EmployeeElevatedPolicyResponse:
+      type: object
+      properties:
+        policyCode: { type: string }
+        allowed: { type: boolean }
+        requiresSupervisorApproval: { type: boolean }
+        maxDurationMinutes: { type: integer }
+        deniedCode: { type: string, example: STR_MNEMO_EMPLOYEE_ELEVATED_POLICY_DENIED }
+    EmployeeElevatedRequestCreateRequest:
+      type: object
+      required: [policyCode, reasonCode, reasonText, targetScope, requestedDurationMinutes]
+      properties:
+        policyCode: { type: string }
+        reasonCode: { type: string }
+        reasonText: { type: string, minLength: 3, maxLength: 1000 }
+        targetScope: { type: string }
+        requestedDurationMinutes: { type: integer, minimum: 1, maximum: 480 }
+        linkedDocumentId: { type: string, format: uuid }
+    EmployeeElevatedRequestResponse:
+      type: object
+      properties:
+        requestId: { type: string, format: uuid }
+        employeeId: { type: string }
+        policyCode: { type: string }
+        reasonCode: { type: string }
+        targetScope: { type: string }
+        requestedDurationMinutes: { type: integer }
+        status: { type: string }
+        requestedAt: { type: string, format: date-time }
+        decidedBy: { type: string }
+        decidedAt: { type: string, format: date-time }
+        auditRecorded: { type: boolean }
+    EmployeeElevatedDecisionRequest:
+      type: object
+      properties:
+        comment: { type: string, maxLength: 1000 }
+    EmployeeElevatedSessionResponse:
+      type: object
+      properties:
+        elevatedSessionId: { type: string, format: uuid }
+        policyCode: { type: string }
+        targetScope: { type: string }
+        status: { type: string }
+        startedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        remainingSeconds: { type: integer }
+        approvedBy: { type: string }
+        allowedLinkedOperations:
+          type: array
+          items: { type: string }
+    EmployeeElevatedAuditResponse:
+      type: object
+      properties:
+        actionCode: { type: string }
+        policyCode: { type: string }
+        targetEntityType: { type: string }
+        targetEntityId: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }
+    EmployeeAuditContextResponse:
+      type: object
+      properties:
+        actorUserId: { type: string }
+        sourceRoute: { type: string }
+        elevatedSessionId: { type: string, format: uuid }
+        correlationId: { type: string }
+        auditRecorded: { type: boolean }
+    EmployeeErrorResponse:
+      type: object
+      properties:
+        code: { type: string, example: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        details:
+          type: array
+          items:
+            type: object
+        metadata:
+          type: object
+          additionalProperties: { type: string }

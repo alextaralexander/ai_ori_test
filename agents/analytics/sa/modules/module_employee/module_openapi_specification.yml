@@ -1,199 +1,322 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
-  title: Best Ori Gin Employee API
-  version: 0.22.0
-  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа, истории заказов сотрудника и employee-претензий, карточки партнера и отчета заказов партнера.
+  title: Best Ori Gin employee module
+  version: 2026.04.27-through-feature-023
+  description: Полная module-level OpenAPI спецификация employee module для features #19-#23.
 servers:
   - url: /api/employee
 paths:
-  /partner-card:
-    get:
-      summary: Поиск и открытие карточки партнера сотрудником
-      parameters:
-        - { in: query, name: query, required: true, schema: { type: string, minLength: 3 } }
-        - { in: query, name: supportReasonCode, schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW } }
-        - { in: query, name: regionCode, schema: { type: string } }
-      responses:
-        '200': { description: EmployeePartnerCardResponse }
-        '400': { description: STR_MNEMO_EMPLOYEE_PARTNER_QUERY_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
-        '404': { description: STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND }
-  /partner-card/{partnerId}:
-    get:
-      summary: Открыть карточку партнера по partnerId
-      parameters:
-        - { in: path, name: partnerId, required: true, schema: { type: string } }
-        - { in: query, name: supportReasonCode, schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW } }
-      responses:
-        '200': { description: EmployeePartnerCardResponse }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
-        '404': { description: STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND }
-  /report/order-history:
-    get:
-      summary: Получить employee-отчет истории заказов партнера
-      parameters:
-        - { in: query, name: partnerId, schema: { type: string } }
-        - { in: query, name: personNumber, schema: { type: string } }
-        - { in: query, name: dateFrom, schema: { type: string, format: date } }
-        - { in: query, name: dateTo, schema: { type: string, format: date } }
-        - { in: query, name: campaignCode, schema: { type: string } }
-        - { in: query, name: orderStatus, schema: { type: string } }
-        - { in: query, name: paymentStatus, schema: { type: string } }
-        - { in: query, name: deliveryStatus, schema: { type: string } }
-        - { in: query, name: problemOnly, schema: { type: boolean, default: false } }
-        - { in: query, name: regionCode, schema: { type: string } }
-        - { in: query, name: page, schema: { type: integer, default: 0 } }
-        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
-        - { in: query, name: sort, schema: { type: string, default: updatedAt,desc } }
-      responses:
-        '200': { description: EmployeePartnerOrderReportResponse }
-        '400': { description: STR_MNEMO_EMPLOYEE_PARTNER_REPORT_FILTER_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
   /workspace:
     get:
-      summary: Поиск клиента, партнера или заказа в employee workspace
+      tags: [employee-workspace]
+      summary: Поиск рабочего контекста сотрудника
       parameters:
-        - { in: query, name: query, required: true, schema: { type: string } }
+        - { name: query, in: query, required: true, schema: { type: string, minLength: 3 } }
+        - { name: supportReasonCode, in: query, required: true, schema: { type: string } }
       responses:
-        '200': { description: Найденный support-контекст }
-        '400': { description: STR_MNEMO_EMPLOYEE_QUERY_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '200': { description: Workspace context, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeWorkspaceResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /operator-orders:
     post:
-      summary: Создать операторский заказ от имени клиента или партнера
+      tags: [employee-operator-order]
+      summary: Создать операторский заказ сотрудником
       responses:
-        '200': { description: Результат созданного заказа }
-        '400': { description: Ошибка валидации }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '201': { description: Operator order created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /operator-orders/{operatorOrderId}/confirm:
     post:
+      tags: [employee-operator-order]
       summary: Подтвердить операторский заказ
       parameters:
-        - { in: path, name: operatorOrderId, required: true, schema: { type: string, format: uuid } }
+        - { name: operatorOrderId, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
-        '200': { description: Подтвержденный заказ }
+        '200': { description: Operator order confirmed, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /order-support/{orderNumber}:
     get:
+      tags: [employee-order-support]
       summary: Открыть поддержку проблемного заказа
       parameters:
-        - { in: path, name: orderNumber, required: true, schema: { type: string } }
+        - { name: orderNumber, in: path, required: true, schema: { type: string } }
       responses:
-        '200': { description: Support-карточка заказа }
-        '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
-  /order-support/{orderNumber}/notes:
-    post:
-      summary: Добавить внутреннюю заметку сотрудника
-      responses:
-        '200': { description: Заметка сохранена }
-  /order-support/{orderNumber}/adjustments:
-    post:
-      summary: Зафиксировать сервисную корректировку
-      responses:
-        '200': { description: Корректировка сохранена }
-  /order-support/{orderNumber}/escalations:
-    post:
-      summary: Создать эскалацию поддержки
-      responses:
-        '200': { description: Эскалация создана }
-  /supervisor/escalations:
-    get:
-      summary: Получить список эскалаций для супервизора
-      responses:
-        '200': { description: Список эскалаций }
+        '200': { description: Order support context, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /order-history:
     get:
-      summary: Получить операторскую историю заказов
+      tags: [employee-order-history]
+      summary: Операторская история заказов
       parameters:
-        - { in: query, name: partnerId, schema: { type: string } }
-        - { in: query, name: customerId, schema: { type: string } }
-        - { in: query, name: dateFrom, schema: { type: string, format: date } }
-        - { in: query, name: dateTo, schema: { type: string, format: date } }
-        - { in: query, name: orderStatus, schema: { type: string } }
-        - { in: query, name: paymentStatus, schema: { type: string, enum: [PENDING, READY_TO_PAY, PAID, FAILED] } }
-        - { in: query, name: deliveryStatus, schema: { type: string, enum: [DRAFT, CONFIRMED, IN_TRANSIT, DELAYED] } }
-        - { in: query, name: problemOnly, schema: { type: boolean, default: false } }
-        - { in: query, name: query, schema: { type: string } }
-        - { in: query, name: page, schema: { type: integer, default: 0 } }
-        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
-        - { in: query, name: sort, schema: { type: string } }
+        - { name: partnerId, in: query, required: false, schema: { type: string } }
+        - { name: customerId, in: query, required: false, schema: { type: string } }
+        - { name: dateFrom, in: query, required: false, schema: { type: string, format: date } }
+        - { name: dateTo, in: query, required: false, schema: { type: string, format: date } }
+        - { name: problemOnly, in: query, required: false, schema: { type: boolean } }
+        - { name: page, in: query, required: false, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
       responses:
-        '200': { description: Страница заказов employee read-model }
-        '400': { description: STR_MNEMO_EMPLOYEE_ORDER_HISTORY_FILTER_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '200': { description: Order history page, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeePagedResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /order-history/{orderId}:
     get:
-      summary: Получить расширенные детали заказа для сотрудника
+      tags: [employee-order-history]
+      summary: Детали заказа для сотрудника
       parameters:
-        - { in: path, name: orderId, required: true, schema: { type: string } }
+        - { name: orderId, in: path, required: true, schema: { type: string } }
       responses:
-        '200': { description: Расширенная карточка заказа }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
-        '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
+        '200': { description: Order details, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /submit-claim:
     post:
-      summary: Создать претензию сотрудником от имени клиента или партнера
+      tags: [employee-claims]
+      summary: Создать претензию сотрудником
       parameters:
-        - { in: header, name: Idempotency-Key, required: true, schema: { type: string } }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/EmployeeClaimCreateRequest' }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
       responses:
-        '201': { description: Создана employee-претензия }
-        '200': { description: Возвращена претензия для того же idempotency key }
-        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_VALIDATION_FAILED }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '201': { description: Claim created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /claims:
     get:
-      summary: Получить историю employee claims
-      parameters:
-        - { in: query, name: claimStatus, schema: { type: string } }
-        - { in: query, name: dateFrom, schema: { type: string, format: date } }
-        - { in: query, name: dateTo, schema: { type: string, format: date } }
-        - { in: query, name: slaState, schema: { type: string } }
-        - { in: query, name: responsibleRole, schema: { type: string } }
-        - { in: query, name: assigneeId, schema: { type: string } }
-        - { in: query, name: resolutionType, schema: { type: string } }
-        - { in: query, name: sourceChannel, schema: { type: string } }
-        - { in: query, name: warehouseCode, schema: { type: string } }
-        - { in: query, name: financeStatus, schema: { type: string } }
-        - { in: query, name: query, schema: { type: string } }
-        - { in: query, name: page, schema: { type: integer, default: 0 } }
-        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
-        - { in: query, name: sort, schema: { type: string } }
+      tags: [employee-claims]
+      summary: Очередь employee-претензий
       responses:
-        '200': { description: Страница employee claims }
-        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_FILTER_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '200': { description: Claims page, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeePagedResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /claims/{claimId}:
     get:
-      summary: Получить детальную карточку employee claim
+      tags: [employee-claims]
+      summary: Карточка employee-претензии
       parameters:
-        - { in: path, name: claimId, required: true, schema: { type: string } }
-        - { in: query, name: supportReasonCode, required: true, schema: { type: string } }
+        - { name: claimId, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
-        '200': { description: Детальная карточка employee claim }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
-        '404': { description: STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND }
+        '200': { description: Claim details, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /claims/{claimId}/transitions:
     post:
-      summary: Выполнить transition employee claim
+      tags: [employee-claims]
+      summary: Выполнить transition претензии
       parameters:
-        - { in: path, name: claimId, required: true, schema: { type: string } }
-        - { in: header, name: Idempotency-Key, required: true, schema: { type: string } }
+        - { name: claimId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Claim transition result, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeOperationResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /partner-card:
+    get:
+      tags: [employee-partner-card]
+      summary: Поиск и открытие карточки партнера сотрудником
+      parameters:
+        - { name: query, in: query, required: true, schema: { type: string, minLength: 3 } }
+        - { name: supportReasonCode, in: query, required: false, schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW } }
+        - { name: regionCode, in: query, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Partner card, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeePartnerCardResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /partner-card/{partnerId}:
+    get:
+      tags: [employee-partner-card]
+      summary: Открыть карточку партнера по partnerId
+      parameters:
+        - { name: partnerId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Partner card, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeePartnerCardResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /report/order-history:
+    get:
+      tags: [employee-partner-report]
+      summary: Отчет истории заказов партнера
+      parameters:
+        - { name: partnerId, in: query, required: false, schema: { type: string } }
+        - { name: personNumber, in: query, required: false, schema: { type: string } }
+        - { name: problemOnly, in: query, required: false, schema: { type: boolean, default: false } }
+        - { name: page, in: query, required: false, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200': { description: Partner order report, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeePartnerOrderReportResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings:
+    get:
+      tags: [employee-profile-settings]
+      summary: Summary настроек employee-профиля
+      responses:
+        '200': { description: Profile settings summary, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeProfileSettingsSummaryResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/general:
+    get:
+      tags: [employee-profile-settings]
+      summary: General-раздел employee-профиля
+      responses:
+        '200': { description: General settings, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeProfileGeneralResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [employee-profile-settings]
+      summary: Обновить general-раздел employee-профиля
       requestBody:
         required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/EmployeeClaimTransitionRequest' }
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeProfileGeneralUpdateRequest' } } }
       responses:
-        '200': { description: Обновленная карточка employee claim }
-        '400': { description: STR_MNEMO_EMPLOYEE_CLAIM_TRANSITION_INVALID }
-        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
-        '404': { description: STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND }
+        '200': { description: Updated general settings, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeProfileGeneralResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /profile-settings/contacts:
+    get:
+      tags: [employee-profile-settings]
+      summary: Контакты сотрудника
+      responses:
+        '200': { description: Contacts, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeContactsResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Добавить контакт сотрудника
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeContactUpsertRequest' } } }
+      responses:
+        '201': { description: Contact created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeContactResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/addresses:
+    get:
+      tags: [employee-profile-settings]
+      summary: Адреса сотрудника
+      responses:
+        '200': { description: Addresses, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeAddressesResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Добавить адрес сотрудника
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeAddressUpsertRequest' } } }
+      responses:
+        '201': { description: Address created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeAddressResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/documents:
+    get:
+      tags: [employee-profile-settings]
+      summary: Metadata документов сотрудника
+      responses:
+        '200': { description: Documents, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeDocumentsResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [employee-profile-settings]
+      summary: Создать metadata документа сотрудника
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeDocumentCreateRequest' } } }
+      responses:
+        '201': { description: Document metadata created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeDocumentResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /profile-settings/security:
+    get:
+      tags: [employee-profile-settings]
+      summary: Security summary сотрудника
+      responses:
+        '200': { description: Security summary, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeSecuritySummaryResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user:
+    get:
+      tags: [employee-super-user]
+      summary: Dashboard повышенных прав сотрудника
+      responses:
+        '200': { description: Super-user dashboard, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeSuperUserDashboardResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user/requests:
+    post:
+      tags: [employee-super-user]
+      summary: Создать elevated request
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeElevatedRequestCreateRequest' } } }
+      responses:
+        '201': { description: Elevated request created, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /super-user/requests/{requestId}/approve:
+    post:
+      tags: [employee-super-user]
+      summary: Одобрить elevated request
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Elevated session activated, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /super-user/requests/{requestId}/reject:
+    post:
+      tags: [employee-super-user]
+      summary: Отклонить elevated request
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Elevated request rejected, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /super-user/sessions/{sessionId}/close:
+    post:
+      tags: [employee-super-user]
+      summary: Завершить или отозвать elevated session
+      parameters:
+        - { name: sessionId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204': { description: Elevated session closed }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 components:
+  responses:
+    ValidationError: { description: Ошибка валидации, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeErrorResponse' } } } }
+    Forbidden: { description: Нет доступа, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeErrorResponse' } } } }
+    NotFound: { description: Запись не найдена, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeErrorResponse' } } } }
+    Conflict: { description: Конфликт версии или состояния, content: { application/json: { schema: { $ref: '#/components/schemas/EmployeeErrorResponse' } } } }
   schemas:
+    EmployeeErrorResponse:
+      type: object
+      properties:
+        code: { type: string, example: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        details: { type: array, items: { type: object } }
+        metadata: { type: object, additionalProperties: { type: string } }
+    EmployeeOperationResponse:
+      type: object
+      properties:
+        id: { type: string }
+        status: { type: string }
+        mnemonicCode: { type: string }
+        auditRecorded: { type: boolean }
+        correlationId: { type: string }
+        linkedRoutes: { type: object, additionalProperties: { type: string } }
+    EmployeePagedResponse:
+      type: object
+      properties:
+        items: { type: array, items: { type: object } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+    EmployeeWorkspaceResponse:
+      type: object
+      properties:
+        actorUserId: { type: string }
+        targetCustomerId: { type: string }
+        targetPartnerId: { type: string }
+        supportReasonCode: { type: string }
+        allowedActions: { type: array, items: { type: string } }
     EmployeePartnerCardResponse:
       type: object
       properties:
@@ -201,18 +324,10 @@ components:
         personNumber: { type: string }
         displayName: { type: string }
         status: { type: string }
-        activityState: { type: string }
-        levelName: { type: string }
-        regionCode: { type: string }
-        mentorPersonNumber: { type: string }
-        maskedPhone: { type: string }
-        maskedEmail: { type: string }
-        registrationDate: { type: string, format: date }
-        lastOrderDate: { type: string, format: date }
         kpi: { type: object }
         recentOrders: { type: array, items: { type: object } }
         riskSignals: { type: array, items: { type: string } }
-        auditContext: { type: object }
+        auditContext: { $ref: '#/components/schemas/EmployeeAuditContextResponse' }
         linkedRoutes: { type: object, additionalProperties: { type: string } }
     EmployeePartnerOrderReportResponse:
       type: object
@@ -223,123 +338,53 @@ components:
         size: { type: integer }
         totalElements: { type: integer, format: int64 }
         auditRecorded: { type: boolean }
-        appliedFilters: { type: object, additionalProperties: { type: string } }
-    EmployeeOperatorOrderCreateRequest:
-      type: object
-      required: [targetCustomerId, supportReasonCode, cartType]
-      properties:
-        targetCustomerId: { type: string }
-        supportReasonCode: { type: string }
-        cartType: { type: string, enum: [MAIN, SUPPLEMENTARY] }
-    EmployeeOrderHistoryPageResponse:
+    EmployeeProfileSettingsSummaryResponse:
       type: object
       properties:
-        items: { type: array, items: { $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse' } }
-        page: { type: integer }
-        size: { type: integer }
-        totalElements: { type: integer, format: int64 }
-        auditRecorded: { type: boolean }
-    EmployeeOrderHistorySummaryResponse:
+        employeeId: { type: string }
+        displayName: { type: string }
+        employeeStatus: { type: string }
+        sections: { type: array, items: { type: object } }
+        activeElevatedSession: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' }
+        securityWarnings: { type: array, items: { type: string } }
+        auditContext: { $ref: '#/components/schemas/EmployeeAuditContextResponse' }
+    EmployeeProfileGeneralResponse:
       type: object
       properties:
-        orderId: { type: string }
-        orderNumber: { type: string }
-        customerDisplayName: { type: string }
-        partnerDisplayName: { type: string }
-        maskedPhone: { type: string }
-        maskedEmail: { type: string }
-        orderStatus: { type: string }
-        paymentStatus: { type: string }
-        deliveryStatus: { type: string }
-        fulfillmentStatus: { type: string }
-        totalAmount: { type: number }
-        currencyCode: { type: string }
-        problemFlags: { type: array, items: { type: string } }
-        linkedRoutes: { type: object, additionalProperties: { type: string } }
-    EmployeeOrderHistoryDetailsResponse:
-      allOf:
-        - $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse'
-        - type: object
-          properties:
-            items: { type: array, items: { type: object } }
-            paymentEvents: { type: array, items: { type: object } }
-            deliveryEvents: { type: array, items: { type: object } }
-            wmsEvents: { type: array, items: { type: object } }
-            supportCaseIds: { type: array, items: { type: string } }
-            claimIds: { type: array, items: { type: string } }
-            auditEvents: { type: array, items: { type: object } }
-    EmployeeClaimCreateRequest:
-      type: object
-      required: [supportReasonCode, orderNumber, items, requestedResolution]
-      properties:
-        customerId: { type: string }
-        partnerId: { type: string }
-        orderId: { type: string }
-        orderNumber: { type: string }
-        sourceChannel: { type: string }
-        supportReasonCode: { type: string }
-        requestedResolution: { type: string }
-        comment: { type: string }
-        attachments: { type: array, items: { type: object } }
-        items: { type: array, items: { $ref: '#/components/schemas/EmployeeClaimItemRequest' } }
-    EmployeeClaimItemRequest:
-      type: object
-      required: [sku, productCode, quantity, problemType, requestedResolution]
-      properties:
-        sku: { type: string }
-        productCode: { type: string }
-        quantity: { type: integer, minimum: 1 }
-        problemType: { type: string }
-        requestedResolution: { type: string }
-        internalComment: { type: string }
-    EmployeeClaimTransitionRequest:
-      type: object
-      required: [transitionCode, supportReasonCode]
-      properties:
-        transitionCode: { type: string }
-        supportReasonCode: { type: string }
-        assigneeId: { type: string }
-        resultCode: { type: string }
-        comment: { type: string }
-        approvedCompensationAmount: { type: number }
-    EmployeeClaimPageResponse:
-      type: object
-      properties:
-        items: { type: array, items: { $ref: '#/components/schemas/EmployeeClaimSummaryResponse' } }
-        page: { type: integer }
-        size: { type: integer }
-        totalElements: { type: integer, format: int64 }
-        auditRecorded: { type: boolean }
-    EmployeeClaimSummaryResponse:
-      type: object
-      properties:
-        claimId: { type: string }
-        claimNumber: { type: string }
-        orderNumber: { type: string }
-        customerOrPartnerLabel: { type: string }
-        maskedContact: { type: string }
-        status: { type: string }
-        slaState: { type: string }
-        slaDueAt: { type: string, format: date-time }
-        resolutionType: { type: string }
-        compensationAmount: { type: number }
-        currencyCode: { type: string }
-        assignee: { type: string }
-        responsibleRole: { type: string }
+        employeeId: { type: string }
+        displayName: { type: string }
+        jobTitle: { type: string }
+        departmentCode: { type: string }
+        preferredLanguage: { type: string }
+        timezone: { type: string }
+        notificationChannel: { type: string }
+        employeeStatus: { type: string }
+        version: { type: integer, format: int64 }
         updatedAt: { type: string, format: date-time }
-        availableActions: { type: array, items: { type: string } }
-    EmployeeClaimDetailsResponse:
-      allOf:
-        - $ref: '#/components/schemas/EmployeeClaimSummaryResponse'
-        - type: object
-          properties:
-            customerId: { type: string }
-            partnerId: { type: string }
-            requestedResolution: { type: string }
-            approvedResolution: { type: string }
-            publicReasonMnemonic: { type: string }
-            supervisorRequired: { type: boolean }
-            items: { type: array, items: { type: object } }
-            attachments: { type: array, items: { type: object } }
-            routeTasks: { type: array, items: { type: object } }
-            auditEvents: { type: array, items: { type: object } }
+        auditRecorded: { type: boolean }
+    EmployeeProfileGeneralUpdateRequest:
+      type: object
+      required: [displayName, preferredLanguage, timezone, version]
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 255 }
+        jobTitle: { type: string }
+        departmentCode: { type: string }
+        preferredLanguage: { type: string }
+        timezone: { type: string }
+        notificationChannel: { type: string }
+        version: { type: integer, format: int64 }
+    EmployeeContactsResponse: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/EmployeeContactResponse' } }, auditRecorded: { type: boolean } } }
+    EmployeeContactResponse: { type: object, properties: { contactId: { type: string, format: uuid }, contactType: { type: string }, maskedValue: { type: string }, primary: { type: boolean }, verificationStatus: { type: string }, version: { type: integer, format: int64 } } }
+    EmployeeContactUpsertRequest: { type: object, required: [contactType, value, version], properties: { contactType: { type: string }, value: { type: string, minLength: 1 }, primary: { type: boolean }, version: { type: integer, format: int64 } } }
+    EmployeeAddressesResponse: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/EmployeeAddressResponse' } }, auditRecorded: { type: boolean } } }
+    EmployeeAddressResponse: { type: object, properties: { addressId: { type: string, format: uuid }, addressType: { type: string }, regionCode: { type: string }, city: { type: string }, addressLine: { type: string }, active: { type: boolean }, version: { type: integer, format: int64 } } }
+    EmployeeAddressUpsertRequest: { type: object, required: [addressType, regionCode, city, addressLine, version], properties: { addressType: { type: string }, regionCode: { type: string }, city: { type: string }, addressLine: { type: string }, postalCode: { type: string }, active: { type: boolean }, version: { type: integer, format: int64 } } }
+    EmployeeDocumentsResponse: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/EmployeeDocumentResponse' } }, auditRecorded: { type: boolean } } }
+    EmployeeDocumentResponse: { type: object, properties: { documentId: { type: string, format: uuid }, documentType: { type: string }, maskedNumber: { type: string }, verificationStatus: { type: string }, linkedPolicyCode: { type: string }, fileReferenceId: { type: string }, version: { type: integer, format: int64 } } }
+    EmployeeDocumentCreateRequest: { type: object, required: [documentType, maskedNumber, fileReferenceId], properties: { documentType: { type: string }, maskedNumber: { type: string }, linkedPolicyCode: { type: string }, fileReferenceId: { type: string } } }
+    EmployeeSecuritySummaryResponse: { type: object, properties: { mfaEnabled: { type: boolean }, lastPasswordChangedAt: { type: string, format: date-time }, activeSessionCount: { type: integer }, riskFlags: { type: array, items: { type: string } }, recentEvents: { type: array, items: { type: object } }, allowedActions: { type: array, items: { type: string } }, auditRecorded: { type: boolean } } }
+    EmployeeSuperUserDashboardResponse: { type: object, properties: { employeeId: { type: string }, policies: { type: array, items: { type: object } }, activeSession: { $ref: '#/components/schemas/EmployeeElevatedSessionResponse' }, pendingRequests: { type: array, items: { $ref: '#/components/schemas/EmployeeElevatedRequestResponse' } }, history: { type: array, items: { type: object } }, auditRecorded: { type: boolean } } }
+    EmployeeElevatedRequestCreateRequest: { type: object, required: [policyCode, reasonCode, reasonText, targetScope, requestedDurationMinutes], properties: { policyCode: { type: string }, reasonCode: { type: string }, reasonText: { type: string, minLength: 3, maxLength: 1000 }, targetScope: { type: string }, requestedDurationMinutes: { type: integer, minimum: 1, maximum: 480 }, linkedDocumentId: { type: string, format: uuid } } }
+    EmployeeElevatedRequestResponse: { type: object, properties: { requestId: { type: string, format: uuid }, employeeId: { type: string }, policyCode: { type: string }, targetScope: { type: string }, requestedDurationMinutes: { type: integer }, status: { type: string }, requestedAt: { type: string, format: date-time }, auditRecorded: { type: boolean } } }
+    EmployeeElevatedSessionResponse: { type: object, properties: { elevatedSessionId: { type: string, format: uuid }, policyCode: { type: string }, targetScope: { type: string }, status: { type: string }, startedAt: { type: string, format: date-time }, expiresAt: { type: string, format: date-time }, remainingSeconds: { type: integer }, approvedBy: { type: string }, allowedLinkedOperations: { type: array, items: { type: string } } } }
+    EmployeeAuditContextResponse: { type: object, properties: { actorUserId: { type: string }, sourceRoute: { type: string }, elevatedSessionId: { type: string, format: uuid }, correlationId: { type: string }, auditRecorded: { type: boolean } } }

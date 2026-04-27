@@ -322,6 +322,102 @@ export interface EmployeePartnerOrderReportResponse {
   appliedFilters: Record<string, string>;
 }
 
+export interface EmployeeProfileSettingsSummaryResponse {
+  employeeId: string;
+  displayName: string;
+  employeeStatus: string;
+  sections: Array<{ sectionCode: string; route: string; readinessState: string; warningCodes: string[] }>;
+  activeElevatedSession?: EmployeeElevatedSessionResponse | null;
+  securityWarnings: string[];
+  auditContext: { actorUserId: string; supportReasonCode: string; sourceChannel: string; auditRecorded: boolean };
+}
+
+export interface EmployeeProfileGeneralResponse {
+  employeeId: string;
+  displayName: string;
+  jobTitle: string;
+  departmentCode: string;
+  preferredLanguage: string;
+  timezone: string;
+  notificationChannel: string;
+  employeeStatus: string;
+  version: number;
+  updatedAt: string;
+  auditRecorded: boolean;
+}
+
+export interface EmployeeContactResponse {
+  contactId: string;
+  contactType: string;
+  maskedValue: string;
+  primary: boolean;
+  verificationStatus: string;
+  version: number;
+}
+
+export interface EmployeeAddressResponse {
+  addressId: string;
+  addressType: string;
+  regionCode: string;
+  city: string;
+  addressLine: string;
+  active: boolean;
+  version: number;
+}
+
+export interface EmployeeDocumentResponse {
+  documentId: string;
+  documentType: string;
+  maskedNumber: string;
+  verificationStatus: string;
+  linkedPolicyCode: string;
+  fileReferenceId: string;
+  version: number;
+}
+
+export interface EmployeeSecuritySummaryResponse {
+  mfaEnabled: boolean;
+  lastPasswordChangedAt: string;
+  activeSessionCount: number;
+  riskFlags: string[];
+  recentEvents: Array<{ eventType: string; riskLevel: string; occurredAt: string; sourceRoute: string }>;
+  allowedActions: string[];
+  auditRecorded: boolean;
+}
+
+export interface EmployeeElevatedRequestResponse {
+  requestId: string;
+  employeeId: string;
+  policyCode: string;
+  reasonCode: string;
+  targetScope: string;
+  requestedDurationMinutes: number;
+  status: string;
+  requestedAt: string;
+  auditRecorded: boolean;
+}
+
+export interface EmployeeElevatedSessionResponse {
+  elevatedSessionId: string;
+  policyCode: string;
+  targetScope: string;
+  status: string;
+  startedAt: string;
+  expiresAt: string;
+  remainingSeconds: number;
+  approvedBy: string;
+  allowedLinkedOperations: string[];
+}
+
+export interface EmployeeSuperUserDashboardResponse {
+  employeeId: string;
+  policies: Array<{ policyCode: string; allowed: boolean; requiresSupervisorApproval: boolean; maxDurationMinutes: number; deniedCode?: string | null }>;
+  activeSession?: EmployeeElevatedSessionResponse | null;
+  pendingRequests: EmployeeElevatedRequestResponse[];
+  history: Array<{ actionCode: string; policyCode: string; correlationId: string; occurredAt: string }>;
+  auditRecorded: boolean;
+}
+
 interface ErrorResponse {
   code: string;
 }
@@ -479,4 +575,72 @@ export async function getEmployeePartnerOrderReport(params: URLSearchParams): Pr
   }
   const response = await fetch(`/api/employee/report/order-history?${query.toString()}`, { headers: authHeaders() });
   return readJson<EmployeePartnerOrderReportResponse>(response);
+}
+
+export async function getEmployeeProfileSettings(): Promise<EmployeeProfileSettingsSummaryResponse> {
+  const response = await fetch('/api/employee/profile-settings', { headers: authHeaders() });
+  return readJson<EmployeeProfileSettingsSummaryResponse>(response);
+}
+
+export async function getEmployeeProfileGeneral(): Promise<EmployeeProfileGeneralResponse> {
+  const response = await fetch('/api/employee/profile-settings/general', { headers: authHeaders() });
+  return readJson<EmployeeProfileGeneralResponse>(response);
+}
+
+export async function updateEmployeeProfileGeneral(displayName: string, timezone: string, version: number): Promise<EmployeeProfileGeneralResponse> {
+  const response = await fetch('/api/employee/profile-settings/general', {
+    method: 'PUT',
+    headers: jsonHeaders('employee-profile-general'),
+    body: JSON.stringify({ displayName, jobTitle: 'Support specialist', departmentCode: 'SUPPORT', preferredLanguage: 'ru', timezone, notificationChannel: 'WORK_EMAIL', version }),
+  });
+  return readJson<EmployeeProfileGeneralResponse>(response);
+}
+
+export async function getEmployeeContacts(): Promise<{ items: EmployeeContactResponse[]; auditRecorded: boolean }> {
+  const response = await fetch('/api/employee/profile-settings/contacts', { headers: authHeaders() });
+  return readJson<{ items: EmployeeContactResponse[]; auditRecorded: boolean }>(response);
+}
+
+export async function getEmployeeAddresses(): Promise<{ items: EmployeeAddressResponse[]; auditRecorded: boolean }> {
+  const response = await fetch('/api/employee/profile-settings/addresses', { headers: authHeaders() });
+  return readJson<{ items: EmployeeAddressResponse[]; auditRecorded: boolean }>(response);
+}
+
+export async function getEmployeeDocuments(): Promise<{ items: EmployeeDocumentResponse[]; auditRecorded: boolean }> {
+  const response = await fetch('/api/employee/profile-settings/documents', { headers: authHeaders() });
+  return readJson<{ items: EmployeeDocumentResponse[]; auditRecorded: boolean }>(response);
+}
+
+export async function getEmployeeSecurity(): Promise<EmployeeSecuritySummaryResponse> {
+  const response = await fetch('/api/employee/profile-settings/security', { headers: authHeaders() });
+  return readJson<EmployeeSecuritySummaryResponse>(response);
+}
+
+export async function getEmployeeSuperUser(): Promise<EmployeeSuperUserDashboardResponse> {
+  const response = await fetch('/api/employee/super-user', { headers: authHeaders() });
+  return readJson<EmployeeSuperUserDashboardResponse>(response);
+}
+
+export async function createEmployeeElevatedRequest(reasonText: string): Promise<EmployeeElevatedRequestResponse> {
+  const response = await fetch('/api/employee/super-user/requests', {
+    method: 'POST',
+    headers: jsonHeaders('employee-elevated-request'),
+    body: JSON.stringify({
+      policyCode: 'EMPLOYEE_ELEVATED_SUPPORT_OPERATIONS',
+      reasonCode: 'SUPPORT_ESCALATION',
+      reasonText,
+      targetScope: 'ORDER_SUPPORT',
+      requestedDurationMinutes: 20,
+    }),
+  });
+  return readJson<EmployeeElevatedRequestResponse>(response);
+}
+
+export async function approveEmployeeElevatedRequest(requestId: string): Promise<EmployeeElevatedSessionResponse> {
+  const response = await fetch(`/api/employee/super-user/requests/${requestId}/approve`, {
+    method: 'POST',
+    headers: jsonHeaders(`employee-elevated-approve-${requestId}`),
+    body: JSON.stringify({ comment: 'approved' }),
+  });
+  return readJson<EmployeeElevatedSessionResponse>(response);
 }
