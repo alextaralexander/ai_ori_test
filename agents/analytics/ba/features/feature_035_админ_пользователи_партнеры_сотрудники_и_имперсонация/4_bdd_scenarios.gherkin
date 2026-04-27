@@ -1,0 +1,103 @@
+# language: ru
+Функция: Feature 035. Админ: пользователи, партнеры, сотрудники и имперсонация
+  Административный identity/master-data модуль Best Ori Gin должен позволять управлять пользователями, партнерами, сотрудниками, sponsor relationships и impersonation controls без нарушения RBAC, audit trail, маскирования персональных данных и frontend i18n contract.
+
+  Предыстория:
+    Дано в системе существует пользователь "USR-035-1001"
+    И существует партнер "PTR-035-1001" со sponsor code "SP-035-A"
+    И существует сотрудник "EMP-035-1001" с ролью "Customer master-data admin"
+    И административные действия выполняются с correlationId "CORR-035-BASE"
+
+  Сценарий: Master-data admin находит пользователя и открывает сводную карточку
+    Дано пользователь "master-data-admin" вошел в административный интерфейс с ролью "Customer master-data admin"
+    Когда пользователь открывает раздел "Админ: пользователи"
+    И применяет фильтры по subject type "USER", статусу "ACTIVE" и email "customer035@example.test"
+    Тогда в результатах отображается субъект "USR-035-1001"
+    Когда пользователь открывает карточку субъекта "USR-035-1001"
+    Тогда карточка показывает profile, статусы, роли, eligibility rules и audit trail
+    И персональные данные отображаются только в объеме, разрешенном permission scopes
+
+  Сценарий: Master-data admin меняет статус аккаунта с reasonCode
+    Дано пользователь "master-data-admin" вошел в административный интерфейс с ролью "Customer master-data admin"
+    И субъект "USR-035-1002" находится в статусе "ACTIVE"
+    Когда пользователь меняет статус субъекта "USR-035-1002" на "SUSPENDED" с reasonCode "MANUAL_RISK_REVIEW"
+    Тогда статус субъекта становится "SUSPENDED"
+    И audit trail содержит actorUserId, old value "ACTIVE", new value "SUSPENDED", reasonCode и correlationId
+
+  Сценарий: Нельзя выполнить невалидный переход статуса
+    Дано пользователь "master-data-admin" вошел в административный интерфейс с ролью "Customer master-data admin"
+    И субъект "USR-035-1003" находится в статусе "ARCHIVED"
+    Когда пользователь пытается изменить статус субъекта "USR-035-1003" на "ACTIVE"
+    Тогда операция отклоняется с mnemonic-кодом "STR_MNEMO_ADMIN_IDENTITY_INVALID_STATUS_TRANSITION"
+    И статус субъекта "USR-035-1003" остается "ARCHIVED"
+
+  Сценарий: Partner operations admin меняет sponsor relationship
+    Дано пользователь "partner-ops-admin" вошел в административный интерфейс с ролью "Partner operations admin"
+    И партнер "PTR-035-1002" находится в команде sponsor "SP-035-A"
+    И sponsor "SP-035-B" существует и доступен для переноса
+    Когда пользователь запускает перенос партнера "PTR-035-1002" к sponsor "SP-035-B"
+    И указывает дату вступления в силу "2026-05-01" и reasonCode "PARTNER_TRANSFER_APPROVED"
+    Тогда backend проверяет отсутствие циклов в MLM-структуре
+    И sponsor relationship сохраняется версионно
+    И audit trail содержит impact preview по downline и correlationId
+
+  Сценарий: Система запрещает цикл sponsor relationships
+    Дано пользователь "partner-ops-admin" вошел в административный интерфейс с ролью "Partner operations admin"
+    И партнер "PTR-035-1004" уже находится выше sponsor "PTR-035-1005" в MLM-структуре
+    Когда пользователь пытается назначить partner "PTR-035-1005" sponsor для "PTR-035-1004"
+    Тогда операция отклоняется с mnemonic-кодом "STR_MNEMO_ADMIN_IDENTITY_ELIGIBILITY_CONFLICT"
+    И sponsor relationship не изменяется
+
+  Сценарий: Employee admin создает сотрудника с role conflict проверкой
+    Дано пользователь "employee-admin" вошел в административный интерфейс с ролью "Employee admin"
+    Когда пользователь создает сотрудника "EMP-035-2001"
+    И назначает роли "Finance operator" и "Refund approver" в одном scope
+    Тогда backend проверяет role conflict rules
+    И при конфликте операция отклоняется с mnemonic-кодом "STR_MNEMO_ADMIN_IDENTITY_ROLE_CONFLICT"
+    И employee bindings не сохраняются
+
+  Сценарий: Security admin выполняет emergency block
+    Дано пользователь "security-admin" вошел в административный интерфейс с ролью "Security admin"
+    И субъект "USR-035-1006" имеет security flag "SUSPICIOUS_ACTIVITY"
+    Когда пользователь выполняет emergency block субъекта "USR-035-1006"
+    И указывает affected scopes "LOGIN,ORDER,BONUS" и reasonCode "SECURITY_INCIDENT"
+    Тогда субъект получает блокировку по указанным scopes
+    И audit trail содержит review deadline и correlationId
+
+  Сценарий: Security admin настраивает impersonation policy
+    Дано пользователь "security-admin" вошел в административный интерфейс с ролью "Security admin"
+    Когда пользователь создает impersonation policy для роли "Support lead"
+    И разрешает target subject type "USER" и duration "30 минут"
+    И запрещает действия "PAYMENT,BONUS_WITHDRAWAL,PASSWORD_CHANGE,PROFILE_EDIT"
+    Тогда policy сохраняется
+    И изменение policy фиксируется в audit trail
+
+  Сценарий: Суперадмин запускает impersonation session
+    Дано пользователь "super-admin" вошел в административный интерфейс с ролью "Суперадмин"
+    И impersonation policy разрешает target subject "USR-035-1007"
+    Когда пользователь запускает impersonation session для "USR-035-1007" с reasonCode "SUPPORT_DIAGNOSTICS"
+    Тогда backend создает session со сроком действия по policy
+    И frontend показывает постоянный banner с actorUserId, targetSubjectId, reasonCode и временем окончания
+    И audit trail содержит событие запуска session
+
+  Сценарий: Impersonation запрещает опасное действие
+    Дано пользователь "super-admin" вошел в административный интерфейс с ролью "Суперадмин"
+    И пользователь находится в impersonation session для "USR-035-1008"
+    Когда пользователь пытается изменить пароль субъекта "USR-035-1008"
+    Тогда backend отклоняет действие с mnemonic-кодом "STR_MNEMO_ADMIN_IDENTITY_IMPERSONATION_ACTION_FORBIDDEN"
+    И попытка запрещенного действия сохраняется в impersonation audit trail
+
+  Сценарий: Аудитор выгружает историю изменений с маскированием
+    Дано пользователь "personal-data-auditor" вошел в административный интерфейс с ролью "Аудитор персональных данных"
+    Когда пользователь ищет audit events по subjectId "USR-035-1001" и диапазону дат
+    Тогда система показывает события с actorUserId, actionCode, reasonCode и correlationId
+    Когда пользователь запускает экспорт результатов
+    Тогда формируется файл экспорта с учетом текущих фильтров и permission scopes
+    И персональные данные в файле замаскированы в соответствии с правами пользователя
+
+  Сценарий: Frontend отображает backend-сообщения через i18n
+    Дано пользователь "security-admin" вошел в административный интерфейс с ролью "Security admin"
+    И backend возвращает mnemonic-код "STR_MNEMO_ADMIN_IDENTITY_FORBIDDEN_ACTION"
+    Когда frontend получает ответ ошибки
+    Тогда пользователь видит локализованное сообщение из словаря "resources_ru.ts" или "resources_en.ts"
+    И React-компонент не содержит hardcoded user-facing текст для этого сообщения

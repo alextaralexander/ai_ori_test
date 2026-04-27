@@ -17,6 +17,7 @@ import { AdminPimView } from './components/AdminPimView';
 import { AdminPricingView } from './components/AdminPricingView';
 import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
+import { AdminIdentityView } from './components/AdminIdentityView';
 import { AdminOrdersView } from './components/AdminOrdersView';
 import { AdminServiceView } from './components/AdminServiceView';
 import { AdminWmsView } from './components/AdminWmsView';
@@ -65,6 +66,10 @@ const testLoginRoles = new Set([
   'tracking-admin',
   'super-admin',
   'security-admin',
+  'master-data-admin',
+  'partner-ops-admin',
+  'employee-admin',
+  'personal-data-auditor',
   'hr-admin',
   'auditor',
   'content-admin',
@@ -364,6 +369,14 @@ function App() {
     contentView = <AdminRbacView section="service-accounts" />;
   } else if (path === '/admin/rbac/audit') {
     contentView = <AdminRbacView section="audit" />;
+  } else if (path === '/admin/identity') {
+    contentView = <AdminIdentityView />;
+  } else if (path.startsWith('/admin/identity/partners/')) {
+    contentView = <AdminIdentityView section="partner" />;
+  } else if (path === '/admin/identity/impersonation') {
+    contentView = <AdminIdentityView section="impersonation" />;
+  } else if (path === '/admin/identity/audit') {
+    contentView = <AdminIdentityView section="audit" />;
   } else if (path === '/admin/cms') {
     contentView = <AdminCmsView />;
   } else if (path === '/admin/cms/review') {

@@ -1,0 +1,496 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin Admin Identity API
+  version: 2026.04-feature-035
+  description: API контур feature #35 для пользователей, партнеров, сотрудников, sponsor relationships и controlled impersonation.
+servers:
+  - url: /api/admin/identity
+tags:
+  - name: AdminIdentitySubjects
+  - name: AdminIdentityPartners
+  - name: AdminIdentityEmployees
+  - name: AdminIdentityImpersonation
+  - name: AdminIdentityAudit
+paths:
+  /subjects:
+    get:
+      tags: [AdminIdentitySubjects]
+      summary: Search subjects
+      parameters:
+        - name: query
+          in: query
+          schema: { type: string }
+        - name: subjectType
+          in: query
+          schema: { $ref: '#/components/schemas/SubjectType' }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/SubjectStatus' }
+        - name: sponsorCode
+          in: query
+          schema: { type: string }
+        - name: officeId
+          in: query
+          schema: { type: string }
+        - name: employeeRole
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Search result with masked data according to permission scopes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectSearchResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /subjects/{subjectId}:
+    get:
+      tags: [AdminIdentitySubjects]
+      summary: Get subject card
+      parameters:
+        - $ref: '#/components/parameters/SubjectId'
+      responses:
+        '200':
+          description: Subject card.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectCard'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /subjects/{subjectId}/status:
+    post:
+      tags: [AdminIdentitySubjects]
+      summary: Change subject status
+      parameters:
+        - $ref: '#/components/parameters/SubjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeStatusRequest'
+      responses:
+        '200':
+          description: Updated status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectStatusChangeResponse'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /subjects/{subjectId}/eligibility-rules:
+    put:
+      tags: [AdminIdentitySubjects]
+      summary: Replace eligibility rules for subject
+      parameters:
+        - $ref: '#/components/parameters/SubjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EligibilityRulesUpdateRequest'
+      responses:
+        '200':
+          description: Updated eligibility rules.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityRulesResponse'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /partners/{partnerSubjectId}/sponsor-relationships:
+    post:
+      tags: [AdminIdentityPartners]
+      summary: Change sponsor relationship
+      parameters:
+        - name: partnerSubjectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsorRelationshipChangeRequest'
+      responses:
+        '200':
+          description: Sponsor relationship changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorRelationshipResponse'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /employees/{employeeSubjectId}/bindings:
+    put:
+      tags: [AdminIdentityEmployees]
+      summary: Replace employee roles and operational scopes
+      parameters:
+        - name: employeeSubjectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeBindingsUpdateRequest'
+      responses:
+        '200':
+          description: Employee bindings updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeBindingsResponse'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /impersonation/policies:
+    get:
+      tags: [AdminIdentityImpersonation]
+      summary: List impersonation policies
+      responses:
+        '200':
+          description: Policies.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ImpersonationPolicy' }
+    post:
+      tags: [AdminIdentityImpersonation]
+      summary: Create or update impersonation policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpersonationPolicyUpsertRequest'
+      responses:
+        '200':
+          description: Policy saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpersonationPolicy'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /impersonation/sessions:
+    post:
+      tags: [AdminIdentityImpersonation]
+      summary: Start impersonation session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartImpersonationRequest'
+      responses:
+        '201':
+          description: Session started.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpersonationSession'
+        '409':
+          $ref: '#/components/responses/BusinessConflict'
+  /impersonation/sessions/{sessionId}/finish:
+    post:
+      tags: [AdminIdentityImpersonation]
+      summary: Finish impersonation session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonedActionRequest'
+      responses:
+        '200':
+          description: Session finished.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpersonationSession'
+  /audit-events:
+    get:
+      tags: [AdminIdentityAudit]
+      summary: Search admin identity audit events
+      parameters:
+        - name: subjectId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actorSubjectId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: reasonCode
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Audit events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditEventSearchResponse'
+components:
+  parameters:
+    SubjectId:
+      name: subjectId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Forbidden:
+      description: Forbidden action.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/MnemonicError' }
+    NotFound:
+      description: Entity not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/MnemonicError' }
+    BusinessConflict:
+      description: Business rule violation.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/MnemonicError' }
+  schemas:
+    SubjectType:
+      type: string
+      enum: [USER, PARTNER, EMPLOYEE, ORGANIZATION]
+    SubjectStatus:
+      type: string
+      enum: [ACTIVE, PENDING_VERIFICATION, SUSPENDED, BLOCKED, ARCHIVED]
+    MnemonicError:
+      type: object
+      required: [code, correlationId]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_ADMIN_IDENTITY_[A-Z0-9_]+$'
+        correlationId: { type: string }
+        parameters:
+          type: object
+          additionalProperties: true
+    SubjectSearchResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubjectSearchItem' }
+        total: { type: integer }
+    SubjectSearchItem:
+      type: object
+      required: [subjectId, subjectType, displayName, status]
+      properties:
+        subjectId: { type: string, format: uuid }
+        subjectType: { $ref: '#/components/schemas/SubjectType' }
+        displayName: { type: string }
+        status: { $ref: '#/components/schemas/SubjectStatus' }
+        maskedContact: { type: string }
+        partnerLevel: { type: string }
+        sponsorCode: { type: string }
+        employeeRole: { type: string }
+        riskFlags:
+          type: array
+          items: { type: string }
+    SubjectCard:
+      type: object
+      required: [subjectId, subjectType, displayName, status, auditPreview]
+      properties:
+        subjectId: { type: string, format: uuid }
+        subjectType: { $ref: '#/components/schemas/SubjectType' }
+        displayName: { type: string }
+        status: { $ref: '#/components/schemas/SubjectStatus' }
+        profileAttributes:
+          type: array
+          items: { $ref: '#/components/schemas/ProfileAttribute' }
+        eligibilityRules:
+          type: array
+          items: { $ref: '#/components/schemas/EligibilityRule' }
+        partnerSummary: { $ref: '#/components/schemas/PartnerSummary' }
+        employeeBindings:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeBinding' }
+        auditPreview:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEvent' }
+    ProfileAttribute:
+      type: object
+      properties:
+        code: { type: string }
+        maskedValue: { type: string }
+        piiMasked: { type: boolean }
+        sourceSystem: { type: string }
+    ChangeStatusRequest:
+      type: object
+      required: [newStatus, reasonCode]
+      properties:
+        newStatus: { $ref: '#/components/schemas/SubjectStatus' }
+        reasonCode: { type: string }
+        comment: { type: string }
+    SubjectStatusChangeResponse:
+      type: object
+      properties:
+        subjectId: { type: string, format: uuid }
+        oldStatus: { $ref: '#/components/schemas/SubjectStatus' }
+        newStatus: { $ref: '#/components/schemas/SubjectStatus' }
+        auditEventId: { type: string, format: uuid }
+    EligibilityRule:
+      type: object
+      required: [ruleType, ruleValue, effectiveFrom]
+      properties:
+        ruleType: { type: string }
+        ruleValue: { type: string }
+        effectiveFrom: { type: string, format: date-time }
+        effectiveTo: { type: string, format: date-time }
+        reasonCode: { type: string }
+    EligibilityRulesUpdateRequest:
+      type: object
+      required: [rules, reasonCode]
+      properties:
+        rules:
+          type: array
+          items: { $ref: '#/components/schemas/EligibilityRule' }
+        reasonCode: { type: string }
+    EligibilityRulesResponse:
+      type: object
+      properties:
+        subjectId: { type: string, format: uuid }
+        rules:
+          type: array
+          items: { $ref: '#/components/schemas/EligibilityRule' }
+    PartnerSummary:
+      type: object
+      properties:
+        partnerLevel: { type: string }
+        sponsorSubjectId: { type: string, format: uuid }
+        sponsorCode: { type: string }
+        officeId: { type: string }
+        downlineCount: { type: integer }
+    SponsorRelationshipChangeRequest:
+      type: object
+      required: [newSponsorSubjectId, effectiveFrom, reasonCode]
+      properties:
+        newSponsorSubjectId: { type: string, format: uuid }
+        effectiveFrom: { type: string, format: date-time }
+        reasonCode: { type: string }
+        comment: { type: string }
+    SponsorRelationshipResponse:
+      type: object
+      properties:
+        relationshipId: { type: string, format: uuid }
+        partnerSubjectId: { type: string, format: uuid }
+        oldSponsorSubjectId: { type: string, format: uuid }
+        newSponsorSubjectId: { type: string, format: uuid }
+        impactPreview:
+          type: object
+          additionalProperties: true
+    EmployeeBinding:
+      type: object
+      properties:
+        roleCode: { type: string }
+        operationalScope: { type: string }
+        regionalScope: { type: string }
+        accessStatus: { type: string }
+    EmployeeBindingsUpdateRequest:
+      type: object
+      required: [bindings, reasonCode]
+      properties:
+        bindings:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeBinding' }
+        reasonCode: { type: string }
+    EmployeeBindingsResponse:
+      type: object
+      properties:
+        employeeSubjectId: { type: string, format: uuid }
+        bindings:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeBinding' }
+        conflictState: { type: string }
+    ImpersonationPolicy:
+      type: object
+      properties:
+        policyId: { type: string, format: uuid }
+        policyCode: { type: string }
+        actorRoleCode: { type: string }
+        targetSubjectType: { $ref: '#/components/schemas/SubjectType' }
+        allowedActions:
+          type: array
+          items: { type: string }
+        forbiddenActions:
+          type: array
+          items: { type: string }
+        maxDurationMinutes: { type: integer }
+        approvalRequired: { type: boolean }
+        status: { type: string }
+    ImpersonationPolicyUpsertRequest:
+      allOf:
+        - $ref: '#/components/schemas/ImpersonationPolicy'
+        - type: object
+          required: [policyCode, actorRoleCode, targetSubjectType, maxDurationMinutes, reasonCode]
+          properties:
+            reasonCode: { type: string }
+    StartImpersonationRequest:
+      type: object
+      required: [targetSubjectId, reasonCode]
+      properties:
+        targetSubjectId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        requestedDurationMinutes: { type: integer }
+    ReasonedActionRequest:
+      type: object
+      required: [reasonCode]
+      properties:
+        reasonCode: { type: string }
+        comment: { type: string }
+    ImpersonationSession:
+      type: object
+      properties:
+        sessionId: { type: string, format: uuid }
+        policyId: { type: string, format: uuid }
+        actorSubjectId: { type: string, format: uuid }
+        targetSubjectId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        status: { type: string }
+        startedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+    AuditEvent:
+      type: object
+      properties:
+        auditEventId: { type: string, format: uuid }
+        subjectId: { type: string, format: uuid }
+        actorSubjectId: { type: string, format: uuid }
+        actionCode: { type: string }
+        reasonCode: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }
+    AuditEventSearchResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEvent' }
+        total: { type: integer }

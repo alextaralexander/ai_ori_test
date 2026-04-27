@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="960" viewBox="0 0 390 960">
+  <title>Feature 035. Макет 03. Impersonation policy и active session mobile</title>
+  <rect width="390" height="960" fill="#f6f7f9"/>
+  <rect x="0" y="0" width="390" height="56" fill="#1f2933"/>
+  <text x="18" y="35" font-family="Arial" font-size="17" fill="#ffffff">Имперсонация</text>
+  <rect x="16" y="76" width="358" height="112" rx="6" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="32" y="106" font-family="Arial" font-size="15" fill="#9a3412">Активная session</text>
+  <text x="32" y="134" font-family="Arial" font-size="12" fill="#111827">actor: super-admin</text>
+  <text x="32" y="156" font-family="Arial" font-size="12" fill="#111827">target: USR-035-1007</text>
+  <text x="32" y="178" font-family="Arial" font-size="12" fill="#111827">reason: SUPPORT_DIAGNOSTICS, до 02:05</text>
+  <rect x="16" y="212" width="358" height="280" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="32" y="246" font-family="Arial" font-size="16" fill="#111827">Policy для Support lead</text>
+  <text x="32" y="284" font-family="Arial" font-size="12" fill="#4b5563">Target subject types</text>
+  <rect x="32" y="300" width="92" height="30" rx="4" fill="#e8f0fe"/>
+  <text x="54" y="320" font-family="Arial" font-size="12" fill="#1d4ed8">USER</text>
+  <rect x="132" y="300" width="92" height="30" rx="4" fill="#f3f4f6"/>
+  <text x="148" y="320" font-family="Arial" font-size="12" fill="#374151">PARTNER</text>
+  <text x="32" y="364" font-family="Arial" font-size="12" fill="#4b5563">Max duration</text>
+  <rect x="32" y="380" width="326" height="38" rx="4" fill="#f9fafb" stroke="#cbd5e1"/>
+  <text x="48" y="404" font-family="Arial" font-size="13" fill="#111827">30 минут</text>
+  <text x="32" y="448" font-family="Arial" font-size="12" fill="#4b5563">Approval required: нет для read-only</text>
+  <rect x="16" y="516" width="358" height="220" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="32" y="550" font-family="Arial" font-size="16" fill="#111827">Запрещенные действия</text>
+  <text x="32" y="588" font-family="Arial" font-size="13" fill="#111827">Платежи</text>
+  <text x="32" y="620" font-family="Arial" font-size="13" fill="#111827">Вывод бонусов</text>
+  <text x="32" y="652" font-family="Arial" font-size="13" fill="#111827">Смена пароля</text>
+  <text x="32" y="684" font-family="Arial" font-size="13" fill="#111827">Изменение PII без elevated scope</text>
+  <rect x="16" y="760" width="358" height="112" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="32" y="794" font-family="Arial" font-size="16" fill="#111827">Audit summary</text>
+  <text x="32" y="830" font-family="Arial" font-size="12" fill="#4b5563">session started: 01:35</text>
+  <text x="32" y="854" font-family="Arial" font-size="12" fill="#4b5563">blocked action: PASSWORD_CHANGE</text>
+  <rect x="16" y="894" width="358" height="44" rx="4" fill="#ef4444"/>
+  <text x="142" y="922" font-family="Arial" font-size="14" fill="#ffffff">Завершить session</text>
+</svg>

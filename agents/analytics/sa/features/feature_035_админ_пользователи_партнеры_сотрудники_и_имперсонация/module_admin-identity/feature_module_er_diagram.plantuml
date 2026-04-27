@@ -1,0 +1,142 @@
+@startuml
+title Feature 035 / module_admin-identity ER changes
+
+entity admin_identity_subject {
+  * subject_id : uuid
+  --
+  subject_type : varchar
+  external_user_id : varchar
+  display_name : varchar
+  status : varchar
+  primary_contact_masked : varchar
+  pii_access_level : varchar
+  created_at : timestamptz
+  updated_at : timestamptz
+  version : bigint
+}
+
+entity admin_identity_profile_attribute {
+  * attribute_id : uuid
+  --
+  subject_id : uuid
+  attribute_code : varchar
+  value_hash : varchar
+  masked_value : varchar
+  source_system : varchar
+  effective_from : timestamptz
+  effective_to : timestamptz
+  version : bigint
+}
+
+entity admin_partner_relationship {
+  * relationship_id : uuid
+  --
+  partner_subject_id : uuid
+  sponsor_subject_id : uuid
+  relationship_type : varchar
+  status : varchar
+  effective_from : timestamptz
+  effective_to : timestamptz
+  reason_code : varchar
+  correlation_id : varchar
+}
+
+entity admin_partner_office_binding {
+  * binding_id : uuid
+  --
+  partner_subject_id : uuid
+  office_id : varchar
+  pickup_point_id : varchar
+  service_area_code : varchar
+  status : varchar
+  effective_from : timestamptz
+  effective_to : timestamptz
+  reason_code : varchar
+}
+
+entity admin_employee_binding {
+  * binding_id : uuid
+  --
+  employee_subject_id : uuid
+  role_code : varchar
+  operational_scope : varchar
+  regional_scope : varchar
+  access_status : varchar
+  conflict_state : varchar
+  effective_from : timestamptz
+  effective_to : timestamptz
+}
+
+entity admin_identity_eligibility_rule {
+  * rule_id : uuid
+  --
+  subject_id : uuid
+  rule_type : varchar
+  rule_value : varchar
+  source_code : varchar
+  effective_from : timestamptz
+  effective_to : timestamptz
+  reason_code : varchar
+}
+
+entity admin_impersonation_policy {
+  * policy_id : uuid
+  --
+  policy_code : varchar
+  actor_role_code : varchar
+  target_subject_type : varchar
+  allowed_actions : jsonb
+  forbidden_actions : jsonb
+  max_duration_minutes : integer
+  approval_required : boolean
+  status : varchar
+  version : bigint
+}
+
+entity admin_impersonation_session {
+  * session_id : uuid
+  --
+  policy_id : uuid
+  actor_subject_id : uuid
+  target_subject_id : uuid
+  reason_code : varchar
+  status : varchar
+  started_at : timestamptz
+  expires_at : timestamptz
+  finished_at : timestamptz
+  correlation_id : varchar
+}
+
+entity admin_identity_audit_event {
+  * audit_event_id : uuid
+  --
+  subject_id : uuid
+  actor_subject_id : uuid
+  action_code : varchar
+  reason_code : varchar
+  old_value : jsonb
+  new_value : jsonb
+  impersonation_session_id : uuid
+  correlation_id : varchar
+  occurred_at : timestamptz
+}
+
+admin_identity_subject ||--o{ admin_identity_profile_attribute
+admin_identity_subject ||--o{ admin_partner_relationship : partner
+admin_identity_subject ||--o{ admin_partner_relationship : sponsor
+admin_identity_subject ||--o{ admin_partner_office_binding
+admin_identity_subject ||--o{ admin_employee_binding
+admin_identity_subject ||--o{ admin_identity_eligibility_rule
+admin_impersonation_policy ||--o{ admin_impersonation_session
+admin_identity_subject ||--o{ admin_impersonation_session : actor
+admin_identity_subject ||--o{ admin_impersonation_session : target
+admin_identity_subject ||--o{ admin_identity_audit_event
+admin_impersonation_session ||--o{ admin_identity_audit_event
+
+note right of admin_identity_subject
+  Owning module: admin-identity.
+  Java package baseline follows bestorigin.com domain policy.
+  Runtime implementation keeps api/domain/db/impl responsibilities separated.
+end note
+
+@enduml

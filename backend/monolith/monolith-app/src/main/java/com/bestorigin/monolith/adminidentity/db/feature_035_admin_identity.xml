@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-035-admin-identity" author="codex">
+        <comment>Feature 035 admin-identity module marker. Runtime schema is represented by module-owned admin_identity_* model artifacts.</comment>
+        <tagDatabase tag="feature-035-admin-identity"/>
+    </changeSet>
+</databaseChangeLog>

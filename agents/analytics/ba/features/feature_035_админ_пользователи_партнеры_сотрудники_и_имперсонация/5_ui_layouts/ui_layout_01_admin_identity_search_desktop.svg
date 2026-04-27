@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960">
+  <title>Feature 035. Макет 01. Единый поиск пользователей, партнеров и сотрудников</title>
+  <rect width="1440" height="960" fill="#f6f7f9"/>
+  <rect x="0" y="0" width="1440" height="64" fill="#1f2933"/>
+  <text x="32" y="40" font-family="Arial" font-size="22" fill="#ffffff">Best Ori Gin Admin</text>
+  <text x="1230" y="39" font-family="Arial" font-size="14" fill="#ffffff">Security admin</text>
+  <rect x="0" y="64" width="248" height="896" fill="#ffffff"/>
+  <text x="28" y="112" font-family="Arial" font-size="16" fill="#111827">Навигация</text>
+  <rect x="20" y="146" width="208" height="38" rx="4" fill="#e8f0fe"/>
+  <text x="36" y="171" font-family="Arial" font-size="14" fill="#1d4ed8">Пользователи и доступ</text>
+  <text x="36" y="218" font-family="Arial" font-size="14" fill="#374151">Партнеры</text>
+  <text x="36" y="258" font-family="Arial" font-size="14" fill="#374151">Сотрудники</text>
+  <text x="36" y="298" font-family="Arial" font-size="14" fill="#374151">Имперсонация</text>
+  <text x="36" y="338" font-family="Arial" font-size="14" fill="#374151">Аудит</text>
+  <main>
+    <text x="288" y="118" font-family="Arial" font-size="28" fill="#111827">Единый поиск субъектов</text>
+    <text x="288" y="148" font-family="Arial" font-size="14" fill="#4b5563">Пользователи, партнеры, сотрудники, sponsor links и организации</text>
+    <rect x="288" y="184" width="1092" height="168" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+    <text x="312" y="220" font-family="Arial" font-size="15" fill="#111827">Фильтры</text>
+    <rect x="312" y="240" width="300" height="42" rx="4" fill="#f9fafb" stroke="#cbd5e1"/>
+    <text x="326" y="266" font-family="Arial" font-size="13" fill="#6b7280">ID, телефон, email, sponsor code</text>
+    <rect x="628" y="240" width="160" height="42" rx="4" fill="#f9fafb" stroke="#cbd5e1"/>
+    <text x="642" y="266" font-family="Arial" font-size="13" fill="#374151">Тип субъекта</text>
+    <rect x="804" y="240" width="160" height="42" rx="4" fill="#f9fafb" stroke="#cbd5e1"/>
+    <text x="818" y="266" font-family="Arial" font-size="13" fill="#374151">Статус</text>
+    <rect x="980" y="240" width="160" height="42" rx="4" fill="#f9fafb" stroke="#cbd5e1"/>
+    <text x="994" y="266" font-family="Arial" font-size="13" fill="#374151">Роль</text>
+    <rect x="1156" y="240" width="160" height="42" rx="4" fill="#1f6feb"/>
+    <text x="1210" y="266" font-family="Arial" font-size="13" fill="#ffffff">Найти</text>
+    <rect x="312" y="300" width="210" height="34" rx="4" fill="#f3f4f6"/>
+    <text x="326" y="322" font-family="Arial" font-size="12" fill="#4b5563">officeId / pickup point</text>
+    <rect x="536" y="300" width="210" height="34" rx="4" fill="#f3f4f6"/>
+    <text x="550" y="322" font-family="Arial" font-size="12" fill="#4b5563">security flags</text>
+    <rect x="760" y="300" width="210" height="34" rx="4" fill="#f3f4f6"/>
+    <text x="774" y="322" font-family="Arial" font-size="12" fill="#4b5563">eligibility segment</text>
+    <rect x="288" y="382" width="1092" height="500" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+    <text x="312" y="418" font-family="Arial" font-size="15" fill="#111827">Результаты</text>
+    <line x1="312" y1="444" x2="1356" y2="444" stroke="#d1d5db"/>
+    <text x="318" y="474" font-family="Arial" font-size="12" fill="#6b7280">Subject</text>
+    <text x="506" y="474" font-family="Arial" font-size="12" fill="#6b7280">Тип</text>
+    <text x="640" y="474" font-family="Arial" font-size="12" fill="#6b7280">Статус</text>
+    <text x="784" y="474" font-family="Arial" font-size="12" fill="#6b7280">Роль / уровень</text>
+    <text x="992" y="474" font-family="Arial" font-size="12" fill="#6b7280">Связи</text>
+    <text x="1218" y="474" font-family="Arial" font-size="12" fill="#6b7280">Риск</text>
+    <g font-family="Arial" font-size="13" fill="#111827">
+      <rect x="312" y="494" width="1044" height="56" fill="#ffffff"/>
+      <text x="318" y="528">USR-035-1001 / Анна П.</text>
+      <text x="506" y="528">Пользователь</text>
+      <text x="640" y="528">ACTIVE</text>
+      <text x="784" y="528">VIP customer</text>
+      <text x="992" y="528">partner PTR-035-1001</text>
+      <text x="1218" y="528">нет</text>
+      <line x1="312" y1="558" x2="1356" y2="558" stroke="#e5e7eb"/>
+      <text x="318" y="604">PTR-035-1001 / Мария С.</text>
+      <text x="506" y="604">Партнер</text>
+      <text x="640" y="604">ACTIVE</text>
+      <text x="784" y="604">Leader</text>
+      <text x="992" y="604">SP-035-A / Office 17</text>
+      <text x="1218" y="604">review</text>
+      <line x1="312" y1="634" x2="1356" y2="634" stroke="#e5e7eb"/>
+      <text x="318" y="680">EMP-035-1001 / Олег Н.</text>
+      <text x="506" y="680">Сотрудник</text>
+      <text x="640" y="680">SUSPENDED</text>
+      <text x="784" y="680">Support lead</text>
+      <text x="992" y="680">Region MSK</text>
+      <text x="1218" y="680">high</text>
+    </g>
+  </main>
+</svg>

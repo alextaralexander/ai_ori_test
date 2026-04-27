@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 034
+title Best Ori Gin monolith architecture through feature 035
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -55,6 +55,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminServiceDecisions UI]
   [AdminServiceSlaBoard UI]
   [AdminServiceAudit UI]
+  [AdminIdentity UI]
+  [AdminIdentitySubjects UI]
+  [AdminIdentityPartners UI]
+  [AdminIdentityEmployees UI]
+  [AdminIdentityImpersonation UI]
+  [AdminIdentityAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -97,6 +103,7 @@ package "backend/monolith/monolith-app" {
   [admin-wms]
   [admin-order]
   [admin-service]
+  [admin-identity]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -163,6 +170,12 @@ cloud "Hybrid Pixel" as hybrid
 [AdminServiceDecisions UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases/{serviceCaseId}/decisions, /decisions/{decisionId}/refund-actions, /replacement-actions
 [AdminServiceSlaBoard UI] --> [admin-service] : HTTP/JSON /api/admin/service/supervisor/sla-board
 [AdminServiceAudit UI] --> [admin-service] : HTTP/JSON /api/admin/service/audit-events, /audit-events/export
+[AdminIdentity UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/subjects, /subjects/{subjectId}
+[AdminIdentitySubjects UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/subjects, /subjects/{subjectId}/status, /eligibility-rules
+[AdminIdentityPartners UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/partners/{partnerSubjectId}/sponsor-relationships
+[AdminIdentityEmployees UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/employees/{employeeSubjectId}/bindings
+[AdminIdentityImpersonation UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/impersonation/policies, /sessions
+[AdminIdentityAudit UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/audit-events
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -250,6 +263,15 @@ cloud "Hybrid Pixel" as hybrid
 [admin-service] --> delivery : replacement delivery status and delivery issue context
 [admin-service] --> s3 : claim attachments and redaction metadata
 [admin-service] --> db : service cases, queues, routing rules, SLA policies, messages, attachments, decisions, actions, WMS events and audit
+[admin-identity] --> [authorization] : admin identity permission, PII scope and impersonation checks
+[admin-identity] --> [admin-rbac] : permission matrix, employee roles and responsibility scopes
+[admin-identity] --> [auth] : session termination, impersonation context and blocked subject validation
+[admin-identity] --> [profile] : user and partner profile read/update projection with PII masking
+[admin-identity] --> [mlm-structure] : sponsor/downline validation and relationship projection
+[admin-identity] --> [employee] : employee bindings and operational scopes
+[admin-identity] --> [admin-order] : order/offline sales eligibility and partner context
+[admin-identity] --> [admin-service] : support subject context and impersonation audit links
+[admin-identity] --> db : subjects, profile attributes, partner relationships, employee bindings, eligibility rules, impersonation policies/sessions and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

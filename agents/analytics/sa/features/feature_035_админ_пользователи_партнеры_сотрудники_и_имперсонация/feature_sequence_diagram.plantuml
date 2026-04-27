@@ -1,0 +1,70 @@
+@startuml
+title Feature 035 sequence: admin identity, sponsor update, impersonation
+
+actor "Security / Master-data admin" as Admin
+participant "web-shell /admin/identity" as UI
+participant "AdminIdentityController" as Controller
+participant "AdminIdentityService" as Service
+participant "PermissionGuard" as Guard
+participant "SponsorPolicyService" as SponsorPolicy
+participant "ImpersonationPolicyService" as ImpPolicy
+database "admin-identity DB" as DB
+participant "AuditPublisher" as Audit
+
+Admin -> UI: открывает /admin/identity
+UI -> Controller: GET /api/admin/identity/subjects?query=...
+Controller -> Guard: check ADMIN_IDENTITY_VIEW + PII scope
+Guard --> Controller: allowed scopes
+Controller -> Service: searchSubjects(filter, actorContext)
+Service -> DB: select masked subject search projection
+DB --> Service: subjects
+Service --> Controller: SubjectSearchResponse
+Controller --> UI: 200 masked results
+
+Admin -> UI: открывает карточку subject
+UI -> Controller: GET /subjects/{subjectId}
+Controller -> Guard: check subject read scopes
+Controller -> Service: getSubjectCard(subjectId, actorContext)
+Service -> DB: load subject, attributes, partner, employee, eligibility, audit preview
+DB --> Service: aggregate
+Service --> Controller: SubjectCard
+Controller --> UI: 200 card
+
+alt смена sponsor relationship
+  Admin -> UI: переносит партнера к новому sponsor с reasonCode
+  UI -> Controller: POST /partners/{partnerSubjectId}/sponsor-relationships
+  Controller -> Guard: check ADMIN_IDENTITY_PARTNER_MANAGE
+  Controller -> Service: changeSponsor(request)
+  Service -> SponsorPolicy: validate no self-sponsor, no MLM cycle, impact preview
+  SponsorPolicy --> Service: validated
+  Service -> DB: close previous relationship and insert new version
+  Service -> Audit: publish SPONSOR_RELATIONSHIP_CHANGED
+  Service --> Controller: SponsorRelationshipResponse
+  Controller --> UI: 200 relationship + impact preview
+else forbidden sponsor update
+  SponsorPolicy --> Service: violation
+  Service --> Controller: STR_MNEMO_ADMIN_IDENTITY_ELIGIBILITY_CONFLICT
+  Controller --> UI: 409 mnemonic error
+end
+
+alt controlled impersonation
+  Admin -> UI: запускает impersonation session
+  UI -> Controller: POST /impersonation/sessions
+  Controller -> Guard: check ADMIN_IDENTITY_IMPERSONATION_MANAGE
+  Controller -> Service: startImpersonation(target, reasonCode)
+  Service -> ImpPolicy: match actor role, target type, duration, forbidden actions
+  ImpPolicy --> Service: policy accepted
+  Service -> DB: insert admin_impersonation_session
+  Service -> Audit: publish IMPERSONATION_STARTED
+  Service --> Controller: ImpersonationSession
+  Controller --> UI: 201 session
+  UI -> UI: показывает banner actor/target/reason/expiresAt
+else forbidden impersonation action
+  UI -> Controller: action in impersonation mode
+  Controller -> Guard: check action not forbidden by session policy
+  Guard --> Controller: forbidden
+  Controller --> UI: 409 STR_MNEMO_ADMIN_IDENTITY_IMPERSONATION_ACTION_FORBIDDEN
+  Controller -> Audit: publish IMPERSONATION_FORBIDDEN_ACTION
+end
+
+@enduml

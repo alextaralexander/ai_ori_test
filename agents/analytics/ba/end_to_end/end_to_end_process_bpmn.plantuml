@@ -325,6 +325,38 @@ if (Нужно обработать сервисный кейс, возврат 
 else (нет)
   :Сервисный контур работает по текущим очередям, SLA policies, compensation limits и интеграционным статусам;
 endif
-:Администраторы управляют PIM-каталогом, ценами, промо, бенефитами, контентом, лендингами, инвайтами, каталогами кампаний, WMS/1C остатками, складами, поставками, заказами, дозаказами, платежами, сервисными кейсами, возвратами, заменами, пользователями, аудитом и локализацией;
+if (Нужно управлять пользователем, партнером, сотрудником или имперсонацией?) then (да)
+  :Суперадмин, master-data admin или security admin открывает admin identity workspace;
+  :Ищет пользователя, партнера, сотрудника или организацию по subjectId, контактам, sponsor code, officeId, роли, статусу и security flags;
+  :Открывает сводную карточку с profile, ролями, статусами, partner data, employee bindings, sponsor relationships, eligibility rules, restrictions и audit trail;
+  if (Нужно изменить master-data или статус?) then (да)
+    :Администратор меняет разрешенные поля, статус, сегменты или eligibility rules с reasonCode и RBAC scope;
+    :Backend проверяет допустимый переход, PII access, subject type, role conflicts и business constraints;
+  else (нет)
+    :Администратор просматривает данные с маскированием персональных данных по permission scopes;
+  endif
+  if (Нужно изменить sponsor relationship или office binding?) then (да)
+    :Partner operations admin выполняет перенос партнера, проверку циклов MLM, impact preview downline и дату вступления в силу;
+  else (нет)
+    :Партнерская структура остается в текущем версионном состоянии;
+  endif
+  if (Нужно изменить employee access?) then (да)
+    :Employee admin обновляет employee profile, roles, operational scopes, regional scopes и статус доступа;
+    :Security admin проверяет role conflicts, excessive permissions, active sessions и security flags;
+  else (нет)
+    :Доступ сотрудника продолжает действовать по текущей RBAC policy;
+  endif
+  if (Нужно запустить controlled impersonation?) then (да)
+    :Security admin применяет impersonation policy по actor role, target subject type, allowed actions, forbidden actions, max duration и reasonCode;
+    :Разрешенный actor запускает impersonation session, frontend показывает постоянный banner actor/target/reason/expiresAt;
+    :Платежи, вывод бонусов, смена пароля и опасные действия блокируются backend в impersonation mode;
+  else (нет)
+    :Имперсонация не активна, actor работает в собственном контексте;
+  endif
+  :Audit trail фиксирует profile changes, status changes, sponsor changes, employee changes, emergency blocks, policy changes, impersonation sessions и forbidden attempts;
+else (нет)
+  :Identity/master-data контур работает по текущим status, sponsor, employee, eligibility и impersonation policies;
+endif
+:Администраторы управляют PIM-каталогом, ценами, промо, бенефитами, контентом, лендингами, инвайтами, каталогами кампаний, WMS/1C остатками, складами, поставками, заказами, дозаказами, платежами, сервисными кейсами, возвратами, заменами, пользователями, партнерами, сотрудниками, имперсонацией, аудитом и локализацией;
 stop
 @enduml

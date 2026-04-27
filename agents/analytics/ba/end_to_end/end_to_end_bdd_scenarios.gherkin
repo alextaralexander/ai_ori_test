@@ -416,3 +416,37 @@
     Тогда бонусный контур получает команду компенсации с claimId и customerId
     И клиент получает локализованный итог решения через mnemonic-код `STR_MNEMO_ADMIN_SERVICE_*`
     И audit trail содержит old decision, new decision, override scope, actorUserId, reasonCode и correlationId
+
+  Сценарий: Администратор master-data находит пользователя и меняет статус с аудитом
+    Допустим customer master-data admin авторизован и имеет permission scopes `ADMIN_IDENTITY_VIEW` и `ADMIN_IDENTITY_MANAGE`
+    И существует пользователь `USR-E2E-035-1` со статусом `ACTIVE`
+    Когда администратор открывает `/admin/identity`
+    И ищет субъекта по email, subject type `USER` и статусу `ACTIVE`
+    И открывает сводную карточку `USR-E2E-035-1`
+    Тогда система показывает profile, роли, eligibility rules, restrictions и audit trail с маскированием персональных данных по scopes
+    Когда администратор меняет статус пользователя на `SUSPENDED` с reasonCode `MANUAL_RISK_REVIEW`
+    Тогда статус субъекта становится `SUSPENDED`
+    И audit trail содержит actorUserId, subjectId, old value, new value, reasonCode и correlationId
+    И frontend показывает результат через i18n dictionaries без hardcoded пользовательского текста
+
+  Сценарий: Partner operations admin переносит партнера без цикла MLM
+    Допустим partner operations admin авторизован и имеет permission scopes `ADMIN_IDENTITY_PARTNER_VIEW` и `ADMIN_IDENTITY_PARTNER_MANAGE`
+    И существует партнер `PTR-E2E-035-1` в команде sponsor `SP-E2E-035-A`
+    И sponsor `SP-E2E-035-B` доступен для переноса
+    Когда администратор открывает карточку партнера в `/admin/identity`
+    И запускает перенос партнера `PTR-E2E-035-1` к sponsor `SP-E2E-035-B` с датой действия и reasonCode `PARTNER_TRANSFER_APPROVED`
+    Тогда backend проверяет отсутствие циклов MLM и показывает impact preview по downline
+    И sponsor relationship сохраняется версионно
+    И связанные партнерские отчеты и offline sales используют новую структуру с даты вступления в силу
+    И audit trail содержит sponsor change, actorUserId, old sponsor, new sponsor и correlationId
+
+  Сценарий: Security admin запускает controlled impersonation и блокирует опасное действие
+    Допустим security admin авторизован и имеет permission scopes `ADMIN_IDENTITY_IMPERSONATION_MANAGE` и `ADMIN_IDENTITY_AUDIT_VIEW`
+    И impersonation policy разрешает actor role `Support lead` target subject type `USER` на 30 минут
+    И policy запрещает действия `PAYMENT`, `BONUS_WITHDRAWAL`, `PASSWORD_CHANGE` и `PROFILE_EDIT`
+    Когда администратор запускает impersonation session для `USR-E2E-035-2` с reasonCode `SUPPORT_DIAGNOSTICS`
+    Тогда frontend показывает постоянный banner с actorUserId, targetSubjectId, reasonCode и expiresAt
+    И audit trail содержит событие запуска impersonation session
+    Когда actor пытается изменить пароль target subject
+    Тогда backend отклоняет действие с mnemonic-кодом `STR_MNEMO_ADMIN_IDENTITY_IMPERSONATION_ACTION_FORBIDDEN`
+    И попытка запрещенного действия сохраняется в impersonation audit trail
