@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="920" viewBox="0 0 390 920" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 015 mobile partner reports</title>
+  <desc id="desc">Схематичный мобильный макет отчетов, комиссий и документов партнера</desc>
+  <rect x="0" y="0" width="390" height="920" fill="white"/>
+  <rect x="16" y="18" width="358" height="54" fill="none" stroke="#111"/>
+  <text x="34" y="52" font-family="Arial" font-size="15">Header: menu, reports, profile</text>
+  <text x="16" y="106" font-family="Arial" font-size="22">Отчеты партнера</text>
+  <rect x="16" y="132" width="358" height="54" fill="none" stroke="#111"/>
+  <text x="32" y="166" font-family="Arial" font-size="14">Tabs: Комиссии | Документы | Выплаты</text>
+  <rect x="16" y="204" width="358" height="110" fill="none" stroke="#111"/>
+  <text x="32" y="236" font-family="Arial" font-size="14">Сводка периода</text>
+  <text x="32" y="270" font-family="Arial" font-size="13">sales / accrued / withheld / payable</text>
+  <rect x="16" y="332" width="358" height="92" fill="none" stroke="#111"/>
+  <text x="32" y="362" font-family="Arial" font-size="14">Filters collapsed</text>
+  <rect x="32" y="382" width="145" height="24" fill="none" stroke="#777"/>
+  <rect x="196" y="382" width="145" height="24" fill="none" stroke="#777"/>
+  <rect x="16" y="442" width="358" height="286" fill="none" stroke="#111"/>
+  <text x="32" y="476" font-family="Arial" font-size="15">Карточки операций</text>
+  <rect x="32" y="500" width="326" height="70" fill="none" stroke="#777"/>
+  <text x="46" y="526" font-family="Arial" font-size="13">ORD-015-STRUCTURE-001</text>
+  <text x="46" y="550" font-family="Arial" font-size="12">commission / READY / 648 RUB</text>
+  <rect x="32" y="588" width="326" height="70" fill="none" stroke="#777"/>
+  <text x="46" y="614" font-family="Arial" font-size="13">DOC-015-ACT-001</text>
+  <text x="46" y="638" font-family="Arial" font-size="12">PUBLISHED / download / print</text>
+  <rect x="32" y="676" width="326" height="34" fill="none" stroke="#111"/>
+  <text x="150" y="698" font-family="Arial" font-size="13">Load more</text>
+  <rect x="16" y="746" width="358" height="96" fill="none" stroke="#111"/>
+  <text x="32" y="776" font-family="Arial" font-size="14">Bottom detail sheet</text>
+  <text x="32" y="808" font-family="Arial" font-size="12">version, checksum, payout, correlation id</text>
+  <rect x="16" y="864" width="358" height="38" fill="none" stroke="#111"/>
+  <text x="48" y="888" font-family="Arial" font-size="13">STR_MNEMO_* messages from i18n</text>
+</svg>

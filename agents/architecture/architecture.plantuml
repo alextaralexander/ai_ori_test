@@ -1,9 +1,10 @@
 @startuml
-title Best Ori Gin target architecture after feature 014
+title Best Ori Gin target architecture after feature 015
 package "Frontend web-shell" {
   [PublicShell]
   [ProfileSettingsView]
   [BonusWalletView]
+  [PartnerReportsView]
   [OrderCheckoutView]
   [OrderHistoryView]
   [OrderClaimsView]
@@ -19,6 +20,12 @@ package "Backend monolith" {
     [Bonus Wallet API]
     [Wallet Ledger Service]
     [Wallet Limit Service]
+  }
+  package "module_partner-reporting" {
+    [Partner Reporting API]
+    [Partner Report Service]
+    [Partner Document Service]
+    [Partner Finance Reconciliation Service]
   }
   package "module_order" {
     [Checkout API]
@@ -40,6 +47,7 @@ package "External systems" {
 }
 [ProfileSettingsView] --> [Profile API]
 [BonusWalletView] --> [Bonus Wallet API]
+[PartnerReportsView] --> [Partner Reporting API]
 [Profile API] --> [ProfileReadinessService]
 [Profile API] --> [ProfileAuditService]
 [ProfileSettingsView] --> [i18n resources]
@@ -50,10 +58,21 @@ package "External systems" {
 [OrderClaimsView] --> [Order claims API]
 [Order claims API] --> [OrderClaimService]
 [OrderClaimService] --> [Order history API]
+[Partner Reporting API] --> [Partner Report Service]
+[Partner Reporting API] --> [Partner Document Service]
+[Partner Reporting API] --> [Partner Finance Reconciliation Service]
+[PartnerReportsView] --> [i18n resources]
+[Partner Report Service] --> [Order history API]
+[Partner Report Service] --> [Wallet Ledger Service]
+[Partner Report Service] --> [Partner Document Service]
+[Partner Finance Reconciliation Service] --> [Partner Report Service]
+[Partner Finance Reconciliation Service] --> [Payment]
+[Partner Document Service] --> [S3 or MinIO attachments]
 [OrderClaimService] --> [Payment]
 [OrderClaimService] --> [Warehouse and logistics]
 [OrderClaimService] --> [S3 or MinIO attachments]
 [OrderClaimsView] --> [i18n resources]
 [BonusWalletView] --> [i18n resources]
 [Wallet Ledger Service] --> [Order history API]
+[OrderClaimService] --> [Partner Report Service]
 @enduml

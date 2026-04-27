@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-015-partner-reporting-period" author="codex">
+        <createTable tableName="partner_report_period">
+            <column name="report_period_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="partner_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="catalog_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bonus_program_id" type="varchar(64)"/>
+            <column name="period_from" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="period_to" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gross_sales_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="commission_base_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="accrued_commission_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="withheld_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="payable_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="paid_amount" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="currency_code" type="varchar(3)" defaultValue="RUB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reconciliation_status" type="varchar(32)" defaultValue="PENDING"/>
+            <column name="public_mnemo" type="varchar(128)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addUniqueConstraint tableName="partner_report_period"
+                             columnNames="partner_id,catalog_id,bonus_program_id,period_from,period_to"
+                             constraintName="uk_partner_report_period_scope"/>
+        <createIndex tableName="partner_report_period" indexName="idx_partner_report_period_partner_dates">
+            <column name="partner_id"/>
+            <column name="period_from"/>
+            <column name="period_to"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-015-partner-reporting-details" author="codex">
+        <createTable tableName="partner_report_order_line">
+            <column name="report_order_line_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="report_period_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_partner_report_order_line_period" references="partner_report_period(report_period_id)"/>
+            </column>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_source" type="varchar(32)"/>
+            <column name="structure_level" type="integer"/>
+            <column name="customer_ref" type="varchar(128)"/>
+            <column name="order_status" type="varchar(32)"/>
+            <column name="ordered_at" type="timestamp"/>
+            <column name="order_amount" type="numeric(19,2)"/>
+            <column name="commission_base_amount" type="numeric(19,2)"/>
+            <column name="commission_rate_percent" type="numeric(7,4)"/>
+            <column name="commission_amount" type="numeric(19,2)"/>
+            <column name="calculation_status" type="varchar(32)"/>
+            <column name="payout_reference" type="varchar(128)"/>
+        </createTable>
+        <createTable tableName="partner_commission_adjustment">
+            <column name="adjustment_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="report_period_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_partner_commission_adjustment_period" references="partner_report_period(report_period_id)"/>
+            </column>
+            <column name="report_order_line_id" type="uuid"/>
+            <column name="adjustment_type" type="varchar(32)"/>
+            <column name="reason_code" type="varchar(64)"/>
+            <column name="source_ref" type="varchar(128)"/>
+            <column name="amount" type="numeric(19,2)"/>
+            <column name="currency_code" type="varchar(3)"/>
+            <column name="actor_user_id" type="varchar(64)"/>
+            <column name="audit_recorded" type="boolean" defaultValueBoolean="false"/>
+            <column name="created_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-015-partner-reporting-payout-documents" author="codex">
+        <createTable tableName="partner_payout">
+            <column name="payout_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="report_period_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_partner_payout_period" references="partner_report_period(report_period_id)"/>
+            </column>
+            <column name="partner_id" type="varchar(64)"/>
+            <column name="payout_reference" type="varchar(128)"/>
+            <column name="payout_method" type="varchar(64)"/>
+            <column name="payout_status" type="varchar(32)"/>
+            <column name="scheduled_at" type="timestamp"/>
+            <column name="paid_at" type="timestamp"/>
+            <column name="amount" type="numeric(19,2)"/>
+            <column name="currency_code" type="varchar(3)"/>
+            <column name="payment_reference" type="varchar(128)"/>
+            <column name="failure_mnemo" type="varchar(128)"/>
+        </createTable>
+        <createTable tableName="partner_report_document">
+            <column name="document_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="report_period_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_partner_report_document_period" references="partner_report_period(report_period_id)"/>
+            </column>
+            <column name="payout_id" type="uuid"/>
+            <column name="document_type" type="varchar(32)"/>
+            <column name="document_status" type="varchar(32)"/>
+            <column name="version_number" type="integer"/>
+            <column name="checksum_sha256" type="varchar(128)"/>
+            <column name="storage_key" type="varchar(512)"/>
+            <column name="print_view_key" type="varchar(512)"/>
+            <column name="published_at" type="timestamp"/>
+            <column name="revoked_at" type="timestamp"/>
+            <column name="author_user_id" type="varchar(64)"/>
+            <column name="reason_code" type="varchar(64)"/>
+            <column name="public_mnemo" type="varchar(128)"/>
+        </createTable>
+        <createTable tableName="partner_report_export">
+            <column name="export_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="report_period_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_partner_report_export_period" references="partner_report_period(report_period_id)"/>
+            </column>
+            <column name="partner_id" type="varchar(64)"/>
+            <column name="export_format" type="varchar(16)"/>
+            <column name="export_status" type="varchar(32)"/>
+            <column name="row_count" type="integer"/>
+            <column name="storage_key" type="varchar(512)"/>
+            <column name="public_mnemo" type="varchar(128)"/>
+            <column name="requested_by_user_id" type="varchar(64)"/>
+            <column name="requested_at" type="timestamp"/>
+            <column name="ready_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

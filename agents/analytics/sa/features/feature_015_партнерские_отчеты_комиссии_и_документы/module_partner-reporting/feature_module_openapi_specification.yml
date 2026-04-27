@@ -1,0 +1,509 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin partner-reporting feature 015 API
+  version: 0.1.0
+servers:
+  - url: /api/partner-reporting
+tags:
+  - name: partner-reports
+  - name: partner-documents
+  - name: partner-finance
+paths:
+  /reports/summary:
+    get:
+      tags: [partner-reports]
+      summary: Получить сводку отчетного периода текущего партнера
+      parameters:
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - $ref: '#/components/parameters/CatalogId'
+        - $ref: '#/components/parameters/BonusProgramId'
+      responses:
+        '200':
+          description: Сводка продаж, комиссий, удержаний, выплат и сверки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportSummaryResponse'
+        '403':
+          description: STR_MNEMO_PARTNER_REPORT_ACCESS_DENIED
+  /reports/orders:
+    get:
+      tags: [partner-reports]
+      summary: Получить строки заказов и комиссий текущего партнера
+      parameters:
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - $ref: '#/components/parameters/CatalogId'
+        - $ref: '#/components/parameters/OrderNumber'
+        - $ref: '#/components/parameters/PayoutStatus'
+        - $ref: '#/components/parameters/BonusProgramId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Страница строк заказов, комиссий и удержаний
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportOrderPageResponse'
+  /reports/orders/{orderNumber}/commission:
+    get:
+      tags: [partner-reports]
+      summary: Получить детализацию комиссии по заказу
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Детализация комиссии, удержаний и payout reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerCommissionDetailResponse'
+        '404':
+          description: STR_MNEMO_PARTNER_REPORT_ORDER_NOT_FOUND
+  /documents:
+    get:
+      tags: [partner-documents]
+      summary: Получить документы текущего партнера
+      parameters:
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - name: documentType
+          in: query
+          schema:
+            $ref: '#/components/schemas/PartnerReportDocumentType'
+        - name: documentStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/PartnerReportDocumentStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Страница документов партнера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportDocumentPageResponse'
+  /documents/{documentId}/download:
+    post:
+      tags: [partner-documents]
+      summary: Получить ссылку скачивания опубликованного документа
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Metadata и signed download URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportDocumentDownloadResponse'
+        '403':
+          description: STR_MNEMO_PARTNER_REPORT_ACCESS_DENIED
+        '404':
+          description: STR_MNEMO_PARTNER_REPORT_DOCUMENT_NOT_FOUND
+  /documents/{documentId}/print-view:
+    get:
+      tags: [partner-documents]
+      summary: Получить печатную форму документа
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Print-view metadata документа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportPrintViewResponse'
+  /exports:
+    post:
+      tags: [partner-reports]
+      summary: Подготовить экспорт отчета в PDF или XLSX
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerReportExportRequest'
+      responses:
+        '200':
+          description: Export metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportExportResponse'
+  /finance/reconciliations:
+    get:
+      tags: [partner-finance]
+      summary: Finance view сверок по партнерам
+      parameters:
+        - name: partnerId
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - name: reason
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Сверка начислено, удержано, к выплате и выплачено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportFinanceReconciliationResponse'
+        '403':
+          description: STR_MNEMO_PARTNER_REPORT_ACCESS_DENIED
+  /finance/documents/{documentId}/publish:
+    post:
+      tags: [partner-finance]
+      summary: Опубликовать готовый финансовый документ
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerReportDocumentLifecycleRequest'
+      responses:
+        '200':
+          description: Опубликованный документ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportDocumentResponse'
+  /finance/documents/{documentId}/revoke:
+    post:
+      tags: [partner-finance]
+      summary: Отозвать опубликованный финансовый документ
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerReportDocumentLifecycleRequest'
+      responses:
+        '200':
+          description: Отозванный документ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerReportDocumentResponse'
+components:
+  parameters:
+    DateFrom:
+      name: dateFrom
+      in: query
+      schema:
+        type: string
+        format: date
+    DateTo:
+      name: dateTo
+      in: query
+      schema:
+        type: string
+        format: date
+    CatalogId:
+      name: catalogId
+      in: query
+      schema:
+        type: string
+    BonusProgramId:
+      name: bonusProgramId
+      in: query
+      schema:
+        type: string
+    OrderNumber:
+      name: orderNumber
+      in: query
+      schema:
+        type: string
+    PayoutStatus:
+      name: payoutStatus
+      in: query
+      schema:
+        $ref: '#/components/schemas/PartnerPayoutStatus'
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    MoneyAmount:
+      type: object
+      required: [amount, currencyCode]
+      properties:
+        amount:
+          type: string
+          format: decimal
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+    PartnerReportSummaryResponse:
+      type: object
+      required: [reportPeriodId, partnerId, catalogId, totals, reconciliationStatus, correlationId]
+      properties:
+        reportPeriodId:
+          type: string
+          format: uuid
+        partnerId:
+          type: string
+        catalogId:
+          type: string
+        bonusProgramId:
+          type: string
+        totals:
+          $ref: '#/components/schemas/PartnerReportTotals'
+        reconciliationStatus:
+          $ref: '#/components/schemas/PartnerReconciliationStatus'
+        publicMnemo:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+        correlationId:
+          type: string
+    PartnerReportTotals:
+      type: object
+      required: [grossSales, commissionBase, accruedCommission, withheld, payable, paid]
+      properties:
+        grossSales:
+          $ref: '#/components/schemas/MoneyAmount'
+        commissionBase:
+          $ref: '#/components/schemas/MoneyAmount'
+        accruedCommission:
+          $ref: '#/components/schemas/MoneyAmount'
+        withheld:
+          $ref: '#/components/schemas/MoneyAmount'
+        payable:
+          $ref: '#/components/schemas/MoneyAmount'
+        paid:
+          $ref: '#/components/schemas/MoneyAmount'
+    PartnerReportOrderPageResponse:
+      type: object
+      required: [items, page, size, totalElements]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartnerReportOrderLineResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+    PartnerReportOrderLineResponse:
+      type: object
+      required: [orderNumber, orderStatus, commissionBase, commissionAmount, calculationStatus]
+      properties:
+        orderNumber:
+          type: string
+        orderSource:
+          type: string
+        structureLevel:
+          type: integer
+        orderedAt:
+          type: string
+          format: date-time
+        orderAmount:
+          $ref: '#/components/schemas/MoneyAmount'
+        commissionBase:
+          $ref: '#/components/schemas/MoneyAmount'
+        commissionRatePercent:
+          type: string
+          format: decimal
+        commissionAmount:
+          $ref: '#/components/schemas/MoneyAmount'
+        calculationStatus:
+          type: string
+        payoutReference:
+          type: string
+    PartnerCommissionDetailResponse:
+      type: object
+      required: [orderLine, adjustments, payoutReference, correlationId]
+      properties:
+        orderLine:
+          $ref: '#/components/schemas/PartnerReportOrderLineResponse'
+        adjustments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartnerCommissionAdjustmentResponse'
+        payoutReference:
+          type: string
+        publicMnemo:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+        correlationId:
+          type: string
+    PartnerCommissionAdjustmentResponse:
+      type: object
+      required: [adjustmentType, reasonCode, amount, sourceRef]
+      properties:
+        adjustmentType:
+          type: string
+          enum: [RETURN, CANCEL, TAX, MANUAL_ADJUSTMENT, CHARGEBACK]
+        reasonCode:
+          type: string
+        sourceRef:
+          type: string
+        amount:
+          $ref: '#/components/schemas/MoneyAmount'
+    PartnerReportDocumentPageResponse:
+      type: object
+      required: [items, page, size, totalElements]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartnerReportDocumentResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+    PartnerReportDocumentResponse:
+      type: object
+      required: [documentId, documentType, documentStatus, versionNumber, checksumSha256]
+      properties:
+        documentId:
+          type: string
+          format: uuid
+        documentType:
+          $ref: '#/components/schemas/PartnerReportDocumentType'
+        documentStatus:
+          $ref: '#/components/schemas/PartnerReportDocumentStatus'
+        versionNumber:
+          type: integer
+        checksumSha256:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        publicMnemo:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+    PartnerReportDocumentDownloadResponse:
+      allOf:
+        - $ref: '#/components/schemas/PartnerReportDocumentResponse'
+        - type: object
+          required: [downloadUrl, expiresAt]
+          properties:
+            downloadUrl:
+              type: string
+              format: uri
+            expiresAt:
+              type: string
+              format: date-time
+    PartnerReportPrintViewResponse:
+      type: object
+      required: [documentId, versionNumber, checksumSha256, printViewUrl]
+      properties:
+        documentId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: integer
+        checksumSha256:
+          type: string
+        printViewUrl:
+          type: string
+          format: uri
+    PartnerReportExportRequest:
+      type: object
+      required: [format, dateFrom, dateTo]
+      properties:
+        format:
+          type: string
+          enum: [PDF, XLSX]
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        catalogId:
+          type: string
+        bonusProgramId:
+          type: string
+    PartnerReportExportResponse:
+      type: object
+      required: [exportId, exportStatus, format, rowCount, publicMnemo]
+      properties:
+        exportId:
+          type: string
+          format: uuid
+        exportStatus:
+          type: string
+          enum: [REQUESTED, READY, FAILED, EXPIRED]
+        format:
+          type: string
+          enum: [PDF, XLSX]
+        rowCount:
+          type: integer
+        publicMnemo:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+    PartnerReportFinanceReconciliationResponse:
+      allOf:
+        - $ref: '#/components/schemas/PartnerReportSummaryResponse'
+        - type: object
+          required: [auditRecorded, reason]
+          properties:
+            mismatchReasons:
+              type: array
+              items:
+                type: string
+            auditRecorded:
+              type: boolean
+            reason:
+              type: string
+    PartnerReportDocumentLifecycleRequest:
+      type: object
+      required: [reasonCode]
+      properties:
+        reasonCode:
+          type: string
+        comment:
+          type: string
+    PartnerReconciliationStatus:
+      type: string
+      enum: [MATCHED, MISMATCH, PENDING]
+    PartnerPayoutStatus:
+      type: string
+      enum: [SCHEDULED, PAID, FAILED, REVERSED]
+    PartnerReportDocumentType:
+      type: string
+      enum: [ACT, RECEIPT, CERTIFICATE, PAYOUT_STATEMENT, TAX_NOTE, RECONCILIATION_REPORT]
+    PartnerReportDocumentStatus:
+      type: string
+      enum: [DRAFT, READY, PUBLISHED, REVOKED]

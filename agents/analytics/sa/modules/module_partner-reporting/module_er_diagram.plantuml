@@ -1,0 +1,115 @@
+@startuml
+title Full ER diagram for module partner-reporting after feature 015
+
+entity partner_report_period {
+  * report_period_id : uuid
+  --
+  partner_id : varchar
+  catalog_id : varchar
+  bonus_program_id : varchar
+  period_from : date
+  period_to : date
+  gross_sales_amount : numeric
+  commission_base_amount : numeric
+  accrued_commission_amount : numeric
+  withheld_amount : numeric
+  payable_amount : numeric
+  paid_amount : numeric
+  currency_code : varchar
+  reconciliation_status : varchar
+  public_mnemo : varchar
+  correlation_id : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity partner_report_order_line {
+  * report_order_line_id : uuid
+  --
+  report_period_id : uuid
+  order_number : varchar
+  order_source : varchar
+  structure_level : integer
+  customer_ref : varchar
+  order_status : varchar
+  ordered_at : timestamp
+  order_amount : numeric
+  commission_base_amount : numeric
+  commission_rate_percent : numeric
+  commission_amount : numeric
+  calculation_status : varchar
+  payout_reference : varchar
+}
+
+entity partner_commission_adjustment {
+  * adjustment_id : uuid
+  --
+  report_period_id : uuid
+  report_order_line_id : uuid
+  adjustment_type : varchar
+  reason_code : varchar
+  source_ref : varchar
+  amount : numeric
+  currency_code : varchar
+  actor_user_id : varchar
+  audit_recorded : boolean
+  created_at : timestamp
+}
+
+entity partner_payout {
+  * payout_id : uuid
+  --
+  report_period_id : uuid
+  partner_id : varchar
+  payout_reference : varchar
+  payout_method : varchar
+  payout_status : varchar
+  scheduled_at : timestamp
+  paid_at : timestamp
+  amount : numeric
+  currency_code : varchar
+  payment_reference : varchar
+  failure_mnemo : varchar
+}
+
+entity partner_report_document {
+  * document_id : uuid
+  --
+  report_period_id : uuid
+  payout_id : uuid
+  document_type : varchar
+  document_status : varchar
+  version_number : integer
+  checksum_sha256 : varchar
+  storage_key : varchar
+  print_view_key : varchar
+  published_at : timestamp
+  revoked_at : timestamp
+  author_user_id : varchar
+  reason_code : varchar
+  public_mnemo : varchar
+}
+
+entity partner_report_export {
+  * export_id : uuid
+  --
+  report_period_id : uuid
+  partner_id : varchar
+  export_format : varchar
+  export_status : varchar
+  row_count : integer
+  storage_key : varchar
+  public_mnemo : varchar
+  requested_by_user_id : varchar
+  requested_at : timestamp
+  ready_at : timestamp
+}
+
+partner_report_period ||--o{ partner_report_order_line
+partner_report_period ||--o{ partner_commission_adjustment
+partner_report_order_line ||--o{ partner_commission_adjustment
+partner_report_period ||--o{ partner_payout
+partner_report_period ||--o{ partner_report_document
+partner_payout ||--o{ partner_report_document
+partner_report_period ||--o{ partner_report_export
+@enduml

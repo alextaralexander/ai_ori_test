@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 015 desktop partner reports and commissions</title>
+  <desc id="desc">Схематичный макет страницы отчетов партнера, комиссий и сверки заказов</desc>
+  <rect x="0" y="0" width="1280" height="900" fill="white"/>
+  <rect x="48" y="40" width="1184" height="72" fill="none" stroke="#111"/>
+  <text x="72" y="84" font-family="Arial" font-size="20">Шапка: каталог, заказы, отчеты, бонусы, профиль, язык, выход</text>
+  <text x="48" y="154" font-family="Arial" font-size="28">Партнерские отчеты</text>
+  <rect x="48" y="188" width="232" height="110" fill="none" stroke="#111"/>
+  <text x="72" y="226" font-family="Arial" font-size="16">Продажи</text>
+  <text x="72" y="260" font-family="Arial" font-size="14">gross / commission base</text>
+  <rect x="304" y="188" width="232" height="110" fill="none" stroke="#111"/>
+  <text x="328" y="226" font-family="Arial" font-size="16">Комиссии</text>
+  <text x="328" y="260" font-family="Arial" font-size="14">accrued / payable</text>
+  <rect x="560" y="188" width="232" height="110" fill="none" stroke="#111"/>
+  <text x="584" y="226" font-family="Arial" font-size="16">Удержания</text>
+  <text x="584" y="260" font-family="Arial" font-size="14">returns / tax / manual</text>
+  <rect x="816" y="188" width="192" height="110" fill="none" stroke="#111"/>
+  <text x="840" y="226" font-family="Arial" font-size="16">Выплачено</text>
+  <text x="840" y="260" font-family="Arial" font-size="14">paid / failed</text>
+  <rect x="1032" y="188" width="200" height="110" fill="none" stroke="#111"/>
+  <text x="1056" y="226" font-family="Arial" font-size="16">Сверка</text>
+  <text x="1056" y="260" font-family="Arial" font-size="14">matched / mismatch</text>
+  <rect x="48" y="330" width="1184" height="86" fill="none" stroke="#111"/>
+  <text x="72" y="362" font-family="Arial" font-size="15">Фильтры: period, catalog, order number, payout status, bonus program</text>
+  <rect x="72" y="380" width="130" height="24" fill="none" stroke="#777"/>
+  <rect x="222" y="380" width="150" height="24" fill="none" stroke="#777"/>
+  <rect x="392" y="380" width="160" height="24" fill="none" stroke="#777"/>
+  <rect x="572" y="380" width="150" height="24" fill="none" stroke="#777"/>
+  <rect x="742" y="380" width="170" height="24" fill="none" stroke="#777"/>
+  <rect x="940" y="374" width="128" height="32" fill="none" stroke="#111"/>
+  <text x="970" y="396" font-family="Arial" font-size="14">PDF</text>
+  <rect x="1088" y="374" width="120" height="32" fill="none" stroke="#111"/>
+  <text x="1118" y="396" font-family="Arial" font-size="14">XLSX</text>
+  <rect x="48" y="448" width="760" height="320" fill="none" stroke="#111"/>
+  <text x="72" y="484" font-family="Arial" font-size="16">Таблица заказов и комиссий</text>
+  <line x1="72" y1="512" x2="784" y2="512" stroke="#777"/>
+  <text x="72" y="542" font-family="Arial" font-size="14">Заказ | Каталог | База | % | Комиссия | Удержано | Статус</text>
+  <line x1="72" y1="562" x2="784" y2="562" stroke="#ddd"/>
+  <text x="72" y="594" font-family="Arial" font-size="14">ORD-015-STRUCTURE-001 | CAT-2026-05 | 5400 | 12% | READY</text>
+  <text x="72" y="642" font-family="Arial" font-size="14">ORD-015-SELF-002 | CAT-2026-05 | 2300 | 8% | PAID</text>
+  <text x="72" y="690" font-family="Arial" font-size="14">ORD-015-RETURN-003 | CAT-2026-05 | -900 | RETURN | HOLD</text>
+  <rect x="840" y="448" width="392" height="320" fill="none" stroke="#111"/>
+  <text x="864" y="484" font-family="Arial" font-size="16">Панель детализации</text>
+  <text x="864" y="526" font-family="Arial" font-size="14">order reference</text>
+  <text x="864" y="562" font-family="Arial" font-size="14">structure level and program</text>
+  <text x="864" y="598" font-family="Arial" font-size="14">rate, base, commission, withholding</text>
+  <text x="864" y="634" font-family="Arial" font-size="14">payout reference and correlation id</text>
+  <rect x="864" y="680" width="156" height="34" fill="none" stroke="#111"/>
+  <text x="898" y="702" font-family="Arial" font-size="14">Открыть выплату</text>
+  <rect x="1040" y="680" width="150" height="34" fill="none" stroke="#111"/>
+  <text x="1068" y="702" font-family="Arial" font-size="14">Документы</text>
+  <rect x="48" y="800" width="1184" height="48" fill="none" stroke="#111"/>
+  <text x="72" y="830" font-family="Arial" font-size="14">Pagination, empty/error states, STR_MNEMO_* resolved through frontend i18n</text>
+</svg>

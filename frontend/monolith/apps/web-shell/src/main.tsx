@@ -11,6 +11,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
+import { PartnerReportsView } from './components/PartnerReportsView';
 import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
 import { OrderHistoryView } from './components/OrderHistoryView';
@@ -50,7 +51,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance')) {
+  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -84,7 +85,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -163,6 +164,10 @@ function App() {
     contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path === '/order/order-history') {
     contentView = <OrderHistoryView params={params} />;
+  } else if (path === '/report/order-history') {
+    contentView = <PartnerReportsView mode="orders" params={params} />;
+  } else if (path === '/report/info-reciept') {
+    contentView = <PartnerReportsView mode="documents" params={params} />;
   } else if (path.startsWith('/order/order-history/')) {
     contentView = <OrderHistoryView orderNumber={decodeURIComponent(path.slice('/order/order-history/'.length))} params={params} />;
   } else if (path === '/order/claims/claim-create') {

@@ -1,0 +1,69 @@
+@startuml
+title Feature 015 sequence: partner reports, commissions and documents
+
+actor "Партнер" as Partner
+actor "Бухгалтер" as Accountant
+actor "Финансовый контролер" as Controller
+participant "Frontend React\n/report/order-history\n/report/info-reciept" as Frontend
+participant "partner-reporting API" as Reporting
+participant "order module" as Order
+participant "bonus-wallet module" as Wallet
+participant "compensation plan" as Compensation
+participant "payment module" as Payment
+database "partner-reporting DB" as DB
+collections "S3/MinIO documents" as Storage
+
+Partner -> Frontend: Открывает /report/order-history
+Frontend -> Reporting: GET /reports/summary?period&catalog&bonusProgram
+Reporting -> DB: Найти report_period
+Reporting -> Order: Получить агрегаты заказов структуры
+Reporting -> Wallet: Получить удержания и reversal events
+Reporting -> Compensation: Получить commission rules и accruals
+Reporting -> DB: Обновить summary snapshot при необходимости
+Reporting --> Frontend: PartnerReportSummaryResponse + STR_MNEMO_* + correlationId
+Frontend --> Partner: Сводка продаж, комиссий, удержаний, выплат и сверки
+
+Partner -> Frontend: Фильтрует строки заказов
+Frontend -> Reporting: GET /reports/orders?filters&page&size
+Reporting -> DB: Найти partner_report_order_line page
+Reporting --> Frontend: PartnerReportOrderPageResponse
+Partner -> Frontend: Открывает детализацию комиссии
+Frontend -> Reporting: GET /reports/orders/{orderNumber}/commission
+Reporting -> DB: Получить order line, adjustments, payout reference
+Reporting --> Frontend: PartnerCommissionDetailResponse
+
+Partner -> Frontend: Открывает /report/info-reciept
+Frontend -> Reporting: GET /documents?filters
+Reporting -> DB: Найти документы партнера
+Reporting --> Frontend: PartnerReportDocumentPageResponse
+Partner -> Frontend: Скачивает опубликованный документ
+Frontend -> Reporting: POST /documents/{documentId}/download
+Reporting -> DB: Проверить ownership, PUBLISHED, version, checksum
+Reporting -> Storage: Создать signed download URL
+Reporting --> Frontend: PartnerReportDocumentDownloadResponse
+Frontend --> Partner: Download URL или localized STR_MNEMO_*
+
+Partner -> Frontend: Запускает XLSX/PDF экспорт
+Frontend -> Reporting: POST /exports
+Reporting -> DB: Создать partner_report_export
+Reporting -> Storage: Сохранить файл экспорта
+Reporting -> DB: Пометить READY, row_count, storage_key
+Reporting --> Frontend: PartnerReportExportResponse STR_MNEMO_PARTNER_REPORT_EXPORT_READY
+
+Accountant -> Frontend: Публикует готовый документ
+Frontend -> Reporting: POST /finance/documents/{documentId}/publish(reasonCode)
+Reporting -> DB: Проверить роль, READY, reasonCode
+Reporting -> Storage: Проверить checksum файла
+Reporting -> DB: Установить PUBLISHED, version, checksum, audit
+Reporting --> Frontend: PartnerReportDocumentResponse
+
+Controller -> Frontend: Разбирает расхождение сверки
+Frontend -> Reporting: GET /finance/reconciliations?partnerId&period&reason
+Reporting -> DB: Получить totals, mismatch reasons, documents, payouts
+Reporting -> Payment: Проверить payout status
+Reporting --> Frontend: PartnerReportFinanceReconciliationResponse
+Controller -> Frontend: Отзывает ошибочный документ
+Frontend -> Reporting: POST /finance/documents/{documentId}/revoke(reasonCode)
+Reporting -> DB: Установить REVOKED и audit trail
+Reporting --> Frontend: PartnerReportDocumentResponse STR_MNEMO_PARTNER_REPORT_RECONCILIATION_MISMATCH
+@enduml

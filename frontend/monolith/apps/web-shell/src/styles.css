@@ -817,6 +817,71 @@ body {
   display: block;
 }
 
+.partner-report-page {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.partner-report-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.partner-report-heading h1 {
+  margin: 0;
+}
+
+.partner-report-totals {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.partner-report-metric,
+.partner-report-details,
+.partner-report-row {
+  background: #ffffff;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.partner-report-metric {
+  display: grid;
+  gap: 8px;
+}
+
+.partner-report-metric strong {
+  font-size: 20px;
+}
+
+.partner-report-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  max-width: 820px;
+}
+
+.partner-report-list {
+  display: grid;
+  gap: 12px;
+}
+
+.partner-report-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(210px, 1fr) repeat(3, auto) auto auto;
+}
+
+.partner-report-row strong,
+.partner-report-row span {
+  display: block;
+}
+
 .claim-create-grid {
   display: grid;
   gap: 18px;
@@ -885,6 +950,8 @@ body {
     .claim-create-grid,
     .bonus-wallet-filters,
     .bonus-wallet-transaction,
+    .partner-report-filters,
+    .partner-report-row,
     .order-details-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;
