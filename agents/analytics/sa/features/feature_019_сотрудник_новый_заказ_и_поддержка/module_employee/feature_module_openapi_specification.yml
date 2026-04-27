@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin Employee API
+  version: 0.19.0
+  description: API employee-контура для поиска клиента, операторского заказа и поддержки проблемного заказа.
+servers:
+  - url: /api/employee
+paths:
+  /workspace:
+    get:
+      summary: Поиск клиента, партнера или заказа в employee workspace
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Найденный support-контекст }
+        '400': { description: Невалидный query }
+        '403': { description: Нет employee-доступа }
+  /operator-orders:
+    post:
+      summary: Создать операторский заказ от имени клиента или партнера
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeOperatorOrderCreateRequest'
+      responses:
+        '200': { description: Результат созданного заказа }
+        '400': { description: Ошибка валидации }
+        '403': { description: Нет employee-доступа }
+  /operator-orders/{operatorOrderId}/confirm:
+    post:
+      summary: Подтвердить операторский заказ
+      parameters:
+        - in: path
+          name: operatorOrderId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Подтвержденный заказ }
+  /order-support/{orderNumber}:
+    get:
+      summary: Открыть поддержку проблемного заказа
+      parameters:
+        - in: path
+          name: orderNumber
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Support-карточка заказа }
+        '404': { description: Заказ не найден }
+  /order-support/{orderNumber}/notes:
+    post:
+      summary: Добавить внутреннюю заметку сотрудника
+      parameters:
+        - in: path
+          name: orderNumber
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Заметка сохранена }
+  /order-support/{orderNumber}/adjustments:
+    post:
+      summary: Зафиксировать сервисную корректировку
+      parameters:
+        - in: path
+          name: orderNumber
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Корректировка сохранена }
+  /order-support/{orderNumber}/escalations:
+    post:
+      summary: Создать эскалацию поддержки
+      parameters:
+        - in: path
+          name: orderNumber
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Эскалация создана }
+  /supervisor/escalations:
+    get:
+      summary: Получить список эскалаций для супервизора
+      responses:
+        '200': { description: Список эскалаций }
+components:
+  schemas:
+    EmployeeOperatorOrderCreateRequest:
+      type: object
+      required: [targetCustomerId, supportReasonCode, cartType]
+      properties:
+        targetCustomerId: { type: string }
+        supportReasonCode: { type: string }
+        cartType: { type: string, enum: [MAIN, SUPPLEMENTARY] }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku: { type: string }
+              quantity: { type: integer }

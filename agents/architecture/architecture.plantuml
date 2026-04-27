@@ -1,40 +1,39 @@
 @startuml
-skinparam componentStyle rectangle
-component "web-shell frontend" as Web
-component "public-content" as PublicContent
-component "catalog" as Catalog
-component "cart" as Cart
-component "order" as Order
-component "profile" as Profile
-component "bonus-wallet" as Bonus
-component "partner-onboarding" as Onboarding
-component "partner-reporting" as Reporting
-component "mlm-structure" as MLM
-component "partner-office" as PartnerOffice
-component "WMS/1C" as WMS
-component "Payment" as Payment
-component "Delivery" as Delivery
-component "Claim workflow" as Claim
-Web --> PublicContent : HTTP JSON
-Web --> Catalog : HTTP JSON
-Web --> Cart : HTTP JSON
-Web --> Order : HTTP JSON /api/order
-Web --> Profile : HTTP JSON
-Web --> Bonus : HTTP JSON
-Web --> Onboarding : HTTP JSON
-Web --> Reporting : HTTP JSON
-Web --> MLM : HTTP JSON /api/mlm-structure
-Web --> PartnerOffice : HTTP JSON /api/partner-office
-MLM --> Order : route/link context for partner orders
-Order --> Bonus : bonus accrual status for offline orders
-Order --> MLM : partnerPersonNumber/businessVolume context
-Order --> Reporting : partner order report context
-PartnerOffice --> Order : order references and workflow links
-PartnerOffice --> Claim : deviation claim references
-PartnerOffice --> Reporting : office logistics KPIs context
-Order --> Payment : payment API
-Order --> WMS : stock/reservation API
-Order --> Delivery : delivery API
-PartnerOffice --> WMS : supply and movement status API
-PartnerOffice --> Delivery : delivery and pickup status links
+title Best Ori Gin monolith architecture with employee module
+package "frontend/monolith apps/web-shell" {
+  [PublicShell]
+  [Catalog UI]
+  [Cart UI]
+  [Order UI]
+  [Partner UI]
+  [EmployeeWorkspace UI]
+}
+package "backend/monolith/monolith-app" {
+  [public-content]
+  [catalog]
+  [cart]
+  [order]
+  [profile]
+  [bonus-wallet]
+  [partner-reporting]
+  [mlm-structure]
+  [partner-office]
+  [employee]
+}
+database "Postgres/Liquibase XML" as db
+cloud "WMS/1C" as wms
+cloud "Payment" as pay
+cloud "Delivery" as delivery
+cloud "Bonus engine" as bonus
+
+[EmployeeWorkspace UI] --> [employee] : /api/employee
+[employee] --> [order]
+[employee] --> [cart]
+[employee] --> [profile]
+[employee] --> [partner-reporting]
+[order] --> pay
+[order] --> delivery
+[order] --> wms
+[bonus-wallet] --> bonus
+[employee] --> db : support audit target tables
 @enduml

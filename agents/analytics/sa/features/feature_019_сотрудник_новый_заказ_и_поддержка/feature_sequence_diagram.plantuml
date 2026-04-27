@@ -1,0 +1,43 @@
+@startuml
+title Feature 019 employee order and support sequence
+actor Employee as employee
+actor Supervisor as supervisor
+participant "EmployeeView" as ui
+participant "EmployeeController" as api
+participant "EmployeeService" as service
+database "EmployeeRepository" as repo
+participant "Order/Cart/Profile modules" as modules
+
+employee -> ui : открыть /employee и выполнить поиск
+ui -> api : GET /api/employee/workspace?query=CUST-019-001
+api -> service : searchWorkspace(actor, query)
+service -> modules : получить профиль, корзину, последние заказы
+service -> repo : сохранить support session и audit event
+service --> api : EmployeeWorkspaceResponse
+api --> ui : карточка клиента и предупреждения
+
+employee -> ui : создать операторский заказ
+ui -> api : POST /api/employee/operator-orders
+api -> service : createOperatorOrder(actor, request, idempotencyKey)
+service -> modules : проверить товары, кампанию, доставку, оплату
+service -> repo : сохранить operator order и audit event
+service --> api : EmployeeOperatorOrderResponse
+api --> ui : orderNumber, totals, nextAction
+
+employee -> ui : открыть поддержку заказа
+ui -> api : GET /api/employee/order-support/BOG-ORD-019-001
+api -> service : getOrderSupport(actor, orderNumber)
+service -> modules : получить order timeline, claims, payment, delivery
+service --> api : EmployeeOrderSupportResponse
+api --> ui : timeline и доступные действия
+
+employee -> ui : создать эскалацию
+ui -> api : POST /api/employee/order-support/{orderNumber}/escalations
+api -> service : createEscalation(actor, request)
+service -> repo : support action + audit event
+supervisor -> ui : открыть список эскалаций
+ui -> api : GET /api/employee/supervisor/escalations
+api -> service : supervisorEscalations(supervisor)
+service --> api : список SLA-эскалаций
+api --> ui : эскалации
+@enduml

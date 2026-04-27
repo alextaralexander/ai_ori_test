@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f7f8fb"/>
+  <text x="48" y="54" font-family="Arial" font-size="28" fill="#1f2937">/employee — рабочее место сотрудника</text>
+  <rect x="48" y="88" width="1184" height="84" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="72" y="124" font-family="Arial" font-size="18" fill="#374151">Поиск клиента, партнера или заказа</text>
+  <rect x="72" y="138" width="760" height="24" fill="#eef2f7"/>
+  <rect x="856" y="128" width="160" height="34" rx="6" fill="#2f6fed"/>
+  <text x="890" y="151" font-family="Arial" font-size="14" fill="#ffffff">Найти</text>
+  <rect x="48" y="200" width="360" height="540" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="72" y="238" font-family="Arial" font-size="20" fill="#111827">Карточка клиента</text>
+  <rect x="72" y="264" width="300" height="24" fill="#eef2f7"/>
+  <rect x="72" y="304" width="260" height="18" fill="#eef2f7"/>
+  <rect x="72" y="344" width="300" height="92" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="90" y="392" font-family="Arial" font-size="16" fill="#92400e">Предупреждения и ограничения</text>
+  <rect x="444" y="200" width="372" height="250" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="468" y="238" font-family="Arial" font-size="20" fill="#111827">Активная корзина</text>
+  <rect x="468" y="272" width="300" height="22" fill="#eef2f7"/>
+  <rect x="468" y="312" width="300" height="22" fill="#eef2f7"/>
+  <rect x="468" y="372" width="180" height="36" rx="6" fill="#10b981"/>
+  <text x="492" y="396" font-family="Arial" font-size="14" fill="#ffffff">Создать заказ</text>
+  <rect x="852" y="200" width="380" height="250" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="876" y="238" font-family="Arial" font-size="20" fill="#111827">Последние заказы</text>
+  <rect x="876" y="272" width="300" height="22" fill="#eef2f7"/>
+  <rect x="876" y="312" width="300" height="22" fill="#eef2f7"/>
+  <rect x="444" y="486" width="788" height="254" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="468" y="524" font-family="Arial" font-size="20" fill="#111827">Audit trail и переходы</text>
+  <rect x="468" y="560" width="320" height="22" fill="#eef2f7"/>
+  <rect x="468" y="604" width="260" height="34" rx="6" fill="#e0f2fe"/>
+  <rect x="748" y="604" width="260" height="34" rx="6" fill="#e0f2fe"/>
+  <rect x="468" y="660" width="540" height="22" fill="#eef2f7"/>
+</svg>

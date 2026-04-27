@@ -1,0 +1,50 @@
+@startuml
+title Feature 019 employee module ER changes
+entity employee_support_session {
+  * session_id : uuid
+  --
+  actor_user_id : varchar
+  target_customer_id : varchar
+  target_partner_person_number : varchar
+  support_reason_code : varchar
+  source_channel : varchar
+  started_at : timestamp
+  closed_at : timestamp
+}
+entity employee_operator_order {
+  * operator_order_id : uuid
+  --
+  session_id : uuid
+  checkout_id : uuid
+  order_number : varchar
+  cart_type : varchar
+  payment_status : varchar
+  delivery_status : varchar
+  idempotency_key : varchar
+  audit_recorded : boolean
+}
+entity employee_support_action {
+  * action_id : uuid
+  --
+  session_id : uuid
+  order_number : varchar
+  action_type : varchar
+  reason_code : varchar
+  amount : decimal
+  supervisor_required : boolean
+  created_at : timestamp
+}
+entity employee_audit_event {
+  * audit_event_id : uuid
+  --
+  actor_user_id : varchar
+  target_entity_type : varchar
+  target_entity_id : varchar
+  event_type : varchar
+  metadata_json : jsonb
+  occurred_at : timestamp
+}
+employee_support_session ||--o{ employee_operator_order
+employee_support_session ||--o{ employee_support_action
+employee_support_session ||--o{ employee_audit_event
+@enduml

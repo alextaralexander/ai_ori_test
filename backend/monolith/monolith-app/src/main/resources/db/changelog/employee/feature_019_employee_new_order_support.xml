@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-019-employee-support-session" author="codex">
+        <createTable tableName="employee_support_session">
+            <column name="session_id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_employee_support_session"/>
+            </column>
+            <column name="actor_user_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_customer_id" type="varchar(64)"/>
+            <column name="target_partner_person_number" type="varchar(64)"/>
+            <column name="support_reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_channel" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="closed_at" type="timestamp with time zone"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-019-employee-operator-order" author="codex">
+        <createTable tableName="employee_operator_order">
+            <column name="operator_order_id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_employee_operator_order"/>
+            </column>
+            <column name="session_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="checkout_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cart_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_recorded" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="employee_operator_order" columnNames="idempotency_key" constraintName="uk_employee_operator_order_idempotency"/>
+    </changeSet>
+
+    <changeSet id="feature-019-employee-support-action" author="codex">
+        <createTable tableName="employee_support_action">
+            <column name="action_id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_employee_support_action"/>
+            </column>
+            <column name="session_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(19,2)"/>
+            <column name="supervisor_required" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

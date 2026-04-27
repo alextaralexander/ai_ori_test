@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f7f8fb"/>
+  <text x="48" y="54" font-family="Arial" font-size="28" fill="#1f2937">/employee/new-order — операторский заказ</text>
+  <rect x="48" y="88" width="1184" height="72" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="72" y="132" font-family="Arial" font-size="18" fill="#374151">Клиент • причина обращения • тип заказа • idempotency</text>
+  <rect x="48" y="190" width="760" height="520" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="72" y="230" font-family="Arial" font-size="22" fill="#111827">Состав заказа</text>
+  <rect x="72" y="266" width="680" height="44" fill="#eef2f7"/>
+  <rect x="72" y="332" width="680" height="44" fill="#eef2f7"/>
+  <rect x="72" y="398" width="680" height="44" fill="#eef2f7"/>
+  <rect x="72" y="488" width="250" height="38" rx="6" fill="#2f6fed"/>
+  <text x="96" y="513" font-family="Arial" font-size="14" fill="#ffffff">Добавить товар</text>
+  <rect x="848" y="190" width="384" height="520" rx="8" fill="#ffffff" stroke="#c9d2e3"/>
+  <text x="872" y="230" font-family="Arial" font-size="22" fill="#111827">Оформление</text>
+  <rect x="872" y="264" width="300" height="50" fill="#eef2f7"/>
+  <rect x="872" y="336" width="300" height="50" fill="#eef2f7"/>
+  <rect x="872" y="408" width="300" height="50" fill="#eef2f7"/>
+  <rect x="872" y="506" width="300" height="72" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="894" y="548" font-family="Arial" font-size="16" fill="#065f46">Итоги, доставка, оплата</text>
+  <rect x="872" y="620" width="220" height="42" rx="6" fill="#10b981"/>
+  <text x="904" y="647" font-family="Arial" font-size="15" fill="#ffffff">Подтвердить заказ</text>
+</svg>
