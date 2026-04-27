@@ -1,0 +1,63 @@
+@startuml
+title Feature 022 employee module ER: карточка партнера и отчеты
+
+entity employee_partner_card_audit {
+  * audit_event_id : uuid <<PK>>
+  --
+  actor_user_id : varchar(128)
+  actor_role : varchar(64)
+  support_reason_code : varchar(64)
+  source_route : varchar(256)
+  target_entity_type : varchar(64)
+  target_entity_id : varchar(128)
+  partner_id : varchar(64)
+  person_number : varchar(64)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+entity employee_partner_report_snapshot {
+  * report_snapshot_id : uuid <<PK>>
+  --
+  partner_id : varchar(64)
+  person_number : varchar(64)
+  campaign_code : varchar(32)
+  region_code : varchar(32)
+  total_orders : integer
+  total_amount : numeric(19,2)
+  paid_amount : numeric(19,2)
+  returned_amount : numeric(19,2)
+  personal_volume : numeric(19,2)
+  group_volume : numeric(19,2)
+  open_claim_count : integer
+  delayed_delivery_count : integer
+  generated_at : timestamptz
+}
+
+entity employee_support_snapshot {
+  * snapshot_id : uuid <<PK>>
+  --
+  actor_user_id : varchar(128)
+  target_customer_id : varchar(64)
+  partner_person_number : varchar(64)
+  reason_code : varchar(64)
+  action_type : varchar(64)
+  order_number : varchar(64)
+  amount : numeric(19,2)
+  supervisor_required : boolean
+  created_at : timestamptz
+}
+
+employee_partner_card_audit }o--|| employee_partner_report_snapshot : "partner_id/person_number"
+employee_partner_card_audit }o--o{ employee_support_snapshot : "audit links support context"
+
+note right of employee_partner_card_audit
+  Событийная таблица фиксирует просмотры карточки,
+  отчета и переходы в order/claim/support flows.
+end note
+
+note right of employee_partner_report_snapshot
+  Snapshot хранит агрегаты отчета feature #22.
+  Источником фактов остаются order, bonus, claim и WMS контуры.
+end note
+@enduml

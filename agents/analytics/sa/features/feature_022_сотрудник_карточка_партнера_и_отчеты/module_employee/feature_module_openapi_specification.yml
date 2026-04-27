@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin employee module - feature 022 partner card and reports
+  version: 2026.04.27-feature-022
+  description: Контракт employee module для карточки партнера и отчета истории заказов партнера.
+servers:
+  - url: /api/employee
+paths:
+  /partner-card:
+    get:
+      tags: [employee-partner-card]
+      summary: Поиск и открытие карточки партнера сотрудником
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema: { type: string, minLength: 3 }
+        - name: supportReasonCode
+          in: query
+          required: false
+          schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW }
+        - name: regionCode
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Карточка партнера найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeePartnerCardResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /partner-card/{partnerId}:
+    get:
+      tags: [employee-partner-card]
+      summary: Открытие карточки партнера по partnerId
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: supportReasonCode
+          in: query
+          required: false
+          schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW }
+      responses:
+        '200':
+          description: Карточка партнера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeePartnerCardResponse'
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /report/order-history:
+    get:
+      tags: [employee-partner-report]
+      summary: Отчет истории заказов партнера для сотрудника
+      parameters:
+        - name: partnerId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: personNumber
+          in: query
+          required: false
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: campaignCode
+          in: query
+          required: false
+          schema: { type: string }
+        - name: orderStatus
+          in: query
+          required: false
+          schema: { type: string }
+        - name: paymentStatus
+          in: query
+          required: false
+          schema: { type: string }
+        - name: deliveryStatus
+          in: query
+          required: false
+          schema: { type: string }
+        - name: problemOnly
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+        - name: regionCode
+          in: query
+          required: false
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, default: updatedAt,desc }
+      responses:
+        '200':
+          description: Постраничный отчет заказов партнера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeePartnerOrderReportResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+components:
+  responses:
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+    Forbidden:
+      description: Нет доступа
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+    NotFound:
+      description: Партнер не найден
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EmployeeErrorResponse' }
+  schemas:
+    EmployeePartnerCardResponse:
+      type: object
+      required: [partnerId, personNumber, displayName, status, kpi, recentOrders, auditContext, linkedRoutes]
+      properties:
+        partnerId: { type: string }
+        personNumber: { type: string }
+        displayName: { type: string }
+        status: { type: string }
+        activityState: { type: string }
+        levelName: { type: string }
+        regionCode: { type: string }
+        mentorPersonNumber: { type: string }
+        maskedPhone: { type: string }
+        maskedEmail: { type: string }
+        registrationDate: { type: string, format: date }
+        lastOrderDate: { type: string, format: date }
+        kpi: { $ref: '#/components/schemas/EmployeePartnerKpiResponse' }
+        recentOrders:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeePartnerOrderSummaryResponse' }
+        riskSignals:
+          type: array
+          items: { type: string }
+        auditContext: { $ref: '#/components/schemas/EmployeeAuditContextResponse' }
+        linkedRoutes:
+          type: object
+          additionalProperties: { type: string }
+    EmployeePartnerKpiResponse:
+      type: object
+      properties:
+        personalVolume: { type: number }
+        groupVolume: { type: number }
+        orderCount: { type: integer }
+        averageOrderAmount: { type: number }
+        bonusBalance: { type: number }
+        activeCustomerCount: { type: integer }
+        openClaimCount: { type: integer }
+        overdueActionCount: { type: integer }
+        returnRatePercent: { type: number }
+        currentCampaignCode: { type: string }
+        currencyCode: { type: string }
+    EmployeePartnerOrderSummaryResponse:
+      type: object
+      properties:
+        orderId: { type: string }
+        orderNumber: { type: string }
+        campaignCode: { type: string }
+        customerDisplayName: { type: string }
+        orderStatus: { type: string }
+        paymentStatus: { type: string }
+        deliveryStatus: { type: string }
+        fulfillmentStatus: { type: string }
+        totalAmount: { type: number }
+        bonusVolume: { type: number }
+        currencyCode: { type: string }
+        problemFlags:
+          type: array
+          items: { type: string }
+        linkedRoutes:
+          type: object
+          additionalProperties: { type: string }
+        updatedAt: { type: string, format: date-time }
+    EmployeePartnerOrderReportResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeePartnerOrderSummaryResponse' }
+        aggregates: { $ref: '#/components/schemas/EmployeePartnerReportAggregateResponse' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+        appliedFilters:
+          type: object
+          additionalProperties: { type: string }
+    EmployeePartnerReportAggregateResponse:
+      type: object
+      properties:
+        totalOrders: { type: integer }
+        totalAmount: { type: number }
+        paidAmount: { type: number }
+        returnedAmount: { type: number }
+        averageOrderAmount: { type: number }
+        personalVolume: { type: number }
+        groupVolume: { type: number }
+        openClaimCount: { type: integer }
+        delayedDeliveryCount: { type: integer }
+        currencyCode: { type: string }
+    EmployeeAuditContextResponse:
+      type: object
+      properties:
+        actorUserId: { type: string }
+        supportReasonCode: { type: string }
+        sourceChannel: { type: string }
+        auditRecorded: { type: boolean }
+    EmployeeErrorResponse:
+      type: object
+      properties:
+        code: { type: string, example: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        details:
+          type: array
+          items:
+            type: object
+        metadata:
+          type: object
+          additionalProperties: { type: string }

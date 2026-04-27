@@ -245,6 +245,83 @@ export interface EmployeeClaimPageResponse {
   availableFilters: string[];
 }
 
+export interface EmployeePartnerKpiResponse {
+  personalVolume: string;
+  groupVolume: string;
+  orderCount: number;
+  averageOrderAmount: string;
+  bonusBalance: string;
+  activeCustomerCount: number;
+  openClaimCount: number;
+  overdueActionCount: number;
+  returnRatePercent: string;
+  currentCampaignCode: string;
+  currencyCode: string;
+}
+
+export interface EmployeePartnerOrderSummaryResponse {
+  orderId: string;
+  orderNumber: string;
+  campaignCode: string;
+  customerDisplayName: string;
+  orderStatus: string;
+  paymentStatus: string;
+  deliveryStatus: string;
+  fulfillmentStatus: string;
+  totalAmount: string;
+  bonusVolume: string;
+  currencyCode: string;
+  problemFlags: string[];
+  linkedRoutes: Record<string, string>;
+  updatedAt: string;
+}
+
+export interface EmployeePartnerCardResponse {
+  partnerId: string;
+  personNumber: string;
+  displayName: string;
+  status: string;
+  activityState: string;
+  levelName: string;
+  regionCode: string;
+  mentorPersonNumber: string;
+  maskedPhone: string;
+  maskedEmail: string;
+  registrationDate: string;
+  lastOrderDate: string;
+  kpi: EmployeePartnerKpiResponse;
+  recentOrders: EmployeePartnerOrderSummaryResponse[];
+  riskSignals: string[];
+  auditContext: {
+    actorUserId: string;
+    supportReasonCode: string;
+    sourceChannel: string;
+    auditRecorded: boolean;
+  };
+  linkedRoutes: Record<string, string>;
+}
+
+export interface EmployeePartnerOrderReportResponse {
+  items: EmployeePartnerOrderSummaryResponse[];
+  aggregates: {
+    totalOrders: number;
+    totalAmount: string;
+    paidAmount: string;
+    returnedAmount: string;
+    averageOrderAmount: string;
+    personalVolume: string;
+    groupVolume: string;
+    openClaimCount: number;
+    delayedDeliveryCount: number;
+    currencyCode: string;
+  };
+  page: number;
+  size: number;
+  totalElements: number;
+  auditRecorded: boolean;
+  appliedFilters: Record<string, string>;
+}
+
 interface ErrorResponse {
   code: string;
 }
@@ -381,4 +458,25 @@ export async function transitionEmployeeClaim(claimId: string, transitionCode: s
     body: JSON.stringify({ transitionCode, supportReasonCode: transitionCode === 'APPROVE_COMPENSATION' ? 'SUPERVISOR_REVIEW' : 'CUSTOMER_CALL', approvedCompensationAmount: transitionCode === 'APPROVE_COMPENSATION' ? 2500 : 1250 }),
   });
   return readJson<EmployeeClaimDetailsResponse>(response);
+}
+
+export async function getEmployeePartnerCard(query: string): Promise<EmployeePartnerCardResponse> {
+  const params = new URLSearchParams({ query, supportReasonCode: 'EMPLOYEE_PARTNER_CARD_VIEW' });
+  const response = await fetch(`/api/employee/partner-card?${params.toString()}`, { headers: authHeaders() });
+  return readJson<EmployeePartnerCardResponse>(response);
+}
+
+export async function getEmployeePartnerCardById(partnerId: string): Promise<EmployeePartnerCardResponse> {
+  const params = new URLSearchParams({ supportReasonCode: 'EMPLOYEE_PARTNER_CARD_VIEW' });
+  const response = await fetch(`/api/employee/partner-card/${encodeURIComponent(partnerId)}?${params.toString()}`, { headers: authHeaders() });
+  return readJson<EmployeePartnerCardResponse>(response);
+}
+
+export async function getEmployeePartnerOrderReport(params: URLSearchParams): Promise<EmployeePartnerOrderReportResponse> {
+  const query = new URLSearchParams(params);
+  if (!query.has('partnerId') && !query.has('personNumber')) {
+    query.set('partnerId', 'PART-022-001');
+  }
+  const response = await fetch(`/api/employee/report/order-history?${query.toString()}`, { headers: authHeaders() });
+  return readJson<EmployeePartnerOrderReportResponse>(response);
 }

@@ -31,3 +31,10 @@ DTO находятся в `com.bestorigin.monolith.employee.api.EmployeeDtos` и
 
 ## Version baseline
 Baseline на 27.04.2026: Java 25, Spring Boot 4.0.6, Maven 4-compatible build, TypeScript/React/Ant Design из текущего web-shell без понижения версий.
+
+## Feature #22: карточка партнера и отчет заказов партнера
+Module employee дополнен endpoint-ами `GET /api/employee/partner-card`, `GET /api/employee/partner-card/{partnerId}` и `GET /api/employee/report/order-history`. Контракты возвращают структурированные DTO `EmployeePartnerCardResponse` и `EmployeePartnerOrderReportResponse` с KPI, recentOrders, riskSignals, aggregates, appliedFilters, auditContext и linkedRoutes.
+
+Валидации feature #22 используют mnemonic-коды `STR_MNEMO_EMPLOYEE_PARTNER_QUERY_INVALID`, `STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND`, `STR_MNEMO_EMPLOYEE_PARTNER_REPORT_FILTER_INVALID` и общий `STR_MNEMO_EMPLOYEE_ACCESS_DENIED`. Backend не возвращает hardcoded user-facing текст; frontend обязан локализовать эти коды через dictionaries.
+
+Endpoint-ы требуют роль `employee-support`, `backoffice`, `supervisor` или `regional-manager`; для регионального менеджера дополнительно проверяется зона ответственности партнера. Успешные просмотры карточки, отчета и переходы в связанные flows фиксируются в audit trail.

@@ -192,6 +192,38 @@ entity employee_claim_audit_event {
   occurred_at : timestamptz
 }
 
+entity employee_partner_card_audit {
+  * audit_event_id : uuid
+  --
+  actor_user_id : varchar(128)
+  actor_role : varchar(64)
+  support_reason_code : varchar(64)
+  source_route : varchar(256)
+  target_entity_type : varchar(64)
+  target_entity_id : varchar(128)
+  partner_id : varchar(64)
+  person_number : varchar(64)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+entity employee_partner_report_snapshot {
+  * report_snapshot_id : uuid
+  --
+  partner_id : varchar(64)
+  person_number : varchar(64)
+  campaign_code : varchar(32)
+  region_code : varchar(32)
+  total_orders : integer
+  total_amount : numeric(19,2)
+  paid_amount : numeric(19,2)
+  returned_amount : numeric(19,2)
+  personal_volume : numeric(19,2)
+  group_volume : numeric(19,2)
+  open_claim_count : integer
+  delayed_delivery_count : integer
+  generated_at : timestamptz
+}
 employee_support_session ||--o{ employee_operator_order
 employee_support_session ||--o{ employee_support_action
 employee_support_session ||--o{ employee_audit_event
@@ -201,4 +233,5 @@ employee_claim_case ||--o{ employee_claim_item
 employee_claim_case ||--o{ employee_claim_attachment
 employee_claim_case ||--o{ employee_claim_route_task
 employee_claim_case ||--o{ employee_claim_audit_event
+employee_partner_report_snapshot ||--o{ employee_partner_card_audit
 @enduml

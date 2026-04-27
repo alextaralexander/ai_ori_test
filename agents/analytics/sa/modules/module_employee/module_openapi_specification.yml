@@ -1,11 +1,54 @@
 openapi: 3.1.0
 info:
   title: Best Ori Gin Employee API
-  version: 0.21.0
-  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа, истории заказов сотрудника и employee-претензий.
+  version: 0.22.0
+  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа, истории заказов сотрудника и employee-претензий, карточки партнера и отчета заказов партнера.
 servers:
   - url: /api/employee
 paths:
+  /partner-card:
+    get:
+      summary: Поиск и открытие карточки партнера сотрудником
+      parameters:
+        - { in: query, name: query, required: true, schema: { type: string, minLength: 3 } }
+        - { in: query, name: supportReasonCode, schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW } }
+        - { in: query, name: regionCode, schema: { type: string } }
+      responses:
+        '200': { description: EmployeePartnerCardResponse }
+        '400': { description: STR_MNEMO_EMPLOYEE_PARTNER_QUERY_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND }
+  /partner-card/{partnerId}:
+    get:
+      summary: Открыть карточку партнера по partnerId
+      parameters:
+        - { in: path, name: partnerId, required: true, schema: { type: string } }
+        - { in: query, name: supportReasonCode, schema: { type: string, default: EMPLOYEE_PARTNER_CARD_VIEW } }
+      responses:
+        '200': { description: EmployeePartnerCardResponse }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND }
+  /report/order-history:
+    get:
+      summary: Получить employee-отчет истории заказов партнера
+      parameters:
+        - { in: query, name: partnerId, schema: { type: string } }
+        - { in: query, name: personNumber, schema: { type: string } }
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo, schema: { type: string, format: date } }
+        - { in: query, name: campaignCode, schema: { type: string } }
+        - { in: query, name: orderStatus, schema: { type: string } }
+        - { in: query, name: paymentStatus, schema: { type: string } }
+        - { in: query, name: deliveryStatus, schema: { type: string } }
+        - { in: query, name: problemOnly, schema: { type: boolean, default: false } }
+        - { in: query, name: regionCode, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, default: 0 } }
+        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
+        - { in: query, name: sort, schema: { type: string, default: updatedAt,desc } }
+      responses:
+        '200': { description: EmployeePartnerOrderReportResponse }
+        '400': { description: STR_MNEMO_EMPLOYEE_PARTNER_REPORT_FILTER_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
   /workspace:
     get:
       summary: Поиск клиента, партнера или заказа в employee workspace
@@ -151,6 +194,36 @@ paths:
         '404': { description: STR_MNEMO_EMPLOYEE_CLAIM_NOT_FOUND }
 components:
   schemas:
+    EmployeePartnerCardResponse:
+      type: object
+      properties:
+        partnerId: { type: string }
+        personNumber: { type: string }
+        displayName: { type: string }
+        status: { type: string }
+        activityState: { type: string }
+        levelName: { type: string }
+        regionCode: { type: string }
+        mentorPersonNumber: { type: string }
+        maskedPhone: { type: string }
+        maskedEmail: { type: string }
+        registrationDate: { type: string, format: date }
+        lastOrderDate: { type: string, format: date }
+        kpi: { type: object }
+        recentOrders: { type: array, items: { type: object } }
+        riskSignals: { type: array, items: { type: string } }
+        auditContext: { type: object }
+        linkedRoutes: { type: object, additionalProperties: { type: string } }
+    EmployeePartnerOrderReportResponse:
+      type: object
+      properties:
+        items: { type: array, items: { type: object } }
+        aggregates: { type: object }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+        appliedFilters: { type: object, additionalProperties: { type: string } }
     EmployeeOperatorOrderCreateRequest:
       type: object
       required: [targetCustomerId, supportReasonCode, cartType]

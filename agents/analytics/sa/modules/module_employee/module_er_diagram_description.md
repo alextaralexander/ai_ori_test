@@ -33,3 +33,14 @@ DTO и enum-контракты находятся в `api`. Domain snapshot и r
 
 ## Version baseline
 Baseline на 27.04.2026: Java 25, Spring Boot 4.0.6, Maven 4-compatible build, Hibernate/Liquibase/MapStruct/Lombok по latest stable baseline задачи без понижения версий текущего monolith.
+
+## Feature #22: карточка партнера и отчет заказов партнера
+
+### employee_partner_card_audit
+Таблица расширяет общий employee audit read-side событиями просмотра карточки партнера, отчета и переходов в смежные order/claim/support flows. Поля: `audit_event_id uuid` PK, `actor_user_id`, `actor_role`, `support_reason_code`, `source_route`, `target_entity_type`, `target_entity_id`, `partner_id`, `person_number`, `correlation_id`, `occurred_at`. Индексы: `partner_id, occurred_at desc` для расследования по партнеру и `actor_user_id, occurred_at desc` для контроля действий сотрудника.
+
+### employee_partner_report_snapshot
+Таблица хранит агрегированный snapshot отчета партнера на момент генерации: `report_snapshot_id uuid` PK, `partner_id`, `person_number`, `campaign_code`, `region_code`, `total_orders`, `total_amount`, `paid_amount`, `returned_amount`, `personal_volume`, `group_volume`, `open_claim_count`, `delayed_delivery_count`, `generated_at`. Денежные и volume-поля используют `numeric(19,2)`, счетчики имеют check constraints на неотрицательные значения.
+
+### Связи и владение
+`employee_partner_report_snapshot` логически агрегирует order, claim, bonus, WMS и delivery read models, но не создает жестких FK к чужим module boundaries. `employee_partner_card_audit` связывает сотрудника, партнера и target entity через identifiers и correlation id. Liquibase changeset feature #22 создается отдельным XML-файлом в employee db package.

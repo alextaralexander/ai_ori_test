@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-022-employee-partner-card-audit" author="codex">
+        <createTable tableName="employee_partner_card_audit">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actor_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="support_reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_route" type="varchar(256)"/>
+            <column name="target_entity_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_entity_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_id" type="varchar(64)"/>
+            <column name="person_number" type="varchar(64)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="employee_partner_card_audit" indexName="idx_employee_partner_card_audit_partner_time">
+            <column name="partner_id"/>
+            <column name="occurred_at" descending="true"/>
+        </createIndex>
+        <createIndex tableName="employee_partner_card_audit" indexName="idx_employee_partner_card_audit_actor_time">
+            <column name="actor_user_id"/>
+            <column name="occurred_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-022-employee-partner-report-snapshot" author="codex">
+        <createTable tableName="employee_partner_report_snapshot">
+            <column name="report_snapshot_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="partner_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_code" type="varchar(32)"/>
+            <column name="region_code" type="varchar(32)"/>
+            <column name="total_orders" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_amount" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="paid_amount" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="returned_amount" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="personal_volume" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_volume" type="numeric(19,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open_claim_count" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delayed_delivery_count" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="generated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addCheckConstraint tableName="employee_partner_report_snapshot" constraintName="chk_employee_partner_report_snapshot_counts" checkConstraint="total_orders &gt;= 0 and open_claim_count &gt;= 0 and delayed_delivery_count &gt;= 0"/>
+        <createIndex tableName="employee_partner_report_snapshot" indexName="idx_employee_partner_report_snapshot_partner_campaign">
+            <column name="partner_id"/>
+            <column name="campaign_code"/>
+            <column name="generated_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

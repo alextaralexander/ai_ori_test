@@ -1,0 +1,54 @@
+@startuml
+title Feature 022 sequence: employee partner card and reports
+actor "Сотрудник backoffice" as Employee
+actor "Региональный менеджер" as Manager
+participant "Frontend web-shell" as FE
+participant "EmployeeController" as Controller
+participant "EmployeeService" as Service
+participant "EmployeeSupportRepository" as Repo
+database "employee db" as DB
+participant "Order/Claim/Bonus/WMS read models" as ReadModels
+
+Employee -> FE: Открывает /employee/partner-card
+FE -> Controller: GET /api/employee/partner-card?query=P-022-7788
+Controller -> Service: partnerCard(userContext, query, reason)
+Service -> Service: Проверить роль и regional scope
+Service -> ReadModels: Получить partner master data, KPI, orders, claims, bonus, WMS flags
+ReadModels --> Service: Partner card projection
+Service -> Repo: save audit EMPLOYEE_PARTNER_CARD_VIEWED
+Repo -> DB: insert employee_partner_card_audit
+Service --> Controller: EmployeePartnerCardResponse
+Controller --> FE: 200 JSON с KPI, recentOrders, riskSignals, linkedRoutes
+FE --> Employee: Показывает карточку партнера
+
+Employee -> FE: Переходит в отчет заказов партнера
+FE -> Controller: GET /api/employee/report/order-history?partnerId=PART-022-001&problemOnly=true
+Controller -> Service: partnerOrderReport(userContext, filters)
+Service -> Service: Проверить фильтры и scope
+Service -> ReadModels: Получить историю заказов, claims, payments, delivery, bonus volume
+ReadModels --> Service: Items and aggregates
+Service -> Repo: save report snapshot and audit EMPLOYEE_PARTNER_REPORT_VIEWED
+Repo -> DB: insert employee_partner_report_snapshot
+Repo -> DB: insert employee_partner_card_audit
+Service --> Controller: EmployeePartnerOrderReportResponse
+Controller --> FE: 200 JSON с items, aggregates, appliedFilters, auditRecorded
+FE --> Employee: Показывает таблицу и агрегаты
+
+Manager -> FE: Открывает отчет по региональному партнеру
+FE -> Controller: GET /api/employee/report/order-history?personNumber=P-022-7788&regionCode=RU-MOW
+Controller -> Service: partnerOrderReport(regional-manager, filters)
+Service -> Service: Проверить regional manager scope
+alt partner вне зоны ответственности
+  Service --> Controller: STR_MNEMO_EMPLOYEE_ACCESS_DENIED
+  Controller --> FE: 403 EmployeeErrorResponse
+else partner доступен
+  Service --> Controller: EmployeePartnerOrderReportResponse
+  Controller --> FE: 200 JSON
+end
+
+Employee -> FE: Открывает связанный order/claim/support route
+FE -> Controller: GET /api/employee/partner-card/{partnerId}?supportReasonCode=EMPLOYEE_PARTNER_CARD_LINK_OPENED
+Controller -> Service: record partner link context
+Service -> Repo: save audit EMPLOYEE_PARTNER_CARD_LINK_OPENED
+Repo -> DB: insert employee_partner_card_audit
+@enduml

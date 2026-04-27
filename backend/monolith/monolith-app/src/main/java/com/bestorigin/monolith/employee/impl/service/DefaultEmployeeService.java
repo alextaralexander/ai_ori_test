@@ -30,6 +30,11 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryPag
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistorySummaryResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSummaryResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSupportResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerCardResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerKpiResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderReportResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderSummaryResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerReportAggregateResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeTimelineEventResponse;
@@ -264,6 +269,177 @@ public class DefaultEmployeeService implements EmployeeService {
         return claimDetailsResponse(userContext, claimId, request.supportReasonCode(), tasks, publicReason, "BOG-CLM-021-002".equals(claimId));
     }
 
+    @Override
+    public EmployeePartnerCardResponse partnerCard(String userContext, String query, String supportReasonCode, String regionCode) {
+        requireEmployee(userContext);
+        if (blank(query) || query.trim().length() < 3) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_PARTNER_QUERY_INVALID", 400);
+        }
+        if (!matchesPartner(query)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND");
+        }
+        validatePartnerScope(userContext, regionCode);
+        repository.save(snapshot(userContext, "CUST-022-001", supportReasonCode, "EMPLOYEE_PARTNER_CARD_VIEWED", "BOG-ORD-022-001", null, BigDecimal.ZERO, false));
+        return partnerCardResponse(userContext, supportReasonCode);
+    }
+
+    @Override
+    public EmployeePartnerCardResponse partnerCardById(String userContext, String partnerId, String supportReasonCode) {
+        requireEmployee(userContext);
+        if (!"PART-022-001".equals(partnerId)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND");
+        }
+        repository.save(snapshot(userContext, "CUST-022-001", supportReasonCode, "EMPLOYEE_PARTNER_CARD_VIEWED", "BOG-ORD-022-001", null, BigDecimal.ZERO, false));
+        return partnerCardResponse(userContext, supportReasonCode);
+    }
+
+    @Override
+    public EmployeePartnerOrderReportResponse partnerOrderReport(String userContext, String partnerId, String personNumber, String dateFrom, String dateTo, String campaignCode, String orderStatus, String paymentStatus, String deliveryStatus, boolean problemOnly, String regionCode, int page, int size, String sort) {
+        requireEmployee(userContext);
+        if ((blank(partnerId) && blank(personNumber)) || page < 0 || size < 1 || size > 100 || (!blank(dateFrom) && !blank(dateTo) && dateFrom.compareTo(dateTo) > 0)) {
+            throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_PARTNER_REPORT_FILTER_INVALID", 400);
+        }
+        if (!blank(partnerId) && !"PART-022-001".equals(partnerId)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND");
+        }
+        if (!blank(personNumber) && !"P-022-7788".equals(personNumber)) {
+            throw new EmployeeNotFoundException("STR_MNEMO_EMPLOYEE_PARTNER_NOT_FOUND");
+        }
+        validatePartnerScope(userContext, regionCode);
+        repository.save(snapshot(userContext, "CUST-022-001", "EMPLOYEE_PARTNER_REPORT_VIEW", "EMPLOYEE_PARTNER_REPORT_VIEWED", "BOG-ORD-022-001", null, BigDecimal.ZERO, false));
+        Map<String, String> filters = new java.util.LinkedHashMap<>();
+        filters.put("partnerId", blank(partnerId) ? "PART-022-001" : partnerId);
+        filters.put("personNumber", blank(personNumber) ? "P-022-7788" : personNumber);
+        filters.put("campaignCode", blank(campaignCode) ? "2026-C06" : campaignCode);
+        filters.put("problemOnly", Boolean.toString(problemOnly));
+        filters.put("sort", blank(sort) ? "updatedAt,desc" : sort);
+        List<EmployeePartnerOrderSummaryResponse> items = problemOnly
+                ? List.of(partnerOrderSummary())
+                : List.of(partnerOrderSummary(), partnerOrderSummaryDelivered());
+        return new EmployeePartnerOrderReportResponse(items, partnerReportAggregates(), page, size, items.size(), true, filters);
+    }
+
+    private static EmployeePartnerCardResponse partnerCardResponse(String userContext, String supportReasonCode) {
+        return new EmployeePartnerCardResponse(
+                "PART-022-001",
+                "P-022-7788",
+                "Partner 022",
+                "ACTIVE",
+                "GROWING",
+                "Business Partner",
+                "RU-MOW",
+                "P-016-1000",
+                "+7 *** ***-22-22",
+                "p***022@example.com",
+                "2024-10-15",
+                "2026-04-27",
+                partnerKpi(),
+                List.of(partnerOrderSummary(), partnerOrderSummaryDelivered()),
+                List.of("OPEN_CLAIM", "DELIVERY_DELAY", "WMS_HOLD"),
+                new EmployeeAuditContextResponse(actor(userContext), supportReasonCode, "BACKOFFICE", true),
+                Map.of(
+                        "orderHistory", "/employee/report/order-history?partnerId=PART-022-001&supportReasonCode=EMPLOYEE_PARTNER_CARD_VIEW",
+                        "orderDetails", "/employee/order-history/BOG-ORD-022-001?partnerId=PART-022-001",
+                        "claim", "/employee/claims-history/BOG-CLM-021-001?partnerId=PART-022-001",
+                        "support", "/employee/order-support?orderNumber=BOG-ORD-022-001&partnerId=PART-022-001&supportReasonCode=EMPLOYEE_PARTNER_CARD_VIEW",
+                        "bonusWallet", "/profile/transactions/finance/PART-022-001"
+                )
+        );
+    }
+
+    private static EmployeePartnerKpiResponse partnerKpi() {
+        return new EmployeePartnerKpiResponse(
+                new BigDecimal("88450.00"),
+                new BigDecimal("342900.00"),
+                12,
+                new BigDecimal("10345.00"),
+                new BigDecimal("15670.00"),
+                28,
+                1,
+                2,
+                new BigDecimal("3.20"),
+                "2026-C06",
+                "RUB"
+        );
+    }
+
+    private static EmployeePartnerOrderSummaryResponse partnerOrderSummary() {
+        return new EmployeePartnerOrderSummaryResponse(
+                "ORD-022-001",
+                "BOG-ORD-022-001",
+                "2026-C06",
+                "Customer 022",
+                "ASSEMBLY_DELAY",
+                PaymentStatus.PAID,
+                DeliveryStatus.DELAYED,
+                "WMS_HOLD",
+                new BigDecimal("12450.00"),
+                new BigDecimal("88.00"),
+                "RUB",
+                List.of("OPEN_CLAIM", "WMS_HOLD", "DELIVERY_DELAY"),
+                Map.of(
+                        "details", "/employee/order-history/BOG-ORD-022-001",
+                        "claim", "/employee/claims-history/BOG-CLM-021-001",
+                        "support", "/employee/order-support?orderNumber=BOG-ORD-022-001&partnerId=PART-022-001"
+                ),
+                "2026-04-27T10:00:00Z"
+        );
+    }
+
+    private static EmployeePartnerOrderSummaryResponse partnerOrderSummaryDelivered() {
+        return new EmployeePartnerOrderSummaryResponse(
+                "ORD-022-002",
+                "BOG-ORD-022-002",
+                "2026-C05",
+                "Customer 022",
+                "DELIVERED",
+                PaymentStatus.PAID,
+                DeliveryStatus.CONFIRMED,
+                "CLOSED",
+                new BigDecimal("8390.00"),
+                new BigDecimal("59.00"),
+                "RUB",
+                List.of(),
+                Map.of(
+                        "details", "/employee/order-history/BOG-ORD-022-002",
+                        "support", "/employee/order-support?orderNumber=BOG-ORD-022-002&partnerId=PART-022-001"
+                ),
+                "2026-04-20T10:00:00Z"
+        );
+    }
+
+    private static EmployeePartnerReportAggregateResponse partnerReportAggregates() {
+        return new EmployeePartnerReportAggregateResponse(
+                2,
+                new BigDecimal("20840.00"),
+                new BigDecimal("20840.00"),
+                new BigDecimal("1250.00"),
+                new BigDecimal("10420.00"),
+                new BigDecimal("88450.00"),
+                new BigDecimal("342900.00"),
+                1,
+                1,
+                "RUB"
+        );
+    }
+
+    private static boolean matchesPartner(String query) {
+        String normalized = query.trim().toLowerCase(java.util.Locale.ROOT);
+        return normalized.contains("p-022-7788")
+                || normalized.contains("part-022-001")
+                || normalized.contains("partner 022")
+                || normalized.contains("022");
+    }
+
+    private static void validatePartnerScope(String userContext, String regionCode) {
+        if (isSupervisor(userContext)) {
+            return;
+        }
+        if (userContext != null && userContext.contains("regional-manager") && !blank(regionCode) && !"RU-MOW".equals(regionCode)) {
+            throw new EmployeeAccessDeniedException("STR_MNEMO_EMPLOYEE_ACCESS_DENIED");
+        }
+    }
+
     private static void validateOrderRequest(EmployeeOperatorOrderCreateRequest request) {
         if (request == null || blank(request.targetCustomerId()) || blank(request.supportReasonCode()) || request.cartType() == null || request.items() == null || request.items().isEmpty()) {
             throw new EmployeeValidationException("STR_MNEMO_EMPLOYEE_OPERATOR_ORDER_INVALID", 400);
@@ -448,7 +624,7 @@ public class DefaultEmployeeService implements EmployeeService {
     }
 
     private static boolean isEmployee(String userContext) {
-        return userContext != null && (userContext.contains("employee-support") || userContext.contains("order-support") || userContext.contains("backoffice"));
+        return userContext != null && (userContext.contains("employee-support") || userContext.contains("order-support") || userContext.contains("backoffice") || userContext.contains("regional-manager"));
     }
 
     private static boolean isSupervisor(String userContext) {

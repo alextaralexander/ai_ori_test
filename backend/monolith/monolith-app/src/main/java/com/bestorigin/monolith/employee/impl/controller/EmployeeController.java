@@ -13,6 +13,8 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryDet
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryFilterRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSupportResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerCardResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderReportResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeWarningResponse;
@@ -145,6 +147,42 @@ public class EmployeeController {
     @PostMapping("/claims/{claimId}/transitions")
     public EmployeeClaimDetailsResponse transitionClaim(@RequestHeader HttpHeaders headers, @PathVariable String claimId, @RequestBody EmployeeClaimTransitionRequest request) {
         return service.transitionClaim(userContext(headers), claimId, request, idempotencyKey(headers));
+    }
+
+    @GetMapping("/partner-card")
+    public EmployeePartnerCardResponse partnerCard(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam String query,
+            @RequestParam(required = false) String supportReasonCode,
+            @RequestParam(required = false) String regionCode) {
+        return service.partnerCard(userContext(headers), query, supportReasonCode == null ? "EMPLOYEE_PARTNER_CARD_VIEW" : supportReasonCode, regionCode);
+    }
+
+    @GetMapping("/partner-card/{partnerId}")
+    public EmployeePartnerCardResponse partnerCardById(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String partnerId,
+            @RequestParam(required = false) String supportReasonCode) {
+        return service.partnerCardById(userContext(headers), partnerId, supportReasonCode == null ? "EMPLOYEE_PARTNER_CARD_VIEW" : supportReasonCode);
+    }
+
+    @GetMapping("/report/order-history")
+    public EmployeePartnerOrderReportResponse partnerOrderReport(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String partnerId,
+            @RequestParam(required = false) String personNumber,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) String campaignCode,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) String paymentStatus,
+            @RequestParam(required = false) String deliveryStatus,
+            @RequestParam(defaultValue = "false") boolean problemOnly,
+            @RequestParam(required = false) String regionCode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "updatedAt,desc") String sort) {
+        return service.partnerOrderReport(userContext(headers), partnerId, personNumber, dateFrom, dateTo, campaignCode, orderStatus, paymentStatus, deliveryStatus, problemOnly, regionCode, page, size, sort);
     }
 
     @ExceptionHandler(EmployeeAccessDeniedException.class)

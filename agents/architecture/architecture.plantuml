@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture with employee order history and claims
+title Best Ori Gin monolith architecture with employee partner card, reports, order history and claims
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
   [Catalog UI]
@@ -7,6 +7,8 @@ package "frontend/monolith apps/web-shell" {
   [Order UI]
   [Partner UI]
   [EmployeeWorkspace UI]
+  [EmployeePartnerCard UI]
+  [EmployeePartnerReport UI]
   [EmployeeOrderHistory UI]
   [EmployeeClaims UI]
 }
@@ -30,14 +32,19 @@ cloud "Bonus engine" as bonus
 cloud "Claims" as claims
 
 [EmployeeWorkspace UI] --> [employee] : /api/employee/workspace, /operator-orders, /order-support
+[EmployeePartnerCard UI] --> [employee] : /api/employee/partner-card, /partner-card/{partnerId}
+[EmployeePartnerReport UI] --> [employee] : /api/employee/report/order-history
 [EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history
+[EmployeePartnerCard UI] --> [employee] : /api/employee/partner-card, /partner-card/{partnerId}
+[EmployeePartnerReport UI] --> [employee] : /api/employee/report/order-history
 [EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : /api/employee/submit-claim
 [EmployeeClaims UI] --> [employee] : /api/employee/claims, /claims/{claimId}, /claims/{claimId}/transitions
 [employee] --> [order] : order read links
 [employee] --> [cart] : active cart/operator order context
 [employee] --> [profile] : masked customer/partner profile
-[employee] --> [partner-reporting] : partner context links
+[employee] --> [partner-reporting] : partner context links, KPI and reports
+[employee] --> [bonus-wallet] : partner bonus balance and volume links
 [employee] --> claims : claim ids and claim deep links
 [employee] --> pay : payment event ids/statuses
 [employee] --> wms : WMS batch and fulfillment events
@@ -48,5 +55,5 @@ cloud "Claims" as claims
 [order] --> delivery
 [order] --> wms
 [bonus-wallet] --> bonus
-[employee] --> db : support/order-history read model and audit tables
+[employee] --> db : support/order-history/partner-card/report read model and audit tables
 @enduml

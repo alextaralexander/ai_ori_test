@@ -12,6 +12,8 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryDet
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryFilterRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSupportResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerCardResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeePartnerOrderReportResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeWorkspaceResponse;
@@ -46,4 +48,10 @@ public interface EmployeeService {
     EmployeeClaimDetailsResponse claimDetails(String userContext, String claimId, String supportReasonCode);
 
     EmployeeClaimDetailsResponse transitionClaim(String userContext, String claimId, EmployeeClaimTransitionRequest request, String idempotencyKey);
+
+    EmployeePartnerCardResponse partnerCard(String userContext, String query, String supportReasonCode, String regionCode);
+
+    EmployeePartnerCardResponse partnerCardById(String userContext, String partnerId, String supportReasonCode);
+
+    EmployeePartnerOrderReportResponse partnerOrderReport(String userContext, String partnerId, String personNumber, String dateFrom, String dateTo, String campaignCode, String orderStatus, String paymentStatus, String deliveryStatus, boolean problemOnly, String regionCode, int page, int size, String sort);
 }

@@ -426,6 +426,85 @@ public final class EmployeeDtos {
     ) {
     }
 
+    public record EmployeePartnerCardResponse(
+            String partnerId,
+            String personNumber,
+            String displayName,
+            String status,
+            String activityState,
+            String levelName,
+            String regionCode,
+            String mentorPersonNumber,
+            String maskedPhone,
+            String maskedEmail,
+            String registrationDate,
+            String lastOrderDate,
+            EmployeePartnerKpiResponse kpi,
+            List<EmployeePartnerOrderSummaryResponse> recentOrders,
+            List<String> riskSignals,
+            EmployeeAuditContextResponse auditContext,
+            Map<String, String> linkedRoutes
+    ) {
+    }
+
+    public record EmployeePartnerKpiResponse(
+            BigDecimal personalVolume,
+            BigDecimal groupVolume,
+            int orderCount,
+            BigDecimal averageOrderAmount,
+            BigDecimal bonusBalance,
+            int activeCustomerCount,
+            int openClaimCount,
+            int overdueActionCount,
+            BigDecimal returnRatePercent,
+            String currentCampaignCode,
+            String currencyCode
+    ) {
+    }
+
+    public record EmployeePartnerOrderSummaryResponse(
+            String orderId,
+            String orderNumber,
+            String campaignCode,
+            String customerDisplayName,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            DeliveryStatus deliveryStatus,
+            String fulfillmentStatus,
+            BigDecimal totalAmount,
+            BigDecimal bonusVolume,
+            String currencyCode,
+            List<String> problemFlags,
+            Map<String, String> linkedRoutes,
+            String updatedAt
+    ) {
+    }
+
+    public record EmployeePartnerOrderReportResponse(
+            List<EmployeePartnerOrderSummaryResponse> items,
+            EmployeePartnerReportAggregateResponse aggregates,
+            int page,
+            int size,
+            long totalElements,
+            boolean auditRecorded,
+            Map<String, String> appliedFilters
+    ) {
+    }
+
+    public record EmployeePartnerReportAggregateResponse(
+            int totalOrders,
+            BigDecimal totalAmount,
+            BigDecimal paidAmount,
+            BigDecimal returnedAmount,
+            BigDecimal averageOrderAmount,
+            BigDecimal personalVolume,
+            BigDecimal groupVolume,
+            int openClaimCount,
+            int delayedDeliveryCount,
+            String currencyCode
+    ) {
+    }
+
     public record EmployeeErrorResponse(
             String code,
             List<EmployeeWarningResponse> details,
