@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-024-auth-session" author="codex">
+        <createTable tableName="auth_session">
+            <column name="session_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_name" type="varchar(255)"/>
+            <column name="primary_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_hash" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="default_route" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invitation_code" type="varchar(64)"/>
+            <column name="invitation_status" type="varchar(32)"/>
+            <column name="active_partner_id" type="varchar(64)"/>
+            <column name="active_impersonation_session_id" type="uuid"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revoked_at" type="timestamp with time zone"/>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_auth_session_user" tableName="auth_session">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_auth_session_expires" tableName="auth_session">
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-024-auth-roles-partner-impersonation" author="codex">
+        <createTable tableName="auth_session_role">
+            <column name="session_role_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="session_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_scope" type="varchar(255)"/>
+        </createTable>
+        <createTable tableName="auth_active_partner_state">
+            <column name="active_partner_state_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="session_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(64)"/>
+            <column name="display_name" type="varchar(255)"/>
+            <column name="role_in_structure" type="varchar(64)"/>
+            <column name="scope_code" type="varchar(64)"/>
+            <column name="selected_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="auth_impersonation_session">
+            <column name="impersonation_session_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="elevated_session_id" type="uuid"/>
+            <column name="reason_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_text_hash" type="varchar(128)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="finished_at" type="timestamp with time zone"/>
+            <column name="correlation_id" type="varchar(64)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-024-auth-policy-audit" author="codex">
+        <createTable tableName="auth_route_policy">
+            <column name="route_policy_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_pattern" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="module_key" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="allowed" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="denied_mnemonic" type="varchar(128)"/>
+        </createTable>
+        <createTable tableName="auth_partner_search_audit">
+            <column name="partner_search_audit_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="query_hash" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result_count" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope_code" type="varchar(64)"/>
+            <column name="correlation_id" type="varchar(64)"/>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="auth_audit_event">
+            <column name="auth_audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="action_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="varchar(64)"/>
+            <column name="target_user_id" type="varchar(64)"/>
+            <column name="role_code" type="varchar(64)"/>
+            <column name="route" type="varchar(255)"/>
+            <column name="source_ip_hash" type="varchar(128)"/>
+            <column name="correlation_id" type="varchar(64)"/>
+            <column name="occurred_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

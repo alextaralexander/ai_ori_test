@@ -10,6 +10,7 @@ import { BonusWalletFinanceView, BonusWalletView } from './components/BonusWalle
 import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
+import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeePartnerCardView } from './components/EmployeePartnerCardView';
@@ -61,6 +62,11 @@ function App() {
   useEffect(() => {
   if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'employee-support' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'supervisor' || loginRole === 'backoffice' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller' || loginRole === 'partner-office' || loginRole === 'partner-office-foreign' || loginRole === 'logistics-operator' || loginRole === 'regional-manager')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
+      window.localStorage.setItem('bestorigin.authToken', `test-token-${loginRole}`);
+      const invitationCode = params.get('invitationCode') ?? params.get('code');
+      if (invitationCode) {
+        window.localStorage.setItem('bestorigin.invitationCode', invitationCode);
+      }
       setPage(null);
       return;
     }
@@ -180,6 +186,12 @@ function App() {
     contentView = <PartnerOfficeView mode="orders" params={params} />;
   } else if (path === '/partner-office/report') {
     contentView = <PartnerOfficeView mode="report" params={params} />;
+  } else if (path === '/auth/session') {
+    contentView = <AuthSessionView />;
+  } else if (path === '/auth/impersonation') {
+    contentView = <AuthImpersonationView />;
+  } else if (path === '/employee' && window.localStorage.getItem('bestorigin.role') === 'customer') {
+    contentView = <AuthRouteForbidden />;
   } else if (path === '/employee') {
     contentView = <EmployeeWorkspaceView mode="workspace" params={params} />;
   } else if (path === '/employee/new-order') {
@@ -302,6 +314,8 @@ function resolveBenefitRoute(path: string): { landingType: BenefitLandingType; c
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );

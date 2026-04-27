@@ -1,0 +1,98 @@
+@startuml
+title Auth module full ER diagram
+
+entity "auth_session" as auth_session {
+  * session_id : uuid
+  --
+  user_id : varchar(64)
+  display_name : varchar(255)
+  primary_role : varchar(64)
+  token_hash : varchar(128)
+  default_route : varchar(255)
+  invitation_code : varchar(64)
+  invitation_status : varchar(32)
+  active_partner_id : varchar(64)
+  active_impersonation_session_id : uuid
+  created_at : timestamptz
+  expires_at : timestamptz
+  revoked_at : timestamptz
+  version : bigint
+}
+
+entity "auth_session_role" as auth_session_role {
+  * session_role_id : uuid
+  --
+  session_id : uuid
+  role_code : varchar(64)
+  route_scope : varchar(255)
+}
+
+entity "auth_route_policy" as auth_route_policy {
+  * route_policy_id : uuid
+  --
+  role_code : varchar(64)
+  route_pattern : varchar(255)
+  module_key : varchar(64)
+  allowed : boolean
+  denied_mnemonic : varchar(128)
+}
+
+entity "auth_active_partner_state" as auth_active_partner_state {
+  * active_partner_state_id : uuid
+  --
+  session_id : uuid
+  partner_id : varchar(64)
+  person_number : varchar(64)
+  display_name : varchar(255)
+  role_in_structure : varchar(64)
+  scope_code : varchar(64)
+  selected_at : timestamptz
+}
+
+entity "auth_partner_search_audit" as auth_partner_search_audit {
+  * partner_search_audit_id : uuid
+  --
+  actor_user_id : varchar(64)
+  query_hash : varchar(128)
+  result_count : integer
+  scope_code : varchar(64)
+  correlation_id : varchar(64)
+  occurred_at : timestamptz
+}
+
+entity "auth_impersonation_session" as auth_impersonation_session {
+  * impersonation_session_id : uuid
+  --
+  actor_user_id : varchar(64)
+  target_user_id : varchar(64)
+  target_role : varchar(64)
+  elevated_session_id : uuid
+  reason_code : varchar(64)
+  reason_text_hash : varchar(128)
+  status : varchar(32)
+  started_at : timestamptz
+  expires_at : timestamptz
+  finished_at : timestamptz
+  correlation_id : varchar(64)
+}
+
+entity "auth_audit_event" as auth_audit_event {
+  * auth_audit_event_id : uuid
+  --
+  action_code : varchar(64)
+  actor_user_id : varchar(64)
+  target_user_id : varchar(64)
+  role_code : varchar(64)
+  route : varchar(255)
+  source_ip_hash : varchar(128)
+  correlation_id : varchar(64)
+  occurred_at : timestamptz
+}
+
+auth_session ||--o{ auth_session_role
+auth_session ||--o{ auth_active_partner_state
+auth_session ||--o{ auth_impersonation_session
+auth_impersonation_session ||--o{ auth_audit_event
+auth_route_policy ||..o{ auth_audit_event
+auth_partner_search_audit }o..|| auth_session
+@enduml

@@ -1,0 +1,63 @@
+@startuml
+title Feature 024 auth, roles and impersonation sequence
+
+actor User as user
+participant "Frontend AuthProvider" as fe
+participant "AuthController" as controller
+participant "AuthService" as service
+database "Auth DB" as db
+participant "Employee Elevated Access" as elevated
+participant "Audit Publisher" as audit
+
+user -> fe: open protected or invite route
+fe -> controller: GET /api/auth/session
+controller -> service: currentSession(token)
+service -> db: load auth_session, roles, active partner, impersonation
+service -> audit: AUTH_SESSION_RESTORED or AUTH_SESSION_EXPIRED
+service --> controller: AuthSessionResponse or AuthErrorResponse
+controller --> fe: session context
+fe --> user: role router opens defaultRoute or forbidden state
+
+user -> fe: submit login with role and invitationCode
+fe -> controller: POST /api/auth/test-login
+controller -> service: login(username, role, invitationCode)
+service -> db: create auth_session and auth_session_role
+service -> audit: AUTH_LOGIN_SUCCEEDED
+service --> controller: AuthSessionResponse
+controller --> fe: token and route policies
+
+user -> fe: search partner
+fe -> controller: GET /api/auth/partners/search?query=024
+controller -> service: searchPartners(actor, query)
+service -> db: write auth_partner_search_audit
+service --> controller: AuthPartnerSearchResponse
+controller --> fe: partner options in scope
+
+user -> fe: select active partner
+fe -> controller: PUT /api/auth/partners/active
+controller -> service: setActivePartner(actor, partnerId)
+service -> db: update auth_active_partner_state and auth_session.version
+service -> audit: AUTH_ACTIVE_PARTNER_CHANGED
+service --> controller: AuthSessionResponse
+controller --> fe: updated session context
+
+user -> fe: start impersonation
+fe -> controller: POST /api/auth/impersonation with X-Elevated-Session-Id
+controller -> service: startImpersonation(actor, request, elevatedSessionId)
+service -> elevated: validate active elevated session and policy
+elevated --> service: allowed linked operation
+service -> db: create auth_impersonation_session and update auth_session
+service -> audit: AUTH_IMPERSONATION_STARTED
+service --> controller: AuthImpersonationResponse
+controller --> fe: active impersonation
+fe --> user: show auth-impersonation-banner
+
+user -> fe: finish impersonation
+fe -> controller: POST /api/auth/impersonation/{id}/finish
+controller -> service: finishImpersonation(actor, id)
+service -> db: close auth_impersonation_session and restore actor session
+service -> audit: AUTH_IMPERSONATION_FINISHED
+service --> controller: AuthSessionResponse
+controller --> fe: actor context
+fe --> user: hide impersonation banner
+@enduml

@@ -1,0 +1,406 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Auth Module API - Feature 024
+  version: 2026.04.27-feature-024
+  description: API для аутентификации, role routing, invitation code, active partner и имперсонации.
+servers:
+  - url: /
+paths:
+  /api/auth/test-login:
+    post:
+      tags: [auth]
+      summary: Тестовый login для managed workflow и локальных проверок
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Session context создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '400':
+          $ref: '#/components/responses/AuthValidationError'
+  /api/auth/session:
+    get:
+      tags: [auth]
+      summary: Вернуть текущий session context
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          description: Текущая сессия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '401':
+          $ref: '#/components/responses/AuthExpired'
+    delete:
+      tags: [auth]
+      summary: Logout и отзыв текущей сессии
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          description: Сессия завершена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLogoutResponse'
+  /api/auth/session/route-access:
+    post:
+      tags: [auth]
+      summary: Проверить доступ к route по session context
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRouteAccessRequest'
+      responses:
+        '200':
+          description: Решение route policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthRouteAccessResponse'
+        '403':
+          $ref: '#/components/responses/AuthForbidden'
+  /api/auth/invitation-code:
+    post:
+      tags: [auth]
+      summary: Сохранить и проверить invitation code
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthInvitationCodeRequest'
+      responses:
+        '200':
+          description: Статус invitation code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthInvitationCodeResponse'
+  /api/auth/partners/search:
+    get:
+      tags: [auth]
+      summary: Найти партнера в доступном scope
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+      responses:
+        '200':
+          description: Результаты поиска партнеров
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthPartnerSearchResponse'
+        '400':
+          $ref: '#/components/responses/AuthValidationError'
+  /api/auth/partners/active:
+    put:
+      tags: [auth]
+      summary: Установить active partner для текущей сессии
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthActivePartnerRequest'
+      responses:
+        '200':
+          description: Обновленный session context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '403':
+          $ref: '#/components/responses/AuthForbidden'
+  /api/auth/impersonation:
+    post:
+      tags: [auth]
+      summary: Запустить controlled impersonation
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthImpersonationStartRequest'
+      responses:
+        '201':
+          description: Имперсонация активирована
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthImpersonationResponse'
+        '400':
+          $ref: '#/components/responses/AuthValidationError'
+        '403':
+          $ref: '#/components/responses/AuthForbidden'
+  /api/auth/impersonation/{impersonationSessionId}/finish:
+    post:
+      tags: [auth]
+      summary: Завершить controlled impersonation
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - name: impersonationSessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Имперсонация завершена, actor context восстановлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '403':
+          $ref: '#/components/responses/AuthForbidden'
+components:
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      required: false
+      schema:
+        type: string
+    ElevatedSessionId:
+      name: X-Elevated-Session-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+  responses:
+    AuthValidationError:
+      description: Validation error with STR_MNEMO code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthErrorResponse'
+    AuthForbidden:
+      description: Forbidden with STR_MNEMO code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthErrorResponse'
+    AuthExpired:
+      description: Session expired with STR_MNEMO code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthErrorResponse'
+  schemas:
+    AuthLoginRequest:
+      type: object
+      required: [username, role]
+      properties:
+        username:
+          type: string
+        role:
+          type: string
+        invitationCode:
+          type: string
+    AuthSessionResponse:
+      type: object
+      required: [token, userId, displayName, roles, defaultRoute, routePolicies, invitationCodeState, auditRecorded]
+      properties:
+        token:
+          type: string
+        userId:
+          type: string
+        displayName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        defaultRoute:
+          type: string
+        routePolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthRoutePolicyResponse'
+        activePartner:
+          $ref: '#/components/schemas/AuthActivePartnerResponse'
+        invitationCodeState:
+          $ref: '#/components/schemas/AuthInvitationCodeResponse'
+        impersonation:
+          $ref: '#/components/schemas/AuthImpersonationResponse'
+        auditRecorded:
+          type: boolean
+    AuthRoutePolicyResponse:
+      type: object
+      required: [routePattern, roleCode, allowed]
+      properties:
+        routePattern:
+          type: string
+        roleCode:
+          type: string
+        moduleKey:
+          type: string
+        allowed:
+          type: boolean
+        deniedCode:
+          type: string
+    AuthRouteAccessRequest:
+      type: object
+      required: [route]
+      properties:
+        route:
+          type: string
+    AuthRouteAccessResponse:
+      type: object
+      required: [allowed, defaultRoute, auditRecorded]
+      properties:
+        allowed:
+          type: boolean
+        deniedCode:
+          type: string
+        defaultRoute:
+          type: string
+        auditRecorded:
+          type: boolean
+    AuthInvitationCodeRequest:
+      type: object
+      properties:
+        invitationCode:
+          type: string
+    AuthInvitationCodeResponse:
+      type: object
+      required: [status, auditRecorded]
+      properties:
+        invitationCode:
+          type: string
+        status:
+          type: string
+          enum: [VALID, EXPIRED, USED, UNKNOWN, NOT_PROVIDED]
+        warningCode:
+          type: string
+        auditRecorded:
+          type: boolean
+    AuthPartnerSearchResponse:
+      type: object
+      required: [items, auditRecorded]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthPartnerOptionResponse'
+        auditRecorded:
+          type: boolean
+    AuthPartnerOptionResponse:
+      type: object
+      required: [partnerId, personNumber, displayName, roleInStructure, scopeCode]
+      properties:
+        partnerId:
+          type: string
+        personNumber:
+          type: string
+        displayName:
+          type: string
+        roleInStructure:
+          type: string
+        scopeCode:
+          type: string
+    AuthActivePartnerRequest:
+      type: object
+      required: [partnerId]
+      properties:
+        partnerId:
+          type: string
+    AuthActivePartnerResponse:
+      allOf:
+        - $ref: '#/components/schemas/AuthPartnerOptionResponse'
+        - type: object
+          properties:
+            selectedAt:
+              type: string
+              format: date-time
+    AuthImpersonationStartRequest:
+      type: object
+      required: [targetUserId, targetRole, reasonCode, reasonText, durationMinutes]
+      properties:
+        targetUserId:
+          type: string
+        targetRole:
+          type: string
+        reasonCode:
+          type: string
+        reasonText:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 120
+    AuthImpersonationResponse:
+      type: object
+      required: [impersonationSessionId, actorUserId, targetUserId, targetRole, reasonCode, status, startedAt, expiresAt, auditRecorded]
+      properties:
+        impersonationSessionId:
+          type: string
+          format: uuid
+        actorUserId:
+          type: string
+        targetUserId:
+          type: string
+        targetRole:
+          type: string
+        reasonCode:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, FINISHED, EXPIRED, REVOKED]
+        startedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        auditRecorded:
+          type: boolean
+    AuthLogoutResponse:
+      type: object
+      required: [loggedOut, auditRecorded]
+      properties:
+        loggedOut:
+          type: boolean
+        auditRecorded:
+          type: boolean
+    AuthErrorResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string

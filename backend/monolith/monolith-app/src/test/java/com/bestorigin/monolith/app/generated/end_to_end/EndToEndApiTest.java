@@ -1,4 +1,4 @@
-// GENERATED FROM agents\tests\api\end_to_end\EndToEndApiTest.java - DO NOT EDIT MANUALLY.
+// GENERATED FROM agents/tests/api/end_to_end/EndToEndApiTest.java - DO NOT EDIT MANUALLY.
 package com.bestorigin.tests.endtoend;
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
@@ -31,5 +31,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature021.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature022.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature023.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature024.FeatureApiTest().assertFeatureGreenPath();
     }
 }

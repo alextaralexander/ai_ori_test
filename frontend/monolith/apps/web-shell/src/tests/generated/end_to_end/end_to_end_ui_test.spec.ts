@@ -1,4 +1,4 @@
-// GENERATED FROM agents\tests\ui\end_to_end\end_to_end_ui_test.spec.ts - DO NOT EDIT MANUALLY.
+// GENERATED FROM agents/tests/ui/end_to_end/end_to_end_ui_test.spec.ts - DO NOT EDIT MANUALLY.
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
 import '../feature_002_контентные_страницы_и_новости/feature_ui_flow';
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
@@ -22,3 +22,4 @@ import '../feature_020_сотрудник_история_заказов/feature_
 import '../feature_021_сотрудник_претензии/feature_ui_flow';
 import '../feature_022_сотрудник_карточка_партнера_и_отчеты/feature_ui_flow';
 import '../feature_023_сотрудник_настройки_и_повышенные_права/feature_ui_flow';
+import '../feature_024_аутентификация_роли_и_имперсонация/feature_ui_flow';

@@ -1,0 +1,91 @@
+# language: ru
+Функция: Feature 024. Аутентификация, роли и имперсонация
+  Единый auth-контур Best Ori Gin восстанавливает session context, управляет role-based routing,
+  invitation code, active partner и контролируемой имперсонацией без передачи hardcoded пользовательских
+  сообщений из backend во frontend.
+
+  Предыстория:
+    Дано существует гость с invitation code "INV-024-SPONSOR"
+    И существует пользователь "USR-024-CUST" с ролью "customer"
+    И существует партнер "USR-024-PARTNER" с ролью "partner" и доступным partnerId "PART-024-001"
+    И существует сотрудник "EMP-024-001" с ролью "employee-support" и активным elevated mode
+    И существует супервайзер "EMP-024-SUP" с ролью "supervisor" и policy "AUTH_IMPERSONATION_ALLOWED"
+
+  Сценарий: Пользователь входит и получает session context с role-based маршрутом
+    Дано пользователь залогинен с ролью "partner"
+    И пользователь находится на маршруте "/test-login?role=partner"
+    Когда frontend запрашивает текущую auth-сессию
+    Тогда backend возвращает userId, displayName, roles и defaultRoute "/business"
+    И session context содержит activePartner "PART-024-001"
+    И ответ содержит route policies без hardcoded user-facing текста
+    И UI содержит test id "auth-role-router"
+
+  Сценарий: Гость сохраняет invitation code до регистрации
+    Дано пользователь залогинен с ролью "guest"
+    И пользователь открывает маршрут "/invite/business-partner-registration?code=INV-024-SPONSOR"
+    Когда frontend сохраняет invitation code в auth context
+    Тогда backend возвращает invitation status "VALID"
+    И session context содержит invitationCodeState "VALID"
+    И audit trail содержит событие "AUTH_INVITATION_CODE_STORED"
+    И UI содержит test id "auth-invitation-code-state"
+
+  Сценарий: Пользователь без роли не открывает закрытый маршрут
+    Дано пользователь залогинен с ролью "customer"
+    Когда пользователь открывает маршрут "/employee"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_AUTH_ACCESS_DENIED"
+    И audit trail содержит событие "AUTH_ROUTE_DENIED"
+    И frontend показывает forbidden state через i18n dictionaries
+
+  Сценарий: Партнер ищет и выбирает активного партнера в разрешенном scope
+    Дано пользователь залогинен с ролью "partner-leader"
+    И пользователь находится на маршруте "/business"
+    Когда пользователь ищет партнера по query "024"
+    Тогда backend возвращает список партнеров только в доступной структуре
+    Когда пользователь выбирает activePartner "PART-024-001"
+    Тогда backend возвращает обновленный session context
+    И frontend передает "X-Active-Partner-Id" в последующих API-запросах
+    И audit trail содержит событие "AUTH_ACTIVE_PARTNER_CHANGED"
+    И UI содержит test id "auth-active-partner-switcher"
+
+  Сценарий: Некорректный поиск партнера отклоняется
+    Дано пользователь залогинен с ролью "partner-leader"
+    Когда пользователь ищет партнера по query "P"
+    Тогда backend возвращает HTTP 400
+    И код ошибки равен "STR_MNEMO_AUTH_PARTNER_SEARCH_INVALID"
+    И список партнеров не возвращается
+
+  Сценарий: Супервайзер запускает имперсонацию партнера
+    Дано пользователь залогинен с ролью "supervisor"
+    И у пользователя активна elevated session "ELS-024-001"
+    Когда пользователь запускает имперсонацию targetUserId "USR-024-PARTNER" с reasonCode "SUPPORT_CASE_REVIEW"
+    Тогда backend создает impersonation session со статусом "ACTIVE"
+    И response содержит impersonationSessionId, actorUserId, targetUserId, targetRole, startedAt и expiresAt
+    И UI показывает баннер с test id "auth-impersonation-banner"
+    И audit trail содержит событие "AUTH_IMPERSONATION_STARTED"
+
+  Сценарий: Супервайзер завершает активную имперсонацию
+    Дано пользователь залогинен с ролью "supervisor"
+    И у пользователя активна impersonation session "IMP-024-001"
+    Когда пользователь завершает имперсонацию
+    Тогда backend закрывает impersonation session "IMP-024-001"
+    И session context возвращается к actorUserId "EMP-024-SUP"
+    И дальнейшее использование impersonationSessionId запрещено
+    И audit trail содержит событие "AUTH_IMPERSONATION_FINISHED"
+
+  Сценарий: Имперсонация без policy запрещена
+    Дано пользователь залогинен с ролью "employee-support"
+    И у пользователя нет active elevated mode
+    Когда пользователь запускает имперсонацию targetUserId "USR-024-PARTNER"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_AUTH_IMPERSONATION_FORBIDDEN"
+    И impersonation session не создается
+
+  Сценарий: Logout очищает auth context
+    Дано пользователь залогинен с ролью "partner"
+    И у пользователя выбран activePartner "PART-024-001"
+    И сохранен invitation code "INV-024-SPONSOR"
+    Когда пользователь нажимает logout
+    Тогда backend завершает текущую сессию
+    И frontend очищает token, role, activePartner, invitationCode и impersonation context
+    И UI содержит test id "auth-logout-button"

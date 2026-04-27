@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 024 auth session shell layout</title>
+  <desc id="desc">Схематичный макет auth shell: login, role router, invitation code, active partner и закрытые маршруты.</desc>
+  <rect x="24" y="24" width="1152" height="712" fill="#ffffff" stroke="#222222" stroke-width="2"/>
+  <rect x="56" y="56" width="1088" height="72" fill="#f5f5f5" stroke="#555555"/>
+  <text x="80" y="100" font-family="Arial" font-size="24">AuthProvider / session context</text>
+  <rect x="56" y="160" width="320" height="520" fill="#ffffff" stroke="#555555"/>
+  <text x="80" y="198" font-family="Arial" font-size="20">auth-login-page</text>
+  <rect x="80" y="232" width="250" height="42" fill="#ffffff" stroke="#777777"/>
+  <text x="96" y="260" font-family="Arial" font-size="16">login / role selector</text>
+  <rect x="80" y="294" width="250" height="42" fill="#ffffff" stroke="#777777"/>
+  <text x="96" y="322" font-family="Arial" font-size="16">password or test role</text>
+  <rect x="80" y="356" width="250" height="46" fill="#e8f1ff" stroke="#3366aa"/>
+  <text x="96" y="386" font-family="Arial" font-size="16">submit login</text>
+  <rect x="80" y="442" width="250" height="72" fill="#fffbe6" stroke="#aa8a00"/>
+  <text x="96" y="472" font-family="Arial" font-size="16">auth-invitation-code-state</text>
+  <text x="96" y="496" font-family="Arial" font-size="14">VALID / EXPIRED / UNKNOWN</text>
+  <rect x="80" y="552" width="250" height="42" fill="#ffffff" stroke="#777777"/>
+  <text x="96" y="580" font-family="Arial" font-size="16">auth-logout-button</text>
+  <rect x="416" y="160" width="320" height="520" fill="#ffffff" stroke="#555555"/>
+  <text x="440" y="198" font-family="Arial" font-size="20">auth-role-router</text>
+  <rect x="440" y="234" width="250" height="54" fill="#f7f7f7" stroke="#777777"/>
+  <text x="456" y="268" font-family="Arial" font-size="16">guest: public routes</text>
+  <rect x="440" y="306" width="250" height="54" fill="#f7f7f7" stroke="#777777"/>
+  <text x="456" y="340" font-family="Arial" font-size="16">customer: profile routes</text>
+  <rect x="440" y="378" width="250" height="54" fill="#f7f7f7" stroke="#777777"/>
+  <text x="456" y="412" font-family="Arial" font-size="16">partner: business routes</text>
+  <rect x="440" y="450" width="250" height="54" fill="#f7f7f7" stroke="#777777"/>
+  <text x="456" y="484" font-family="Arial" font-size="16">employee: backoffice routes</text>
+  <rect x="440" y="522" width="250" height="54" fill="#f7f7f7" stroke="#777777"/>
+  <text x="456" y="556" font-family="Arial" font-size="16">admin: admin routes</text>
+  <rect x="776" y="160" width="320" height="520" fill="#ffffff" stroke="#555555"/>
+  <text x="800" y="198" font-family="Arial" font-size="20">active partner context</text>
+  <rect x="800" y="232" width="250" height="56" fill="#ffffff" stroke="#777777"/>
+  <text x="816" y="266" font-family="Arial" font-size="16">auth-partner-search</text>
+  <rect x="800" y="312" width="250" height="168" fill="#f7f7f7" stroke="#777777"/>
+  <text x="816" y="344" font-family="Arial" font-size="16">partner search results</text>
+  <line x1="816" y1="370" x2="1030" y2="370" stroke="#999999"/>
+  <line x1="816" y1="414" x2="1030" y2="414" stroke="#999999"/>
+  <line x1="816" y1="458" x2="1030" y2="458" stroke="#999999"/>
+  <rect x="800" y="514" width="250" height="74" fill="#e8f1ff" stroke="#3366aa"/>
+  <text x="816" y="546" font-family="Arial" font-size="16">auth-active-partner-switcher</text>
+  <text x="816" y="570" font-family="Arial" font-size="14">sets X-Active-Partner-Id</text>
+  <path d="M376 420 H416" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M736 420 H776" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#222222"/>
+    </marker>
+  </defs>
+</svg>

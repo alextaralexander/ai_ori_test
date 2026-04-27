@@ -1,7 +1,11 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 023
+title Best Ori Gin monolith architecture through feature 024
 
 package "frontend/monolith apps/web-shell" {
+  [AuthProvider]
+  [RoleRouter]
+  [ActivePartnerSwitcher]
+  [ImpersonationPanel]
   [PublicShell]
   [Catalog UI]
   [Cart UI]
@@ -18,6 +22,7 @@ package "frontend/monolith apps/web-shell" {
 
 package "backend/monolith/monolith-app" {
   [public-content]
+  [auth]
   [catalog]
   [cart]
   [order]
@@ -45,7 +50,14 @@ cloud "Claims" as claims
 [EmployeePartnerReport UI] --> [employee] : HTTP/JSON /api/employee/report/order-history
 [EmployeeProfileSettings UI] --> [employee] : HTTP/JSON /api/employee/profile-settings/*
 [EmployeeSuperUser UI] --> [employee] : HTTP/JSON /api/employee/super-user/*
+[AuthProvider] --> [auth] : HTTP/JSON /api/auth/session, /test-login, /invitation-code
+[RoleRouter] --> [auth] : HTTP/JSON /api/auth/session/route-access
+[ActivePartnerSwitcher] --> [auth] : HTTP/JSON /api/auth/partners/search, /partners/active
+[ImpersonationPanel] --> [auth] : HTTP/JSON /api/auth/impersonation/*
 
+[auth] --> [authorization] : role, route policy, MFA/elevated policy checks
+[auth] --> [employee] : elevatedSessionId validation for controlled impersonation
+[auth] --> db : auth sessions, roles, route policies, active partner, impersonation and audit
 [employee] --> [authorization] : role, scope, MFA, locks, supervisor checks
 [employee] --> [order] : order read links and elevated operation context
 [employee] --> [cart] : active cart/operator order context
