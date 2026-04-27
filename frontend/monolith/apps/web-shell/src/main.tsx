@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type BenefitLandingType, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
 import { BenefitLandingView } from './components/BenefitLandingView';
+import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
@@ -44,7 +45,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner')) {
+    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -78,13 +79,13 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
   }
 
-  if (path === '/catalog' || path === '/cart' || path === '/partner-office' || path === '/benefits' || path === '/register' || path === '/app' || path === '/sponsor/contact') {
+  if (path === '/catalog' || path === '/partner-office' || path === '/benefits' || path === '/register' || path === '/app' || path === '/sponsor/contact') {
     return <div data-testid="route-opened" />;
   }
 
@@ -143,6 +144,16 @@ function App() {
     contentView = <CatalogSearchView audience={audience} />;
   } else if (path.startsWith('/product/')) {
     contentView = <ProductCardView audience={audience} productCode={decodeURIComponent(path.slice('/product/'.length))} />;
+  } else if (path === '/cart') {
+    contentView = <CartView seed={params.get('seed')} />;
+  } else if (path === '/cart/shopping-offers') {
+    contentView = <CartView mode="offers" />;
+  } else if (path === '/cart/supplementary') {
+    contentView = <CartView cartType="SUPPLEMENTARY" seed={params.get('seed')} />;
+  } else if (path === '/cart/supplementary/shopping-offers') {
+    contentView = <CartView cartType="SUPPLEMENTARY" mode="offers" />;
+  } else if (path.startsWith('/support/carts/')) {
+    contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

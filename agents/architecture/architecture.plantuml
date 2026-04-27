@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 008
+title Best Ori Gin. Архитектура платформы на feature 009
 
 skinparam componentStyle rectangle
 
@@ -9,27 +9,31 @@ actor "Партнер" as Partner
 actor "Контент-менеджер" as ContentManager
 actor "Маркетинг-менеджер" as MarketingManager
 actor "Каталожный менеджер" as CatalogManager
+actor "Сотрудник поддержки заказов" as OrderSupport
 actor "Редактор документов" as LegalEditor
 actor "Приглашенный партнер" as InvitedPartner
 
 component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
 component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents, benefit landings" as PublicContent
-component "backend/monolith/catalog\nSpring Boot module\nsearch, product cards, cart quick add, digital catalogues" as Catalog
+component "backend/monolith/catalog\nSpring Boot module\nsearch, product cards, digital catalogues" as Catalog
+component "backend/monolith/cart\nSpring Boot module\ncart, shopping offers, supplementary order, checkout validation" as Cart
 component "backend/monolith/partner-onboarding\nSpring Boot module\nregistration, invites, activation, sponsor cabinet" as PartnerOnboarding
 database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents, benefit landings, referral, conversions" as PublicDb
-database "PostgreSQL\ncatalog schema\ncategories, products, tags, promos, cart items, digital issues" as CatalogDb
+database "PostgreSQL\ncatalog schema\ncategories, products, tags, promos, digital issues" as CatalogDb
+database "PostgreSQL\ncart schema\ncarts, lines, applied offers, totals snapshots, audit events" as CartDb
 database "PostgreSQL\npartner-onboarding schema\ninvites, applications, activation tokens, partner profiles, referral links, events" as PartnerOnboardingDb
 cloud "S3/MinIO\ncatalog PDF materials" as CatalogStorage
 cloud "CRM / marketing systems\nregistration lead events" as CrmSystem
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
 component "Auth/Profile контур\nбудущие фичи" as AuthProfile
-component "Cart/Order контур\nбудущие фичи" as CartOrder
+component "Order/Payment контур\nбудущие фичи" as OrderPayment
 component "Partner контур\nбудущие фичи" as PartnerArea
 
 Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, benefit routes, invite routes, /products/digital-catalogue-current, /products/digital-catalogue-next, /search, /product/:code
-Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, digital catalogues, /search и /product/:code
-Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, referral benefit routes, sponsor cabinet, digital catalogues, /search и /product/:code
+Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers
+Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, referral benefit routes, sponsor cabinet, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers, /cart/supplementary
 InvitedPartner --> PublicWeb : HTTPS /invite/partners-activation
+OrderSupport --> PublicWeb : HTTPS support view корзины
 ContentManager --> CmsAdmin : HTTPS управление контентом
 MarketingManager --> CmsAdmin : HTTPS управление benefit-блоками, A/B-вариантами и CTA
 CatalogManager --> CmsAdmin : HTTPS управление товарами, кампаниями и цифровыми выпусками
@@ -42,10 +46,11 @@ PublicWeb --> PublicContent : REST benefit landing payload, referral status, con
 PublicWeb --> PartnerOnboarding : REST invite validation, registration application, activation, sponsor cabinet
 PublicWeb --> Catalog : REST search, filters, product cards, recommendations
 PublicWeb --> Catalog : REST product detail, media, attachments, availability
-PublicWeb --> Catalog : REST cart quick add from search/product card
 PublicWeb --> Catalog : REST digital catalogues, PDF actions, product hotspots
+PublicWeb --> Cart : REST current cart, items, shopping offers, supplementary order, validation, support view
 PublicContent --> PublicDb : JDBC / Liquibase XML target model
 Catalog --> CatalogDb : JDBC / Liquibase XML target model
+Cart --> CartDb : JDBC / Liquibase XML target model
 PartnerOnboarding --> PartnerOnboardingDb : JDBC / Liquibase XML target model
 Catalog --> CatalogStorage : S3/MinIO temporary URL for PDF download/share
 PartnerOnboarding --> CrmSystem : REST/event registration lead events and retry
@@ -56,7 +61,8 @@ PublicContent ..> Catalog : productRef / route references to /search
 PublicContent ..> PartnerOnboarding : referral context handoff через frontend route
 PartnerOnboarding ..> AuthProfile : activation creates login/profile handoff
 PartnerOnboarding ..> PartnerArea : initial partner profile and referral link handoff
-Catalog ..> CartOrder : future order/cart integration boundary and checkout handoff
+Cart --> Catalog : REST/internal contract product price, availability, campaign and order limits
+Cart ..> OrderPayment : future checkout/order/payment handoff after validation
 PublicWeb --> PartnerArea : route navigation в партнерский офис
 
 @enduml

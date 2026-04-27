@@ -537,6 +537,66 @@ body {
   border-top: 1px solid #d9d9d9;
 }
 
+.cart-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 32px 24px 56px;
+}
+
+.cart-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0 24px;
+}
+
+.cart-heading h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.cart-layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.cart-line {
+  margin-bottom: 12px;
+}
+
+.cart-line .ant-card-body {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.cart-line strong,
+.cart-line span {
+  display: block;
+}
+
+.cart-totals {
+  align-self: start;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.cart-totals h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.cart-offers {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 @media (max-width: 760px) {
   .public-header {
     align-items: flex-start;
@@ -568,7 +628,9 @@ body {
     .digital-catalogue-layout,
     .benefit-hero,
     .benefit-blocks,
-    .partner-onboarding-grid {
+    .partner-onboarding-grid,
+    .cart-layout,
+    .cart-line .ant-card-body {
     grid-template-columns: 1fr;
   }
 

@@ -1,7 +1,8 @@
 import { Button, Card, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
-import { addCatalogItemToCart, loadCatalogProductCard, type CatalogProductCard } from '../api/catalog';
+import { loadCatalogProductCard, type CatalogProductCard } from '../api/catalog';
+import { addCartItem } from '../api/cart';
 import type { Audience } from '../api/publicContent';
 import { t } from '../i18n';
 
@@ -29,9 +30,15 @@ export function ProductCardView({ audience, productCode }: ProductCardViewProps)
       return;
     }
     const parsedQuantity = Math.max(Number.parseInt(quantity, 10) || 1, 1);
-    const summary = await addCatalogItemToCart(product.id ?? null, audience, window.location.pathname, parsedQuantity, 'PRODUCT_CARD', product.productCode ?? product.sku);
-    setCartCount(summary.totalQuantity);
-    setCartMessage(t(summary.messageCode));
+    const cart = await addCartItem('MAIN', {
+      productCode: product.productCode ?? product.sku,
+      quantity: parsedQuantity,
+      source: 'PRODUCT_CARD',
+      campaignId: product.campaignCode,
+    });
+    const currentLine = cart.lines.find((line) => line.productCode === (product.productCode ?? product.sku) && line.source === 'PRODUCT_CARD');
+    setCartCount(currentLine?.quantity ?? parsedQuantity);
+    setCartMessage(t(cart.messageCode === 'STR_MNEMO_CART_RECALCULATED' ? 'STR_MNEMO_CART_ITEM_ADDED' : cart.messageCode));
   }
 
   if (product === undefined) {

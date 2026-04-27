@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860" role="img" aria-label="Схематичный desktop-макет основной корзины">
+  <rect x="0" y="0" width="1280" height="860" fill="#ffffff"/>
+  <text x="40" y="40" font-family="Arial" font-size="20">Основная корзина desktop</text>
+  <rect x="40" y="70" width="1200" height="64" fill="none" stroke="#222"/>
+  <text x="60" y="108" font-family="Arial" font-size="16">Шапка: логотип, поиск, каталог, корзина, профиль</text>
+  <rect x="40" y="155" width="1200" height="34" fill="none" stroke="#777"/>
+  <text x="60" y="178" font-family="Arial" font-size="14">Хлебные крошки: Главная / Корзина</text>
+  <rect x="40" y="215" width="780" height="560" fill="none" stroke="#222"/>
+  <text x="70" y="250" font-family="Arial" font-size="18">Состав корзины</text>
+  <rect x="70" y="285" width="720" height="112" fill="none" stroke="#777"/>
+  <text x="95" y="318" font-family="Arial" font-size="14">Строка товара: фото, название, код, campaign</text>
+  <rect x="540" y="305" width="90" height="44" fill="none" stroke="#444"/>
+  <text x="562" y="333" font-family="Arial" font-size="13">Кол-во</text>
+  <rect x="650" y="305" width="112" height="44" fill="none" stroke="#444"/>
+  <text x="678" y="333" font-family="Arial" font-size="13">Удалить</text>
+  <text x="95" y="360" font-family="Arial" font-size="13">Цена, скидка, статус доступности, причина блокировки</text>
+  <rect x="70" y="425" width="720" height="112" fill="none" stroke="#777"/>
+  <text x="95" y="458" font-family="Arial" font-size="14">Строка товара с LOW_STOCK / RESERVED состоянием</text>
+  <rect x="540" y="445" width="90" height="44" fill="none" stroke="#444"/>
+  <text x="562" y="473" font-family="Arial" font-size="13">Кол-во</text>
+  <rect x="650" y="445" width="112" height="44" fill="none" stroke="#444"/>
+  <text x="678" y="473" font-family="Arial" font-size="13">Удалить</text>
+  <rect x="70" y="575" width="720" height="76" fill="none" stroke="#777"/>
+  <text x="95" y="607" font-family="Arial" font-size="14">Контролируемые ошибки: пересчет, остатки, campaign rules</text>
+  <rect x="70" y="685" width="330" height="48" fill="none" stroke="#444"/>
+  <text x="112" y="715" font-family="Arial" font-size="14">Перейти к промо-предложениям</text>
+  <rect x="850" y="215" width="390" height="560" fill="none" stroke="#222"/>
+  <text x="880" y="250" font-family="Arial" font-size="18">Итоги заказа</text>
+  <rect x="880" y="285" width="330" height="150" fill="none" stroke="#777"/>
+  <text x="905" y="318" font-family="Arial" font-size="14">Subtotal</text>
+  <text x="905" y="350" font-family="Arial" font-size="14">Скидки и промо-выгоды</text>
+  <text x="905" y="382" font-family="Arial" font-size="14">Подарки и retention offers</text>
+  <text x="905" y="414" font-family="Arial" font-size="14">Grand total</text>
+  <rect x="880" y="465" width="330" height="86" fill="none" stroke="#777"/>
+  <text x="905" y="498" font-family="Arial" font-size="14">Прогресс бесплатной доставки</text>
+  <text x="905" y="526" font-family="Arial" font-size="13">Специальный продукт и условия</text>
+  <rect x="880" y="585" width="330" height="52" fill="none" stroke="#444"/>
+  <text x="1010" y="617" font-family="Arial" font-size="15">Checkout</text>
+  <rect x="880" y="670" width="330" height="72" fill="none" stroke="#777"/>
+  <text x="905" y="700" font-family="Arial" font-size="13">Validation summary перед checkout</text>
+  <text x="905" y="724" font-family="Arial" font-size="13">Blocking statuses и STR_MNEMO_* причины</text>
+</svg>

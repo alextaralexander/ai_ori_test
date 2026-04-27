@@ -1,0 +1,78 @@
+@startuml
+title Feature 009. Корзина и промо-предложения. Sequence
+
+actor "Покупатель / партнер" as User
+participant "Frontend web-shell" as Frontend
+participant "CartController\nmodule cart" as CartController
+participant "CartService\nmodule cart" as CartService
+participant "CatalogService\nmodule catalog" as CatalogService
+participant "PromotionPolicy\nmodule cart" as PromotionPolicy
+participant "AuditService\nmodule cart" as AuditService
+
+User -> Frontend: Открывает /cart
+Frontend -> CartController: GET /api/cart/current
+CartController -> CartService: getCurrentCart(user, MAIN)
+CartService -> CatalogService: refreshAvailability(productCodes, campaignId, roleSegment)
+CatalogService --> CartService: цены, остатки, лимиты, публикация
+CartService -> PromotionPolicy: recalculate(cart, MAIN)
+PromotionPolicy --> CartService: totals, offer statuses, blocking reasons
+CartService --> CartController: CartResponse
+CartController --> Frontend: CartResponse без hardcoded user-facing text
+Frontend --> User: Строки, итоги, доступность, STR_MNEMO_* через i18n
+
+User -> Frontend: Меняет количество строки
+Frontend -> CartController: PATCH /api/cart/items/{lineId}\nIdempotency-Key
+CartController -> CartService: changeQuantity(lineId, quantity, expectedVersion)
+CartService -> CatalogService: validateQuantity(productCode, quantity, campaignId)
+CatalogService --> CartService: maxAllowedQuantity, availability
+CartService -> PromotionPolicy: recalculate(cart, MAIN)
+CartService -> AuditService: ADD/CHANGE_QUANTITY audit event
+CartService --> CartController: CartResponse
+CartController --> Frontend: CartResponse
+Frontend --> User: Обновленные итоги или причина блокировки
+
+User -> Frontend: Открывает /cart/shopping-offers
+Frontend -> CartController: GET /api/cart/shopping-offers
+CartController -> CartService: getShoppingOffers(user, MAIN)
+CartService -> PromotionPolicy: findApplicableOffers(cart, MAIN)
+PromotionPolicy -> CatalogService: checkOfferProductsAvailability(productCodes)
+CatalogService --> PromotionPolicy: availability и цены
+PromotionPolicy --> CartService: ShoppingOffersResponse
+CartService --> CartController: ShoppingOffersResponse
+CartController --> Frontend: ShoppingOffersResponse
+Frontend --> User: Наборы, подарки, cross-sell, upsell, free-delivery progress
+
+User -> Frontend: Применяет offer
+Frontend -> CartController: POST /api/cart/shopping-offers/{offerId}/apply\nIdempotency-Key
+CartController -> CartService: applyOffer(offerId, MAIN)
+CartService -> PromotionPolicy: validateAndApplyOffer(cart, offerId, MAIN)
+PromotionPolicy -> CatalogService: validateProducts(relatedProductCodes)
+CatalogService --> PromotionPolicy: доступность и ограничения
+PromotionPolicy --> CartService: измененные строки и applied offer
+CartService -> AuditService: APPLY_OFFER audit event
+CartService --> CartController: CartResponse
+CartController --> Frontend: CartResponse
+Frontend --> User: Оффер применен или показана STR_MNEMO_* причина
+
+alt Партнерский дозаказ
+  User -> Frontend: Открывает /cart/supplementary
+  Frontend -> CartController: GET /api/cart/supplementary/current
+  CartController -> CartService: getCurrentCart(user, SUPPLEMENTARY)
+  CartService -> PromotionPolicy: validateSupplementaryAccess(user, campaignId)
+  PromotionPolicy --> CartService: разрешение или STR_MNEMO_SUPPLEMENTARY_ORDER_FORBIDDEN
+  CartService --> CartController: CartResponse или ErrorResponse
+  CartController --> Frontend: response
+  Frontend --> User: Отдельная корзина дозаказа или контролируемая блокировка
+end
+
+User -> Frontend: Переходит к checkout
+Frontend -> CartController: POST /api/cart/validate
+CartController -> CartService: validateForCheckout(user, MAIN)
+CartService -> CatalogService: validateCampaignAndAvailability(cart.lines)
+CartService -> PromotionPolicy: validateBenefitsAndOffers(cart)
+CartService -> AuditService: VALIDATION_FAILED audit event при блокировках
+CartService --> CartController: CartValidationResponse
+CartController --> Frontend: CartValidationResponse
+Frontend --> User: Checkout route или список причин исправления
+
+@enduml

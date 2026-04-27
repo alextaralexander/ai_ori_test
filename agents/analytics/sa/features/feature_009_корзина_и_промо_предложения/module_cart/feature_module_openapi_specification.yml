@@ -1,0 +1,531 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Cart API - Feature 009
+  version: 1.0.0
+  description: Контракты основной корзины, промо-предложений, supplementary order и checkout validation для module cart.
+servers:
+  - url: /api/cart
+tags:
+  - name: Cart
+  - name: ShoppingOffers
+  - name: SupplementaryCart
+  - name: SupportCart
+paths:
+  /current:
+    get:
+      tags: [Cart]
+      summary: Получить текущую основную корзину пользователя.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Текущая основная корзина.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /items:
+    post:
+      tags: [Cart]
+      summary: Добавить товар в основную корзину.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItemRequest'
+      responses:
+        '200':
+          description: Корзина после добавления и пересчета.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /items/{lineId}:
+    patch:
+      tags: [Cart]
+      summary: Изменить количество строки основной корзины.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeQuantityRequest'
+      responses:
+        '200':
+          description: Корзина после изменения количества.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Cart]
+      summary: Удалить строку основной корзины.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Корзина после удаления строки.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /shopping-offers:
+    get:
+      tags: [ShoppingOffers]
+      summary: Получить промо-предложения основной корзины.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Применимые предложения основной корзины.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingOffersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /shopping-offers/{offerId}/apply:
+    post:
+      tags: [ShoppingOffers]
+      summary: Применить промо-предложение к основной корзине.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Корзина после применения предложения.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /validate:
+    post:
+      tags: [Cart]
+      summary: Проверить основную корзину перед checkout.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Результат validation перед checkout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartValidationResponse'
+  /supplementary/current:
+    get:
+      tags: [SupplementaryCart]
+      summary: Получить текущий supplementary order партнера.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Текущий дозаказ партнера.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /supplementary/items:
+    post:
+      tags: [SupplementaryCart]
+      summary: Добавить товар в supplementary order.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItemRequest'
+      responses:
+        '200':
+          description: Supplementary cart после добавления.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /supplementary/shopping-offers:
+    get:
+      tags: [SupplementaryCart]
+      summary: Получить промо-предложения supplementary order.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Предложения, применимые только к дозаказу.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingOffersResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /support/users/{userId}/current:
+    get:
+      tags: [SupportCart]
+      summary: Получить support view корзины пользователя.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 80
+        - name: cartType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CartType'
+      responses:
+        '200':
+          description: Разрешенное представление корзины для поддержки.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 120
+    LineId:
+      name: lineId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 80
+  responses:
+    ValidationError:
+      description: Ошибка валидации или бизнес-ограничение без hardcoded пользовательского текста.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Требуется авторизация.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Действие запрещено текущей роли или типом корзины.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Строка или корзина не найдена.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    CartType:
+      type: string
+      enum: [MAIN, SUPPLEMENTARY]
+    CartStatus:
+      type: string
+      enum: [ACTIVE, BLOCKED, READY_FOR_CHECKOUT, ARCHIVED]
+    AvailabilityStatus:
+      type: string
+      enum: [AVAILABLE, LOW_STOCK, RESERVED, PARTIALLY_AVAILABLE, UNAVAILABLE, REMOVED_FROM_CAMPAIGN]
+    OfferType:
+      type: string
+      enum: [BUNDLE, GIFT, CROSS_SELL, UPSELL, RETENTION, FREE_DELIVERY_PRODUCT]
+    OfferStatus:
+      type: string
+      enum: [AVAILABLE, PENDING_CONDITION, APPLIED, UNAVAILABLE]
+    AddCartItemRequest:
+      type: object
+      required: [productCode, quantity, source]
+      properties:
+        productCode:
+          type: string
+          maxLength: 64
+        quantity:
+          type: integer
+          minimum: 1
+        source:
+          type: string
+          enum: [SEARCH_RESULT, PRODUCT_CARD, SHOPPING_OFFER, SUPPLEMENTARY_OFFER]
+        campaignId:
+          type: string
+          maxLength: 80
+    ChangeQuantityRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+        expectedVersion:
+          type: integer
+          minimum: 0
+    CartResponse:
+      type: object
+      required: [cartId, cartType, campaignId, status, currency, version, lines, totals, messageCode]
+      properties:
+        cartId:
+          type: string
+          format: uuid
+        cartType:
+          $ref: '#/components/schemas/CartType'
+        campaignId:
+          type: string
+        roleSegment:
+          type: string
+          enum: [CUSTOMER, PARTNER, SUPPORT]
+        partnerContextId:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/CartStatus'
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        version:
+          type: integer
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLineResponse'
+        appliedOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppliedOfferResponse'
+        totals:
+          $ref: '#/components/schemas/CartTotalsResponse'
+        validation:
+          $ref: '#/components/schemas/CartValidationResponse'
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_RECALCULATED
+    CartLineResponse:
+      type: object
+      required: [lineId, productCode, name, quantity, price, availability]
+      properties:
+        lineId:
+          type: string
+          format: uuid
+        productCode:
+          type: string
+        name:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        price:
+          $ref: '#/components/schemas/CartLinePrice'
+        availability:
+          $ref: '#/components/schemas/CartAvailability'
+        source:
+          type: string
+    CartLinePrice:
+      type: object
+      required: [unitPrice, lineTotal]
+      properties:
+        unitPrice:
+          type: number
+          format: double
+        promoUnitPrice:
+          type: number
+          format: double
+          nullable: true
+        lineTotal:
+          type: number
+          format: double
+    CartAvailability:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/AvailabilityStatus'
+        reservedQuantity:
+          type: integer
+          nullable: true
+        maxAllowedQuantity:
+          type: integer
+          nullable: true
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_ITEM_UNAVAILABLE
+    AppliedOfferResponse:
+      type: object
+      required: [offerId, offerType, status]
+      properties:
+        offerId:
+          type: string
+        offerType:
+          $ref: '#/components/schemas/OfferType'
+        status:
+          type: string
+        benefitAmount:
+          type: number
+          format: double
+        giftProductCode:
+          type: string
+          nullable: true
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_OFFER_APPLIED
+    CartTotalsResponse:
+      type: object
+      required: [subtotal, discountTotal, benefitTotal, grandTotal]
+      properties:
+        subtotal:
+          type: number
+          format: double
+        discountTotal:
+          type: number
+          format: double
+        benefitTotal:
+          type: number
+          format: double
+        shippingThresholdRemaining:
+          type: number
+          format: double
+          nullable: true
+        grandTotal:
+          type: number
+          format: double
+    ShoppingOffersResponse:
+      type: object
+      required: [cartId, cartType, offers]
+      properties:
+        cartId:
+          type: string
+          format: uuid
+        cartType:
+          $ref: '#/components/schemas/CartType'
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShoppingOfferResponse'
+    ShoppingOfferResponse:
+      type: object
+      required: [offerId, offerType, status, messageCode]
+      properties:
+        offerId:
+          type: string
+        titleKey:
+          type: string
+        offerType:
+          $ref: '#/components/schemas/OfferType'
+        status:
+          $ref: '#/components/schemas/OfferStatus'
+        requiredCondition:
+          type: string
+          nullable: true
+        remainingCondition:
+          type: string
+          nullable: true
+        relatedProductCodes:
+          type: array
+          items:
+            type: string
+        benefitAmount:
+          type: number
+          format: double
+          nullable: true
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_OFFER_AVAILABLE
+    CartValidationResponse:
+      type: object
+      required: [valid, blockingReasons]
+      properties:
+        valid:
+          type: boolean
+        blockingReasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartBlockingReason'
+        checkoutRoute:
+          type: string
+          nullable: true
+    CartBlockingReason:
+      type: object
+      required: [code, messageCode]
+      properties:
+        lineId:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+          example: ITEM_UNAVAILABLE
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_ITEM_UNAVAILABLE
+    ErrorResponse:
+      type: object
+      required: [code, messageCode]
+      properties:
+        code:
+          type: string
+          example: CART_ITEM_UNAVAILABLE
+        messageCode:
+          type: string
+          example: STR_MNEMO_CART_ITEM_UNAVAILABLE
+        details:
+          type: object
+          additionalProperties:
+            type: string

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-009-cart-001" author="codex">
+        <createTable tableName="cart">
+            <column name="cart_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cart_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_segment" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_context_id" type="varchar(80)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="cart"
+                             columnNames="owner_user_id, cart_type, campaign_id"
+                             constraintName="uk_cart_owner_type_campaign"/>
+        <createIndex tableName="cart" indexName="idx_cart_owner_status">
+            <column name="owner_user_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-009-cart-002" author="codex">
+        <createTable tableName="cart_line">
+            <column name="cart_line_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cart_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_cart_line_cart" references="cart(cart_id)"/>
+            </column>
+            <column name="product_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promo_unit_price" type="numeric(12,2)"/>
+            <column name="line_total" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="availability_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="blocking_message_code" type="varchar(120)"/>
+            <column name="reserved_quantity" type="int"/>
+            <column name="max_allowed_quantity" type="int"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="cart_line"
+                             columnNames="cart_id, product_code, source"
+                             constraintName="uk_cart_line_product_source"/>
+        <createIndex tableName="cart_line" indexName="idx_cart_line_cart">
+            <column name="cart_id"/>
+        </createIndex>
+        <createIndex tableName="cart_line" indexName="idx_cart_line_product">
+            <column name="product_code"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-009-cart-003" author="codex">
+        <createTable tableName="cart_applied_offer">
+            <column name="applied_offer_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cart_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_cart_offer_cart" references="cart(cart_id)"/>
+            </column>
+            <column name="offer_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offer_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="benefit_amount" type="numeric(12,2)"/>
+            <column name="gift_product_code" type="varchar(64)"/>
+            <column name="message_code" type="varchar(120)"/>
+            <column name="applied_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="cart_applied_offer" indexName="idx_cart_offer_cart_offer">
+            <column name="cart_id"/>
+            <column name="offer_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-009-cart-004" author="codex">
+        <createTable tableName="cart_totals_snapshot">
+            <column name="cart_id" type="uuid">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_cart_totals_cart" references="cart(cart_id)"/>
+            </column>
+            <column name="subtotal" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_total" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="benefit_total" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shipping_threshold_remaining" type="numeric(12,2)"/>
+            <column name="grand_total" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recalculated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-009-cart-005" author="codex">
+        <createTable tableName="cart_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cart_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_cart_audit_cart" references="cart(cart_id)"/>
+            </column>
+            <column name="actor_user_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actor_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_id" type="varchar(120)"/>
+            <column name="details_json" type="text"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="cart_audit_event" indexName="idx_cart_audit_cart_created">
+            <column name="cart_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

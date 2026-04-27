@@ -1,4 +1,4 @@
-// Synchronized from agents/tests/. Do not edit this runtime copy manually.
+// Синхронизировано из agents/tests. Не редактировать вручную.
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
 import '../feature_002_контентные_страницы_и_новости/feature_ui_flow';
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
@@ -7,3 +7,4 @@ import '../feature_005_карточка_товара/feature_ui_flow';
 import '../feature_006_цифровые_каталоги_и_pdf_материалы/feature_ui_flow';
 import '../feature_007_бьюти_и_бизнес_бенефиты/feature_ui_flow';
 import '../feature_008_регистрация_и_инвайты_партнеров/feature_ui_flow';
+import '../feature_009_корзина_и_промо_предложения/feature_ui_flow';

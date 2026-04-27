@@ -1,0 +1,90 @@
+@startuml
+title Module cart. Полная ER-диаграмма корзины и промо-предложений
+
+entity "cart" as cart {
+  * cart_id : uuid
+  --
+  owner_user_id : varchar(80)
+  cart_type : varchar(32)
+  campaign_id : varchar(80)
+  role_segment : varchar(32)
+  partner_context_id : varchar(80)
+  status : varchar(32)
+  currency : varchar(3)
+  version : integer
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "cart_line" as cart_line {
+  * cart_line_id : uuid
+  --
+  cart_id : uuid
+  product_code : varchar(64)
+  source : varchar(32)
+  quantity : integer
+  unit_price : numeric(12,2)
+  promo_unit_price : numeric(12,2)
+  line_total : numeric(12,2)
+  availability_status : varchar(32)
+  blocking_message_code : varchar(120)
+  reserved_quantity : integer
+  max_allowed_quantity : integer
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "cart_applied_offer" as cart_applied_offer {
+  * applied_offer_id : uuid
+  --
+  cart_id : uuid
+  offer_id : varchar(80)
+  offer_type : varchar(32)
+  status : varchar(32)
+  benefit_amount : numeric(12,2)
+  gift_product_code : varchar(64)
+  message_code : varchar(120)
+  applied_at : timestamptz
+}
+
+entity "cart_totals_snapshot" as cart_totals_snapshot {
+  * cart_id : uuid
+  --
+  subtotal : numeric(12,2)
+  discount_total : numeric(12,2)
+  benefit_total : numeric(12,2)
+  shipping_threshold_remaining : numeric(12,2)
+  grand_total : numeric(12,2)
+  recalculated_at : timestamptz
+}
+
+entity "cart_audit_event" as cart_audit_event {
+  * audit_event_id : uuid
+  --
+  cart_id : uuid
+  actor_user_id : varchar(80)
+  actor_role : varchar(64)
+  action : varchar(64)
+  request_id : varchar(120)
+  details_json : text
+  created_at : timestamptz
+}
+
+cart ||--o{ cart_line : "строки"
+cart ||--o{ cart_applied_offer : "примененные офферы"
+cart ||--|| cart_totals_snapshot : "последний расчет"
+cart ||--o{ cart_audit_event : "audit trail"
+
+note right of cart
+  cart_type: MAIN или SUPPLEMENTARY.
+  Основная корзина и дозаказ не смешивают строки,
+  итоги и промо-состояния.
+end note
+
+note right of cart_line
+  product_code ссылается на catalog module.
+  Жесткий FK не обязателен в monolith boundary,
+  но код товара валидируется через catalog contract.
+end note
+
+@enduml

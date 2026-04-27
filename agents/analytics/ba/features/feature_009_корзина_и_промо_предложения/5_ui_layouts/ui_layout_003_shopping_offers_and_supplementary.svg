@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" role="img" aria-label="Схематичный макет промо-предложений и supplementary order">
+  <rect x="0" y="0" width="1180" height="820" fill="#ffffff"/>
+  <text x="40" y="42" font-family="Arial" font-size="20">Промо-предложения и дозаказ</text>
+  <rect x="40" y="70" width="1100" height="58" fill="none" stroke="#222"/>
+  <text x="62" y="104" font-family="Arial" font-size="15">Шапка: логотип, каталог, корзина, профиль партнера</text>
+  <rect x="40" y="155" width="1100" height="46" fill="none" stroke="#777"/>
+  <text x="62" y="184" font-family="Arial" font-size="14">Tabs/segments: основная корзина / промо основной корзины / supplementary cart / supplementary offers</text>
+  <rect x="40" y="230" width="330" height="520" fill="none" stroke="#222"/>
+  <text x="66" y="264" font-family="Arial" font-size="17">Контекст корзины</text>
+  <rect x="66" y="292" width="278" height="82" fill="none" stroke="#777"/>
+  <text x="86" y="324" font-family="Arial" font-size="13">Campaign, role segment</text>
+  <text x="86" y="350" font-family="Arial" font-size="13">Основная или дозаказ</text>
+  <rect x="66" y="405" width="278" height="108" fill="none" stroke="#777"/>
+  <text x="86" y="438" font-family="Arial" font-size="13">Краткие итоги корзины</text>
+  <text x="86" y="464" font-family="Arial" font-size="13">Subtotal, скидка, grand total</text>
+  <text x="86" y="490" font-family="Arial" font-size="13">Блокирующие статусы</text>
+  <rect x="66" y="550" width="278" height="128" fill="none" stroke="#777"/>
+  <text x="86" y="584" font-family="Arial" font-size="13">Правила дозаказа</text>
+  <text x="86" y="610" font-family="Arial" font-size="12">Доступен / недоступен</text>
+  <text x="86" y="636" font-family="Arial" font-size="12">Лимиты партнера</text>
+  <text x="86" y="662" font-family="Arial" font-size="12">STR_MNEMO_* причина</text>
+  <rect x="410" y="230" width="730" height="520" fill="none" stroke="#222"/>
+  <text x="438" y="264" font-family="Arial" font-size="17">Список предложений</text>
+  <rect x="438" y="300" width="312" height="150" fill="none" stroke="#777"/>
+  <text x="462" y="332" font-family="Arial" font-size="14">Offer card: набор</text>
+  <text x="462" y="360" font-family="Arial" font-size="12">Условие, remaining action</text>
+  <text x="462" y="386" font-family="Arial" font-size="12">Ожидаемая выгода и подарок</text>
+  <rect x="462" y="406" width="180" height="34" fill="none" stroke="#444"/>
+  <text x="512" y="428" font-family="Arial" font-size="12">Добавить</text>
+  <rect x="790" y="300" width="312" height="150" fill="none" stroke="#777"/>
+  <text x="814" y="332" font-family="Arial" font-size="14">Offer card: cross-sell</text>
+  <text x="814" y="360" font-family="Arial" font-size="12">Товар, доступность, роль</text>
+  <text x="814" y="386" font-family="Arial" font-size="12">Цена и применимость</text>
+  <rect x="814" y="406" width="180" height="34" fill="none" stroke="#444"/>
+  <text x="864" y="428" font-family="Arial" font-size="12">Добавить</text>
+  <rect x="438" y="485" width="312" height="150" fill="none" stroke="#777"/>
+  <text x="462" y="517" font-family="Arial" font-size="14">Offer card: бесплатная доставка</text>
+  <text x="462" y="545" font-family="Arial" font-size="12">Спецпродукт и прогресс</text>
+  <text x="462" y="571" font-family="Arial" font-size="12">Оставшееся условие</text>
+  <rect x="462" y="591" width="180" height="34" fill="none" stroke="#444"/>
+  <text x="512" y="613" font-family="Arial" font-size="12">Добавить</text>
+  <rect x="790" y="485" width="312" height="150" fill="none" stroke="#777"/>
+  <text x="814" y="517" font-family="Arial" font-size="14">Offer card: недоступно</text>
+  <text x="814" y="545" font-family="Arial" font-size="12">Истекло / нет остатка / роль</text>
+  <text x="814" y="571" font-family="Arial" font-size="12">Контролируемое состояние</text>
+  <rect x="814" y="591" width="180" height="34" fill="none" stroke="#444"/>
+  <text x="855" y="613" font-family="Arial" font-size="12">Недоступно</text>
+</svg>
