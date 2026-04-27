@@ -751,6 +751,72 @@ body {
   gap: 18px;
 }
 
+.bonus-wallet-page {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.bonus-wallet-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bonus-wallet-heading h1 {
+  margin: 0;
+}
+
+.bonus-wallet-balances {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.bonus-wallet-balance,
+.bonus-wallet-details,
+.bonus-wallet-transaction {
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.bonus-wallet-balance {
+  display: grid;
+  gap: 8px;
+}
+
+.bonus-wallet-balance h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.bonus-wallet-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 12px;
+  max-width: 820px;
+}
+
+.bonus-wallet-transactions {
+  display: grid;
+  gap: 12px;
+}
+
+.bonus-wallet-transaction {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(240px, 1fr) auto auto minmax(180px, 0.6fr) auto;
+}
+
+.bonus-wallet-transaction strong,
+.bonus-wallet-transaction span {
+  display: block;
+}
+
 .claim-create-grid {
   display: grid;
   gap: 18px;
@@ -817,6 +883,8 @@ body {
     .order-history-filters,
     .order-history-card,
     .claim-create-grid,
+    .bonus-wallet-filters,
+    .bonus-wallet-transaction,
     .order-details-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;

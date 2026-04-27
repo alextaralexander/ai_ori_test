@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 014 desktop wallet overview</title>
+  <desc id="desc">Схематичный макет страницы бонусного кошелька и балансов</desc>
+  <rect x="0" y="0" width="1280" height="860" fill="white"/>
+  <rect x="48" y="40" width="1184" height="72" fill="none" stroke="#111"/>
+  <text x="72" y="84" font-family="Arial" font-size="20">Шапка: профиль, заказы, бонусы, язык, выход</text>
+  <text x="48" y="156" font-family="Arial" font-size="28">Бонусный кошелек</text>
+  <rect x="48" y="190" width="272" height="118" fill="none" stroke="#111"/>
+  <text x="72" y="230" font-family="Arial" font-size="16">Cashback</text>
+  <text x="72" y="266" font-family="Arial" font-size="14">available / hold / expires soon</text>
+  <rect x="344" y="190" width="272" height="118" fill="none" stroke="#111"/>
+  <text x="368" y="230" font-family="Arial" font-size="16">Referral discount</text>
+  <text x="368" y="266" font-family="Arial" font-size="14">source: referral, qualification</text>
+  <rect x="640" y="190" width="272" height="118" fill="none" stroke="#111"/>
+  <text x="664" y="230" font-family="Arial" font-size="16">Manual adjustment</text>
+  <text x="664" y="266" font-family="Arial" font-size="14">positive / negative corrections</text>
+  <rect x="936" y="190" width="296" height="118" fill="none" stroke="#111"/>
+  <text x="960" y="230" font-family="Arial" font-size="16">Order redemption</text>
+  <text x="960" y="266" font-family="Arial" font-size="14">limits and checkout usage</text>
+  <rect x="48" y="340" width="1184" height="74" fill="none" stroke="#111"/>
+  <text x="72" y="372" font-family="Arial" font-size="15">Фильтры: period, status, campaign, source, order number, bucket type</text>
+  <rect x="72" y="386" width="120" height="22" fill="none" stroke="#777"/>
+  <rect x="212" y="386" width="120" height="22" fill="none" stroke="#777"/>
+  <rect x="352" y="386" width="120" height="22" fill="none" stroke="#777"/>
+  <rect x="492" y="386" width="160" height="22" fill="none" stroke="#777"/>
+  <rect x="672" y="386" width="160" height="22" fill="none" stroke="#777"/>
+  <rect x="852" y="386" width="120" height="22" fill="none" stroke="#777"/>
+  <rect x="996" y="380" width="172" height="30" fill="none" stroke="#111"/>
+  <text x="1032" y="401" font-family="Arial" font-size="14">Экспорт CSV</text>
+  <rect x="48" y="446" width="1184" height="300" fill="none" stroke="#111"/>
+  <text x="72" y="482" font-family="Arial" font-size="16">Таблица транзакций</text>
+  <line x1="72" y1="510" x2="1208" y2="510" stroke="#777"/>
+  <text x="72" y="540" font-family="Arial" font-size="14">Дата | Тип | Bucket | Сумма | Статус | Источник | Заказ | Expires</text>
+  <line x1="72" y1="560" x2="1208" y2="560" stroke="#ddd"/>
+  <text x="72" y="592" font-family="Arial" font-size="14">TXN-014-CASHBACK-ACCRUAL | +450 RUB | ORD-011-MAIN | active</text>
+  <text x="72" y="640" font-family="Arial" font-size="14">TXN-014-REDEMPTION | -200 RUB | ORD-011-MAIN | redeemed</text>
+  <text x="72" y="688" font-family="Arial" font-size="14">TXN-014-EXPIRE | -120 RUB | CMP-2026-05 | expires soon</text>
+  <rect x="48" y="770" width="1184" height="44" fill="none" stroke="#111"/>
+  <text x="72" y="798" font-family="Arial" font-size="14">Pagination, empty/error states, STR_MNEMO_* messages from i18n</text>
+</svg>

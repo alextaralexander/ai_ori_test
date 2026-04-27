@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin bonus-wallet module API
+  version: 0.1.0
+paths:
+  /api/bonus-wallet/summary:
+    get:
+      responses:
+        '200':
+          description: Wallet summary
+  /api/bonus-wallet/transactions:
+    get:
+      responses:
+        '200':
+          description: Wallet transaction page
+  /api/bonus-wallet/transactions/{transactionId}:
+    get:
+      responses:
+        '200':
+          description: Wallet transaction details
+  /api/bonus-wallet/limits/order/{orderNumber}:
+    get:
+      responses:
+        '200':
+          description: Wallet application limit
+  /api/bonus-wallet/exports:
+    post:
+      responses:
+        '200':
+          description: Export metadata
+  /api/bonus-wallet/finance/{targetUserId}:
+    get:
+      responses:
+        '200':
+          description: Finance wallet view
+  /api/bonus-wallet/finance/adjustments:
+    post:
+      responses:
+        '200':
+          description: Manual adjustment

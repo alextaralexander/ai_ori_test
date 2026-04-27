@@ -1,0 +1,59 @@
+@startuml
+title Feature 014 ER changes for module bonus-wallet
+entity bonus_wallet_account {
+  * wallet_id : uuid
+  --
+  owner_user_id : varchar
+  owner_role : varchar
+  currency_code : varchar
+  status : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity bonus_wallet_balance {
+  * balance_id : uuid
+  --
+  wallet_id : uuid
+  bucket : varchar
+  available_amount : numeric
+  hold_amount : numeric
+  expiring_soon_amount : numeric
+  currency_code : varchar
+}
+
+entity bonus_wallet_transaction {
+  * transaction_id : varchar
+  --
+  wallet_id : uuid
+  bucket : varchar
+  operation_type : varchar
+  status : varchar
+  amount : numeric
+  currency_code : varchar
+  source_type : varchar
+  source_ref : varchar
+  order_number : varchar
+  claim_id : varchar
+  campaign_id : varchar
+  expires_at : date
+  public_mnemo : varchar
+  correlation_id : varchar
+  created_at : timestamp
+}
+
+entity bonus_wallet_adjustment {
+  * adjustment_id : uuid
+  --
+  transaction_id : varchar
+  target_user_id : varchar
+  reason_code : varchar
+  actor_user_id : varchar
+  idempotency_key : varchar
+  audit_recorded : boolean
+}
+
+bonus_wallet_account ||--o{ bonus_wallet_balance
+bonus_wallet_account ||--o{ bonus_wallet_transaction
+bonus_wallet_transaction ||--o| bonus_wallet_adjustment
+@enduml

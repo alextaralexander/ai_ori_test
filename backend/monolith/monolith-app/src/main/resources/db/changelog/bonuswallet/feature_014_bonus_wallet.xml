@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-014-bonus-wallet-account" author="codex">
+        <createTable tableName="bonus_wallet_account">
+            <column name="wallet_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_role" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="bonus_wallet_account" indexName="idx_bonus_wallet_account_owner">
+            <column name="owner_user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-014-bonus-wallet-balance" author="codex">
+        <createTable tableName="bonus_wallet_balance">
+            <column name="balance_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="wallet_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_bonus_wallet_balance_wallet" references="bonus_wallet_account(wallet_id)"/>
+            </column>
+            <column name="bucket" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available_amount" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hold_amount" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiring_soon_amount" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="bonus_wallet_balance" columnNames="wallet_id,bucket" constraintName="uk_bonus_wallet_balance_bucket"/>
+    </changeSet>
+
+    <changeSet id="feature-014-bonus-wallet-transaction" author="codex">
+        <createTable tableName="bonus_wallet_transaction">
+            <column name="transaction_id" type="varchar(128)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="wallet_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_bonus_wallet_transaction_wallet" references="bonus_wallet_account(wallet_id)"/>
+            </column>
+            <column name="bucket" type="varchar(64)"/>
+            <column name="operation_type" type="varchar(64)"/>
+            <column name="status" type="varchar(64)"/>
+            <column name="amount" type="numeric(19,2)"/>
+            <column name="currency_code" type="varchar(3)"/>
+            <column name="source_type" type="varchar(64)"/>
+            <column name="source_ref" type="varchar(128)"/>
+            <column name="order_number" type="varchar(64)"/>
+            <column name="claim_id" type="varchar(64)"/>
+            <column name="campaign_id" type="varchar(64)"/>
+            <column name="expires_at" type="date"/>
+            <column name="public_mnemo" type="varchar(128)"/>
+            <column name="correlation_id" type="varchar(128)"/>
+            <column name="created_at" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="bonus_wallet_transaction" indexName="idx_bonus_wallet_transaction_wallet_created">
+            <column name="wallet_id"/>
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex tableName="bonus_wallet_transaction" indexName="idx_bonus_wallet_transaction_order">
+            <column name="order_number"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

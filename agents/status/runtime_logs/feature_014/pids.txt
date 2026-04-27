@@ -1,0 +1,6 @@
+﻿backend=28028
+frontend=25448
+frontend-proxy=12576
+frontend-proxy2=38028
+backend2=35068
+frontend-proxy3=41244

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="920" viewBox="0 0 390 920" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 014 mobile wallet</title>
+  <desc id="desc">Мобильная схема бонусного кошелька</desc>
+  <rect x="0" y="0" width="390" height="920" fill="white"/>
+  <rect x="16" y="24" width="358" height="56" fill="none" stroke="#111"/>
+  <text x="32" y="58" font-family="Arial" font-size="14">Header / profile / bonuses</text>
+  <text x="16" y="122" font-family="Arial" font-size="22">Бонусный кошелек</text>
+  <rect x="16" y="150" width="358" height="96" fill="none" stroke="#111"/>
+  <text x="32" y="184" font-family="Arial" font-size="14">Баланс: all buckets summary</text>
+  <text x="32" y="216" font-family="Arial" font-size="13">available / hold / expires soon</text>
+  <rect x="16" y="266" width="358" height="54" fill="none" stroke="#111"/>
+  <text x="32" y="298" font-family="Arial" font-size="14">Segmented bucket tabs</text>
+  <rect x="16" y="340" width="358" height="72" fill="none" stroke="#111"/>
+  <text x="32" y="372" font-family="Arial" font-size="14">Collapsed filters</text>
+  <text x="32" y="396" font-family="Arial" font-size="12">period, status, campaign, source</text>
+  <rect x="16" y="438" width="358" height="110" fill="none" stroke="#111"/>
+  <text x="32" y="470" font-family="Arial" font-size="14">Transaction card</text>
+  <text x="32" y="500" font-family="Arial" font-size="12">ACCRUAL / CASHBACK / +450 RUB</text>
+  <text x="32" y="528" font-family="Arial" font-size="12">ORD-011-MAIN / expires 18.05.2026</text>
+  <rect x="16" y="568" width="358" height="110" fill="none" stroke="#111"/>
+  <text x="32" y="600" font-family="Arial" font-size="14">Transaction card</text>
+  <text x="32" y="630" font-family="Arial" font-size="12">REDEMPTION / -200 RUB / redeemed</text>
+  <rect x="16" y="704" width="358" height="72" fill="none" stroke="#111"/>
+  <text x="32" y="736" font-family="Arial" font-size="14">Export / next page actions</text>
+  <rect x="16" y="802" width="358" height="72" fill="none" stroke="#111"/>
+  <text x="32" y="836" font-family="Arial" font-size="13">Error/empty state with STR_MNEMO_* mapping</text>
+</svg>

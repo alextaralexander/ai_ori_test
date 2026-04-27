@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin bonus-wallet feature 014 API
+  version: 0.1.0
+servers:
+  - url: /api/bonus-wallet
+paths:
+  /summary:
+    get:
+      summary: Получить сводку бонусного кошелька текущего пользователя
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Сводка балансов и последних операций
+  /transactions:
+    get:
+      summary: Получить историю транзакций
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: campaignId
+          in: query
+          schema:
+            type: string
+        - name: sourceType
+          in: query
+          schema:
+            type: string
+        - name: orderNumber
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Страница операций
+  /transactions/{transactionId}:
+    get:
+      summary: Получить детали транзакции
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Детали операции
+        '404':
+          description: STR_MNEMO_BONUS_WALLET_TRANSACTION_NOT_FOUND
+  /limits/order/{orderNumber}:
+    get:
+      summary: Получить лимиты применения кошелька к заказу
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Лимит применения
+  /exports:
+    post:
+      summary: Подготовить экспорт истории
+      responses:
+        '200':
+          description: Metadata CSV export
+  /finance/{targetUserId}:
+    get:
+      summary: Finance view кошелька пользователя
+      parameters:
+        - name: targetUserId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reason
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Finance wallet summary with audit flag
+        '403':
+          description: STR_MNEMO_BONUS_WALLET_ACCESS_DENIED
+  /finance/adjustments:
+    post:
+      summary: Создать ручную финансовую корректировку
+      responses:
+        '200':
+          description: Созданная или идемпотентно возвращенная корректировка
+components:
+  schemas:
+    BonusWalletSummaryResponse:
+      type: object
+      required: [walletId, ownerUserId, balances, recentTransactions]
+    BonusWalletTransactionResponse:
+      type: object
+      required: [transactionId, bucket, operationType, status, amount, currencyCode, publicMnemo]
+    BonusWalletErrorResponse:
+      type: object
+      required: [code, details]

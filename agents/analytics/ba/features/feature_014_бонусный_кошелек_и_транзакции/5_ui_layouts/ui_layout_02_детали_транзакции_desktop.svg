@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 014 transaction details</title>
+  <desc id="desc">Схематичный макет деталей бонусной транзакции</desc>
+  <rect x="0" y="0" width="1180" height="760" fill="white"/>
+  <rect x="48" y="40" width="1084" height="64" fill="none" stroke="#111"/>
+  <text x="72" y="80" font-family="Arial" font-size="18">Назад к истории бонусов</text>
+  <text x="48" y="148" font-family="Arial" font-size="26">TXN-014-CASHBACK-ACCRUAL</text>
+  <rect x="48" y="184" width="520" height="250" fill="none" stroke="#111"/>
+  <text x="76" y="222" font-family="Arial" font-size="16">Основные поля</text>
+  <text x="76" y="260" font-family="Arial" font-size="14">Bucket: CASHBACK</text>
+  <text x="76" y="292" font-family="Arial" font-size="14">Amount: +450 RUB</text>
+  <text x="76" y="324" font-family="Arial" font-size="14">Status: ACTIVE</text>
+  <text x="76" y="356" font-family="Arial" font-size="14">Expires at: 2026-05-18</text>
+  <text x="76" y="388" font-family="Arial" font-size="14">Correlation id and audit flag</text>
+  <rect x="612" y="184" width="520" height="250" fill="none" stroke="#111"/>
+  <text x="640" y="222" font-family="Arial" font-size="16">Связанные объекты</text>
+  <text x="640" y="260" font-family="Arial" font-size="14">Order: ORD-011-MAIN</text>
+  <rect x="640" y="282" width="180" height="36" fill="none" stroke="#111"/>
+  <text x="666" y="306" font-family="Arial" font-size="14">Открыть заказ</text>
+  <text x="640" y="350" font-family="Arial" font-size="14">Source: ORDER_PAID</text>
+  <text x="640" y="382" font-family="Arial" font-size="14">Campaign: CMP-2026-05</text>
+  <rect x="48" y="472" width="1084" height="210" fill="none" stroke="#111"/>
+  <text x="76" y="510" font-family="Arial" font-size="16">Timeline транзакции</text>
+  <text x="76" y="550" font-family="Arial" font-size="14">ACCRUAL_CREATED - checkout/order source</text>
+  <text x="76" y="586" font-family="Arial" font-size="14">BALANCE_AVAILABLE - wallet ledger</text>
+  <text x="76" y="622" font-family="Arial" font-size="14">EXPORT_INCLUDED - optional report trace</text>
+</svg>

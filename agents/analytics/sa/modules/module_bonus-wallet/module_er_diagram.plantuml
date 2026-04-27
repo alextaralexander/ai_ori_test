@@ -1,0 +1,10 @@
+@startuml
+title Module bonus-wallet full ER
+entity bonus_wallet_account
+entity bonus_wallet_balance
+entity bonus_wallet_transaction
+entity bonus_wallet_adjustment
+bonus_wallet_account ||--o{ bonus_wallet_balance
+bonus_wallet_account ||--o{ bonus_wallet_transaction
+bonus_wallet_transaction ||--o| bonus_wallet_adjustment
+@enduml

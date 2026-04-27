@@ -1,0 +1,25 @@
+@startuml
+title Feature 014 sequence - bonus wallet and transactions
+actor User as "Покупатель/Партнер"
+actor Finance as "Финансовый оператор"
+participant Web as "React web-shell"
+participant Wallet as "bonus-wallet API"
+participant Order as "order module"
+
+User -> Web: открыть /profile/transactions/:type
+Web -> Wallet: GET /api/bonus-wallet/summary?type=:type
+Wallet --> Web: balances, recentTransactions, applyLimit
+Web -> Wallet: GET /api/bonus-wallet/transactions?filters
+Wallet --> Web: transaction page
+User -> Web: открыть transaction details
+Web -> Wallet: GET /api/bonus-wallet/transactions/{transactionId}
+Wallet --> Web: details, events, linkedResources
+User -> Web: перейти к связанному заказу
+Web -> Order: GET /api/order/order-history/{orderNumber}
+Order --> Web: order details
+
+Finance -> Web: создать manual adjustment
+Web -> Wallet: POST /api/bonus-wallet/finance/adjustments
+Wallet -> Wallet: проверить роль, reason, idempotency key
+Wallet --> Web: transaction with auditRecorded=true
+@enduml

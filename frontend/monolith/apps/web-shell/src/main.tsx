@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { loadContentPage, loadDocuments, loadFaq, loadInfoSection, loadNews, loadOffer, loadPublicPage, type Audience, type BenefitLandingType, type ContentPage, type DocumentCollection, type FaqPage, type InfoPage, type NewsFeed, type OfferPage, type PublicPage } from './api/publicContent';
 import { BenefitLandingView } from './components/BenefitLandingView';
+import { BonusWalletFinanceView, BonusWalletView } from './components/BonusWalletView';
 import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
@@ -49,7 +50,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support')) {
+  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -83,7 +84,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -184,6 +185,10 @@ function App() {
     contentView = <ProfileSettingsView mode="security" />;
   } else if (path.startsWith('/profile-settings/support/')) {
     contentView = <ProfileSettingsView mode="forbidden" />;
+  } else if (path.startsWith('/profile/transactions/finance/')) {
+    contentView = <BonusWalletFinanceView targetUserId={decodeURIComponent(path.slice('/profile/transactions/finance/'.length))} />;
+  } else if (path.startsWith('/profile/transactions/')) {
+    contentView = <BonusWalletView params={params} transactionType={decodeURIComponent(path.slice('/profile/transactions/'.length))} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
