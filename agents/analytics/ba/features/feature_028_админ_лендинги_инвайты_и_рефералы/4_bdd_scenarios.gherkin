@@ -1,0 +1,99 @@
+# language: ru
+Функция: Feature 028. Админ: лендинги, инвайты и рефералы
+  Административный контур Best Ori Gin позволяет управлять benefit-лендингами,
+  registration funnels, invite/referral-кодами, attribution policy и conversion analytics
+  без релиза frontend-кода и без передачи hardcoded пользовательского текста из backend.
+
+  Предыстория:
+    Дано пользователь с ролью "Маркетинг-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_MANAGE"
+    И пользователь открыл раздел "Лендинги, инвайты и рефералы"
+
+  Сценарий: Создание и активация landing variant для business partner
+    Когда администратор создает landing variant с типом "BUSINESS", локалью "ru", campaign code "BIZ-SPRING-2026" и slug "business-partner-spring"
+    И администратор добавляет hero, benefit blocks, CTA registration entrypoint, FAQ и legal notice
+    И администратор задает период активности с "2026-05-01T00:00:00+03:00" по "2026-05-21T23:59:59+03:00"
+    И администратор сохраняет landing variant как черновик
+    Тогда система создает версию landing variant со статусом "DRAFT"
+    И audit trail содержит событие "LANDING_VARIANT_CREATED"
+    Когда администратор запускает preview landing variant
+    Тогда система возвращает preview без публикации лендинга
+    Когда администратор активирует landing variant
+    Тогда статус landing variant становится "ACTIVE"
+    И публичная регистрационная точка получает campaign context "BIZ-SPRING-2026"
+
+  Сценарий: Валидация обязательных блоков перед активацией landing variant
+    Когда администратор создает landing variant без legal notice
+    И администратор пытается активировать landing variant
+    Тогда система отклоняет операцию с кодом "STR_MNEMO_ADMIN_REFERRAL_LANDING_LEGAL_NOTICE_REQUIRED"
+    И статус landing variant остается "DRAFT"
+    И frontend показывает локализованное сообщение из i18n dictionary
+
+  Сценарий: Настройка registration funnel с юридическими согласиями
+    Дано пользователь с ролью "CRM-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_FUNNEL_MANAGE"
+    Когда CRM-администратор создает funnel "business-partner-default" для сценария "BUSINESS_PARTNER"
+    И CRM-администратор добавляет шаги "PERSONAL_DATA", "CONTACT_CONFIRMATION", "PARTNER_TERMS", "ACCOUNT_SETUP"
+    И CRM-администратор добавляет обязательные consent codes "PERSONAL_DATA_PROCESSING" и "PARTNER_COMMERCIAL_TERMS"
+    И CRM-администратор активирует funnel
+    Тогда система создает активную версию funnel
+    И новые регистрации используют эту версию funnel
+    И audit trail содержит событие "REGISTRATION_FUNNEL_ACTIVATED"
+
+  Сценарий: Генерация многоразового campaign referral code
+    Дано пользователь с ролью "CRM-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_CODE_MANAGE"
+    Когда CRM-администратор генерирует referral code типа "CAMPAIGN_MULTI_USE" для campaign code "BIZ-SPRING-2026"
+    И CRM-администратор задает лимит использований 1000 и период активности с "2026-05-01T00:00:00+03:00" по "2026-05-21T23:59:59+03:00"
+    Тогда система создает referral code со статусом "ACTIVE"
+    И повторный запрос с тем же idempotency key возвращает тот же referral code без дубля
+    И audit trail содержит событие "REFERRAL_CODE_GENERATED"
+
+  Сценарий: Запрет активации referral code с истекшим сроком действия
+    Дано пользователь с ролью "CRM-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_CODE_MANAGE"
+    Когда CRM-администратор создает referral code с activeTo в прошлом
+    И CRM-администратор пытается активировать referral code
+    Тогда система отклоняет операцию с кодом "STR_MNEMO_ADMIN_REFERRAL_CODE_ACTIVE_WINDOW_INVALID"
+    И referral code остается в статусе "DRAFT"
+
+  Сценарий: Настройка priority attribution policy и разрешение конфликта источников
+    Дано пользователь с ролью "CRM-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_ATTRIBUTION_MANAGE"
+    Когда CRM-администратор задает priority источников "URL_REFERRAL_CODE", "MANUAL_CODE", "SESSION_CONTEXT", "CAMPAIGN_DEFAULT_SPONSOR", "CRM_OVERRIDE"
+    И кандидат начинает регистрацию с referral code в URL и другим кодом в ручном вводе
+    Тогда система выбирает источник "URL_REFERRAL_CODE"
+    И система сохраняет отклоненный источник "MANUAL_CODE"
+    И событие attribution содержит reason code "ATTRIBUTION_PRIORITY_RULE_APPLIED"
+
+  Сценарий: Ручная корректировка sponsor attribution
+    Дано пользователь с ролью "CRM-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_ATTRIBUTION_OVERRIDE"
+    И существует регистрационная заявка с назначенным sponsor attribution
+    Когда CRM-администратор меняет sponsor attribution с reason code "SPONSOR_CLAIM_ACCEPTED" и комментарием проверки
+    Тогда система сохраняет новую attribution record
+    И исходная attribution history остается доступной
+    И conversion event "ATTRIBUTION_OVERRIDDEN" попадает в отчетность
+
+  Сценарий: Conversion report по campaign и landing variant
+    Дано пользователь с ролью "Маркетинг-администратор" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_REFERRAL_ANALYTICS_VIEW"
+    И по campaign code "BIZ-SPRING-2026" накоплены события воронки
+    Когда администратор фильтрует conversion report по campaign code "BIZ-SPRING-2026" и периоду "2026-05-01" - "2026-05-21"
+    Тогда отчет показывает метрики landing views, CTA clicks, started registrations, submitted applications, confirmed contacts и activated partners
+    И отчет группирует данные по landing variant, funnel, source channel и sponsor
+    И отчет не содержит секретов, токенов и лишних персональных данных кандидатов
+
+  Сценарий: Запрет доступа без административного scope
+    Дано пользователь с ролью "Редактор CMS" успешно вошел в административный интерфейс
+    И пользователь не имеет RBAC scope "ADMIN_REFERRAL_MANAGE"
+    Когда пользователь открывает раздел "Лендинги, инвайты и рефералы"
+    Тогда backend возвращает статус 403 и код "STR_MNEMO_ADMIN_REFERRAL_FORBIDDEN"
+    И frontend показывает локализованное состояние запрета доступа
+
+  Сценарий: Sponsor cabinet использует административные правила referral links
+    Дано пользователь с ролью "Партнер-спонсор" успешно вошел в личный кабинет
+    И для campaign code "BIZ-SPRING-2026" активны landing variant, funnel и referral policy
+    Когда партнер открывает sponsor cabinet
+    Тогда система показывает personal referral link, построенный по активным административным правилам
+    И переход по ссылке сохраняет campaign context и sponsor attribution для registration funnel

@@ -1,0 +1,642 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Admin Referral API - Feature 028
+  version: 1.0.0
+  description: Admin endpoints for landing variants, registration funnels, referral codes, attribution policy, conversion analytics and audit.
+servers:
+  - url: /api/admin-referral
+paths:
+  /landing-variants:
+    get:
+      tags: [Admin Referral Landing]
+      summary: Search landing variants
+      parameters:
+        - $ref: '#/components/parameters/LandingType'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/CampaignCode'
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Landing variant list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralLandingListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Admin Referral Landing]
+      summary: Create landing variant draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralLandingUpsertRequest'
+      responses:
+        '201':
+          description: Created landing variant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralLandingDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /landing-variants/{landingId}:
+    get:
+      tags: [Admin Referral Landing]
+      summary: Get landing variant detail
+      parameters:
+        - $ref: '#/components/parameters/LandingId'
+      responses:
+        '200':
+          description: Landing detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralLandingDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Admin Referral Landing]
+      summary: Update landing variant draft
+      parameters:
+        - $ref: '#/components/parameters/LandingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralLandingUpsertRequest'
+      responses:
+        '200':
+          description: Updated landing variant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralLandingDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /landing-variants/{landingId}/activate:
+    post:
+      tags: [Admin Referral Landing]
+      summary: Activate landing variant version
+      parameters:
+        - $ref: '#/components/parameters/LandingId'
+      responses:
+        '200':
+          description: Activated landing variant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralLandingDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /landing-variants/{landingId}/preview:
+    post:
+      tags: [Admin Referral Landing]
+      summary: Build preview render model for landing draft
+      parameters:
+        - $ref: '#/components/parameters/LandingId'
+      responses:
+        '200':
+          description: Preview render model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralPreviewResponse'
+  /funnels:
+    get:
+      tags: [Admin Referral Funnels]
+      summary: Search registration funnels
+      parameters:
+        - name: scenario
+          in: query
+          schema:
+            $ref: '#/components/schemas/AdminReferralFunnelScenario'
+        - $ref: '#/components/parameters/Status'
+      responses:
+        '200':
+          description: Funnel list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralFunnelListResponse'
+    post:
+      tags: [Admin Referral Funnels]
+      summary: Create registration funnel draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralFunnelUpsertRequest'
+      responses:
+        '201':
+          description: Created funnel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralFunnelDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /funnels/{funnelId}/activate:
+    post:
+      tags: [Admin Referral Funnels]
+      summary: Activate registration funnel version
+      parameters:
+        - $ref: '#/components/parameters/FunnelId'
+      responses:
+        '200':
+          description: Activated funnel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralFunnelDetailResponse'
+  /referral-codes:
+    get:
+      tags: [Admin Referral Codes]
+      summary: Search referral codes
+      parameters:
+        - $ref: '#/components/parameters/CampaignCode'
+        - name: ownerPartnerId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: codeType
+          in: query
+          schema:
+            $ref: '#/components/schemas/AdminReferralCodeType'
+        - $ref: '#/components/parameters/Status'
+      responses:
+        '200':
+          description: Referral code list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralCodeListResponse'
+    post:
+      tags: [Admin Referral Codes]
+      summary: Generate referral code
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralCodeGenerateRequest'
+      responses:
+        '201':
+          description: Generated referral code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralCodeResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /referral-codes/{referralCodeId}/revoke:
+    post:
+      tags: [Admin Referral Codes]
+      summary: Revoke referral code
+      parameters:
+        - $ref: '#/components/parameters/ReferralCodeId'
+      responses:
+        '200':
+          description: Revoked referral code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralCodeResponse'
+  /attribution-policy:
+    get:
+      tags: [Admin Referral Attribution]
+      summary: Get active attribution policy
+      responses:
+        '200':
+          description: Active attribution policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralAttributionPolicyResponse'
+    put:
+      tags: [Admin Referral Attribution]
+      summary: Update attribution priority policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralAttributionPolicyUpdateRequest'
+      responses:
+        '200':
+          description: Updated attribution policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralAttributionPolicyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /attribution/override:
+    post:
+      tags: [Admin Referral Attribution]
+      summary: Override sponsor attribution for registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReferralAttributionOverrideRequest'
+      responses:
+        '200':
+          description: Attribution override saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralAttributionEventResponse'
+  /analytics/conversions:
+    get:
+      tags: [Admin Referral Analytics]
+      summary: Get conversion report
+      parameters:
+        - $ref: '#/components/parameters/CampaignCode'
+        - name: landingId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: sourceChannel
+          in: query
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Conversion report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralConversionReportResponse'
+  /audit:
+    get:
+      tags: [Admin Referral Audit]
+      summary: Search admin referral audit trail
+      parameters:
+        - name: entityType
+          in: query
+          schema: { type: string }
+        - name: entityId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReferralAuditResponse'
+components:
+  parameters:
+    LandingId:
+      name: landingId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    FunnelId:
+      name: funnelId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ReferralCodeId:
+      name: referralCodeId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    LandingType:
+      name: landingType
+      in: query
+      schema:
+        $ref: '#/components/schemas/AdminReferralLandingType'
+    Status:
+      name: status
+      in: query
+      schema: { type: string }
+    CampaignCode:
+      name: campaignCode
+      in: query
+      schema: { type: string }
+    Locale:
+      name: locale
+      in: query
+      schema: { type: string }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, maxLength: 120 }
+  responses:
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminReferralErrorResponse'
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminReferralErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminReferralErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminReferralErrorResponse'
+  schemas:
+    AdminReferralLandingType:
+      type: string
+      enum: [BEAUTY, BUSINESS, CUSTOMER_REFERRAL]
+    AdminReferralLandingStatus:
+      type: string
+      enum: [DRAFT, IN_REVIEW, ACTIVE, PAUSED, SCHEDULED, ARCHIVED]
+    AdminReferralFunnelScenario:
+      type: string
+      enum: [BEAUTY_PARTNER, BUSINESS_PARTNER, CUSTOMER_REFERRAL]
+    AdminReferralCodeType:
+      type: string
+      enum: [PERSONAL_SINGLE_USE, PERSONAL_MULTI_USE, CAMPAIGN_SINGLE_USE, CAMPAIGN_MULTI_USE]
+    AdminReferralCodeStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, USED, EXPIRED, REVOKED, LOCKED]
+    AdminReferralLandingSummary:
+      type: object
+      required: [landingId, landingType, locale, slug, name, campaignCode, status]
+      properties:
+        landingId: { type: string, format: uuid }
+        landingType: { $ref: '#/components/schemas/AdminReferralLandingType' }
+        locale: { type: string }
+        slug: { type: string }
+        name: { type: string }
+        campaignCode: { type: string }
+        status: { $ref: '#/components/schemas/AdminReferralLandingStatus' }
+        activeFrom: { type: string, format: date-time, nullable: true }
+        activeTo: { type: string, format: date-time, nullable: true }
+    AdminReferralLandingListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReferralLandingSummary'
+        total: { type: integer, format: int64 }
+    AdminReferralLandingDetailResponse:
+      type: object
+      required: [landing, version, auditRecorded]
+      properties:
+        landing: { $ref: '#/components/schemas/AdminReferralLandingSummary' }
+        version: { $ref: '#/components/schemas/AdminReferralLandingVersion' }
+        auditRecorded: { type: boolean }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_REFERRAL_LANDING_SAVED }
+    AdminReferralLandingVersion:
+      type: object
+      required: [versionId, versionNumber, blocks]
+      properties:
+        versionId: { type: string, format: uuid }
+        versionNumber: { type: integer }
+        hero: { type: object, additionalProperties: true }
+        seo: { type: object, additionalProperties: true }
+        campaignContext: { type: object, additionalProperties: true }
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReferralLandingBlock'
+    AdminReferralLandingBlock:
+      type: object
+      required: [blockType, sortOrder, payload]
+      properties:
+        blockType:
+          type: string
+          enum: [HERO, BENEFIT, TESTIMONIAL, CTA, FAQ, LEGAL_NOTICE]
+        sortOrder: { type: integer }
+        payload: { type: object, additionalProperties: true }
+    AdminReferralLandingUpsertRequest:
+      type: object
+      required: [landingType, locale, slug, name, campaignCode, activeFrom, activeTo, blocks]
+      properties:
+        landingType: { $ref: '#/components/schemas/AdminReferralLandingType' }
+        locale: { type: string }
+        slug: { type: string }
+        name: { type: string }
+        campaignCode: { type: string }
+        activeFrom: { type: string, format: date-time }
+        activeTo: { type: string, format: date-time }
+        hero: { type: object, additionalProperties: true }
+        seo: { type: object, additionalProperties: true }
+        campaignContext: { type: object, additionalProperties: true }
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReferralLandingBlock'
+    AdminReferralPreviewResponse:
+      type: object
+      required: [landingId, renderModel]
+      properties:
+        landingId: { type: string, format: uuid }
+        renderModel: { type: object, additionalProperties: true }
+    AdminReferralFunnelListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReferralFunnelDetailResponse'
+    AdminReferralFunnelDetailResponse:
+      type: object
+      properties:
+        funnelId: { type: string, format: uuid }
+        funnelCode: { type: string }
+        scenario: { $ref: '#/components/schemas/AdminReferralFunnelScenario' }
+        status: { type: string }
+        version:
+          $ref: '#/components/schemas/AdminReferralFunnelVersion'
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_REFERRAL_FUNNEL_SAVED }
+    AdminReferralFunnelVersion:
+      type: object
+      properties:
+        versionId: { type: string, format: uuid }
+        versionNumber: { type: integer }
+        steps:
+          type: array
+          items: { type: string }
+        consentCodes:
+          type: array
+          items: { type: string }
+        validationRules: { type: object, additionalProperties: true }
+        defaultContext: { type: object, additionalProperties: true }
+    AdminReferralFunnelUpsertRequest:
+      type: object
+      required: [funnelCode, scenario, steps, consentCodes]
+      properties:
+        funnelCode: { type: string }
+        scenario: { $ref: '#/components/schemas/AdminReferralFunnelScenario' }
+        steps:
+          type: array
+          items: { type: string }
+        consentCodes:
+          type: array
+          items: { type: string }
+        validationRules: { type: object, additionalProperties: true }
+        defaultContext: { type: object, additionalProperties: true }
+    AdminReferralCodeGenerateRequest:
+      type: object
+      required: [codeType, campaignCode, landingType, activeFrom, activeTo]
+      properties:
+        codeType: { $ref: '#/components/schemas/AdminReferralCodeType' }
+        campaignCode: { type: string }
+        ownerPartnerId: { type: string, format: uuid, nullable: true }
+        landingType: { $ref: '#/components/schemas/AdminReferralLandingType' }
+        activeFrom: { type: string, format: date-time }
+        activeTo: { type: string, format: date-time }
+        maxUsageCount: { type: integer, nullable: true }
+        constraints: { type: object, additionalProperties: true }
+    AdminReferralCodeResponse:
+      type: object
+      properties:
+        referralCodeId: { type: string, format: uuid }
+        publicCode: { type: string }
+        codeType: { $ref: '#/components/schemas/AdminReferralCodeType' }
+        status: { $ref: '#/components/schemas/AdminReferralCodeStatus' }
+        campaignCode: { type: string }
+        ownerPartnerId: { type: string, format: uuid, nullable: true }
+        usageCount: { type: integer }
+        maxUsageCount: { type: integer, nullable: true }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_REFERRAL_CODE_GENERATED }
+    AdminReferralCodeListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReferralCodeResponse'
+        total: { type: integer, format: int64 }
+    AdminReferralAttributionPolicyUpdateRequest:
+      type: object
+      required: [prioritySources, conflictStrategy]
+      properties:
+        prioritySources:
+          type: array
+          items:
+            type: string
+            enum: [URL_REFERRAL_CODE, MANUAL_CODE, SESSION_CONTEXT, CAMPAIGN_DEFAULT_SPONSOR, CRM_OVERRIDE]
+        conflictStrategy: { type: string }
+    AdminReferralAttributionPolicyResponse:
+      type: object
+      properties:
+        policyId: { type: string, format: uuid }
+        policyCode: { type: string }
+        status: { type: string }
+        prioritySources:
+          type: array
+          items: { type: string }
+        conflictStrategy: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_REFERRAL_ATTRIBUTION_POLICY_SAVED }
+    AdminReferralAttributionOverrideRequest:
+      type: object
+      required: [registrationId, sponsorPartnerId, reasonCode, comment]
+      properties:
+        registrationId: { type: string, format: uuid }
+        sponsorPartnerId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        comment: { type: string, maxLength: 1000 }
+    AdminReferralAttributionEventResponse:
+      type: object
+      properties:
+        attributionEventId: { type: string, format: uuid }
+        selectedSource: { type: string }
+        sponsorPartnerId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_REFERRAL_ATTRIBUTION_OVERRIDDEN }
+    AdminReferralConversionReportResponse:
+      type: object
+      properties:
+        totals:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              campaignCode: { type: string }
+              landingId: { type: string, format: uuid }
+              sourceChannel: { type: string }
+              sponsorPartnerId: { type: string, format: uuid, nullable: true }
+              metrics:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int64
+    AdminReferralAuditResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              auditEventId: { type: string, format: uuid }
+              entityType: { type: string }
+              entityId: { type: string, format: uuid }
+              actionCode: { type: string }
+              actorUserId: { type: string, format: uuid }
+              correlationId: { type: string }
+              occurredAt: { type: string, format: date-time }
+    AdminReferralErrorResponse:
+      type: object
+      required: [messageCode]
+      properties:
+        messageCode:
+          type: string
+          enum:
+            - STR_MNEMO_ADMIN_REFERRAL_FORBIDDEN
+            - STR_MNEMO_ADMIN_REFERRAL_LANDING_LEGAL_NOTICE_REQUIRED
+            - STR_MNEMO_ADMIN_REFERRAL_LANDING_SLUG_CONFLICT
+            - STR_MNEMO_ADMIN_REFERRAL_ACTIVE_WINDOW_INVALID
+            - STR_MNEMO_ADMIN_REFERRAL_FUNNEL_CONSENT_REQUIRED
+            - STR_MNEMO_ADMIN_REFERRAL_CODE_ACTIVE_WINDOW_INVALID
+            - STR_MNEMO_ADMIN_REFERRAL_CODE_DUPLICATE
+            - STR_MNEMO_ADMIN_REFERRAL_ATTRIBUTION_POLICY_INVALID
+            - STR_MNEMO_ADMIN_REFERRAL_ATTRIBUTION_REASON_REQUIRED
+        details:
+          type: array
+          items: { type: string }

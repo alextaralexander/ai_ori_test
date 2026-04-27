@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <title>Feature 028 admin referral funnel and code editor layout</title>
+  <rect x="0" y="0" width="1280" height="820" fill="#ffffff"/>
+  <rect x="0" y="0" width="1280" height="64" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="32" y="40" font-family="Arial" font-size="22">Редактор funnel и referral code</text>
+  <rect x="32" y="92" width="384" height="660" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="56" y="126" font-family="Arial" font-size="17">Registration funnel</text>
+  <rect x="56" y="154" width="160" height="30" fill="#ffffff" stroke="#6b7280"/><text x="68" y="174" font-family="Arial" font-size="12">scenario</text>
+  <rect x="232" y="154" width="140" height="30" fill="#ffffff" stroke="#6b7280"/><text x="244" y="174" font-family="Arial" font-size="12">status</text>
+  <text x="56" y="222" font-family="Arial" font-size="14">Шаги registration funnel</text>
+  <rect x="56" y="244" width="316" height="48" fill="#ffffff" stroke="#d1d5db"/><text x="72" y="274" font-family="Arial" font-size="12">1. PERSONAL_DATA</text>
+  <rect x="56" y="304" width="316" height="48" fill="#ffffff" stroke="#d1d5db"/><text x="72" y="334" font-family="Arial" font-size="12">2. CONTACT_CONFIRMATION</text>
+  <rect x="56" y="364" width="316" height="48" fill="#ffffff" stroke="#d1d5db"/><text x="72" y="394" font-family="Arial" font-size="12">3. PARTNER_TERMS</text>
+  <rect x="56" y="424" width="316" height="48" fill="#ffffff" stroke="#d1d5db"/><text x="72" y="454" font-family="Arial" font-size="12">4. ACCOUNT_SETUP</text>
+  <text x="56" y="520" font-family="Arial" font-size="14">Consent codes</text>
+  <rect x="56" y="544" width="316" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="566" font-family="Arial" font-size="12">PERSONAL_DATA_PROCESSING</text>
+  <rect x="56" y="590" width="316" height="34" fill="#ffffff" stroke="#6b7280"/><text x="68" y="612" font-family="Arial" font-size="12">PARTNER_COMMERCIAL_TERMS</text>
+  <rect x="56" y="676" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="78" y="698" font-family="Arial" font-size="13">Сохранить</text>
+  <rect x="206" y="676" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="232" y="698" font-family="Arial" font-size="13">Активировать</text>
+  <rect x="448" y="92" width="384" height="660" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="472" y="126" font-family="Arial" font-size="17">Referral code</text>
+  <rect x="472" y="154" width="146" height="30" fill="#ffffff" stroke="#6b7280"/><text x="484" y="174" font-family="Arial" font-size="12">code type</text>
+  <rect x="636" y="154" width="150" height="30" fill="#ffffff" stroke="#6b7280"/><text x="648" y="174" font-family="Arial" font-size="12">campaign code</text>
+  <rect x="472" y="206" width="146" height="30" fill="#ffffff" stroke="#6b7280"/><text x="484" y="226" font-family="Arial" font-size="12">owner partner</text>
+  <rect x="636" y="206" width="150" height="30" fill="#ffffff" stroke="#6b7280"/><text x="648" y="226" font-family="Arial" font-size="12">landing type</text>
+  <rect x="472" y="258" width="146" height="30" fill="#ffffff" stroke="#6b7280"/><text x="484" y="278" font-family="Arial" font-size="12">activeFrom</text>
+  <rect x="636" y="258" width="150" height="30" fill="#ffffff" stroke="#6b7280"/><text x="648" y="278" font-family="Arial" font-size="12">activeTo</text>
+  <rect x="472" y="310" width="146" height="30" fill="#ffffff" stroke="#6b7280"/><text x="484" y="330" font-family="Arial" font-size="12">max usage</text>
+  <rect x="636" y="310" width="150" height="30" fill="#ffffff" stroke="#6b7280"/><text x="648" y="330" font-family="Arial" font-size="12">region constraints</text>
+  <text x="472" y="390" font-family="Arial" font-size="14">Lifecycle</text>
+  <rect x="472" y="414" width="314" height="44" fill="#ffffff" stroke="#d1d5db"/><text x="486" y="442" font-family="Arial" font-size="12">DRAFT -> ACTIVE -> USED/EXPIRED/REVOKED</text>
+  <text x="472" y="500" font-family="Arial" font-size="14">Validation messages</text>
+  <rect x="472" y="524" width="314" height="44" fill="#ffffff" stroke="#d1d5db"/><text x="486" y="552" font-family="Arial" font-size="12">STR_MNEMO_ADMIN_REFERRAL_CODE_*</text>
+  <rect x="472" y="676" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="498" y="698" font-family="Arial" font-size="13">Генерировать</text>
+  <rect x="622" y="676" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="652" y="698" font-family="Arial" font-size="13">Отозвать</text>
+  <rect x="864" y="92" width="352" height="660" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="888" y="126" font-family="Arial" font-size="17">Attribution policy</text>
+  <text x="888" y="166" font-family="Arial" font-size="13">Priority sources</text>
+  <rect x="888" y="190" width="284" height="40" fill="#ffffff" stroke="#d1d5db"/><text x="904" y="216" font-family="Arial" font-size="12">1. URL_REFERRAL_CODE</text>
+  <rect x="888" y="242" width="284" height="40" fill="#ffffff" stroke="#d1d5db"/><text x="904" y="268" font-family="Arial" font-size="12">2. MANUAL_CODE</text>
+  <rect x="888" y="294" width="284" height="40" fill="#ffffff" stroke="#d1d5db"/><text x="904" y="320" font-family="Arial" font-size="12">3. SESSION_CONTEXT</text>
+  <rect x="888" y="346" width="284" height="40" fill="#ffffff" stroke="#d1d5db"/><text x="904" y="372" font-family="Arial" font-size="12">4. CAMPAIGN_DEFAULT_SPONSOR</text>
+  <rect x="888" y="398" width="284" height="40" fill="#ffffff" stroke="#d1d5db"/><text x="904" y="424" font-family="Arial" font-size="12">5. CRM_OVERRIDE</text>
+  <text x="888" y="500" font-family="Arial" font-size="13">Override form: sponsor, reason code, comment</text>
+  <rect x="888" y="526" width="284" height="34" fill="#ffffff" stroke="#6b7280"/><text x="900" y="548" font-family="Arial" font-size="12">new sponsor</text>
+  <rect x="888" y="574" width="284" height="34" fill="#ffffff" stroke="#6b7280"/><text x="900" y="596" font-family="Arial" font-size="12">reason code</text>
+  <rect x="888" y="622" width="284" height="58" fill="#ffffff" stroke="#6b7280"/><text x="900" y="652" font-family="Arial" font-size="12">comment</text>
+  <rect x="888" y="698" width="132" height="34" fill="#e5e7eb" stroke="#6b7280"/><text x="908" y="720" font-family="Arial" font-size="13">Применить</text>
+</svg>

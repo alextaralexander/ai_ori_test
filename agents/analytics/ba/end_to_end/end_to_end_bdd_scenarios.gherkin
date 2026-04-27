@@ -218,3 +218,19 @@
     И пользователь не видит draft, rejected, archived или future scheduled материалы
     И audit trail содержит создание, review decision, публикацию, materialId, versionId, actorUserId и correlationId
     И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_CMS_*` для предопределенных сообщений
+
+  Сценарий: Маркетинг и CRM запускают партнерскую referral funnel без нарушения регистрации
+    Допустим маркетинг-администратор авторизован и имеет permission scope `ADMIN_REFERRAL_MANAGE`
+    И CRM-администратор авторизован и имеет permission scopes `ADMIN_REFERRAL_FUNNEL_MANAGE`, `ADMIN_REFERRAL_CODE_MANAGE` и `ADMIN_REFERRAL_ATTRIBUTION_MANAGE`
+    Когда маркетинг-администратор открывает `/admin/referrals`
+    И создает business landing variant с campaign code `BIZ-SPRING-2026`, CTA registration entrypoint, legal notice и active window
+    И CRM-администратор активирует registration funnel с consent codes и validation rules
+    И CRM-администратор генерирует campaign referral code с лимитом использований и idempotency key
+    И CRM-администратор задает attribution priority для URL referral code, ручного ввода, session context, campaign default sponsor и CRM override
+    Тогда sponsor cabinet показывает partner referral link по активным административным правилам
+    Когда кандидат открывает partner referral link и начинает регистрацию
+    Тогда registration funnel сохраняет campaign context, referral code и sponsor attribution
+    И conversion analytics фиксирует `LANDING_VIEWED`, `CTA_CLICKED`, `REGISTRATION_STARTED`, `APPLICATION_SUBMITTED` и `PARTNER_ACTIVATED`
+    И спорная ручная корректировка attribution требует reason code, комментарий и отдельный permission scope
+    И audit trail содержит landing variant, referral code, attribution policy, actorUserId и correlationId
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_REFERRAL_*` для предопределенных сообщений

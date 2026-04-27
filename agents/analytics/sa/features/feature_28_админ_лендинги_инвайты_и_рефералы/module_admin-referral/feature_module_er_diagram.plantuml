@@ -1,0 +1,162 @@
+@startuml
+title Feature 028 admin-referral ER changes
+
+entity admin_ref_landing_variant {
+  * landing_id : uuid <<PK>>
+  --
+  landing_type : varchar(32)
+  locale_code : varchar(8)
+  slug : varchar(180)
+  name : varchar(240)
+  campaign_code : varchar(80)
+  status : varchar(32)
+  owner_user_id : uuid
+  active_version_id : uuid <<FK>>
+  active_from : timestamptz
+  active_to : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
+  version_number : bigint
+}
+
+entity admin_ref_landing_version {
+  * version_id : uuid <<PK>>
+  --
+  landing_id : uuid <<FK>>
+  version_number : int
+  status : varchar(32)
+  hero_json : jsonb
+  seo_json : jsonb
+  campaign_context_json : jsonb
+  created_by_user_id : uuid
+  created_at : timestamptz
+  activated_by_user_id : uuid
+  activated_at : timestamptz
+}
+
+entity admin_ref_landing_block {
+  * block_id : uuid <<PK>>
+  --
+  version_id : uuid <<FK>>
+  block_type : varchar(40)
+  sort_order : int
+  payload_json : jsonb
+  created_at : timestamptz
+}
+
+entity admin_ref_registration_funnel {
+  * funnel_id : uuid <<PK>>
+  --
+  funnel_code : varchar(100)
+  scenario : varchar(40)
+  status : varchar(32)
+  active_version_id : uuid <<FK>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  version_number : bigint
+}
+
+entity admin_ref_funnel_version {
+  * funnel_version_id : uuid <<PK>>
+  --
+  funnel_id : uuid <<FK>>
+  version_number : int
+  steps_json : jsonb
+  consent_codes_json : jsonb
+  validation_rules_json : jsonb
+  default_context_json : jsonb
+  created_by_user_id : uuid
+  created_at : timestamptz
+  activated_by_user_id : uuid
+  activated_at : timestamptz
+}
+
+entity admin_ref_referral_code {
+  * referral_code_id : uuid <<PK>>
+  --
+  public_code : varchar(80)
+  code_type : varchar(40)
+  status : varchar(32)
+  campaign_code : varchar(80)
+  owner_partner_id : uuid
+  landing_type : varchar(32)
+  active_from : timestamptz
+  active_to : timestamptz
+  max_usage_count : int
+  usage_count : int
+  constraints_json : jsonb
+  idempotency_key : varchar(120)
+  created_by_user_id : uuid
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity admin_ref_attribution_policy {
+  * policy_id : uuid <<PK>>
+  --
+  policy_code : varchar(100)
+  status : varchar(32)
+  priority_sources_json : jsonb
+  conflict_strategy : varchar(40)
+  created_by_user_id : uuid
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity admin_ref_attribution_event {
+  * attribution_event_id : uuid <<PK>>
+  --
+  policy_id : uuid <<FK>>
+  referral_code_id : uuid <<FK>>
+  registration_id : uuid
+  selected_source : varchar(40)
+  rejected_sources_json : jsonb
+  sponsor_partner_id : uuid
+  reason_code : varchar(80)
+  comment : varchar(1000)
+  actor_user_id : uuid
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+entity admin_ref_conversion_event {
+  * conversion_event_id : uuid <<PK>>
+  --
+  event_type : varchar(64)
+  landing_id : uuid <<FK>>
+  funnel_id : uuid <<FK>>
+  referral_code_id : uuid <<FK>>
+  campaign_code : varchar(80)
+  source_channel : varchar(80)
+  sponsor_partner_id : uuid
+  registration_id : uuid
+  metadata_json : jsonb
+  occurred_at : timestamptz
+}
+
+entity admin_ref_audit_event {
+  * audit_event_id : uuid <<PK>>
+  --
+  entity_type : varchar(64)
+  entity_id : uuid
+  actor_user_id : uuid
+  action_code : varchar(80)
+  old_value_json : jsonb
+  new_value_json : jsonb
+  reason_code : varchar(80)
+  comment : varchar(1000)
+  source_route : varchar(240)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+admin_ref_landing_variant ||--o{ admin_ref_landing_version : versions
+admin_ref_landing_version ||--o{ admin_ref_landing_block : blocks
+admin_ref_registration_funnel ||--o{ admin_ref_funnel_version : versions
+admin_ref_referral_code ||--o{ admin_ref_conversion_event : code events
+admin_ref_landing_variant ||--o{ admin_ref_conversion_event : landing events
+admin_ref_registration_funnel ||--o{ admin_ref_conversion_event : funnel events
+admin_ref_attribution_policy ||--o{ admin_ref_attribution_event : decisions
+admin_ref_referral_code ||--o{ admin_ref_attribution_event : attribution
+
+@enduml

@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 027
+title Best Ori Gin monolith architecture through feature 028
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -15,6 +15,11 @@ package "frontend/monolith apps/web-shell" {
   [AdminCmsEditor UI]
   [AdminCmsReview UI]
   [AdminCmsAudit UI]
+  [AdminReferral UI]
+  [AdminReferralLanding UI]
+  [AdminReferralFunnel UI]
+  [AdminReferralAnalytics UI]
+  [AdminReferralAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -45,10 +50,12 @@ package "backend/monolith/monolith-app" {
   [partner-reporting]
   [mlm-structure]
   [partner-office]
+  [partner-onboarding]
   [employee]
   [platform-experience]
   [admin-rbac]
   [admin-cms]
+  [admin-referral]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -75,6 +82,11 @@ cloud "Hybrid Pixel" as hybrid
 [AdminCmsEditor UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials, /preview, /publish, /archive
 [AdminCmsReview UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials/{materialId}/review
 [AdminCmsAudit UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/audit
+[AdminReferral UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/landing-variants, /referral-codes
+[AdminReferralLanding UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/landing-variants/{landingId}/preview, /activate
+[AdminReferralFunnel UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/funnels, /attribution-policy
+[AdminReferralAnalytics UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/analytics/conversions
+[AdminReferralAudit UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/audit
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -103,6 +115,12 @@ cloud "Hybrid Pixel" as hybrid
 [admin-cms] --> [public-content] : published render model projection for home/news/FAQ/documents/offers
 [admin-cms] --> s3 : document/image fileReferenceId metadata, no private storage paths
 [admin-cms] --> db : CMS materials, versions, blocks, SEO, relations, review decisions and audit
+[admin-referral] --> [authorization] : admin referral permission, scope and elevated checks
+[admin-referral] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-referral] --> [public-content] : active benefit landing render model and campaign context
+[admin-referral] --> [partner-onboarding] : referral code validation and sponsor attribution context
+[admin-referral] --> [platform-experience] : conversion analytics diagnostics and mnemonic message contract
+[admin-referral] --> db : landing variants, versions, funnels, referral codes, attribution, conversion events and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

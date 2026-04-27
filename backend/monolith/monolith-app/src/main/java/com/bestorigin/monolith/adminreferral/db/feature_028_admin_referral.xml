@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-028-admin-referral-metadata" author="codex">
+        <createTable tableName="admin_ref_landing_variant">
+            <column name="landing_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="landing_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locale_code" type="varchar(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="slug" type="varchar(180)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(240)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_ref_referral_code">
+            <column name="referral_code_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="public_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="code_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_code" type="varchar(80)"/>
+            <column name="owner_partner_id" type="uuid"/>
+            <column name="max_usage_count" type="int"/>
+            <column name="usage_count" type="int" defaultValueNumeric="0"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="created_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_ref_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="uuid"/>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="action_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <createIndex tableName="admin_ref_landing_variant" indexName="idx_admin_ref_landing_campaign_status">
+            <column name="campaign_code"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="admin_ref_referral_code" indexName="idx_admin_ref_code_campaign_status">
+            <column name="campaign_code"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="admin_ref_audit_event" indexName="idx_admin_ref_audit_entity_action">
+            <column name="entity_type"/>
+            <column name="action_code"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

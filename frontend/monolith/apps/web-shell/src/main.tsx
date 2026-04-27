@@ -12,6 +12,7 @@ import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
 import { AdminCmsView } from './components/AdminCmsView';
+import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
@@ -63,6 +64,8 @@ const testLoginRoles = new Set([
   'content-admin',
   'cms-editor',
   'legal-reviewer',
+  'marketing-admin',
+  'crm-admin',
 ]);
 
 function resolveAudience(): Audience {
@@ -343,6 +346,16 @@ function App() {
     contentView = <AdminCmsView section="review" />;
   } else if (path === '/admin/cms/audit') {
     contentView = <AdminCmsView section="audit" />;
+  } else if (path === '/admin/referrals') {
+    contentView = <AdminReferralView />;
+  } else if (path === '/admin/referrals/funnels') {
+    contentView = <AdminReferralView section="funnels" />;
+  } else if (path === '/admin/referrals/codes') {
+    contentView = <AdminReferralView section="codes" />;
+  } else if (path === '/admin/referrals/analytics') {
+    contentView = <AdminReferralView section="analytics" />;
+  } else if (path === '/admin/referrals/audit') {
+    contentView = <AdminReferralView section="audit" />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

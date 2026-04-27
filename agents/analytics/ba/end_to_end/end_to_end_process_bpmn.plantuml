@@ -142,6 +142,29 @@ if (Нужно обновить публичный контент?) then (да)
   :Публичные главная, новости, FAQ, документы и offer pages получают только published render models;
 else (нет)
   :Публичный контент остается в текущей опубликованной версии;
-endif:Администраторы управляют контентом, каталогом, кампаниями, WMS, платежами, пользователями, аудитом и локализацией;
+endif
+if (Нужно запустить или изменить партнерскую marketing funnel?) then (да)
+  :Маркетинг-администратор открывает admin referral workspace;
+  :Создает или обновляет benefit landing variant для beauty, business или customer referral сценария;
+  :Настраивает structured blocks, CTA, campaign code, UTM-шаблоны, локаль и active window;
+  :CRM-администратор настраивает registration funnel, consent codes, validation rules и lifecycle referral codes;
+  :CRM-администратор задает attribution priority между URL referral code, ручным вводом, session context, campaign default sponsor и CRM override;
+  if (Лендинг, funnel и referral code валидны?) then (да)
+    :Система активирует landing variant, funnel version и referral code;
+    :Sponsor cabinet и публичные invite routes используют актуальные административные правила;
+    :Переход кандидата по referral link сохраняет campaign context и sponsor attribution для регистрации;
+    :Conversion analytics собирает landing views, CTA clicks, started registrations, submitted applications, confirmed contacts и activated partners;
+  else (нет)
+    :Администратор получает локализованные validation states через frontend i18n и исправляет настройки;
+  endif
+  if (Возник спор по атрибуции спонсора?) then (да)
+    :CRM-администратор выполняет controlled attribution override с reason code, комментарием и audit trail;
+  else (нет)
+    :Атрибуция применяется по активной policy без ручной корректировки;
+  endif
+else (нет)
+  :Партнерские landing funnels работают по текущим активным правилам;
+endif
+:Администраторы управляют контентом, лендингами, инвайтами, каталогом, кампаниями, WMS, платежами, пользователями, аудитом и локализацией;
 stop
 @enduml

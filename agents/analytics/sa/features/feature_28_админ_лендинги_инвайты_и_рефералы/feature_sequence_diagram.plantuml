@@ -1,0 +1,97 @@
+@startuml
+title Feature 028 admin referral sequence
+
+actor "Маркетинг-администратор" as MarketingAdmin
+actor "CRM-администратор" as CrmAdmin
+actor "Партнер-спонсор" as Sponsor
+actor "Кандидат" as Candidate
+participant "Frontend web-shell\n/admin/referrals" as Frontend
+participant "Auth/RBAC module" as Auth
+participant "admin-referral API" as AdminReferral
+database "admin_ref_* tables" as AdminReferralDb
+participant "partner-onboarding API\nfeature #008" as Onboarding
+participant "platform analytics layer\nfeature #025" as Analytics
+
+MarketingAdmin -> Frontend: открыть раздел лендингов и инвайтов
+Frontend -> Auth: получить session context и permission scopes
+Auth --> Frontend: roles, scopes, locale, message dictionaries
+Frontend -> AdminReferral: GET /api/admin-referral/landing-variants
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_VIEW
+AdminReferral -> AdminReferralDb: найти landing variants
+AdminReferral --> Frontend: список лендингов
+
+MarketingAdmin -> Frontend: создать business landing draft
+Frontend -> AdminReferral: POST /landing-variants
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_MANAGE
+AdminReferral -> AdminReferral: validate slug, blocks, active window
+AdminReferral -> AdminReferralDb: сохранить landing, version, blocks, audit
+AdminReferral --> Frontend: AdminReferralLandingDetailResponse
+
+MarketingAdmin -> Frontend: открыть preview и активировать
+Frontend -> AdminReferral: POST /landing-variants/{landingId}/preview
+AdminReferral -> AdminReferralDb: собрать draft render model
+AdminReferral --> Frontend: preview render model
+Frontend -> AdminReferral: POST /landing-variants/{landingId}/activate
+AdminReferral -> AdminReferral: validate required blocks and conflicts
+AdminReferral -> AdminReferralDb: active version, audit event
+AdminReferral --> Frontend: messageCode STR_MNEMO_ADMIN_REFERRAL_LANDING_SAVED
+
+CrmAdmin -> Frontend: настроить registration funnel
+Frontend -> AdminReferral: POST /funnels
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_FUNNEL_MANAGE
+AdminReferral -> AdminReferral: validate steps and consent codes
+AdminReferral -> AdminReferralDb: сохранить funnel version and audit
+AdminReferral --> Frontend: funnel detail
+Frontend -> AdminReferral: POST /funnels/{funnelId}/activate
+AdminReferral -> AdminReferralDb: active funnel version
+AdminReferral --> Frontend: messageCode STR_MNEMO_ADMIN_REFERRAL_FUNNEL_SAVED
+
+CrmAdmin -> Frontend: сгенерировать referral code
+Frontend -> AdminReferral: POST /referral-codes + Idempotency-Key
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_CODE_MANAGE
+AdminReferral -> AdminReferralDb: найти по idempotency key
+alt код уже создан
+  AdminReferralDb --> AdminReferral: existing referral code
+else новый idempotency key
+  AdminReferral -> AdminReferral: validate code active window and owner
+  AdminReferral -> AdminReferralDb: insert referral code and audit event
+end
+AdminReferral --> Frontend: referral code response
+
+CrmAdmin -> Frontend: задать attribution policy
+Frontend -> AdminReferral: PUT /attribution-policy
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_ATTRIBUTION_MANAGE
+AdminReferral -> AdminReferral: validate priority sources
+AdminReferral -> AdminReferralDb: save policy and audit
+AdminReferral --> Frontend: attribution policy response
+
+Sponsor -> Frontend: открыть sponsor cabinet
+Frontend -> AdminReferral: получить active referral rules для partner link
+AdminReferral -> AdminReferralDb: active landing, funnel, referral code
+AdminReferral --> Frontend: referral link context
+Frontend --> Sponsor: personal referral link
+
+Candidate -> Frontend: открыть referral link
+Frontend -> AdminReferral: track LANDING_VIEWED and validate referral context
+AdminReferral -> AdminReferralDb: conversion event
+Frontend -> Onboarding: start registration with campaign/referral context
+Onboarding -> AdminReferral: validate referral code and resolve attribution
+AdminReferral -> AdminReferralDb: attribution event, conversion event
+AdminReferral --> Onboarding: selected sponsor attribution
+Onboarding --> Frontend: registration state
+Frontend -> Analytics: consent-aware conversion events
+
+CrmAdmin -> Frontend: исправить спорную attribution
+Frontend -> AdminReferral: POST /attribution/override
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_ATTRIBUTION_OVERRIDE
+AdminReferral -> AdminReferral: validate reason code and comment
+AdminReferral -> AdminReferralDb: attribution override, conversion event, audit
+AdminReferral --> Frontend: STR_MNEMO_ADMIN_REFERRAL_ATTRIBUTION_OVERRIDDEN
+
+MarketingAdmin -> Frontend: открыть conversion report
+Frontend -> AdminReferral: GET /analytics/conversions
+AdminReferral -> Auth: проверить ADMIN_REFERRAL_ANALYTICS_VIEW
+AdminReferral -> AdminReferralDb: aggregate conversion metrics
+AdminReferral --> Frontend: totals and rows without secrets
+
+@enduml
