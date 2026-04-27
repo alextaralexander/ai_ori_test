@@ -11,6 +11,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
+import { AdminRbacView } from './components/AdminRbacView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeePartnerCardView } from './components/EmployeePartnerCardView';
@@ -54,6 +55,10 @@ const testLoginRoles = new Set([
   'logistics-operator',
   'regional-manager',
   'tracking-admin',
+  'super-admin',
+  'security-admin',
+  'hr-admin',
+  'auditor',
 ]);
 
 function resolveAudience(): Audience {
@@ -320,6 +325,14 @@ function App() {
     contentView = <PlatformConsentView />;
   } else if (path === '/admin/analytics-diagnostics') {
     contentView = <PlatformAnalyticsDiagnosticsView />;
+  } else if (path === '/admin/rbac') {
+    contentView = <AdminRbacView />;
+  } else if (path === '/admin/rbac/security') {
+    contentView = <AdminRbacView section="security" />;
+  } else if (path === '/admin/rbac/service-accounts') {
+    contentView = <AdminRbacView section="service-accounts" />;
+  } else if (path === '/admin/rbac/audit') {
+    contentView = <AdminRbacView section="audit" />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

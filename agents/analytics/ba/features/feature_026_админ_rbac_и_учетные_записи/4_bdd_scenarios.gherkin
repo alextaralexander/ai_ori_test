@@ -1,0 +1,120 @@
+# language: ru
+Функция: Feature 026. Админ: RBAC и учетные записи
+  Административный контур Best Ori Gin управляет внутренними учетными записями,
+  ролями, permission sets, зонами ответственности, security policies, служебными
+  учетными записями и audit trail без передачи hardcoded пользовательских сообщений
+  из backend во frontend.
+
+  Предыстория:
+    Дано существует суперадмин "ADM-026-SUPER" с permission set "ADMIN_RBAC_FULL"
+    И существует администратор безопасности "ADM-026-SEC" с permission set "ADMIN_RBAC_SECURITY"
+    И существует HR/операционный администратор "ADM-026-HR" с permission set "ADMIN_RBAC_HR_SCOPE"
+    И существует сотрудник "EMP-026-001" со статусом "DRAFT"
+    И существует роль "employee-support" и permission set "EMPLOYEE_SUPPORT_BASE"
+    И существует service account "SVC-026-WMS" для интеграции "WMS"
+
+  Сценарий: Суперадмин создает внутреннюю учетную запись сотрудника
+    Дано пользователь залогинен с ролью "super-admin"
+    И у пользователя активна elevated session "ELS-026-SUPER"
+    Когда пользователь создает внутреннюю учетную запись с email "employee026@bestorigin.test"
+    Тогда backend возвращает HTTP 201
+    И учетная запись получает статус "ACTIVE"
+    И ответ содержит userId, fullName, email, department, position и accountType
+    И ответ не содержит пароль, MFA secret или session secret
+    И audit trail содержит событие "ADMIN_ACCOUNT_CREATED"
+    И UI содержит test id "admin-rbac-account-form"
+
+  Сценарий: Повторный email внутренней учетной записи отклоняется
+    Дано пользователь залогинен с ролью "super-admin"
+    Когда пользователь создает внутреннюю учетную запись с email "employee026@bestorigin.test"
+    Тогда backend возвращает HTTP 409
+    И код ошибки равен "STR_MNEMO_ADMIN_RBAC_ACCOUNT_ALREADY_EXISTS"
+    И новая учетная запись не создается
+    И frontend показывает validation state через i18n dictionaries
+
+  Сценарий: HR-администратор назначает базовую роль в своем scope
+    Дано пользователь залогинен с ролью "hr-admin"
+    И пользователь имеет responsibility scope "DEPARTMENT_SUPPORT"
+    Когда пользователь назначает сотруднику "EMP-026-001" роль "employee-support"
+    Тогда backend возвращает обновленную матрицу доступа
+    И effective permissions содержат permission set "EMPLOYEE_SUPPORT_BASE"
+    И responsibility scope сотрудника не выходит за "DEPARTMENT_SUPPORT"
+    И audit trail содержит событие "ADMIN_ROLE_ASSIGNED"
+    И UI содержит test id "admin-rbac-role-assignment"
+
+  Сценарий: Назначение прав вне scope запрещается
+    Дано пользователь залогинен с ролью "hr-admin"
+    И пользователь имеет responsibility scope "DEPARTMENT_SUPPORT"
+    Когда пользователь назначает сотруднику "EMP-026-001" permission set "ADMIN_RBAC_FULL"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_ADMIN_RBAC_SCOPE_DENIED"
+    И назначение permission set не сохраняется
+    И audit trail содержит отказ доступа без раскрытия секретов
+
+  Сценарий: Суперадмин проверяет preview итоговой матрицы прав
+    Дано пользователь залогинен с ролью "super-admin"
+    Когда пользователь запрашивает preview effective permissions для сотрудника "EMP-026-001"
+    Тогда backend возвращает effectivePermissions, conflicts, requiredMfa, affectedModules и auditPreview
+    И данные сотрудника не изменяются
+    И UI содержит test id "admin-rbac-permission-preview"
+
+  Сценарий: Администратор безопасности меняет MFA и session policy
+    Дано пользователь залогинен с ролью "security-admin"
+    И у пользователя активна elevated session "ELS-026-SEC"
+    Когда пользователь обновляет MFA policy для admin-ролей
+    Тогда backend возвращает актуальную версию policy
+    И audit trail содержит событие "ADMIN_POLICY_CHANGED"
+    И код ответа не содержит hardcoded user-facing текста
+    И UI содержит test id "admin-rbac-security-policy"
+
+  Сценарий: Некорректная security policy отклоняется
+    Дано пользователь залогинен с ролью "security-admin"
+    Когда пользователь устанавливает idle timeout "0" минут для внутренних сессий
+    Тогда backend возвращает HTTP 400
+    И код ошибки равен "STR_MNEMO_ADMIN_RBAC_POLICY_INVALID"
+    И версия policy не изменяется
+
+  Сценарий: Суперадмин блокирует учетную запись и завершает активные сессии
+    Дано пользователь залогинен с ролью "super-admin"
+    И у сотрудника "EMP-026-001" есть активная сессия "SES-026-001"
+    Когда пользователь блокирует учетную запись "EMP-026-001"
+    Тогда backend переводит учетную запись в статус "BLOCKED"
+    И активная сессия "SES-026-001" завершена
+    И повторный login сотрудника запрещен
+    И audit trail содержит событие "ADMIN_ACCOUNT_BLOCKED"
+
+  Сценарий: Администратор безопасности создает и ротирует служебную учетную запись
+    Дано пользователь залогинен с ролью "security-admin"
+    И у пользователя активна elevated session "ELS-026-SEC"
+    Когда пользователь создает service account для integrationType "WMS"
+    Тогда backend возвращает HTTP 201
+    И secret показан только один раз
+    И UI содержит test id "admin-rbac-service-account-table"
+    Когда пользователь ротирует secret service account "SVC-026-WMS"
+    Тогда предыдущий secret помечен как истекающий
+    И audit trail содержит событие "ADMIN_SERVICE_ACCOUNT_ROTATED"
+
+  Сценарий: Emergency deactivation немедленно останавливает доступ
+    Дано пользователь залогинен с ролью "super-admin"
+    И у пользователя активна elevated session "ELS-026-SUPER"
+    Когда пользователь запускает emergency deactivation для permission set "EMPLOYEE_SUPPORT_BASE"
+    Тогда backend деактивирует permission set
+    И новые запросы с этим permission set получают HTTP 403
+    И код ошибки равен "STR_MNEMO_ADMIN_RBAC_ACCESS_DENIED"
+    И audit trail содержит событие "ADMIN_EMERGENCY_DEACTIVATED"
+    И UI содержит test id "admin-rbac-emergency-deactivate"
+
+  Сценарий: Аудитор ищет события изменения доступа
+    Дано пользователь залогинен с ролью "auditor"
+    Когда пользователь ищет audit trail по targetUserId "EMP-026-001"
+    Тогда backend возвращает immutable events с actionCode, actor, target, diff, source, sourceIp, correlationId и occurredAt
+    И audit response не содержит пароли, MFA seed, service account secret или session token
+    И UI содержит test id "admin-rbac-audit-table"
+
+  Сценарий: Пользователь без admin RBAC прав не открывает раздел
+    Дано пользователь залогинен с ролью "employee-support"
+    Когда пользователь открывает маршрут "/admin/rbac"
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен "STR_MNEMO_ADMIN_RBAC_ACCESS_DENIED"
+    И frontend показывает forbidden state через i18n dictionaries
+    И UI не показывает формы управления ролями и служебными учетными записями

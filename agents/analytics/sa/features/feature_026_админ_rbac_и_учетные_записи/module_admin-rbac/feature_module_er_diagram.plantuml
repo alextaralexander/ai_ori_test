@@ -1,0 +1,138 @@
+@startuml
+title Feature 026 admin-rbac module ER changes
+
+entity "admin_rbac_internal_account" as internal_account {
+  * id : uuid
+  --
+  * full_name : varchar(255)
+  * email : varchar(320)
+  phone : varchar(64)
+  * department : varchar(128)
+  * position_title : varchar(128)
+  * account_type : varchar(32)
+  * status : varchar(32)
+  access_expires_at : timestamptz
+  * version : bigint
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "admin_rbac_role" as role {
+  * id : uuid
+  --
+  * code : varchar(96)
+  * name : varchar(255)
+  description : text
+  * module_access : varchar(128)
+  * active : boolean
+  * risk_level : varchar(32)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "admin_rbac_permission_set" as permission_set {
+  * id : uuid
+  --
+  * code : varchar(96)
+  * name : varchar(255)
+  description : text
+  * permissions_json : jsonb
+  * risk_level : varchar(32)
+  * elevated_required : boolean
+  * active : boolean
+  valid_until : timestamptz
+}
+
+entity "admin_rbac_role_permission" as role_permission {
+  * id : uuid
+  --
+  * role_id : uuid
+  * permission_set_id : uuid
+}
+
+entity "admin_rbac_account_role" as account_role {
+  * id : uuid
+  --
+  * account_id : uuid
+  * role_id : uuid
+  assigned_by_user_id : uuid
+  valid_from : timestamptz
+  valid_until : timestamptz
+  * active : boolean
+}
+
+entity "admin_rbac_responsibility_scope" as responsibility_scope {
+  * id : uuid
+  --
+  * account_id : uuid
+  region_id : uuid
+  warehouse_id : uuid
+  pickup_point_id : uuid
+  catalog_id : uuid
+  product_category_id : uuid
+  department_id : varchar(128)
+  partner_structure_segment_id : uuid
+  * active : boolean
+}
+
+entity "admin_rbac_security_policy" as security_policy {
+  * id : uuid
+  --
+  * policy_type : varchar(48)
+  * policy_code : varchar(96)
+  * settings_json : jsonb
+  * version : bigint
+  * active : boolean
+  * updated_by_user_id : uuid
+  * updated_at : timestamptz
+}
+
+entity "admin_rbac_service_account" as service_account {
+  * id : uuid
+  --
+  * code : varchar(96)
+  * owner_user_id : uuid
+  * integration_type : varchar(64)
+  * permission_scopes_json : jsonb
+  * allowed_ip_ranges_json : jsonb
+  * status : varchar(32)
+  expires_at : timestamptz
+  last_used_at : timestamptz
+}
+
+entity "admin_rbac_service_secret_rotation" as secret_rotation {
+  * id : uuid
+  --
+  * service_account_id : uuid
+  * secret_hash : varchar(255)
+  * masked_secret_hint : varchar(64)
+  * valid_from : timestamptz
+  valid_until : timestamptz
+  * status : varchar(32)
+}
+
+entity "admin_rbac_audit_event" as audit_event {
+  * id : uuid
+  --
+  actor_user_id : uuid
+  target_user_id : uuid
+  service_account_id : uuid
+  * action_code : varchar(96)
+  * old_value_json : jsonb
+  * new_value_json : jsonb
+  source_route : varchar(255)
+  source_ip : varchar(64)
+  * correlation_id : varchar(128)
+  * occurred_at : timestamptz
+}
+
+role ||--o{ role_permission
+permission_set ||--o{ role_permission
+internal_account ||--o{ account_role
+role ||--o{ account_role
+internal_account ||--o{ responsibility_scope
+service_account ||--o{ secret_rotation
+internal_account ||--o{ audit_event : target_user_id
+service_account ||--o{ audit_event
+
+@enduml

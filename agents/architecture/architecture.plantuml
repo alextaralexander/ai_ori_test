@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 025
+title Best Ori Gin monolith architecture through feature 026
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -8,6 +8,9 @@ package "frontend/monolith apps/web-shell" {
   [AnalyticsProvider]
   [ConsentPanel]
   [AnalyticsDiagnostics UI]
+  [AdminRbac UI]
+  [AdminRbacAudit UI]
+  [AdminRbacServiceAccounts UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -40,6 +43,7 @@ package "backend/monolith/monolith-app" {
   [partner-office]
   [employee]
   [platform-experience]
+  [admin-rbac]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -59,6 +63,9 @@ cloud "Hybrid Pixel" as hybrid
 [AnalyticsProvider] --> [platform-experience] : HTTP/JSON /runtime-config, /consent/preferences, /diagnostics/analytics-events
 [ConsentPanel] --> [platform-experience] : HTTP/JSON /api/platform-experience/consent/preferences
 [AnalyticsDiagnostics UI] --> [platform-experience] : HTTP/JSON /api/platform-experience/diagnostics/summary
+[AdminRbac UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/accounts, /roles, /security-policies
+[AdminRbacServiceAccounts UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/service-accounts, /rotate-secret
+[AdminRbacAudit UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/audit-events, /emergency-deactivations
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -73,7 +80,15 @@ cloud "Hybrid Pixel" as hybrid
 
 [auth] --> [authorization] : role, route policy, MFA/elevated policy checks
 [auth] --> [employee] : elevatedSessionId validation for controlled impersonation
+[auth] --> [admin-rbac] : session permission matrix and affected session termination
 [auth] --> db : auth sessions, roles, route policies, active partner, impersonation and audit
+[admin-rbac] --> [authorization] : role, permission set, scope, MFA/elevated policy checks
+[admin-rbac] --> [auth] : current session and terminate sessions after block/deactivation
+[admin-rbac] --> db : internal accounts, roles, permission sets, scopes, policies, service accounts and audit
+[admin-rbac] --> wms : service account scope for WMS/1C integration access
+[admin-rbac] --> pay : service account scope for payment integration access
+[admin-rbac] --> delivery : service account scope for delivery integration access
+[admin-rbac] --> bonus : service account scope for bonus integration access
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

@@ -1,0 +1,563 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin admin-rbac module API
+  version: 0.26.0
+  description: Feature 026 API for internal accounts, roles, permission sets, scopes, security policies, service accounts and audit trail.
+servers:
+  - url: /api/admin/rbac
+tags:
+  - name: AdminRbacAccounts
+  - name: AdminRbacRoles
+  - name: AdminRbacPolicies
+  - name: AdminRbacServiceAccounts
+  - name: AdminRbacAudit
+paths:
+  /accounts:
+    get:
+      tags: [AdminRbacAccounts]
+      summary: Search internal accounts
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: query
+          in: query
+          schema: { type: string, minLength: 2 }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/InternalAccountStatus' }
+        - name: department
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Accounts found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalAccountListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [AdminRbacAccounts]
+      summary: Create internal account
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalAccountCreateRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalAccountResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /accounts/{accountId}:
+    get:
+      tags: [AdminRbacAccounts]
+      summary: Get internal account
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalAccountResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [AdminRbacAccounts]
+      summary: Update internal account profile and status metadata
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalAccountUpdateRequest'
+      responses:
+        '200':
+          description: Account updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalAccountResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /accounts/{accountId}/roles:
+    put:
+      tags: [AdminRbacAccounts]
+      summary: Replace account roles, permission sets and responsibility scopes
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAccessUpdateRequest'
+      responses:
+        '200':
+          description: Access matrix updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EffectivePermissionPreviewResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /accounts/{accountId}/permission-preview:
+    post:
+      tags: [AdminRbacAccounts]
+      summary: Preview effective permissions without saving
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAccessUpdateRequest'
+      responses:
+        '200':
+          description: Effective permissions preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EffectivePermissionPreviewResponse'
+  /accounts/{accountId}/block:
+    post:
+      tags: [AdminRbacAccounts]
+      summary: Block account and terminate active sessions
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      responses:
+        '204':
+          description: Account blocked
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /accounts/{accountId}/deactivate:
+    post:
+      tags: [AdminRbacAccounts]
+      summary: Deactivate account
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      responses:
+        '204':
+          description: Account deactivated
+  /roles:
+    get:
+      tags: [AdminRbacRoles]
+      summary: List roles and permission sets
+      responses:
+        '200':
+          description: Role catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleCatalogResponse'
+  /security-policies:
+    get:
+      tags: [AdminRbacPolicies]
+      summary: Get active security policies
+      responses:
+        '200':
+          description: Active policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityPolicyListResponse'
+    put:
+      tags: [AdminRbacPolicies]
+      summary: Update password, MFA or session policy
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityPolicyUpdateRequest'
+      responses:
+        '200':
+          description: Policy updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityPolicyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /service-accounts:
+    get:
+      tags: [AdminRbacServiceAccounts]
+      summary: Search service accounts
+      responses:
+        '200':
+          description: Service accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountListResponse'
+    post:
+      tags: [AdminRbacServiceAccounts]
+      summary: Create service account
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceAccountCreateRequest'
+      responses:
+        '201':
+          description: Service account created with one-time secret
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountSecretResponse'
+  /service-accounts/{serviceAccountId}/rotate-secret:
+    post:
+      tags: [AdminRbacServiceAccounts]
+      summary: Rotate service account secret
+      parameters:
+        - $ref: '#/components/parameters/ServiceAccountId'
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      responses:
+        '200':
+          description: Secret rotated and shown once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountSecretResponse'
+  /emergency-deactivations:
+    post:
+      tags: [AdminRbacPolicies]
+      summary: Emergency deactivate account, role or permission set
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/ElevatedSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmergencyDeactivationRequest'
+      responses:
+        '204':
+          description: Deactivation completed
+  /audit-events:
+    get:
+      tags: [AdminRbacAudit]
+      summary: Search admin RBAC audit events
+      parameters:
+        - name: actorUserId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: targetUserId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date-time }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date-time }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditEventListResponse'
+components:
+  parameters:
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      schema: { type: string, maxLength: 128 }
+    ElevatedSessionId:
+      name: X-Elevated-Session-Id
+      in: header
+      required: false
+      schema: { type: string, format: uuid }
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ServiceAccountId:
+      name: serviceAccountId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, correlationId]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_[A-Z0-9_]+$'
+        correlationId:
+          type: string
+    InternalAccountStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, BLOCKED, ACCESS_EXPIRING, DEACTIVATED]
+    InternalAccountCreateRequest:
+      type: object
+      required: [fullName, email, department, positionTitle, accountType]
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 255 }
+        email: { type: string, format: email }
+        phone: { type: string, maxLength: 64 }
+        department: { type: string, maxLength: 128 }
+        positionTitle: { type: string, maxLength: 128 }
+        accountType: { type: string, enum: [HUMAN, SERVICE_OWNER] }
+        status: { $ref: '#/components/schemas/InternalAccountStatus' }
+        accessExpiresAt: { type: string, format: date-time }
+    InternalAccountUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/InternalAccountCreateRequest'
+        - type: object
+          required: [version]
+          properties:
+            version: { type: integer, format: int64 }
+    InternalAccountResponse:
+      type: object
+      required: [id, fullName, email, department, positionTitle, accountType, status, version]
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        department: { type: string }
+        positionTitle: { type: string }
+        accountType: { type: string }
+        status: { $ref: '#/components/schemas/InternalAccountStatus' }
+        accessExpiresAt: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    InternalAccountListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/InternalAccountResponse' }
+    AccountAccessUpdateRequest:
+      type: object
+      required: [roleCodes, permissionSetCodes, responsibilityScopes]
+      properties:
+        roleCodes:
+          type: array
+          items: { type: string }
+        permissionSetCodes:
+          type: array
+          items: { type: string }
+        responsibilityScopes:
+          type: array
+          items: { $ref: '#/components/schemas/ResponsibilityScopeRequest' }
+    ResponsibilityScopeRequest:
+      type: object
+      properties:
+        regionId: { type: string, format: uuid }
+        warehouseId: { type: string, format: uuid }
+        pickupPointId: { type: string, format: uuid }
+        catalogId: { type: string, format: uuid }
+        productCategoryId: { type: string, format: uuid }
+        departmentId: { type: string }
+        partnerStructureSegmentId: { type: string, format: uuid }
+    EffectivePermissionPreviewResponse:
+      type: object
+      required: [effectivePermissions, conflicts, requiredMfa, affectedModules, auditPreview]
+      properties:
+        effectivePermissions:
+          type: array
+          items: { type: string }
+        conflicts:
+          type: array
+          items: { type: string }
+        requiredMfa: { type: boolean }
+        affectedModules:
+          type: array
+          items: { type: string }
+        auditPreview:
+          type: object
+          additionalProperties: true
+    RoleCatalogResponse:
+      type: object
+      properties:
+        roles:
+          type: array
+          items: { $ref: '#/components/schemas/RoleResponse' }
+        permissionSets:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionSetResponse' }
+    RoleResponse:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        moduleAccess: { type: string }
+        active: { type: boolean }
+        riskLevel: { type: string }
+    PermissionSetResponse:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        permissions:
+          type: array
+          items: { type: string }
+        riskLevel: { type: string }
+        elevatedRequired: { type: boolean }
+        active: { type: boolean }
+    SecurityPolicyUpdateRequest:
+      type: object
+      required: [policyType, policyCode, settings, version]
+      properties:
+        policyType: { type: string, enum: [PASSWORD, MFA, SESSION, EMERGENCY] }
+        policyCode: { type: string }
+        settings:
+          type: object
+          additionalProperties: true
+        version: { type: integer, format: int64 }
+    SecurityPolicyResponse:
+      type: object
+      properties:
+        policyType: { type: string }
+        policyCode: { type: string }
+        settings:
+          type: object
+          additionalProperties: true
+        version: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+    SecurityPolicyListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SecurityPolicyResponse' }
+    ServiceAccountCreateRequest:
+      type: object
+      required: [code, ownerUserId, integrationType, permissionScopes, allowedIpRanges]
+      properties:
+        code: { type: string }
+        ownerUserId: { type: string, format: uuid }
+        integrationType: { type: string }
+        permissionScopes:
+          type: array
+          items: { type: string }
+        allowedIpRanges:
+          type: array
+          items: { type: string }
+        expiresAt: { type: string, format: date-time }
+    ServiceAccountResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        ownerUserId: { type: string, format: uuid }
+        integrationType: { type: string }
+        maskedSecretHint: { type: string }
+        status: { type: string }
+        expiresAt: { type: string, format: date-time }
+        lastUsedAt: { type: string, format: date-time }
+    ServiceAccountSecretResponse:
+      allOf:
+        - $ref: '#/components/schemas/ServiceAccountResponse'
+        - type: object
+          required: [oneTimeSecret]
+          properties:
+            oneTimeSecret: { type: string }
+    ServiceAccountListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceAccountResponse' }
+    EmergencyDeactivationRequest:
+      type: object
+      required: [targetType, targetCode, reasonCode]
+      properties:
+        targetType: { type: string, enum: [ACCOUNT, ROLE, PERMISSION_SET] }
+        targetCode: { type: string }
+        reasonCode: { type: string }
+    AuditEventListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEventResponse' }
+    AuditEventResponse:
+      type: object
+      properties:
+        eventId: { type: string, format: uuid }
+        actorUserId: { type: string, format: uuid }
+        targetUserId: { type: string, format: uuid }
+        serviceAccountId: { type: string, format: uuid }
+        actionCode: { type: string }
+        oldValue:
+          type: object
+          additionalProperties: true
+        newValue:
+          type: object
+          additionalProperties: true
+        sourceIp: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }

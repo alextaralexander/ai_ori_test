@@ -1,0 +1,98 @@
+@startuml
+title Feature 026. Admin RBAC and internal accounts sequence
+
+actor "Суперадмин" as SuperAdmin
+actor "Администратор безопасности" as SecurityAdmin
+actor "HR/операционный администратор" as HrAdmin
+actor "Аудитор" as Auditor
+participant "Frontend /admin/rbac" as Frontend
+participant "Auth module" as Auth
+participant "admin-rbac controller" as Controller
+participant "admin-rbac service" as Service
+participant "admin-rbac security policy" as Policy
+database "admin-rbac DB" as Db
+participant "Audit publisher" as Audit
+participant "Integration client" as Integration
+
+== Создание и выдача доступа ==
+SuperAdmin -> Frontend: Открывает /admin/rbac
+Frontend -> Auth: GET current session
+Auth --> Frontend: roles, permission matrix, elevated state
+Frontend -> Controller: POST /api/admin/rbac/accounts
+Controller -> Policy: Проверить role, permission set, scope, elevated session
+Policy --> Controller: allowed
+Controller -> Service: createInternalAccount(request, correlationId)
+Service -> Db: insert internal_account
+Service -> Audit: ADMIN_ACCOUNT_CREATED(actor, target, diff)
+Audit -> Db: insert audit_event
+Service --> Controller: InternalAccountResponse
+Controller --> Frontend: 201 account without secrets
+
+Frontend -> Controller: POST /accounts/{id}/permission-preview
+Controller -> Policy: Проверить scope preview
+Controller -> Service: calculateEffectivePermissions(request)
+Service -> Db: read roles, permission sets, scopes
+Service --> Controller: effectivePermissions, conflicts, requiredMfa
+Controller --> Frontend: 200 preview
+
+SuperAdmin -> Frontend: Подтверждает роли и scopes
+Frontend -> Controller: PUT /accounts/{id}/roles + X-Elevated-Session-Id
+Controller -> Policy: Проверить elevated/MFA и отсутствие конфликтов
+Policy --> Controller: allowed
+Controller -> Service: replaceAccountAccess(request)
+Service -> Db: upsert account_role and responsibility_scope
+Service -> Audit: ADMIN_ROLE_ASSIGNED / ADMIN_PERMISSION_SET_CHANGED
+Audit -> Db: insert audit_event
+Controller --> Frontend: 200 updated effective permission matrix
+
+== Запрет вне scope ==
+HrAdmin -> Frontend: Пытается выдать admin permission set
+Frontend -> Controller: PUT /accounts/{id}/roles
+Controller -> Policy: Проверить responsibility scope
+Policy --> Controller: denied STR_MNEMO_ADMIN_RBAC_SCOPE_DENIED
+Controller --> Frontend: 403 ErrorResponse
+Controller -> Audit: access denied event
+
+== Security policy и service account ==
+SecurityAdmin -> Frontend: Обновляет MFA/session policy
+Frontend -> Controller: PUT /security-policies + X-Elevated-Session-Id
+Controller -> Policy: Проверить elevated session
+Controller -> Service: updateSecurityPolicy(request)
+Service -> Db: update security_policy version
+Service -> Audit: ADMIN_POLICY_CHANGED
+Controller --> Frontend: 200 SecurityPolicyResponse
+
+SecurityAdmin -> Frontend: Ротирует service account WMS
+Frontend -> Controller: POST /service-accounts/{id}/rotate-secret
+Controller -> Policy: Проверить SECURITY_ADMIN и elevated session
+Controller -> Service: rotateServiceAccountSecret(id)
+Service -> Db: mark previous secret EXPIRING
+Service -> Db: insert new secret hash and masked hint
+Service -> Audit: ADMIN_SERVICE_ACCOUNT_ROTATED
+Controller --> Frontend: 200 oneTimeSecret
+Frontend --> SecurityAdmin: Показывает secret один раз
+
+Integration -> Controller: API request with service credentials
+Controller -> Service: validateServiceAccountCredential()
+Service -> Db: read service account status and active secret
+Service --> Controller: scopes or disabled
+
+== Emergency deactivation и audit ==
+SuperAdmin -> Frontend: Запускает emergency deactivation
+Frontend -> Controller: POST /emergency-deactivations + X-Elevated-Session-Id
+Controller -> Policy: Проверить critical elevated action
+Controller -> Service: emergencyDeactivate(target)
+Service -> Db: deactivate account/role/permission_set
+Service -> Auth: terminate affected sessions
+Service -> Audit: ADMIN_EMERGENCY_DEACTIVATED
+Controller --> Frontend: 204
+
+Auditor -> Frontend: Ищет audit trail
+Frontend -> Controller: GET /audit-events?targetUserId=&actionCode=
+Controller -> Policy: Проверить audit permission
+Controller -> Service: searchAuditEvents(filter)
+Service -> Db: select immutable audit events
+Service --> Controller: AuditEventListResponse without secrets
+Controller --> Frontend: 200 audit events
+
+@enduml

@@ -155,6 +155,51 @@
     Тогда система возвращает HTTP 403
     И frontend показывает forbidden state через i18n dictionaries
 
+  Сценарий: Суперадмин создает сотрудника и выдает доступ через RBAC preview
+    Допустим суперадмин авторизован и имеет активную elevated session
+    Когда суперадмин открывает `/admin/rbac`
+    И создает внутреннюю учетную запись сотрудника
+    И выбирает роли, permission sets и responsibility scopes
+    Тогда система показывает preview effective permissions, conflicts, requiredMfa и affectedModules
+    Когда суперадмин подтверждает сохранение
+    Тогда backend сохраняет учетную запись и назначения доступа
+    И audit trail содержит actor, target, diff и correlationId
+    И frontend показывает результат через i18n dictionaries без hardcoded пользовательского текста
+
+  Сценарий: HR-администратор не может выдать доступ вне своего scope
+    Допустим HR/операционный администратор авторизован
+    И HR/операционный администратор имеет scope только для подразделения поддержки
+    Когда он пытается назначить сотруднику admin permission set
+    Тогда backend возвращает HTTP 403
+    И код ошибки равен `STR_MNEMO_ADMIN_RBAC_SCOPE_DENIED`
+    И назначение не сохраняется
+    И audit trail содержит отказ доступа без раскрытия секретов
+
+  Сценарий: Администратор безопасности ротирует служебную учетную запись интеграции
+    Допустим администратор безопасности авторизован и имеет активную elevated session
+    Когда администратор открывает `/admin/rbac/service-accounts`
+    И ротирует service account для WMS/1C
+    Тогда backend показывает новый secret только один раз
+    И прежний secret помечается как истекающий по overlap policy
+    И audit trail содержит событие `ADMIN_SERVICE_ACCOUNT_ROTATED`
+    И service account сохраняет ограниченные permission scopes и срок действия
+
+  Сценарий: Суперадмин выполняет emergency deactivation при инциденте доступа
+    Допустим суперадмин авторизован и имеет активную elevated session
+    И обнаружен скомпрометированный permission set
+    Когда суперадмин запускает emergency deactivation
+    Тогда backend немедленно деактивирует permission set
+    И активные сессии с затронутым доступом прекращают действие
+    И новые запросы получают mnemonic-код `STR_MNEMO_ADMIN_RBAC_ACCESS_DENIED`
+    И audit trail содержит событие `ADMIN_EMERGENCY_DEACTIVATED`
+
+  Сценарий: Аудитор восстанавливает цепочку изменений доступа
+    Допустим аудитор авторизован
+    Когда аудитор открывает `/admin/rbac/audit`
+    И фильтрует события по targetUserId, actionCode и периоду
+    Тогда система показывает immutable audit events с actor, target, diff, sourceIp, correlationId и occurredAt
+    И ответ не содержит пароли, MFA seed, service account secret или session token
+
   Сценарий: Администратор управляет платформой без нарушения пользовательских потоков
     Допустим администратор авторизован
     Когда администратор обновляет контент, каталог, кампанию, WMS-настройки или пользователей
