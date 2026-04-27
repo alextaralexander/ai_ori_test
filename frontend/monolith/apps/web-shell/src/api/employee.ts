@@ -103,6 +103,77 @@ export interface EmployeeEscalationPageResponse {
   totalElements: number;
 }
 
+export interface EmployeeOrderHistorySummaryResponse {
+  orderId: string;
+  orderNumber: string;
+  campaignCode: string;
+  customerId: string;
+  partnerId: string;
+  customerDisplayName: string;
+  partnerDisplayName: string;
+  maskedPhone: string;
+  maskedEmail: string;
+  orderStatus: string;
+  paymentStatus: string;
+  deliveryStatus: string;
+  fulfillmentStatus: string;
+  totalAmount: string;
+  currencyCode: string;
+  problemFlags: string[];
+  linkedRoutes: Record<string, string>;
+  updatedAt: string;
+}
+
+export interface EmployeeOrderHistoryPageResponse {
+  items: EmployeeOrderHistorySummaryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  auditRecorded: boolean;
+  availableProblemFilters: string[];
+}
+
+export interface EmployeeOrderHistoryDetailsResponse extends EmployeeOrderHistorySummaryResponse {
+  items: Array<{
+    sku: string;
+    productName: string;
+    quantity: number;
+    unitPrice: string;
+    totalPrice: string;
+    promoCode: string;
+    bonusPoints: number;
+    reserveStatus: string;
+  }>;
+  paymentEvents: EmployeeLinkedEventResponse[];
+  deliveryEvents: EmployeeLinkedEventResponse[];
+  wmsEvents: EmployeeLinkedEventResponse[];
+  supportCaseIds: string[];
+  claimIds: string[];
+  paymentEventIds: string[];
+  wmsBatchId: string;
+  deliveryTrackingId: string;
+  manualAdjustmentPresent: boolean;
+  supervisorRequired: boolean;
+  sourceChannel: string;
+  auditEvents: Array<{
+    eventType: string;
+    actorUserId: string;
+    actorRole?: string;
+    targetEntityType: string;
+    targetEntityId: string;
+    occurredAt: string;
+  }>;
+}
+
+export interface EmployeeLinkedEventResponse {
+  eventId: string;
+  eventType: string;
+  status: string;
+  sourceSystem: string;
+  occurredAt: string;
+  messageCode: string;
+}
+
 interface ErrorResponse {
   code: string;
 }
@@ -189,4 +260,15 @@ export async function recordEmployeeAdjustment(orderNumber: string): Promise<Emp
 export async function getEmployeeEscalations(): Promise<EmployeeEscalationPageResponse> {
   const response = await fetch('/api/employee/supervisor/escalations', { headers: authHeaders() });
   return readJson<EmployeeEscalationPageResponse>(response);
+}
+
+export async function getEmployeeOrderHistory(params: URLSearchParams): Promise<EmployeeOrderHistoryPageResponse> {
+  const query = new URLSearchParams(params);
+  const response = await fetch(`/api/employee/order-history?${query.toString()}`, { headers: authHeaders() });
+  return readJson<EmployeeOrderHistoryPageResponse>(response);
+}
+
+export async function getEmployeeOrderHistoryDetails(orderId: string): Promise<EmployeeOrderHistoryDetailsResponse> {
+  const response = await fetch(`/api/employee/order-history/${encodeURIComponent(orderId)}`, { headers: authHeaders() });
+  return readJson<EmployeeOrderHistoryDetailsResponse>(response);
 }

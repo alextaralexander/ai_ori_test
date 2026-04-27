@@ -17,3 +17,4 @@ import '../feature_016_mlm_структура_и_рост_партнера/featu
 import '../feature_017_партнерские_офлайн_продажи_и_заказы_клиентов/feature_ui_flow';
 import '../feature_018_партнерский_офис_поставки_и_логистика/feature_ui_flow';
 import '../feature_019_сотрудник_новый_заказ_и_поддержка/feature_ui_flow';
+import '../feature_020_сотрудник_история_заказов/feature_ui_flow';

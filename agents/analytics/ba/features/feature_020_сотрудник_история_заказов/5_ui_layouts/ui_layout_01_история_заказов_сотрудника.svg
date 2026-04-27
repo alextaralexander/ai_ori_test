@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 020: список заказов сотрудника</title>
+  <desc id="desc">Схематичный макет маршрута /employee/order-history с фильтрами, таблицей заказов, problem tabs и переходами</desc>
+  <rect x="24" y="24" width="1232" height="812" fill="white" stroke="black"/>
+  <text x="48" y="64" font-family="Arial" font-size="24">/employee/order-history - История заказов сотрудника</text>
+  <rect x="48" y="92" width="1184" height="88" fill="none" stroke="black"/>
+  <text x="64" y="124" font-family="Arial" font-size="16">Фильтры: partnerId / customerId / период / статус заказа / оплата / доставка / problemOnly / поиск</text>
+  <rect x="64" y="140" width="170" height="28" fill="none" stroke="black"/><text x="74" y="160" font-family="Arial" font-size="13">query</text>
+  <rect x="246" y="140" width="160" height="28" fill="none" stroke="black"/><text x="256" y="160" font-family="Arial" font-size="13">partnerId</text>
+  <rect x="418" y="140" width="160" height="28" fill="none" stroke="black"/><text x="428" y="160" font-family="Arial" font-size="13">dateFrom-dateTo</text>
+  <rect x="590" y="140" width="150" height="28" fill="none" stroke="black"/><text x="600" y="160" font-family="Arial" font-size="13">orderStatus</text>
+  <rect x="752" y="140" width="150" height="28" fill="none" stroke="black"/><text x="762" y="160" font-family="Arial" font-size="13">paymentStatus</text>
+  <rect x="914" y="140" width="150" height="28" fill="none" stroke="black"/><text x="924" y="160" font-family="Arial" font-size="13">problemOnly</text>
+  <rect x="1076" y="140" width="140" height="28" fill="none" stroke="black"/><text x="1086" y="160" font-family="Arial" font-size="13">Применить</text>
+
+  <rect x="48" y="204" width="1184" height="56" fill="none" stroke="black"/>
+  <text x="64" y="238" font-family="Arial" font-size="15">Problem tabs: все / задержка оплаты / задержка сборки / открытая претензия / ошибка доставки / WMS-исключение</text>
+
+  <rect x="48" y="288" width="1184" height="420" fill="none" stroke="black"/>
+  <line x1="48" y1="334" x2="1232" y2="334" stroke="black"/>
+  <text x="64" y="318" font-family="Arial" font-size="14">Номер</text>
+  <text x="190" y="318" font-family="Arial" font-size="14">Партнер / клиент</text>
+  <text x="390" y="318" font-family="Arial" font-size="14">Кампания</text>
+  <text x="510" y="318" font-family="Arial" font-size="14">Статусы</text>
+  <text x="720" y="318" font-family="Arial" font-size="14">Сумма</text>
+  <text x="830" y="318" font-family="Arial" font-size="14">Проблемы</text>
+  <text x="1050" y="318" font-family="Arial" font-size="14">Переходы</text>
+  <line x1="170" y1="288" x2="170" y2="708" stroke="black"/>
+  <line x1="370" y1="288" x2="370" y2="708" stroke="black"/>
+  <line x1="490" y1="288" x2="490" y2="708" stroke="black"/>
+  <line x1="700" y1="288" x2="700" y2="708" stroke="black"/>
+  <line x1="810" y1="288" x2="810" y2="708" stroke="black"/>
+  <line x1="1030" y1="288" x2="1030" y2="708" stroke="black"/>
+  <text x="64" y="372" font-family="Arial" font-size="13">BOG-ORD-020-001</text>
+  <text x="190" y="372" font-family="Arial" font-size="13">PART-020-001 / CUST-020-001</text>
+  <text x="390" y="372" font-family="Arial" font-size="13">2026-C06</text>
+  <text x="510" y="372" font-family="Arial" font-size="13">PAID / DELAYED / WMS_HOLD</text>
+  <text x="720" y="372" font-family="Arial" font-size="13">12 450 RUB</text>
+  <text x="830" y="372" font-family="Arial" font-size="13">claim, payment, wms</text>
+  <text x="1050" y="372" font-family="Arial" font-size="13">details / support / claim</text>
+  <line x1="48" y1="396" x2="1232" y2="396" stroke="black"/>
+  <text x="64" y="436" font-family="Arial" font-size="13">BOG-ORD-020-002</text>
+  <text x="190" y="436" font-family="Arial" font-size="13">PART-020-010 / CUST-020-010</text>
+  <text x="390" y="436" font-family="Arial" font-size="13">2026-C06</text>
+  <text x="510" y="436" font-family="Arial" font-size="13">CREATED / PENDING / READY</text>
+  <text x="720" y="436" font-family="Arial" font-size="13">4 990 RUB</text>
+  <text x="830" y="436" font-family="Arial" font-size="13">none</text>
+  <text x="1050" y="436" font-family="Arial" font-size="13">details / support</text>
+  <line x1="48" y1="460" x2="1232" y2="460" stroke="black"/>
+
+  <rect x="48" y="732" width="760" height="64" fill="none" stroke="black"/>
+  <text x="64" y="770" font-family="Arial" font-size="14">Пагинация, сортировка, состояние загрузки, пустая выборка, ошибки STR_MNEMO_*</text>
+  <rect x="840" y="732" width="392" height="64" fill="none" stroke="black"/>
+  <text x="856" y="770" font-family="Arial" font-size="14">Audit: LIST_VIEWED + фильтры + actorUserId</text>
+</svg>

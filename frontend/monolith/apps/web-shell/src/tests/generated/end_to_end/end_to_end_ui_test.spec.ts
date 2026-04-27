@@ -1,4 +1,4 @@
-// GENERATED FROM agents/tests/. DO NOT EDIT MANUALLY.
+// GENERATED FROM agents/tests/. Do not edit this synchronized runtime copy manually.
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
 import '../feature_002_контентные_страницы_и_новости/feature_ui_flow';
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
@@ -18,3 +18,4 @@ import '../feature_016_mlm_структура_и_рост_партнера/featu
 import '../feature_017_партнерские_офлайн_продажи_и_заказы_клиентов/feature_ui_flow';
 import '../feature_018_партнерский_офис_поставки_и_логистика/feature_ui_flow';
 import '../feature_019_сотрудник_новый_заказ_и_поддержка/feature_ui_flow';
+import '../feature_020_сотрудник_история_заказов/feature_ui_flow';

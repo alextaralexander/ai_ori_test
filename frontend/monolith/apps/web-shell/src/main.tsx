@@ -10,6 +10,7 @@ import { BonusWalletFinanceView, BonusWalletView } from './components/BonusWalle
 import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
+import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeeWorkspaceView } from './components/EmployeeWorkspaceView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { PartnerGrowthView } from './components/PartnerGrowthView';
@@ -182,6 +183,10 @@ function App() {
     contentView = <EmployeeWorkspaceView mode="new-order" params={params} />;
   } else if (path === '/employee/order-support') {
     contentView = <EmployeeWorkspaceView mode="order-support" params={params} />;
+  } else if (path === '/employee/order-history') {
+    contentView = <EmployeeOrderHistoryView params={params} />;
+  } else if (path.startsWith('/employee/order-history/')) {
+    contentView = <EmployeeOrderHistoryView orderId={decodeURIComponent(path.slice('/employee/order-history/'.length))} params={params} />;
   } else if (path === '/partner-office/supply') {
     contentView = <PartnerOfficeView mode="supply" params={params} />;
   } else if (path.startsWith('/partner-office/supply/orders/')) {

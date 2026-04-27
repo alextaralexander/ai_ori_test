@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Best Ori Gin Employee API
-  version: 0.19.0
-  description: API employee-контура для поиска клиента, операторского заказа и поддержки проблемного заказа.
+  version: 0.20.0
+  description: API employee-контура для workspace, операторского заказа, поддержки проблемного заказа и истории заказов сотрудника.
 servers:
   - url: /api/employee
 paths:
@@ -10,76 +10,46 @@ paths:
     get:
       summary: Поиск клиента, партнера или заказа в employee workspace
       parameters:
-        - in: query
-          name: query
-          required: true
-          schema: { type: string }
+        - { in: query, name: query, required: true, schema: { type: string } }
       responses:
         '200': { description: Найденный support-контекст }
-        '400': { description: Невалидный query }
-        '403': { description: Нет employee-доступа }
+        '400': { description: STR_MNEMO_EMPLOYEE_QUERY_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
   /operator-orders:
     post:
       summary: Создать операторский заказ от имени клиента или партнера
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmployeeOperatorOrderCreateRequest'
       responses:
         '200': { description: Результат созданного заказа }
         '400': { description: Ошибка валидации }
-        '403': { description: Нет employee-доступа }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
   /operator-orders/{operatorOrderId}/confirm:
     post:
       summary: Подтвердить операторский заказ
       parameters:
-        - in: path
-          name: operatorOrderId
-          required: true
-          schema: { type: string, format: uuid }
+        - { in: path, name: operatorOrderId, required: true, schema: { type: string, format: uuid } }
       responses:
         '200': { description: Подтвержденный заказ }
   /order-support/{orderNumber}:
     get:
       summary: Открыть поддержку проблемного заказа
       parameters:
-        - in: path
-          name: orderNumber
-          required: true
-          schema: { type: string }
+        - { in: path, name: orderNumber, required: true, schema: { type: string } }
       responses:
         '200': { description: Support-карточка заказа }
-        '404': { description: Заказ не найден }
+        '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
   /order-support/{orderNumber}/notes:
     post:
       summary: Добавить внутреннюю заметку сотрудника
-      parameters:
-        - in: path
-          name: orderNumber
-          required: true
-          schema: { type: string }
       responses:
         '200': { description: Заметка сохранена }
   /order-support/{orderNumber}/adjustments:
     post:
       summary: Зафиксировать сервисную корректировку
-      parameters:
-        - in: path
-          name: orderNumber
-          required: true
-          schema: { type: string }
       responses:
         '200': { description: Корректировка сохранена }
   /order-support/{orderNumber}/escalations:
     post:
       summary: Создать эскалацию поддержки
-      parameters:
-        - in: path
-          name: orderNumber
-          required: true
-          schema: { type: string }
       responses:
         '200': { description: Эскалация создана }
   /supervisor/escalations:
@@ -87,6 +57,35 @@ paths:
       summary: Получить список эскалаций для супервизора
       responses:
         '200': { description: Список эскалаций }
+  /order-history:
+    get:
+      summary: Получить операторскую историю заказов
+      parameters:
+        - { in: query, name: partnerId, schema: { type: string } }
+        - { in: query, name: customerId, schema: { type: string } }
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo, schema: { type: string, format: date } }
+        - { in: query, name: orderStatus, schema: { type: string } }
+        - { in: query, name: paymentStatus, schema: { type: string, enum: [PENDING, READY_TO_PAY, PAID, FAILED] } }
+        - { in: query, name: deliveryStatus, schema: { type: string, enum: [DRAFT, CONFIRMED, IN_TRANSIT, DELAYED] } }
+        - { in: query, name: problemOnly, schema: { type: boolean, default: false } }
+        - { in: query, name: query, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, default: 0 } }
+        - { in: query, name: size, schema: { type: integer, default: 20, maximum: 100 } }
+        - { in: query, name: sort, schema: { type: string } }
+      responses:
+        '200': { description: Страница заказов employee read-model }
+        '400': { description: STR_MNEMO_EMPLOYEE_ORDER_HISTORY_FILTER_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+  /order-history/{orderId}:
+    get:
+      summary: Получить расширенные детали заказа для сотрудника
+      parameters:
+        - { in: path, name: orderId, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Расширенная карточка заказа }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
 components:
   schemas:
     EmployeeOperatorOrderCreateRequest:
@@ -96,10 +95,40 @@ components:
         targetCustomerId: { type: string }
         supportReasonCode: { type: string }
         cartType: { type: string, enum: [MAIN, SUPPLEMENTARY] }
-        items:
-          type: array
-          items:
-            type: object
-            properties:
-              sku: { type: string }
-              quantity: { type: integer }
+    EmployeeOrderHistoryPageResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse' } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+    EmployeeOrderHistorySummaryResponse:
+      type: object
+      properties:
+        orderId: { type: string }
+        orderNumber: { type: string }
+        customerDisplayName: { type: string }
+        partnerDisplayName: { type: string }
+        maskedPhone: { type: string }
+        maskedEmail: { type: string }
+        orderStatus: { type: string }
+        paymentStatus: { type: string }
+        deliveryStatus: { type: string }
+        fulfillmentStatus: { type: string }
+        totalAmount: { type: number }
+        currencyCode: { type: string }
+        problemFlags: { type: array, items: { type: string } }
+        linkedRoutes: { type: object, additionalProperties: { type: string } }
+    EmployeeOrderHistoryDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse'
+        - type: object
+          properties:
+            items: { type: array, items: { type: object } }
+            paymentEvents: { type: array, items: { type: object } }
+            deliveryEvents: { type: array, items: { type: object } }
+            wmsEvents: { type: array, items: { type: object } }
+            supportCaseIds: { type: array, items: { type: string } }
+            claimIds: { type: array, items: { type: string } }
+            auditEvents: { type: array, items: { type: object } }

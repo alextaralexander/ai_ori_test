@@ -80,6 +80,111 @@ public final class EmployeeDtos {
     ) {
     }
 
+    public record EmployeeOrderHistoryFilterRequest(
+            String partnerId,
+            String customerId,
+            String dateFrom,
+            String dateTo,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            DeliveryStatus deliveryStatus,
+            boolean problemOnly,
+            String query,
+            int page,
+            int size,
+            String sort
+    ) {
+    }
+
+    public record EmployeeOrderHistoryPageResponse(
+            List<EmployeeOrderHistorySummaryResponse> items,
+            int page,
+            int size,
+            long totalElements,
+            boolean auditRecorded,
+            List<String> availableProblemFilters
+    ) {
+    }
+
+    public record EmployeeOrderHistorySummaryResponse(
+            String orderId,
+            String orderNumber,
+            String campaignCode,
+            String customerId,
+            String partnerId,
+            String customerDisplayName,
+            String partnerDisplayName,
+            String maskedPhone,
+            String maskedEmail,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            DeliveryStatus deliveryStatus,
+            String fulfillmentStatus,
+            BigDecimal totalAmount,
+            String currencyCode,
+            List<String> problemFlags,
+            Map<String, String> linkedRoutes,
+            String updatedAt
+    ) {
+    }
+
+    public record EmployeeOrderHistoryDetailsResponse(
+            String orderId,
+            String orderNumber,
+            String campaignCode,
+            String customerId,
+            String partnerId,
+            String customerDisplayName,
+            String partnerDisplayName,
+            String maskedPhone,
+            String maskedEmail,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            DeliveryStatus deliveryStatus,
+            String fulfillmentStatus,
+            BigDecimal totalAmount,
+            String currencyCode,
+            List<String> problemFlags,
+            Map<String, String> linkedRoutes,
+            String updatedAt,
+            List<EmployeeOrderHistoryItemResponse> items,
+            List<EmployeeLinkedEventResponse> paymentEvents,
+            List<EmployeeLinkedEventResponse> deliveryEvents,
+            List<EmployeeLinkedEventResponse> wmsEvents,
+            List<String> supportCaseIds,
+            List<String> claimIds,
+            List<String> paymentEventIds,
+            String wmsBatchId,
+            String deliveryTrackingId,
+            boolean manualAdjustmentPresent,
+            boolean supervisorRequired,
+            String sourceChannel,
+            List<EmployeeAuditEventResponse> auditEvents
+    ) {
+    }
+
+    public record EmployeeOrderHistoryItemResponse(
+            String sku,
+            String productName,
+            int quantity,
+            BigDecimal unitPrice,
+            BigDecimal totalPrice,
+            String promoCode,
+            int bonusPoints,
+            String reserveStatus
+    ) {
+    }
+
+    public record EmployeeLinkedEventResponse(
+            String eventId,
+            String eventType,
+            String status,
+            String sourceSystem,
+            String occurredAt,
+            String messageCode
+    ) {
+    }
+
     public record EmployeeWarningResponse(String code, String severity, String target) {
     }
 

@@ -1,0 +1,60 @@
+@startuml
+title Feature 020: employee order history sequence
+
+actor "Сотрудник backoffice" as Employee
+actor "Супервизор" as Supervisor
+participant "web-shell\n/employee/order-history" as FE
+participant "EmployeeController" as Controller
+participant "EmployeeService" as Service
+participant "EmployeeOrderHistoryRepository" as Repo
+database "employee_order_history_*" as DB
+participant "Order module" as Order
+participant "Payment system" as Payment
+participant "Claims module" as Claims
+participant "WMS/1C" as WMS
+
+Employee -> FE : открывает /employee/order-history
+FE -> Controller : GET /api/employee/order-history?filters
+Controller -> Service : orderHistory(userContext, filters)
+Service -> Service : validate employee role and filters
+Service -> Repo : findOrderHistory(filters, page, sort)
+Repo -> DB : select snapshots by filters
+DB --> Repo : page of snapshots
+Repo --> Service : EmployeeOrderHistoryPageResponse items
+Service -> Repo : recordAudit(ORDER_HISTORY_LIST_VIEWED)
+Repo -> DB : insert audit event
+Service --> Controller : page response + auditRecorded=true
+Controller --> FE : 200 JSON with summary and linkedRoutes
+FE --> Employee : таблица заказов и problem flags
+
+Employee -> FE : открывает детали заказа
+FE -> Controller : GET /api/employee/order-history/{orderId}
+Controller -> Service : orderHistoryDetails(userContext, orderId)
+Service -> Repo : findDetails(orderId)
+Repo -> DB : select snapshot, items, audit events
+DB --> Repo : details read model
+Service -> Order : resolve current order state if stale
+Service -> Payment : resolve payment events if needed
+Service -> Claims : resolve claim links if needed
+Service -> WMS : resolve WMS events if needed
+Service -> Repo : recordAudit(ORDER_DETAILS_VIEWED)
+Repo -> DB : insert audit event
+Service --> Controller : EmployeeOrderHistoryDetailsResponse
+Controller --> FE : 200 JSON
+FE --> Employee : карточка заказа, события, deep links
+
+Employee -> FE : переход в support/claim/payment
+FE -> Controller : target route with orderId context
+Controller -> Service : recordDeepLinkAudit(orderId, route)
+Service -> Repo : recordAudit(ORDER_HISTORY_DEEP_LINK_OPENED)
+Repo -> DB : insert audit event
+
+Supervisor -> FE : открывает детали заказа как supervisor
+FE -> Controller : GET /api/employee/order-history/{orderId}
+Controller -> Service : orderHistoryDetails(supervisorContext, orderId)
+Service -> Repo : findDetailsWithExtendedAudit(orderId)
+Repo -> DB : select extended audit events
+Service --> Controller : details with supervisor audit scope
+Controller --> FE : 200 JSON
+FE --> Supervisor : audit trail и проблемные признаки
+@enduml

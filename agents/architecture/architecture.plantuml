@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture with employee module
+title Best Ori Gin monolith architecture with employee order history
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
   [Catalog UI]
@@ -7,6 +7,7 @@ package "frontend/monolith apps/web-shell" {
   [Order UI]
   [Partner UI]
   [EmployeeWorkspace UI]
+  [EmployeeOrderHistory UI]
 }
 package "backend/monolith/monolith-app" {
   [public-content]
@@ -25,15 +26,21 @@ cloud "WMS/1C" as wms
 cloud "Payment" as pay
 cloud "Delivery" as delivery
 cloud "Bonus engine" as bonus
+cloud "Claims" as claims
 
-[EmployeeWorkspace UI] --> [employee] : /api/employee
-[employee] --> [order]
-[employee] --> [cart]
-[employee] --> [profile]
-[employee] --> [partner-reporting]
+[EmployeeWorkspace UI] --> [employee] : /api/employee/workspace, /operator-orders, /order-support
+[EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history
+[EmployeeOrderHistory UI] --> [employee] : /api/employee/order-history/{orderId}
+[employee] --> [order] : order read links
+[employee] --> [cart] : active cart/operator order context
+[employee] --> [profile] : masked customer/partner profile
+[employee] --> [partner-reporting] : partner context links
+[employee] --> claims : claim ids and claim deep links
+[employee] --> pay : payment event ids/statuses
+[employee] --> wms : WMS batch and fulfillment events
 [order] --> pay
 [order] --> delivery
 [order] --> wms
 [bonus-wallet] --> bonus
-[employee] --> db : support audit target tables
+[employee] --> db : support/order-history read model and audit tables
 @enduml

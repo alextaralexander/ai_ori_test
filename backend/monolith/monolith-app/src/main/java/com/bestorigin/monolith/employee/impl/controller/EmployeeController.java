@@ -5,6 +5,9 @@ import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeErrorResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeEscalationPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderCreateRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOperatorOrderResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryDetailsResponse;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryFilterRequest;
+import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderHistoryPageResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeOrderSupportResponse;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionRequest;
 import com.bestorigin.monolith.employee.api.EmployeeDtos.EmployeeSupportActionResponse;
@@ -78,6 +81,29 @@ public class EmployeeController {
     @GetMapping("/supervisor/escalations")
     public EmployeeEscalationPageResponse supervisorEscalations(@RequestHeader HttpHeaders headers, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         return service.supervisorEscalations(userContext(headers), page, size);
+    }
+
+    @GetMapping("/order-history")
+    public EmployeeOrderHistoryPageResponse orderHistory(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String partnerId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) com.bestorigin.monolith.employee.api.EmployeeDtos.PaymentStatus paymentStatus,
+            @RequestParam(required = false) com.bestorigin.monolith.employee.api.EmployeeDtos.DeliveryStatus deliveryStatus,
+            @RequestParam(defaultValue = "false") boolean problemOnly,
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "updatedAt,desc") String sort) {
+        return service.orderHistory(userContext(headers), new EmployeeOrderHistoryFilterRequest(partnerId, customerId, dateFrom, dateTo, orderStatus, paymentStatus, deliveryStatus, problemOnly, query, page, size, sort));
+    }
+
+    @GetMapping("/order-history/{orderId}")
+    public EmployeeOrderHistoryDetailsResponse orderHistoryDetails(@RequestHeader HttpHeaders headers, @PathVariable String orderId) {
+        return service.orderHistoryDetails(userContext(headers), orderId);
     }
 
     @ExceptionHandler(EmployeeAccessDeniedException.class)

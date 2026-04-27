@@ -1,0 +1,165 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin Employee API - Feature 020 Order History
+  version: 0.20.0
+  description: API employee-контура для операторской истории заказов и расширенных деталей заказа.
+servers:
+  - url: /api/employee
+paths:
+  /order-history:
+    get:
+      summary: Получить операторскую историю заказов
+      operationId: getEmployeeOrderHistory
+      parameters:
+        - { in: query, name: partnerId, schema: { type: string } }
+        - { in: query, name: customerId, schema: { type: string } }
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo, schema: { type: string, format: date } }
+        - { in: query, name: orderStatus, schema: { type: string } }
+        - { in: query, name: paymentStatus, schema: { $ref: '#/components/schemas/EmployeePaymentStatus' } }
+        - { in: query, name: deliveryStatus, schema: { $ref: '#/components/schemas/EmployeeDeliveryStatus' } }
+        - { in: query, name: problemOnly, schema: { type: boolean, default: false } }
+        - { in: query, name: query, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, minimum: 0, default: 0 } }
+        - { in: query, name: size, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { in: query, name: sort, schema: { type: string, default: updatedAt,desc } }
+      responses:
+        '200':
+          description: Страница заказов employee read-model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeOrderHistoryPageResponse'
+        '400': { description: STR_MNEMO_EMPLOYEE_ORDER_HISTORY_FILTER_INVALID }
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+  /order-history/{orderId}:
+    get:
+      summary: Получить расширенные детали заказа для сотрудника
+      operationId: getEmployeeOrderHistoryDetails
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Расширенная карточка заказа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeOrderHistoryDetailsResponse'
+        '403': { description: STR_MNEMO_EMPLOYEE_ACCESS_DENIED }
+        '404': { description: STR_MNEMO_EMPLOYEE_ORDER_NOT_FOUND }
+components:
+  schemas:
+    EmployeePaymentStatus:
+      type: string
+      enum: [PENDING, READY_TO_PAY, PAID, FAILED]
+    EmployeeDeliveryStatus:
+      type: string
+      enum: [DRAFT, CONFIRMED, IN_TRANSIT, DELAYED]
+    EmployeeOrderHistoryPageResponse:
+      type: object
+      required: [items, page, size, totalElements, auditRecorded]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        auditRecorded: { type: boolean }
+        availableProblemFilters:
+          type: array
+          items: { type: string }
+    EmployeeOrderHistorySummaryResponse:
+      type: object
+      required: [orderId, orderNumber, orderStatus, paymentStatus, deliveryStatus, fulfillmentStatus, totalAmount, currencyCode]
+      properties:
+        orderId: { type: string }
+        orderNumber: { type: string }
+        campaignCode: { type: string }
+        customerId: { type: string }
+        partnerId: { type: string }
+        customerDisplayName: { type: string }
+        partnerDisplayName: { type: string }
+        maskedPhone: { type: string }
+        maskedEmail: { type: string }
+        orderStatus: { type: string }
+        paymentStatus: { $ref: '#/components/schemas/EmployeePaymentStatus' }
+        deliveryStatus: { $ref: '#/components/schemas/EmployeeDeliveryStatus' }
+        fulfillmentStatus: { type: string }
+        totalAmount: { type: number }
+        currencyCode: { type: string }
+        problemFlags:
+          type: array
+          items: { type: string }
+        linkedRoutes:
+          type: object
+          additionalProperties: { type: string }
+        updatedAt: { type: string, format: date-time }
+    EmployeeOrderHistoryDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EmployeeOrderHistorySummaryResponse'
+        - type: object
+          required: [items, paymentEvents, deliveryEvents, supportCaseIds, claimIds, auditEvents]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/EmployeeOrderHistoryItemResponse' }
+            paymentEvents:
+              type: array
+              items: { $ref: '#/components/schemas/EmployeeLinkedEventResponse' }
+            deliveryEvents:
+              type: array
+              items: { $ref: '#/components/schemas/EmployeeLinkedEventResponse' }
+            wmsEvents:
+              type: array
+              items: { $ref: '#/components/schemas/EmployeeLinkedEventResponse' }
+            supportCaseIds:
+              type: array
+              items: { type: string }
+            claimIds:
+              type: array
+              items: { type: string }
+            paymentEventIds:
+              type: array
+              items: { type: string }
+            wmsBatchId: { type: string }
+            deliveryTrackingId: { type: string }
+            manualAdjustmentPresent: { type: boolean }
+            supervisorRequired: { type: boolean }
+            sourceChannel: { type: string }
+            auditEvents:
+              type: array
+              items: { $ref: '#/components/schemas/EmployeeAuditEventResponse' }
+    EmployeeOrderHistoryItemResponse:
+      type: object
+      properties:
+        sku: { type: string }
+        productName: { type: string }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+        totalPrice: { type: number }
+        promoCode: { type: string }
+        bonusPoints: { type: integer }
+        reserveStatus: { type: string }
+    EmployeeLinkedEventResponse:
+      type: object
+      properties:
+        eventId: { type: string }
+        eventType: { type: string }
+        status: { type: string }
+        sourceSystem: { type: string }
+        occurredAt: { type: string, format: date-time }
+        messageCode: { type: string }
+    EmployeeAuditEventResponse:
+      type: object
+      properties:
+        eventType: { type: string }
+        actorUserId: { type: string }
+        actorRole: { type: string }
+        targetEntityType: { type: string }
+        targetEntityId: { type: string }
+        sourceRoute: { type: string }
+        occurredAt: { type: string, format: date-time }
