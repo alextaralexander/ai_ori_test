@@ -10,6 +10,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
+import { OrderCheckoutView } from './components/OrderCheckoutView';
 import { ProductCardView } from './components/ProductCardView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
@@ -152,6 +153,10 @@ function App() {
     contentView = <CartView cartType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path === '/cart/supplementary/shopping-offers') {
     contentView = <CartView cartType="SUPPLEMENTARY" mode="offers" />;
+  } else if (path === '/order') {
+    contentView = <OrderCheckoutView seed={params.get('seed')} />;
+  } else if (path === '/order/supplementary') {
+    contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {

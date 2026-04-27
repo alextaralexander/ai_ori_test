@@ -26,6 +26,18 @@ export function CartView({ cartType = 'MAIN', mode = 'cart', seed, supportUserId
         setCart(await addCartItem(cartType, { productCode: 'BOG-REMOVED-003', quantity: 1, source: 'PRODUCT_CARD', campaignId: 'CMP-2026-05' }));
         return;
       }
+      if (seed === 'checkout-ready') {
+        let readyCart = await addCartItem(cartType, { productCode: cartType === 'SUPPLEMENTARY' ? 'BOG-SERUM-002' : 'BOG-CREAM-001', quantity: 1, source: cartType === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY_OFFER' : 'PRODUCT_CARD', campaignId: 'CMP-2026-05' });
+        if (cartType === 'MAIN') {
+          for (const reason of readyCart.validation.blockingReasons) {
+            if (reason.lineId) {
+              readyCart = await removeCartLine(reason.lineId);
+            }
+          }
+        }
+        setCart(readyCart);
+        return;
+      }
       setCart(await loadCart(cartType));
       if (mode === 'offers') {
         const loadedOffers = await loadShoppingOffers(cartType);
@@ -125,15 +137,26 @@ function CartLineCard({ line, onIncrease, onRemove }: { line: CartLine; onIncrea
 }
 
 function CartTotals({ cart }: { cart: CartResponse | null }): ReactElement {
+  const checkoutRoute = cart?.cartType === 'SUPPLEMENTARY' ? '/order/supplementary' : '/order';
+
   return (
     <aside className="cart-totals" data-testid="cart-totals">
       <h2>{t('cart.totals')}</h2>
       <span>{t('cart.subtotal')}: {cart?.totals.subtotal ?? 0}</span>
       <span>{t('cart.discount')}: {cart?.totals.discountTotal ?? 0}</span>
       <span>{t('cart.grandTotal')}: {cart?.totals.grandTotal ?? 0}</span>
-      <Button data-testid="cart-checkout" disabled={!cart?.validation.valid} href={cart?.validation.checkoutRoute ?? undefined} type="primary">
-        {t('cart.checkout')}
-      </Button>
+      {cart ? (
+        <Button
+          data-testid={cart.cartType === 'SUPPLEMENTARY' ? 'supplementary-cart-checkout' : 'cart-checkout'}
+          disabled={!cart.validation.valid}
+          onClick={() => {
+            window.location.href = checkoutRoute;
+          }}
+          type="primary"
+        >
+          {t('cart.checkout')}
+        </Button>
+      ) : null}
     </aside>
   );
 }

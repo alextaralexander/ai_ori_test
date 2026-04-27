@@ -597,6 +597,93 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.order-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 32px 24px 56px;
+}
+
+.order-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.order-heading h1 {
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+
+.order-layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.order-workspace,
+.order-totals,
+.order-step-panel,
+.order-confirmation-summary {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.order-workspace {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+
+.order-stepper {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.order-step-panel {
+  min-height: 180px;
+  padding: 20px;
+}
+
+.order-form-grid,
+.order-choice-grid,
+.order-confirmation-summary,
+.order-totals,
+.order-result {
+  display: grid;
+  gap: 12px;
+}
+
+.order-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.order-form-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.order-choice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.order-validation {
+  margin-bottom: 16px;
+}
+
+.order-totals {
+  align-self: start;
+  padding: 20px;
+}
+
+.order-totals h2,
+.order-result h2,
+.order-confirmation-summary h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
 @media (max-width: 760px) {
   .public-header {
     align-items: flex-start;
@@ -630,8 +717,16 @@ body {
     .benefit-blocks,
     .partner-onboarding-grid,
     .cart-layout,
+    .order-layout,
+    .order-form-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;
+  }
+
+  .order-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .digital-catalogue-viewer-toolbar,

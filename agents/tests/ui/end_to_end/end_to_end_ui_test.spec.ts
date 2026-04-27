@@ -7,3 +7,4 @@ import '../feature_006_цифровые_каталоги_и_pdf_материал
 import '../feature_007_бьюти_и_бизнес_бенефиты/feature_ui_flow';
 import '../feature_008_регистрация_и_инвайты_партнеров/feature_ui_flow';
 import '../feature_009_корзина_и_промо_предложения/feature_ui_flow';
+import '../feature_010_оформление_заказа_и_дозаказ/feature_ui_flow';

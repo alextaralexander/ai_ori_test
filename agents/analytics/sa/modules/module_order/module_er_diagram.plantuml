@@ -1,0 +1,145 @@
+@startuml
+title Feature 010. Module order. ER diagram for checkout and supplementary order
+
+entity "order_checkout_draft" as checkout {
+  * id : uuid <<PK>>
+  --
+  * owner_user_id : varchar(64)
+  * checkout_type : varchar(32)
+  * cart_id : varchar(64)
+  * campaign_id : varchar(64)
+  * status : varchar(32)
+  * version : bigint
+  partner_context_id : varchar(64)
+  vip_mode : boolean
+  super_order_mode : boolean
+  subtotal_amount : numeric(19,2)
+  delivery_amount : numeric(19,2)
+  discount_amount : numeric(19,2)
+  wallet_amount : numeric(19,2)
+  cashback_amount : numeric(19,2)
+  grand_total_amount : numeric(19,2)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "order_checkout_item" as item {
+  * id : uuid <<PK>>
+  --
+  * checkout_id : uuid <<FK>>
+  * product_code : varchar(64)
+  * product_name_snapshot : varchar(255)
+  * quantity : int
+  * unit_price : numeric(19,2)
+  * total_price : numeric(19,2)
+  * availability_status : varchar(32)
+  reserve_status : varchar(32)
+  blocking_reason_mnemo : varchar(128)
+}
+
+entity "order_checkout_recipient" as recipient {
+  * checkout_id : uuid <<PK, FK>>
+  --
+  * recipient_type : varchar(32)
+  * full_name : varchar(255)
+  * phone : varchar(64)
+  email : varchar(255)
+}
+
+entity "order_checkout_address" as address {
+  * checkout_id : uuid <<PK, FK>>
+  --
+  address_id : varchar(64)
+  pickup_point_id : varchar(64)
+  * delivery_target_type : varchar(32)
+  country : varchar(128)
+  region : varchar(128)
+  city : varchar(128)
+  street : varchar(255)
+  house : varchar(64)
+  apartment : varchar(64)
+  postal_code : varchar(32)
+}
+
+entity "order_checkout_delivery" as delivery {
+  * checkout_id : uuid <<PK, FK>>
+  --
+  * delivery_method_code : varchar(64)
+  * delivery_method_name : varchar(255)
+  delivery_price : numeric(19,2)
+  estimated_interval : varchar(128)
+  unavailable_reason_mnemo : varchar(128)
+}
+
+entity "order_checkout_payment" as payment {
+  * checkout_id : uuid <<PK, FK>>
+  --
+  * payment_method_code : varchar(64)
+  payment_session_id : varchar(128)
+  payment_status : varchar(32)
+  idempotency_key : varchar(128)
+  amount_to_pay : numeric(19,2)
+}
+
+entity "order_checkout_benefit" as benefit {
+  * id : uuid <<PK>>
+  --
+  * checkout_id : uuid <<FK>>
+  * benefit_type : varchar(32)
+  * benefit_code : varchar(64)
+  applied_amount : numeric(19,2)
+  status : varchar(32)
+  reason_mnemo : varchar(128)
+}
+
+entity "order_reservation" as reservation {
+  * id : uuid <<PK>>
+  --
+  * checkout_id : uuid <<FK>>
+  checkout_item_id : uuid <<FK>>
+  * reservation_status : varchar(32)
+  reserved_quantity : int
+  available_quantity : int
+  external_reservation_id : varchar(128)
+  reason_mnemo : varchar(128)
+  created_at : timestamptz
+}
+
+entity "order_order" as orderEntity {
+  * id : uuid <<PK>>
+  --
+  * order_number : varchar(64) <<UK>>
+  * checkout_id : uuid <<FK>>
+  * owner_user_id : varchar(64)
+  * order_type : varchar(32)
+  * campaign_id : varchar(64)
+  * status : varchar(32)
+  payment_status : varchar(32)
+  delivery_status : varchar(32)
+  grand_total_amount : numeric(19,2)
+  * created_at : timestamptz
+}
+
+entity "order_audit_event" as audit {
+  * id : uuid <<PK>>
+  --
+  * aggregate_id : uuid
+  * event_type : varchar(64)
+  * actor_user_id : varchar(64)
+  actor_role : varchar(64)
+  mnemo_code : varchar(128)
+  created_at : timestamptz
+}
+
+checkout ||--o{ item
+checkout ||--|| recipient
+checkout ||--|| address
+checkout ||--|| delivery
+checkout ||--|| payment
+checkout ||--o{ benefit
+checkout ||--o{ reservation
+item ||--o{ reservation
+checkout ||--o| orderEntity
+checkout ||--o{ audit
+orderEntity ||--o{ audit
+@enduml

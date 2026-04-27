@@ -17,5 +17,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature007.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature008.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature009.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature010.FeatureApiTest().assertFeatureGreenPath();
     }
 }

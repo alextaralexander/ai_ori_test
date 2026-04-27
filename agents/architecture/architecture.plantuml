@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin. Архитектура платформы на feature 009
+title Best Ori Gin. Архитектура платформы на feature 010
 
 skinparam componentStyle rectangle
 
@@ -17,21 +17,26 @@ component "frontend/public-web\nReact + TypeScript + Ant Design" as PublicWeb
 component "backend/monolith/public-content\nSpring Boot module\npages, navigation, news, content, offers, FAQ, info, documents, benefit landings" as PublicContent
 component "backend/monolith/catalog\nSpring Boot module\nsearch, product cards, digital catalogues" as Catalog
 component "backend/monolith/cart\nSpring Boot module\ncart, shopping offers, supplementary order, checkout validation" as Cart
+component "backend/monolith/order\nSpring Boot module\ncheckout, supplementary checkout, delivery, payment handoff, reservation, order confirmation" as Order
 component "backend/monolith/partner-onboarding\nSpring Boot module\nregistration, invites, activation, sponsor cabinet" as PartnerOnboarding
 database "PostgreSQL\npublic-content schema\nCMS pages, news, offers, FAQ, info, documents, benefit landings, referral, conversions" as PublicDb
 database "PostgreSQL\ncatalog schema\ncategories, products, tags, promos, digital issues" as CatalogDb
 database "PostgreSQL\ncart schema\ncarts, lines, applied offers, totals snapshots, audit events" as CartDb
+database "PostgreSQL\norder schema\ncheckout drafts, recipients, delivery, payments, benefits, reservations, orders, audit events" as OrderDb
 database "PostgreSQL\npartner-onboarding schema\ninvites, applications, activation tokens, partner profiles, referral links, events" as PartnerOnboardingDb
 cloud "S3/MinIO\ncatalog PDF materials" as CatalogStorage
 cloud "CRM / marketing systems\nregistration lead events" as CrmSystem
+cloud "WMS / 1C\nstock validation and reservations" as WmsSystem
+cloud "Payment provider\npayment sessions and statuses" as PaymentSystem
+cloud "Delivery provider\nmethods, pickup points and delivery constraints" as DeliverySystem
 component "CMS admin контур\nбудущие админ-фичи" as CmsAdmin
 component "Auth/Profile контур\nбудущие фичи" as AuthProfile
-component "Order/Payment контур\nбудущие фичи" as OrderPayment
+component "Bonus/Partner finance контур\nбудущие фичи" as BonusFinance
 component "Partner контур\nбудущие фичи" as PartnerArea
 
 Guest --> PublicWeb : HTTPS /, /home, /community, /news, /content/:id, /offer/:id, /FAQ, /info/:section, /documents/:type, benefit routes, invite routes, /products/digital-catalogue-current, /products/digital-catalogue-next, /search, /product/:code
-Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers
-Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, referral benefit routes, sponsor cabinet, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers, /cart/supplementary
+Customer --> PublicWeb : HTTPS публичные, клиентские маршруты, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers, /order
+Partner --> PublicWeb : HTTPS публичные, партнерские маршруты, referral benefit routes, sponsor cabinet, digital catalogues, /search, /product/:code, /cart, /cart/shopping-offers, /cart/supplementary, /order, /order/supplementary
 InvitedPartner --> PublicWeb : HTTPS /invite/partners-activation
 OrderSupport --> PublicWeb : HTTPS support view корзины
 ContentManager --> CmsAdmin : HTTPS управление контентом
@@ -48,9 +53,11 @@ PublicWeb --> Catalog : REST search, filters, product cards, recommendations
 PublicWeb --> Catalog : REST product detail, media, attachments, availability
 PublicWeb --> Catalog : REST digital catalogues, PDF actions, product hotspots
 PublicWeb --> Cart : REST current cart, items, shopping offers, supplementary order, validation, support view
+PublicWeb --> Order : REST checkout draft, recipient, address, delivery, payment, benefits, validation, confirm, order result
 PublicContent --> PublicDb : JDBC / Liquibase XML target model
 Catalog --> CatalogDb : JDBC / Liquibase XML target model
 Cart --> CartDb : JDBC / Liquibase XML target model
+Order --> OrderDb : JDBC / Liquibase XML target model
 PartnerOnboarding --> PartnerOnboardingDb : JDBC / Liquibase XML target model
 Catalog --> CatalogStorage : S3/MinIO temporary URL for PDF download/share
 PartnerOnboarding --> CrmSystem : REST/event registration lead events and retry
@@ -62,7 +69,12 @@ PublicContent ..> PartnerOnboarding : referral context handoff через fronte
 PartnerOnboarding ..> AuthProfile : activation creates login/profile handoff
 PartnerOnboarding ..> PartnerArea : initial partner profile and referral link handoff
 Cart --> Catalog : REST/internal contract product price, availability, campaign and order limits
-Cart ..> OrderPayment : future checkout/order/payment handoff after validation
+Order --> Cart : REST/internal contract cart validation and cart snapshot
+Order --> Catalog : REST/internal contract campaign/product snapshot and order limits
+Order --> WmsSystem : REST stock validation and reservation
+Order --> PaymentSystem : REST payment session and payment status
+Order --> DeliverySystem : REST delivery methods and pickup points
+Order ..> BonusFinance : future bonus accrual handoff after paid order
 PublicWeb --> PartnerArea : route navigation в партнерский офис
 
 @enduml

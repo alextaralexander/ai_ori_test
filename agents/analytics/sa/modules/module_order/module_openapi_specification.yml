@@ -1,0 +1,546 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin module_order API for feature 010
+  version: 1.0.0
+  description: Checkout and supplementary order contracts for feature 010.
+servers:
+  - url: /api
+tags:
+  - name: OrderCheckout
+    description: Checkout draft, delivery, payment, benefits and confirmation.
+paths:
+  /order/checkouts:
+    post:
+      tags: [OrderCheckout]
+      operationId: startCheckout
+      summary: Start checkout from a validated cart
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartCheckoutRequest'
+      responses:
+        '200':
+          description: Existing or newly created checkout draft.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /order/checkouts/{checkoutId}:
+    get:
+      tags: [OrderCheckout]
+      operationId: getCheckout
+      summary: Read checkout draft
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      responses:
+        '200':
+          description: Checkout draft.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /order/checkouts/{checkoutId}/recipient:
+    put:
+      tags: [OrderCheckout]
+      operationId: updateRecipient
+      summary: Update recipient and contacts
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipientRequest'
+      responses:
+        '200':
+          description: Updated checkout draft.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /order/checkouts/{checkoutId}/address:
+    put:
+      tags: [OrderCheckout]
+      operationId: updateAddress
+      summary: Update address or pickup point
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '200':
+          description: Updated checkout draft with delivery options recalculated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /order/checkouts/{checkoutId}/delivery:
+    put:
+      tags: [OrderCheckout]
+      operationId: selectDelivery
+      summary: Select delivery method
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliverySelectionRequest'
+      responses:
+        '200':
+          description: Updated checkout draft.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /order/checkouts/{checkoutId}/payment:
+    put:
+      tags: [OrderCheckout]
+      operationId: selectPayment
+      summary: Select payment method
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentSelectionRequest'
+      responses:
+        '200':
+          description: Updated checkout draft and payment session status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /order/checkouts/{checkoutId}/benefits:
+    put:
+      tags: [OrderCheckout]
+      operationId: applyBenefits
+      summary: Apply wallet, cashback and catalog benefits
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitApplyRequest'
+      responses:
+        '200':
+          description: Updated checkout draft with recalculated totals.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDraftResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /order/checkouts/{checkoutId}/validation:
+    post:
+      tags: [OrderCheckout]
+      operationId: validateCheckout
+      summary: Validate checkout before confirmation
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      responses:
+        '200':
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutValidationResponse'
+  /order/checkouts/{checkoutId}/confirm:
+    post:
+      tags: [OrderCheckout]
+      operationId: confirmCheckout
+      summary: Confirm checkout and create order
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmCheckoutRequest'
+      responses:
+        '200':
+          description: Order confirmation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderConfirmationResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /order/orders/{orderNumber}:
+    get:
+      tags: [OrderCheckout]
+      operationId: getOrderResult
+      summary: Read created order result
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderConfirmationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    CheckoutId:
+      name: checkoutId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 128
+  responses:
+    Unauthorized:
+      description: User is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: User is not allowed to access checkout/order.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Checkout or order not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Request or business validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Checkout version conflict or idempotency conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    StartCheckoutRequest:
+      type: object
+      required: [cartId, checkoutType]
+      properties:
+        cartId:
+          type: string
+        checkoutType:
+          $ref: '#/components/schemas/CheckoutType'
+        vipMode:
+          type: boolean
+        superOrderMode:
+          type: boolean
+    CheckoutDraftResponse:
+      type: object
+      required: [id, checkoutType, cartId, campaignId, status, version, items, totals, validation]
+      properties:
+        id:
+          type: string
+          format: uuid
+        checkoutType:
+          $ref: '#/components/schemas/CheckoutType'
+        cartId:
+          type: string
+        campaignId:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, VALIDATION_REQUIRED, READY_TO_CONFIRM, CONFIRMED, BLOCKED, EXPIRED]
+        version:
+          type: integer
+          format: int64
+        recipient:
+          $ref: '#/components/schemas/RecipientResponse'
+        address:
+          $ref: '#/components/schemas/AddressResponse'
+        deliveryOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryOptionResponse'
+        selectedDelivery:
+          $ref: '#/components/schemas/DeliveryOptionResponse'
+        selectedPayment:
+          $ref: '#/components/schemas/PaymentResponse'
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitResponse'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutItemResponse'
+        totals:
+          $ref: '#/components/schemas/CheckoutTotalsResponse'
+        validation:
+          $ref: '#/components/schemas/CheckoutValidationResponse'
+    CheckoutType:
+      type: string
+      enum: [MAIN, SUPPLEMENTARY]
+    RecipientRequest:
+      type: object
+      required: [recipientType, fullName, phone]
+      properties:
+        recipientType:
+          type: string
+          enum: [SELF, OTHER]
+        fullName:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 64
+        email:
+          type: string
+          maxLength: 255
+    RecipientResponse:
+      allOf:
+        - $ref: '#/components/schemas/RecipientRequest'
+    AddressRequest:
+      type: object
+      required: [deliveryTargetType]
+      properties:
+        deliveryTargetType:
+          type: string
+          enum: [ADDRESS, PICKUP_POINT]
+        addressId:
+          type: string
+        pickupPointId:
+          type: string
+        country:
+          type: string
+        region:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        house:
+          type: string
+        apartment:
+          type: string
+        postalCode:
+          type: string
+    AddressResponse:
+      allOf:
+        - $ref: '#/components/schemas/AddressRequest'
+    DeliverySelectionRequest:
+      type: object
+      required: [deliveryMethodCode]
+      properties:
+        deliveryMethodCode:
+          type: string
+    DeliveryOptionResponse:
+      type: object
+      required: [code, name, available, price]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        available:
+          type: boolean
+        price:
+          type: number
+        estimatedInterval:
+          type: string
+        reasonMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+    PaymentSelectionRequest:
+      type: object
+      required: [paymentMethodCode]
+      properties:
+        paymentMethodCode:
+          type: string
+    PaymentResponse:
+      type: object
+      properties:
+        paymentMethodCode:
+          type: string
+        paymentSessionId:
+          type: string
+        paymentStatus:
+          type: string
+          enum: [PENDING, PAID, FAILED, EXPIRED, CANCELLED]
+        amountToPay:
+          type: number
+    BenefitApplyRequest:
+      type: object
+      properties:
+        walletAmount:
+          type: number
+        cashbackAmount:
+          type: number
+        benefitCodes:
+          type: array
+          items:
+            type: string
+    BenefitResponse:
+      type: object
+      required: [benefitType, benefitCode, status]
+      properties:
+        benefitType:
+          type: string
+          enum: [WALLET, CASHBACK, CATALOG_DISCOUNT, RETENTION, VIP, SUPER_ORDER]
+        benefitCode:
+          type: string
+        appliedAmount:
+          type: number
+        status:
+          type: string
+          enum: [APPLIED, REJECTED, LIMITED]
+        reasonMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+    CheckoutItemResponse:
+      type: object
+      required: [productCode, productName, quantity, unitPrice, totalPrice, availabilityStatus]
+      properties:
+        productCode:
+          type: string
+        productName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+        availabilityStatus:
+          type: string
+        reserveStatus:
+          type: string
+        blockingReasonMnemo:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+    CheckoutTotalsResponse:
+      type: object
+      required: [subtotalAmount, deliveryAmount, discountAmount, walletAmount, cashbackAmount, grandTotalAmount]
+      properties:
+        subtotalAmount:
+          type: number
+        deliveryAmount:
+          type: number
+        discountAmount:
+          type: number
+        walletAmount:
+          type: number
+        cashbackAmount:
+          type: number
+        grandTotalAmount:
+          type: number
+    CheckoutValidationResponse:
+      type: object
+      required: [valid, reasons]
+      properties:
+        valid:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationReasonResponse'
+    ValidationReasonResponse:
+      type: object
+      required: [code, severity]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+        severity:
+          type: string
+          enum: [INFO, WARNING, BLOCKING]
+        target:
+          type: string
+    ConfirmCheckoutRequest:
+      type: object
+      required: [checkoutVersion]
+      properties:
+        checkoutVersion:
+          type: integer
+          format: int64
+    OrderConfirmationResponse:
+      type: object
+      required: [orderNumber, orderType, status, paymentStatus, deliveryStatus, totals]
+      properties:
+        orderNumber:
+          type: string
+        orderType:
+          $ref: '#/components/schemas/CheckoutType'
+        status:
+          type: string
+        paymentStatus:
+          type: string
+        deliveryStatus:
+          type: string
+        paymentSessionId:
+          type: string
+        totals:
+          $ref: '#/components/schemas/CheckoutTotalsResponse'
+        nextAction:
+          type: string
+          enum: [PAYMENT_REDIRECT, WAIT_PAYMENT, ORDER_DETAILS, FIX_CHECKOUT]
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationReasonResponse'
+    ErrorResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          pattern: '^STR_MNEMO_.*'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationReasonResponse'

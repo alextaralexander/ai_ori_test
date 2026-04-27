@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 010 - основное оформление заказа</title>
+  <desc id="desc">Схематичный макет страницы /order: шаги checkout, форма текущего шага, блок итогов, предупреждения и действия.</desc>
+  <rect x="20" y="20" width="1160" height="860" fill="white" stroke="black"/>
+  <text x="48" y="60" font-size="24">/order - Оформление основного заказа</text>
+
+  <rect x="48" y="92" width="1104" height="64" fill="white" stroke="black"/>
+  <text x="72" y="130" font-size="18">Шаги: 1 Получатель -> 2 Адрес -> 3 Доставка -> 4 Оплата -> 5 Подтверждение</text>
+
+  <rect x="48" y="184" width="690" height="600" fill="white" stroke="black"/>
+  <text x="72" y="222" font-size="20">Форма текущего шага</text>
+
+  <rect x="72" y="250" width="620" height="54" fill="white" stroke="black"/>
+  <text x="92" y="284" font-size="16">Получатель: selector self / another recipient</text>
+
+  <rect x="72" y="324" width="620" height="54" fill="white" stroke="black"/>
+  <text x="92" y="358" font-size="16">Контакты: имя, телефон, email, validation errors</text>
+
+  <rect x="72" y="398" width="620" height="54" fill="white" stroke="black"/>
+  <text x="92" y="432" font-size="16">Адрес / пункт выдачи: saved address, new address, pickup point</text>
+
+  <rect x="72" y="472" width="620" height="74" fill="white" stroke="black"/>
+  <text x="92" y="504" font-size="16">Доставка: radio list, стоимость, срок, ограничения</text>
+  <text x="92" y="528" font-size="14">Недоступные варианты показывают structured reason</text>
+
+  <rect x="72" y="566" width="620" height="74" fill="white" stroke="black"/>
+  <text x="92" y="598" font-size="16">Оплата: ONLINE_CARD / wallet / cashback / benefit controls</text>
+  <text x="92" y="622" font-size="14">Idempotency key для платежной сессии</text>
+
+  <rect x="72" y="660" width="620" height="88" fill="white" stroke="black"/>
+  <text x="92" y="692" font-size="16">Validation summary: ошибки контактов, адреса, доставки, оплаты, резерва</text>
+  <text x="92" y="716" font-size="14">Все сообщения берутся из i18n / STR_MNEMO_* mapping</text>
+
+  <rect x="770" y="184" width="382" height="600" fill="white" stroke="black"/>
+  <text x="794" y="222" font-size="20">Итоги заказа</text>
+
+  <rect x="794" y="250" width="334" height="150" fill="white" stroke="black"/>
+  <text x="814" y="282" font-size="16">Позиции checkout snapshot</text>
+  <text x="814" y="310" font-size="14">productCode, quantity, price, reserve status</text>
+  <text x="814" y="338" font-size="14">campaignId CMP-2026-05</text>
+
+  <rect x="794" y="424" width="334" height="118" fill="white" stroke="black"/>
+  <text x="814" y="456" font-size="16">Выгоды</text>
+  <text x="814" y="484" font-size="14">wallet, cashback, catalog benefits</text>
+  <text x="814" y="512" font-size="14">лимиты и предупреждения</text>
+
+  <rect x="794" y="566" width="334" height="96" fill="white" stroke="black"/>
+  <text x="814" y="600" font-size="16">Сумма</text>
+  <text x="814" y="628" font-size="14">subtotal, delivery, discounts, grand total</text>
+
+  <rect x="794" y="690" width="154" height="54" fill="white" stroke="black"/>
+  <text x="820" y="724" font-size="16">Назад</text>
+  <rect x="974" y="690" width="154" height="54" fill="white" stroke="black"/>
+  <text x="1002" y="724" font-size="16">Далее</text>
+
+  <rect x="48" y="814" width="1104" height="42" fill="white" stroke="black"/>
+  <text x="72" y="842" font-size="14">Mobile: одна колонка - шаги, форма, validation summary, итоги, CTA подтверждения.</text>
+</svg>

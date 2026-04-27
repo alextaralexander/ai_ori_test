@@ -1,0 +1,36 @@
+package com.bestorigin.monolith.order.impl.service;
+
+import com.bestorigin.monolith.order.api.OrderDtos.AddressRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.BenefitApplyRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.CheckoutDraftResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.CheckoutValidationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.ConfirmCheckoutRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.StartCheckoutRequest;
+import java.util.UUID;
+
+public interface OrderCheckoutService {
+
+    CheckoutDraftResponse start(String userContextId, StartCheckoutRequest request, String idempotencyKey);
+
+    CheckoutDraftResponse get(String userContextId, UUID checkoutId);
+
+    CheckoutDraftResponse updateRecipient(String userContextId, UUID checkoutId, RecipientRequest request);
+
+    CheckoutDraftResponse updateAddress(String userContextId, UUID checkoutId, AddressRequest request);
+
+    CheckoutDraftResponse selectDelivery(String userContextId, UUID checkoutId, DeliverySelectionRequest request);
+
+    CheckoutDraftResponse selectPayment(String userContextId, UUID checkoutId, PaymentSelectionRequest request, String idempotencyKey);
+
+    CheckoutDraftResponse applyBenefits(String userContextId, UUID checkoutId, BenefitApplyRequest request, String idempotencyKey);
+
+    CheckoutValidationResponse validate(String userContextId, UUID checkoutId);
+
+    OrderConfirmationResponse confirm(String userContextId, UUID checkoutId, ConfirmCheckoutRequest request, String idempotencyKey);
+
+    OrderConfirmationResponse getOrder(String userContextId, String orderNumber);
+}

@@ -1,0 +1,95 @@
+@startuml
+title Feature 010. Оформление заказа и дозаказ. Sequence diagram
+
+actor "Покупатель/Партнер" as User
+participant "Frontend web-shell\n/order, /order/supplementary" as FE
+participant "module_order\nOrderController" as OrderApi
+participant "module_order\nCheckoutService" as Checkout
+participant "module_cart\nCart API" as Cart
+participant "module_catalog\nCampaign/Product API" as Catalog
+participant "Benefit rules" as Benefit
+participant "Delivery integration" as Delivery
+participant "WMS/1C inventory" as Wms
+participant "Payment provider" as Payment
+participant "Audit/Event publisher" as Audit
+
+User -> FE: opens /order or /order/supplementary
+FE -> OrderApi: POST /api/order/checkouts\ncartId, checkoutType, Idempotency-Key
+OrderApi -> Checkout: startCheckout(command)
+Checkout -> Cart: validateCart(cartId, checkoutType, owner)
+Cart --> Checkout: cart snapshot, totals, availability, validation
+Checkout -> Catalog: resolve campaign and product snapshots
+Catalog --> Checkout: campaign/product data
+Checkout -> Benefit: precheck role, partner, VIP/super, retention limits
+Benefit --> Checkout: allowed benefits and warnings
+Checkout -> Audit: CHECKOUT_STARTED
+Checkout --> OrderApi: CheckoutDraftResponse
+OrderApi --> FE: checkout draft with STR_MNEMO_* reasons
+
+User -> FE: enters recipient and contacts
+FE -> OrderApi: PUT /api/order/checkouts/{id}/recipient
+OrderApi -> Checkout: updateRecipient
+Checkout -> Audit: RECIPIENT_UPDATED or VALIDATION_FAILED
+Checkout --> FE: updated draft
+
+User -> FE: selects address or pickup point
+FE -> OrderApi: PUT /api/order/checkouts/{id}/address
+OrderApi -> Checkout: updateAddress
+Checkout -> Delivery: calculate options(address, items, checkoutType)
+Delivery --> Checkout: delivery options and reasonMnemo
+Checkout -> Audit: ADDRESS_UPDATED
+Checkout --> FE: draft with deliveryOptions
+
+User -> FE: selects delivery
+FE -> OrderApi: PUT /api/order/checkouts/{id}/delivery
+OrderApi -> Checkout: selectDelivery
+Checkout -> Delivery: verify selected method
+Delivery --> Checkout: available or STR_MNEMO_ORDER_DELIVERY_UNAVAILABLE
+Checkout -> Audit: DELIVERY_SELECTED or VALIDATION_FAILED
+Checkout --> FE: updated draft and totals
+
+User -> FE: applies wallet/cashback/catalog benefits
+FE -> OrderApi: PUT /api/order/checkouts/{id}/benefits\nIdempotency-Key
+OrderApi -> Checkout: applyBenefits
+Checkout -> Benefit: validate limits and calculate amounts
+Benefit --> Checkout: applied/rejected benefits
+Checkout -> Audit: BENEFIT_APPLIED or VALIDATION_FAILED
+Checkout --> FE: recalculated draft
+
+User -> FE: selects payment method
+FE -> OrderApi: PUT /api/order/checkouts/{id}/payment\nIdempotency-Key
+OrderApi -> Checkout: selectPayment
+Checkout -> Payment: create or reuse payment session
+Payment --> Checkout: paymentSessionId, paymentStatus
+Checkout -> Audit: PAYMENT_SELECTED
+Checkout --> FE: draft with payment status
+
+User -> FE: confirms checkout
+FE -> OrderApi: POST /api/order/checkouts/{id}/confirm\ncheckoutVersion, Idempotency-Key
+OrderApi -> Checkout: confirmCheckout
+Checkout -> Cart: final validation
+Checkout -> Benefit: final benefit validation
+Checkout -> Wms: reserve items
+alt full reserve
+  Wms --> Checkout: reservation ids
+  Checkout -> Payment: ensure payment session
+  Payment --> Checkout: payment status
+  Checkout -> Audit: ORDER_CONFIRMED
+  Checkout -> Audit: publish order event for assembly/delivery
+  Checkout --> OrderApi: OrderConfirmationResponse\norderNumber, nextAction
+  OrderApi --> FE: success result
+  FE --> User: order number and next payment step
+else partial reserve
+  Wms --> Checkout: available quantities and reason
+  Checkout -> Audit: RESERVATION_FAILED
+  Checkout --> OrderApi: validation response\nSTR_MNEMO_ORDER_PARTIAL_RESERVE
+  OrderApi --> FE: controlled blocking state
+  FE --> User: fix quantity or return to cart
+else payment failed
+  Payment --> Checkout: FAILED/EXPIRED
+  Checkout -> Audit: PAYMENT_STATUS_CHANGED
+  Checkout --> OrderApi: order/payment state\nSTR_MNEMO_ORDER_PAYMENT_FAILED
+  OrderApi --> FE: retry payment state
+  FE --> User: retry or change payment method
+end
+@enduml

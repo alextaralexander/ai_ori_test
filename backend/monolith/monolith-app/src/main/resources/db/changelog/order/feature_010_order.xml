@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-010-order-001" author="codex">
+        <createTable tableName="order_checkout_draft">
+            <column name="checkout_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="checkout_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cart_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grand_total_amount" type="numeric(12,2)"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="order_checkout_draft" indexName="idx_order_checkout_owner_status">
+            <column name="owner_user_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-010-order-002" author="codex">
+        <createTable tableName="order_order">
+            <column name="order_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="checkout_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="varchar(32)"/>
+            <column name="delivery_status" type="varchar(32)"/>
+            <column name="grand_total_amount" type="numeric(12,2)"/>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="order_order" indexName="idx_order_owner_created">
+            <column name="owner_user_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
