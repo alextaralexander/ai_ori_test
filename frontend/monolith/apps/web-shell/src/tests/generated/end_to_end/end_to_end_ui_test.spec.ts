@@ -37,6 +37,7 @@ import { runFeature032AdminWmsFlow } from '../feature_032_админ_wms_1c_ос
 import { runFeature033AdminOrdersFlow } from '../feature_033_админ_заказы_платежи_и_дозаказы/feature_ui_flow';
 import { runFeature034AdminServiceFlow } from '../feature_034_админ_претензии_возвраты_и_сервис/feature_ui_flow';
 import { runFeature035AdminIdentityFlow } from '../feature_035_админ_пользователи_партнеры_сотрудники_и_имперсонация/feature_ui_flow';
+import { runFeature036AdminPlatformFlow } from '../feature_036_админ_kpi_аудит_и_интеграции_платформы/feature_ui_flow';
 
 test('admin WMS green path participates in product e2e flow', async ({ page }) => {
   await runFeature032AdminWmsFlow(page);
@@ -52,4 +53,9 @@ test('admin service claims returns replacements and SLA green path participates 
 
 test('admin identity users partners employees and impersonation green path participates in product e2e flow', async ({ page }) => {
   await runFeature035AdminIdentityFlow(page);
+});
+
+
+test('admin platform KPI audit and integrations green path participates in product e2e flow', async ({ page }) => {
+  await runFeature036AdminPlatformFlow(page);
 });

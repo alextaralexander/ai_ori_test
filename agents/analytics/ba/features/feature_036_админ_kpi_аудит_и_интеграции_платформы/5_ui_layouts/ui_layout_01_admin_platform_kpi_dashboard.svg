@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет KPI dashboard feature 036</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Админ: KPI платформы</text>
+  <rect x="32" y="116" width="220" height="596" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="56" y="156" font-family="Arial" font-size="16">Период</text>
+  <text x="56" y="204" font-family="Arial" font-size="16">Кампания</text>
+  <text x="56" y="252" font-family="Arial" font-size="16">Регион</text>
+  <rect x="284" y="116" width="916" height="130" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="312" y="160" font-family="Arial" font-size="18">GMV / Conversion / Orders / SLA</text>
+  <rect x="284" y="278" width="560" height="300" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="312" y="316" font-family="Arial" font-size="18">Тренды KPI</text>
+  <rect x="872" y="278" width="328" height="300" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="900" y="316" font-family="Arial" font-size="18">Alerts</text>
+</svg>

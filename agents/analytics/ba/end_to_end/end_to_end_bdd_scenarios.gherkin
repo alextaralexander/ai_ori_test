@@ -450,3 +450,11 @@
     Когда actor пытается изменить пароль target subject
     Тогда backend отклоняет действие с mnemonic-кодом `STR_MNEMO_ADMIN_IDENTITY_IMPERSONATION_ACTION_FORBIDDEN`
     И попытка запрещенного действия сохраняется в impersonation audit trail
+
+  Сценарий: Администратор контролирует KPI и интеграции платформы
+    Допустим пользователь вошел с ролью "business-admin"
+    Когда пользователь открывает "/admin/platform"
+    Тогда платформа показывает KPI заказов, продаж, SLA и претензий
+    Допустим пользователь вошел с ролью "integration-admin"
+    Когда пользователь открывает "/admin/platform/integrations"
+    Тогда платформа показывает состояние WMS/1С, доставки, payment, bonus и analytics adapters

@@ -1,0 +1,24 @@
+@startuml
+entity admin_platform_kpi_snapshot {
+  * snapshot_id : uuid
+  * period_code : varchar
+  * metric_code : varchar
+  * metric_value : numeric
+  * updated_at : timestamptz
+}
+entity admin_platform_integration_status {
+  * integration_code : varchar
+  * status : varchar
+  * sla_minutes : integer
+  * retry_policy : varchar
+}
+entity admin_platform_audit_event {
+  * audit_event_id : uuid
+  * actor_role : varchar
+  * domain_code : varchar
+  * action_code : varchar
+  * correlation_id : varchar
+}
+admin_platform_integration_status ||--o{ admin_platform_audit_event
+admin_platform_kpi_snapshot ||--o{ admin_platform_audit_event
+@enduml

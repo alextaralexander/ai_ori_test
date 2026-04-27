@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет мониторинга интеграций feature 036</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <text x="48" y="64" font-family="Arial" font-size="24">Интеграции платформы</text>
+  <rect x="48" y="104" width="720" height="520" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="72" y="148" font-family="Arial" font-size="16">WMS_1C / ASSEMBLY / DELIVERY / PAYMENT / BONUS / ANALYTICS</text>
+  <rect x="812" y="104" width="388" height="520" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="836" y="148" font-family="Arial" font-size="16">SLA, retry policy, maintenance window</text>
+</svg>

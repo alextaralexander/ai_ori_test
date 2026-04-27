@@ -298,3 +298,9 @@ cloud "Hybrid Pixel" as hybrid
 [partner-office] --> [admin-wms] : supply and acceptance HTTP/JSON projection
 
 @enduml
+
+component "admin-platform" as AdminPlatform
+AdminPlatform --> AdminWms : KPI/SLA read-model
+AdminPlatform --> AdminOrder : order/payment KPI
+AdminPlatform --> AdminService : claims/SLA KPI
+AdminPlatform --> PlatformExperience : analytics diagnostics

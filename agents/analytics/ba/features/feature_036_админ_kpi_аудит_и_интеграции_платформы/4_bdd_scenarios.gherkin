@@ -1,0 +1,26 @@
+# language: ru
+Функция: Админ KPI, аудит и интеграции платформы
+
+  Сценарий: Бизнес-администратор просматривает KPI dashboard
+    Допустим пользователь вошел с ролью "business-admin"
+    Когда пользователь открывает "/admin/platform"
+    Тогда отображается KPI board с GMV, conversion, orders и SLA метриками
+    И backend возвращает данные без предопределенного hardcoded UI-текста
+
+  Сценарий: Администратор интеграций меняет SLA настройки WMS/1С
+    Допустим пользователь вошел с ролью "integration-admin"
+    Когда пользователь открывает "/admin/platform/integrations"
+    И сохраняет SLA и retry policy для интеграции "WMS_1C"
+    Тогда отображается mnemonic-код "STR_MNEMO_ADMIN_PLATFORM_INTEGRATION_SAVED"
+    И audit trail содержит reasonCode и correlationId
+
+  Сценарий: Аудитор ищет административные действия
+    Допустим пользователь вошел с ролью "audit-admin"
+    Когда пользователь открывает "/admin/platform/audit"
+    И фильтрует события по domain "INTEGRATION"
+    Тогда таблица аудита содержит actionCode, masked subject и correlationId
+
+  Сценарий: Пользователь без прав не получает доступ к административной платформе
+    Допустим пользователь вошел с ролью "content-admin"
+    Когда пользователь открывает "/admin/platform"
+    Тогда отображается код "STR_MNEMO_ADMIN_PLATFORM_ACCESS_DENIED"

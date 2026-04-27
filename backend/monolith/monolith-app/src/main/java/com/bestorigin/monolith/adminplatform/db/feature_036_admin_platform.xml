@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="feature-036-admin-platform-kpi" author="codex">
+        <createTable tableName="admin_platform_kpi_snapshot">
+            <column name="snapshot_id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="period_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="metric_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="metric_value" type="numeric(19,4)"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createTable tableName="admin_platform_integration_status">
+            <column name="integration_code" type="varchar(64)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="sla_minutes" type="int"><constraints nullable="false"/></column>
+            <column name="retry_policy" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="maintenance_window" type="varchar(128)"/>
+        </createTable>
+        <createTable tableName="admin_platform_audit_event">
+            <column name="audit_event_id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="actor_role" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="domain_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="action_code" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="correlation_id" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="occurred_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

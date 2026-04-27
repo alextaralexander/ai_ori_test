@@ -1,0 +1,16 @@
+@startuml
+actor "Business admin" as Admin
+participant "AdminPlatformView" as UI
+participant "AdminPlatformController" as API
+participant "AdminPlatformService" as SVC
+Admin -> UI: open /admin/platform
+UI -> API: GET /api/admin/platform/kpis
+API -> SVC: dashboard(token, filters)
+SVC --> API: KpiDashboardResponse
+API --> UI: KPI tiles + alerts
+Admin -> UI: save integration SLA
+UI -> API: PUT /api/admin/platform/integrations/WMS_1C
+API -> SVC: save settings with reasonCode
+SVC --> API: IntegrationSettingsResponse
+API --> UI: STR_MNEMO_ADMIN_PLATFORM_INTEGRATION_SAVED
+@enduml

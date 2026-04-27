@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: Admin Platform API
+  version: 0.1.0
+paths:
+  /api/admin/platform/kpis:
+    get:
+      summary: KPI dashboard
+      responses:
+        '200': { description: KPI dashboard response }
+  /api/admin/platform/integrations:
+    get:
+      summary: Integration statuses
+      responses:
+        '200': { description: Integration status list }
+  /api/admin/platform/integrations/{integrationCode}:
+    put:
+      summary: Save integration settings
+      responses:
+        '200': { description: Integration settings saved }
+  /api/admin/platform/audit-events:
+    get:
+      summary: Platform audit events
+      responses:
+        '200': { description: Audit event page }
+  /api/admin/platform/reports/exports:
+    post:
+      summary: Start KPI or SLA export
+      responses:
+        '202': { description: Export accepted }
