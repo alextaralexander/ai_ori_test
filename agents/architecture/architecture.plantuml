@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 033
+title Best Ori Gin monolith architecture through feature 034
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -49,6 +49,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminOrderSupplementary UI]
   [AdminOrderRisk UI]
   [AdminOrderAudit UI]
+  [AdminService UI]
+  [AdminServiceQueue UI]
+  [AdminServiceCaseCard UI]
+  [AdminServiceDecisions UI]
+  [AdminServiceSlaBoard UI]
+  [AdminServiceAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -90,6 +96,7 @@ package "backend/monolith/monolith-app" {
   [admin-pricing]
   [admin-wms]
   [admin-order]
+  [admin-service]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -150,6 +157,12 @@ cloud "Hybrid Pixel" as hybrid
 [AdminOrderPayments UI] --> [admin-order] : HTTP/JSON /api/admin/orders/payment-events, /orders/{orderId}/refunds, /financial-holds
 [AdminOrderRisk UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}/risk-decisions
 [AdminOrderAudit UI] --> [admin-order] : HTTP/JSON /api/admin/orders/audit-events, /audit-events/export
+[AdminService UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases, /cases/{serviceCaseId}
+[AdminServiceQueue UI] --> [admin-service] : HTTP/JSON /api/admin/service/queues, /cases/{serviceCaseId}/assignment
+[AdminServiceCaseCard UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases/{serviceCaseId}, /messages, /status-transition
+[AdminServiceDecisions UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases/{serviceCaseId}/decisions, /decisions/{decisionId}/refund-actions, /replacement-actions
+[AdminServiceSlaBoard UI] --> [admin-service] : HTTP/JSON /api/admin/service/supervisor/sla-board
+[AdminServiceAudit UI] --> [admin-service] : HTTP/JSON /api/admin/service/audit-events, /audit-events/export
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -226,6 +239,17 @@ cloud "Hybrid Pixel" as hybrid
 [admin-order] --> bonus : bonus writeoff and compensation consistency checks
 [admin-order] --> delivery : shipment reference and delivery blocking context
 [admin-order] --> db : orders, lines, fulfillment groups, payment events, refunds, holds, risk events, operator actions and audit
+[admin-service] --> [authorization] : admin service permission, role, queue, amount and elevated checks
+[admin-service] --> [admin-rbac] : permission matrix, supervisor scopes and responsibility scopes
+[admin-service] --> [admin-order] : order, payment, refund limit and financial hold context
+[admin-service] --> [admin-wms] : return inspection, warehouse availability and replacement shipment context
+[admin-service] --> [employee] : employee claim links and support context
+[admin-service] --> claims : customer/partner claim ids and public claim status projection
+[admin-service] --> pay : refund command protocol through order/payment context
+[admin-service] --> bonus : bonus compensation transaction protocol
+[admin-service] --> delivery : replacement delivery status and delivery issue context
+[admin-service] --> s3 : claim attachments and redaction metadata
+[admin-service] --> db : service cases, queues, routing rules, SLA policies, messages, attachments, decisions, actions, WMS events and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

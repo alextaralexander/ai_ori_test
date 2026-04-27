@@ -1,0 +1,98 @@
+@startuml
+title Feature 034. Admin service cases, refunds, replacements and SLA sequence
+
+actor "Оператор претензий" as operator
+actor "Супервизор сервиса" as supervisor
+participant "Admin frontend\n/admin/service" as frontend
+participant "admin-service\nController" as controller
+participant "admin-service\nService layer" as service
+participant "admin-rbac" as rbac
+participant "admin-order/payment" as order
+participant "admin-wms/logistics" as wms
+participant "bonuswallet" as bonus
+participant "S3/MinIO" as storage
+database "admin_service_*" as db
+
+operator -> frontend : Открывает очередь service cases
+frontend -> controller : GET /api/admin/service/cases?filters
+controller -> service : searchServiceCases(token, filters)
+service -> rbac : verify ADMIN_SERVICE_VIEW
+service -> db : select cases by filters, SLA, owner, queue
+db --> service : ServiceCasePage
+service --> controller : ServiceCasePage + allowedActions
+controller --> frontend : 200 ServiceCasePage
+
+operator -> frontend : Открывает карточку CLM-034
+frontend -> controller : GET /api/admin/service/cases/{serviceCaseId}
+controller -> service : getServiceCase(token, serviceCaseId)
+service -> rbac : verify ADMIN_SERVICE_VIEW
+service -> db : load case, messages, decisions, actions, audit
+service -> order : load order/payment/refund context
+service -> wms : load return/replacement context
+service -> storage : resolve attachment metadata
+service --> controller : ServiceCaseDetails
+controller --> frontend : 200 ServiceCaseDetails
+
+operator -> frontend : Берет кейс в работу
+frontend -> controller : POST /cases/{id}/assignment + Idempotency-Key
+controller -> service : assignServiceCase(token, request)
+service -> rbac : verify ADMIN_SERVICE_MANAGE
+service -> db : update owner, append audit event
+service --> controller : updated ServiceCaseDetails
+controller --> frontend : 200
+
+alt Нужно запросить данные клиента
+  operator -> frontend : Запросить фото/документы
+  frontend -> controller : POST /cases/{id}/messages
+  service -> db : add CUSTOMER_MESSAGE, set WAITING_CUSTOMER, pause SLA
+  service -> db : append audit event
+  controller --> frontend : ServiceMessageResponse
+else Данных достаточно для решения
+  operator -> frontend : Выбирает решение
+endif
+
+operator -> frontend : APPROVE_REFUND 2500 RUB
+frontend -> controller : POST /cases/{id}/decisions
+controller -> service : createDecision(APPROVE_REFUND)
+service -> rbac : verify ADMIN_SERVICE_MANAGE
+service -> order : verify paid/refunded amount and refund policy
+service -> db : insert decision, append audit
+controller --> frontend : 202 DecisionResponse
+
+frontend -> controller : POST /decisions/{decisionId}/refund-actions
+controller -> service : createRefundAction(token, request)
+service -> rbac : verify ADMIN_SERVICE_REFUND_MANAGE
+service -> order : create refund command with claimId/orderId/idempotencyKey
+order --> service : refund accepted or finance approval required
+service -> db : insert refund_action, update decision status, append audit
+service --> controller : RefundActionResponse
+controller --> frontend : 202 RefundActionResponse
+
+alt Replacement decision
+  operator -> frontend : APPROVE_REPLACEMENT
+  frontend -> controller : POST /decisions/{decisionId}/replacement-actions
+  service -> rbac : verify ADMIN_SERVICE_REPLACEMENT_MANAGE
+  service -> wms : check SKU availability and create replacement shipment task
+  wms --> service : shipmentReference
+  service -> db : insert replacement_action, append audit
+  controller --> frontend : ReplacementActionResponse
+else Bonus compensation decision
+  operator -> frontend : APPROVE_BONUS_COMPENSATION
+  service -> bonus : create compensation transaction
+  bonus --> service : externalBonusTransactionId
+  service -> db : insert bonus_compensation, append audit
+endif
+
+supervisor -> frontend : Открывает SLA board
+frontend -> controller : GET /supervisor/sla-board
+service -> rbac : verify ADMIN_SERVICE_SUPERVISOR
+service -> db : load AT_RISK and BREACHED cases
+controller --> frontend : SlaBoardResponse
+
+supervisor -> frontend : Выполняет override решения
+frontend -> controller : POST /cases/{id}/decisions + supervisor reason
+service -> rbac : verify ADMIN_SERVICE_SUPERVISOR
+service -> db : insert decision(supervisor_override=true), old/new values audit
+controller --> frontend : DecisionResponse
+
+@enduml

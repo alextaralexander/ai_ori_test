@@ -1,0 +1,662 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin Admin Service API
+  version: 0.1.0-module-admin-service
+  description: >
+    Feature 034 API for administration of service cases, claim queues, routing,
+    SLA, messages, attachments, refunds, replacements, bonus compensations,
+    WMS events, supervisor override and audit trail. Runtime Swagger is generated
+    by springdoc-openapi under /v3/api-docs/admin-service and Swagger UI
+    /swagger-ui/admin-service.
+servers:
+  - url: /api/admin/service
+security:
+  - bearerAuth: []
+tags:
+  - name: ServiceCases
+  - name: Queues
+  - name: Decisions
+  - name: Actions
+  - name: WmsEvents
+  - name: Supervisor
+  - name: Audit
+paths:
+  /cases:
+    get:
+      tags: [ServiceCases]
+      summary: Search service cases
+      operationId: searchServiceCases
+      security:
+        - bearerAuth: [ADMIN_SERVICE_VIEW]
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/CaseStatus'
+        - $ref: '#/components/parameters/SlaStatus'
+        - $ref: '#/components/parameters/ClaimType'
+        - $ref: '#/components/parameters/QueueIdQuery'
+        - $ref: '#/components/parameters/WarehouseIdQuery'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Service case page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCasePage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [ServiceCases]
+      summary: Create administrative service case
+      operationId: createServiceCase
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateServiceCaseRequest' }
+      responses:
+        '201':
+          description: Created service case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCaseDetails' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /cases/{serviceCaseId}:
+    get:
+      tags: [ServiceCases]
+      summary: Get service case card
+      operationId: getServiceCase
+      security:
+        - bearerAuth: [ADMIN_SERVICE_VIEW]
+      parameters:
+        - $ref: '#/components/parameters/ServiceCaseId'
+      responses:
+        '200':
+          description: Service case details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCaseDetails' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /cases/{serviceCaseId}/assignment:
+    post:
+      tags: [ServiceCases]
+      summary: Assign or release service case owner
+      operationId: assignServiceCase
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/ServiceCaseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssignmentRequest' }
+      responses:
+        '200':
+          description: Updated service case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCaseDetails' }
+  /cases/{serviceCaseId}/status-transition:
+    post:
+      tags: [ServiceCases]
+      summary: Change service case status by allowed transition
+      operationId: transitionServiceCaseStatus
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/ServiceCaseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusTransitionRequest' }
+      responses:
+        '200':
+          description: Updated service case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCaseDetails' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /cases/{serviceCaseId}/messages:
+    post:
+      tags: [ServiceCases]
+      summary: Add customer-visible message or internal note
+      operationId: addServiceMessage
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/ServiceCaseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateMessageRequest' }
+      responses:
+        '201':
+          description: Created message
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceMessageResponse' }
+  /queues:
+    get:
+      tags: [Queues]
+      summary: Search service queues
+      operationId: searchServiceQueues
+      security:
+        - bearerAuth: [ADMIN_SERVICE_VIEW]
+      responses:
+        '200':
+          description: Service queues
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ServiceQueueResponse' }
+    post:
+      tags: [Queues]
+      summary: Create or update service queue
+      operationId: upsertServiceQueue
+      security:
+        - bearerAuth: [ADMIN_SERVICE_SUPERVISOR]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpsertQueueRequest' }
+      responses:
+        '200':
+          description: Saved queue
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceQueueResponse' }
+  /cases/{serviceCaseId}/decisions:
+    post:
+      tags: [Decisions]
+      summary: Create decision for service case
+      operationId: createServiceDecision
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/ServiceCaseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateDecisionRequest' }
+      responses:
+        '202':
+          description: Decision accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DecisionResponse' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /decisions/{decisionId}/refund-actions:
+    post:
+      tags: [Actions]
+      summary: Create refund action from service decision
+      operationId: createServiceRefundAction
+      security:
+        - bearerAuth: [ADMIN_SERVICE_REFUND_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/DecisionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRefundActionRequest' }
+      responses:
+        '202':
+          description: Refund action requested
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RefundActionResponse' }
+  /decisions/{decisionId}/replacement-actions:
+    post:
+      tags: [Actions]
+      summary: Create replacement action from service decision
+      operationId: createServiceReplacementAction
+      security:
+        - bearerAuth: [ADMIN_SERVICE_REPLACEMENT_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/DecisionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReplacementActionRequest' }
+      responses:
+        '202':
+          description: Replacement action requested
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReplacementActionResponse' }
+  /wms-events:
+    post:
+      tags: [WmsEvents]
+      summary: Ingest WMS event for service case
+      operationId: ingestServiceWmsEvent
+      security:
+        - bearerAuth: [ADMIN_SERVICE_MANAGE]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WmsEventRequest' }
+      responses:
+        '202':
+          description: WMS event accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WmsEventResponse' }
+  /supervisor/sla-board:
+    get:
+      tags: [Supervisor]
+      summary: Get supervisor SLA board
+      operationId: getSupervisorSlaBoard
+      security:
+        - bearerAuth: [ADMIN_SERVICE_SUPERVISOR]
+      responses:
+        '200':
+          description: SLA board
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SlaBoardResponse' }
+  /audit-events:
+    get:
+      tags: [Audit]
+      summary: Search service audit events
+      operationId: searchServiceAuditEvents
+      security:
+        - bearerAuth: [ADMIN_SERVICE_AUDIT_VIEW]
+      parameters:
+        - name: entityType
+          in: query
+          schema: { type: string }
+        - name: entityId
+          in: query
+          schema: { type: string }
+        - name: actorUserId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Audit event page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditEventPage' }
+  /audit-events/export:
+    post:
+      tags: [Audit]
+      summary: Export service audit events
+      operationId: exportServiceAuditEvents
+      security:
+        - bearerAuth: [ADMIN_SERVICE_EXPORT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuditExportRequest' }
+      responses:
+        '202':
+          description: Accepted export job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditExportResponse' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ServiceCaseId:
+      name: serviceCaseId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DecisionId:
+      name: decisionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    QueueIdQuery:
+      name: queueId
+      in: query
+      schema: { type: string, format: uuid }
+    WarehouseIdQuery:
+      name: warehouseId
+      in: query
+      schema: { type: string, format: uuid }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+    CaseStatus:
+      name: caseStatus
+      in: query
+      schema: { $ref: '#/components/schemas/CaseStatus' }
+    SlaStatus:
+      name: slaStatus
+      in: query
+      schema: { $ref: '#/components/schemas/SlaStatus' }
+    ClaimType:
+      name: claimType
+      in: query
+      schema: { type: string }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 120 }
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Conflict:
+      description: Business conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    ServiceCasePage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ServiceCaseSummary' } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+    ServiceCaseSummary:
+      type: object
+      required: [serviceCaseId, claimNumber, claimType, priority, caseStatus, slaStatus, messageCode]
+      properties:
+        serviceCaseId: { type: string, format: uuid }
+        claimNumber: { type: string }
+        sourceClaimId: { type: string }
+        orderId: { type: string, format: uuid }
+        customerId: { type: string }
+        partnerId: { type: string }
+        warehouseId: { type: string, format: uuid }
+        queueId: { type: string, format: uuid }
+        ownerUserId: { type: string, format: uuid }
+        claimType: { type: string }
+        priority: { type: string, enum: [LOW, NORMAL, HIGH, CRITICAL] }
+        caseStatus: { $ref: '#/components/schemas/CaseStatus' }
+        slaStatus: { $ref: '#/components/schemas/SlaStatus' }
+        reactionDueAt: { type: string, format: date-time }
+        resolutionDueAt: { type: string, format: date-time }
+        messageCode: { type: string }
+    ServiceCaseDetails:
+      allOf:
+        - $ref: '#/components/schemas/ServiceCaseSummary'
+        - type: object
+          required: [messages, attachments, decisions, auditEvents, allowedActions]
+          properties:
+            messages: { type: array, items: { $ref: '#/components/schemas/ServiceMessageResponse' } }
+            attachments: { type: array, items: { $ref: '#/components/schemas/AttachmentResponse' } }
+            decisions: { type: array, items: { $ref: '#/components/schemas/DecisionResponse' } }
+            refundActions: { type: array, items: { $ref: '#/components/schemas/RefundActionResponse' } }
+            replacementActions: { type: array, items: { $ref: '#/components/schemas/ReplacementActionResponse' } }
+            wmsEvents: { type: array, items: { $ref: '#/components/schemas/WmsEventResponse' } }
+            auditEvents: { type: array, items: { $ref: '#/components/schemas/AuditEventResponse' } }
+            allowedActions: { type: array, items: { type: string } }
+    CreateServiceCaseRequest:
+      type: object
+      required: [sourceClaimId, orderId, claimType, priority, reasonCode]
+      properties:
+        sourceClaimId: { type: string }
+        orderId: { type: string, format: uuid }
+        customerId: { type: string }
+        partnerId: { type: string }
+        warehouseId: { type: string, format: uuid }
+        claimType: { type: string }
+        priority: { type: string }
+        reasonCode: { type: string }
+    AssignmentRequest:
+      type: object
+      required: [assignmentAction, reasonCode]
+      properties:
+        assignmentAction: { type: string, enum: [TAKE, ASSIGN, RELEASE] }
+        ownerUserId: { type: string, format: uuid }
+        reasonCode: { type: string }
+    StatusTransitionRequest:
+      type: object
+      required: [targetStatus, reasonCode, version]
+      properties:
+        targetStatus: { $ref: '#/components/schemas/CaseStatus' }
+        reasonCode: { type: string }
+        comment: { type: string, maxLength: 1000 }
+        version: { type: integer, format: int64 }
+    CreateMessageRequest:
+      type: object
+      required: [messageType, visibility, reasonCode]
+      properties:
+        messageType: { type: string, enum: [CUSTOMER_MESSAGE, INTERNAL_NOTE, SYSTEM_EVENT] }
+        visibility: { type: string, enum: [CUSTOMER_VISIBLE, INTERNAL] }
+        customerVisibleMessageCode: { type: string, pattern: '^STR_MNEMO_ADMIN_SERVICE_' }
+        body: { type: string, maxLength: 4000 }
+        reasonCode: { type: string }
+    ServiceMessageResponse:
+      type: object
+      required: [messageId, serviceCaseId, messageType, visibility, createdAt]
+      properties:
+        messageId: { type: string, format: uuid }
+        serviceCaseId: { type: string, format: uuid }
+        messageType: { type: string }
+        visibility: { type: string }
+        authorUserId: { type: string, format: uuid }
+        customerVisibleMessageCode: { type: string }
+        createdAt: { type: string, format: date-time }
+    AttachmentResponse:
+      type: object
+      required: [attachmentId, fileName, mimeType, sizeBytes, attachmentStatus]
+      properties:
+        attachmentId: { type: string, format: uuid }
+        fileName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer, format: int64 }
+        checksum: { type: string }
+        attachmentStatus: { type: string, enum: [ACTIVE, REDACTED, QUARANTINED] }
+    UpsertQueueRequest:
+      type: object
+      required: [queueCode, queueName, active]
+      properties:
+        queueCode: { type: string }
+        queueName: { type: string }
+        active: { type: boolean }
+        defaultOwnerGroup: { type: string }
+        regionCode: { type: string }
+        warehouseId: { type: string, format: uuid }
+    ServiceQueueResponse:
+      type: object
+      required: [queueId, queueCode, queueName, active]
+      properties:
+        queueId: { type: string, format: uuid }
+        queueCode: { type: string }
+        queueName: { type: string }
+        active: { type: boolean }
+        defaultOwnerGroup: { type: string }
+        regionCode: { type: string }
+        warehouseId: { type: string, format: uuid }
+    CreateDecisionRequest:
+      type: object
+      required: [decisionType, reasonCode]
+      properties:
+        decisionType: { type: string, enum: [APPROVE_REFUND, APPROVE_REPLACEMENT, APPROVE_BONUS_COMPENSATION, REJECT, REQUEST_INFO, ESCALATE] }
+        reasonCode: { type: string }
+        customerMessageCode: { type: string, pattern: '^STR_MNEMO_ADMIN_SERVICE_' }
+        comment: { type: string, maxLength: 1000 }
+    DecisionResponse:
+      type: object
+      required: [decisionId, serviceCaseId, decisionType, decisionStatus, reasonCode, correlationId]
+      properties:
+        decisionId: { type: string, format: uuid }
+        serviceCaseId: { type: string, format: uuid }
+        decisionType: { type: string }
+        decisionStatus: { type: string, enum: [DRAFT, REQUESTED, APPROVED, REJECTED, COMPLETED, CANCELLED] }
+        reasonCode: { type: string }
+        supervisorOverride: { type: boolean }
+        customerMessageCode: { type: string }
+        correlationId: { type: string }
+    CreateRefundActionRequest:
+      type: object
+      required: [amount, currencyCode, reasonCode]
+      properties:
+        amount: { type: number, minimum: 0 }
+        currencyCode: { type: string, minLength: 3, maxLength: 3 }
+        paymentReference: { type: string }
+        reasonCode: { type: string }
+    RefundActionResponse:
+      type: object
+      required: [refundActionId, serviceCaseId, orderId, amount, currencyCode, refundStatus, correlationId]
+      properties:
+        refundActionId: { type: string, format: uuid }
+        serviceCaseId: { type: string, format: uuid }
+        orderId: { type: string, format: uuid }
+        amount: { type: number }
+        currencyCode: { type: string }
+        refundStatus: { type: string, enum: [REQUESTED, WAITING_FINANCE, APPROVED, SENT_TO_PROVIDER, SUCCEEDED, FAILED, CANCELLED] }
+        externalRefundId: { type: string }
+        messageCode: { type: string }
+        correlationId: { type: string }
+    CreateReplacementActionRequest:
+      type: object
+      required: [sku, quantity, warehouseId, reasonCode]
+      properties:
+        sku: { type: string }
+        quantity: { type: number, minimum: 0 }
+        warehouseId: { type: string, format: uuid }
+        reasonCode: { type: string }
+    ReplacementActionResponse:
+      type: object
+      required: [replacementActionId, serviceCaseId, orderId, sku, quantity, replacementStatus, correlationId]
+      properties:
+        replacementActionId: { type: string, format: uuid }
+        serviceCaseId: { type: string, format: uuid }
+        orderId: { type: string, format: uuid }
+        sku: { type: string }
+        quantity: { type: number }
+        warehouseId: { type: string, format: uuid }
+        replacementStatus: { type: string, enum: [REQUESTED, SENT_TO_WMS, RESERVED, SHIPPED, DELIVERED, FAILED, CANCELLED] }
+        shipmentReference: { type: string }
+        messageCode: { type: string }
+        correlationId: { type: string }
+    WmsEventRequest:
+      type: object
+      required: [serviceCaseId, sourceSystem, externalEventId, eventType]
+      properties:
+        serviceCaseId: { type: string, format: uuid }
+        sourceSystem: { type: string }
+        externalEventId: { type: string }
+        eventType: { type: string, enum: [RETURN_RECEIVED, INSPECTION_UPDATED, REPLACEMENT_SHIPPED, REPLACEMENT_DELIVERED] }
+        inspectionStatus: { type: string }
+        payloadChecksum: { type: string }
+    WmsEventResponse:
+      type: object
+      required: [wmsEventId, serviceCaseId, eventType, retryStatus, correlationId]
+      properties:
+        wmsEventId: { type: string, format: uuid }
+        serviceCaseId: { type: string, format: uuid }
+        sourceSystem: { type: string }
+        externalEventId: { type: string }
+        eventType: { type: string }
+        inspectionStatus: { type: string }
+        retryStatus: { type: string, enum: [ACCEPTED, PROCESSED, RETRY, FAILED] }
+        correlationId: { type: string }
+    SlaBoardResponse:
+      type: object
+      required: [activeCases, atRiskCases, breachedCases, items]
+      properties:
+        activeCases: { type: integer }
+        atRiskCases: { type: integer }
+        breachedCases: { type: integer }
+        items: { type: array, items: { $ref: '#/components/schemas/ServiceCaseSummary' } }
+    AuditEventPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/AuditEventResponse' } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+    AuditEventResponse:
+      type: object
+      required: [auditEventId, actorUserId, actionCode, entityType, entityId, correlationId, occurredAt]
+      properties:
+        auditEventId: { type: string, format: uuid }
+        actorUserId: { type: string, format: uuid }
+        actionCode: { type: string }
+        entityType: { type: string }
+        entityId: { type: string }
+        reasonCode: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }
+    AuditExportRequest:
+      type: object
+      required: [filters, format]
+      properties:
+        filters: { type: object, additionalProperties: true }
+        format: { type: string, enum: [CSV, XLSX] }
+    AuditExportResponse:
+      type: object
+      required: [exportJobId, status, messageCode]
+      properties:
+        exportJobId: { type: string, format: uuid }
+        status: { type: string, enum: [ACCEPTED, COMPLETED, FAILED] }
+        messageCode: { type: string }
+    CaseStatus:
+      type: string
+      enum: [NEW, ROUTED, IN_PROGRESS, WAITING_CUSTOMER, WAITING_WMS, WAITING_FINANCE, ESCALATED, RESOLVED, REJECTED, CLOSED]
+    SlaStatus:
+      type: string
+      enum: [ON_TRACK, AT_RISK, BREACHED, PAUSED]
+    ErrorResponse:
+      type: object
+      required: [code, correlationId]
+      properties:
+        code:
+          type: string
+          example: STR_MNEMO_ADMIN_SERVICE_INVALID_STATUS_TRANSITION
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            required: [field, code]
+            properties:
+              field: { type: string }
+              code: { type: string }
+        correlationId: { type: string }

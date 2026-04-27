@@ -375,3 +375,44 @@
     И финансовый оператор снимает financial hold с reasonCode `PAYMENT_REVIEW_PASSED`
     Тогда capture, fulfillment и supplementary order actions становятся доступны согласно RBAC и статусам заказа
     И audit trail содержит risk decision, financial hold release, actorUserId, reasonCode и correlationId
+
+  Сценарий: Service admin настраивает очереди и SLA для претензий
+    Допустим service admin авторизован и имеет permission scopes `ADMIN_SERVICE_MANAGE` и `ADMIN_SERVICE_SUPERVISOR`
+    Когда service admin открывает `/admin/service/settings`
+    И создает очередь для claim type `DAMAGED_ITEM`, склада `WH-MSK-01`, приоритета `HIGH` и региона `RU-MSK`
+    И задает SLA реакции `4h` и SLA решения `48h`
+    Тогда новые претензии с таким контекстом маршрутизируются в созданную очередь
+    И карточка кейса показывает рассчитанные SLA deadlines
+    И audit trail содержит routing rule, SLA policy, actorUserId и correlationId
+
+  Сценарий: Оператор сервиса обрабатывает претензию и запускает refund
+    Допустим оператор претензий авторизован и имеет permission scopes `ADMIN_SERVICE_VIEW`, `ADMIN_SERVICE_MANAGE` и `ADMIN_SERVICE_REFUND_MANAGE`
+    И существует оплаченный заказ `BO-E2E-034-1` с доступной к возврату суммой `12000.00 RUB`
+    И клиент создал претензию `CLM-E2E-034-1` по поврежденному товару
+    Когда оператор открывает `/admin/service`
+    И фильтрует очередь по claimId `CLM-E2E-034-1`, SLA `AT_RISK` и типу проблемы `DAMAGED_ITEM`
+    И открывает карточку кейса
+    Тогда система показывает order context, payment context, WMS context, вложения, переписку, SLA и audit trail
+    Когда оператор выбирает решение `APPROVE_REFUND` на сумму `2500.00 RUB` с reasonCode `DAMAGED_ITEM_CONFIRMED`
+    Тогда система создает refund action в пределах доступной суммы
+    И payment контур получает структурированную команду refund с claimId, orderId, amount, currency и idempotency key
+    И frontend показывает результат через i18n dictionaries без hardcoded пользовательского текста
+
+  Сценарий: Replacement по сервисному кейсу передается в WMS и доставку
+    Допустим оператор претензий авторизован и имеет permission scopes `ADMIN_SERVICE_VIEW`, `ADMIN_SERVICE_MANAGE` и `ADMIN_SERVICE_REPLACEMENT_MANAGE`
+    И существует претензия `CLM-E2E-034-2` по ошибочному товару в заказе `BO-E2E-034-2`
+    И SKU `BOG-SERUM-001` доступен на складе `WH-MSK-01`
+    Когда оператор выбирает решение `APPROVE_REPLACEMENT` с reasonCode `WRONG_ITEM_RECEIVED`
+    Тогда admin service контур создает replacement action с claimId, originalOrderId, SKU, количеством и correlationId
+    И WMS/логистика получает replacement shipment task
+    И клиентская история претензии показывает локализованный статус замены
+    И audit trail содержит service decision, WMS task reference и actorUserId
+
+  Сценарий: Супервизор сервиса закрывает SLA breach через override
+    Допустим супервизор сервиса авторизован и имеет permission scopes `ADMIN_SERVICE_SUPERVISOR` и `ADMIN_SERVICE_AUDIT_VIEW`
+    И существует кейс `CLM-E2E-034-3` со статусом SLA `BREACHED` и спорным отказом
+    Когда супервизор открывает `/admin/service/sla-board`
+    И выполняет override решения на `APPROVE_BONUS_COMPENSATION` с reasonCode `SUPERVISOR_GOODWILL`
+    Тогда бонусный контур получает команду компенсации с claimId и customerId
+    И клиент получает локализованный итог решения через mnemonic-код `STR_MNEMO_ADMIN_SERVICE_*`
+    И audit trail содержит old decision, new decision, override scope, actorUserId, reasonCode и correlationId

@@ -289,6 +289,42 @@ if (Нужно обслужить заказ, дозаказ или платеж
 else (нет)
   :Заказный и платежный контуры работают по текущим confirmed order, payment, WMS и anti-fraud events;
 endif
-:Администраторы управляют PIM-каталогом, ценами, промо, бенефитами, контентом, лендингами, инвайтами, каталогами кампаний, WMS/1C остатками, складами, поставками, заказами, дозаказами, платежами, пользователями, аудитом и локализацией;
+if (Нужно обработать сервисный кейс, возврат или замену?) then (да)
+  :Service admin открывает admin service workspace;
+  :Настраивает очереди, routing rules, reason codes, SLA policies и compensation limits;
+  :Оператор претензий фильтрует очередь по claimId, orderId, клиенту, партнеру, типу проблемы, SLA, складу, ответственному и статусу;
+  :Открывает карточку сервисного кейса с order context, платежами, доставкой, WMS-статусами, вложениями, перепиской, SLA и audit trail;
+  if (Нужна дополнительная информация?) then (да)
+    :Оператор переводит кейс в WAITING_CUSTOMER, WAITING_WMS или WAITING_FINANCE с reasonCode;
+    :Клиент, WMS или финансовый оператор возвращает структурированный ответ по claimId и correlationId;
+  else (нет)
+    :Оператор выбирает решение по доступной policy без ожидания внешнего ответа;
+  endif
+  if (Решение требует refund?) then (да)
+    :Система проверяет paid amount, already refunded amount, payment policy и claim reason;
+    if (Требуется финансовое подтверждение?) then (да)
+      :Финансовый оператор подтверждает или отклоняет refund action с reasonCode;
+    else (нет)
+      :Refund отправляется в payment контур с claimId, orderId, amount и idempotencyKey;
+    endif
+  elseif (Решение требует replacement?) then (да)
+    :Система проверяет SKU, складскую доступность, delivery constraints и отсутствие конфликтующего refund;
+    :WMS/логистика получает replacement shipment task с claimId и originalOrderId;
+  elseif (Решение требует бонусную компенсацию?) then (да)
+    :Система проверяет compensation policy и передает начисление в бонусный контур;
+  else (отказ или запрос)
+    :Клиент получает локализованный итог отказа или запроса информации через mnemonic-код;
+  endif
+  if (SLA breached или решение спорное?) then (да)
+    :Супервизор сервиса видит кейс на SLA board;
+    :Выполняет назначение, эскалацию, quality review или override с отдельным permission scope;
+  else (нет)
+    :Кейс закрывается по обычному service lifecycle;
+  endif
+  :Audit trail фиксирует claim, decision, refund, replacement, compensation, SLA, WMS, finance и operator actions с actorUserId, reasonCode и correlationId;
+else (нет)
+  :Сервисный контур работает по текущим очередям, SLA policies, compensation limits и интеграционным статусам;
+endif
+:Администраторы управляют PIM-каталогом, ценами, промо, бенефитами, контентом, лендингами, инвайтами, каталогами кампаний, WMS/1C остатками, складами, поставками, заказами, дозаказами, платежами, сервисными кейсами, возвратами, заменами, пользователями, аудитом и локализацией;
 stop
 @enduml

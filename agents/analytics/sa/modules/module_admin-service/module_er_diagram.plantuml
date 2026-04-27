@@ -1,0 +1,188 @@
+@startuml
+title Module admin-service ER diagram
+
+entity "admin_service_case" as service_case {
+  * service_case_id : uuid <<PK>>
+  --
+  claim_number : varchar(80) <<UK>>
+  source_claim_id : varchar(80)
+  order_id : uuid
+  customer_id : varchar(80)
+  partner_id : varchar(80)
+  warehouse_id : uuid
+  queue_id : uuid <<FK>>
+  owner_user_id : uuid
+  claim_type : varchar(80)
+  priority : varchar(40)
+  case_status : varchar(40)
+  sla_status : varchar(40)
+  reaction_due_at : timestamptz
+  resolution_due_at : timestamptz
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_service_queue" as queue {
+  * queue_id : uuid <<PK>>
+  --
+  queue_code : varchar(80) <<UK>>
+  queue_name : varchar(200)
+  active : boolean
+  default_owner_group : varchar(120)
+  region_code : varchar(40)
+  warehouse_id : uuid
+  created_at : timestamptz
+}
+
+entity "admin_service_routing_rule" as routing {
+  * routing_rule_id : uuid <<PK>>
+  --
+  queue_id : uuid <<FK>>
+  claim_type : varchar(80)
+  channel_code : varchar(40)
+  region_code : varchar(40)
+  warehouse_id : uuid
+  priority : varchar(40)
+  rule_status : varchar(40)
+  sort_order : integer
+}
+
+entity "admin_service_sla_policy" as sla_policy {
+  * sla_policy_id : uuid <<PK>>
+  --
+  policy_code : varchar(80) <<UK>>
+  claim_type : varchar(80)
+  priority : varchar(40)
+  reaction_minutes : integer
+  resolution_minutes : integer
+  escalation_minutes : integer
+  business_calendar_code : varchar(80)
+  active : boolean
+}
+
+entity "admin_service_message" as message {
+  * message_id : uuid <<PK>>
+  --
+  service_case_id : uuid <<FK>>
+  message_type : varchar(40)
+  visibility : varchar(40)
+  author_user_id : uuid
+  customer_visible_message_code : varchar(120)
+  body_storage_ref : varchar(200)
+  created_at : timestamptz
+}
+
+entity "admin_service_attachment" as attachment {
+  * attachment_id : uuid <<PK>>
+  --
+  service_case_id : uuid <<FK>>
+  message_id : uuid <<FK>>
+  storage_key : varchar(240)
+  file_name : varchar(240)
+  mime_type : varchar(120)
+  size_bytes : bigint
+  checksum : varchar(128)
+  attachment_status : varchar(40)
+  created_at : timestamptz
+}
+
+entity "admin_service_decision" as decision {
+  * decision_id : uuid <<PK>>
+  --
+  service_case_id : uuid <<FK>>
+  decision_type : varchar(60)
+  decision_status : varchar(40)
+  reason_code : varchar(80)
+  actor_user_id : uuid
+  supervisor_override : boolean
+  customer_message_code : varchar(120)
+  correlation_id : varchar(120)
+  decided_at : timestamptz
+}
+
+entity "admin_service_refund_action" as refund_action {
+  * refund_action_id : uuid <<PK>>
+  --
+  decision_id : uuid <<FK>>
+  service_case_id : uuid <<FK>>
+  order_id : uuid
+  payment_reference : varchar(120)
+  amount : numeric(19,4)
+  currency_code : varchar(3)
+  refund_status : varchar(40)
+  external_refund_id : varchar(120)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+}
+
+entity "admin_service_replacement_action" as replacement_action {
+  * replacement_action_id : uuid <<PK>>
+  --
+  decision_id : uuid <<FK>>
+  service_case_id : uuid <<FK>>
+  order_id : uuid
+  sku : varchar(80)
+  quantity : numeric(19,4)
+  warehouse_id : uuid
+  replacement_status : varchar(40)
+  shipment_reference : varchar(120)
+  correlation_id : varchar(120)
+}
+
+entity "admin_service_bonus_compensation" as bonus {
+  * bonus_compensation_id : uuid <<PK>>
+  --
+  decision_id : uuid <<FK>>
+  service_case_id : uuid <<FK>>
+  customer_id : varchar(80)
+  partner_id : varchar(80)
+  bonus_amount : numeric(19,4)
+  compensation_status : varchar(40)
+  external_bonus_transaction_id : varchar(120)
+  correlation_id : varchar(120)
+}
+
+entity "admin_service_wms_event" as wms_event {
+  * wms_event_id : uuid <<PK>>
+  --
+  service_case_id : uuid <<FK>>
+  source_system : varchar(80)
+  external_event_id : varchar(120)
+  event_type : varchar(80)
+  inspection_status : varchar(80)
+  payload_checksum : varchar(128)
+  retry_status : varchar(40)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+entity "admin_service_audit_event" as audit {
+  * audit_event_id : uuid <<PK>>
+  --
+  actor_user_id : uuid
+  action_code : varchar(80)
+  entity_type : varchar(80)
+  entity_id : varchar(80)
+  old_value : jsonb
+  new_value : jsonb
+  reason_code : varchar(80)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+queue ||--o{ routing
+queue ||--o{ service_case
+sla_policy ||--o{ service_case
+service_case ||--o{ message
+service_case ||--o{ attachment
+message ||--o{ attachment
+service_case ||--o{ decision
+decision ||--o{ refund_action
+decision ||--o{ replacement_action
+decision ||--o{ bonus
+service_case ||--o{ wms_event
+service_case ||--o{ audit
+
+@enduml

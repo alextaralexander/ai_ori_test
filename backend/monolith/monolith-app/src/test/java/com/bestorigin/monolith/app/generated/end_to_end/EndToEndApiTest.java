@@ -1,4 +1,4 @@
-// GENERATED FROM agents/tests/api/end_to_end/EndToEndApiTest.java. DO NOT EDIT MANUALLY.
+/* Managed synchronized artifact from agents/tests/api/end_to_end. Do not edit manually. */
 package com.bestorigin.tests.endtoend;
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
@@ -41,5 +41,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature031.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature032.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature033.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature034.FeatureApiTest().assertFeatureGreenPath();
     }
 }

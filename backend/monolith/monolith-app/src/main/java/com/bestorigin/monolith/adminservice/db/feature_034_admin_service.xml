@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-034-admin-service" author="codex">
+        <comment>Feature 034 admin-service module marker. Runtime schema is represented by module-owned admin_service_* model artifacts.</comment>
+        <tagDatabase tag="feature-034-admin-service"/>
+    </changeSet>
+</databaseChangeLog>

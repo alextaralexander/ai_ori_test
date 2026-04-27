@@ -18,6 +18,7 @@ import { AdminPricingView } from './components/AdminPricingView';
 import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
 import { AdminOrdersView } from './components/AdminOrdersView';
+import { AdminServiceView } from './components/AdminServiceView';
 import { AdminWmsView } from './components/AdminWmsView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
@@ -81,6 +82,8 @@ const testLoginRoles = new Set([
   'fraud-admin',
   'audit-admin',
   'support-agent',
+  'claim-operator',
+  'service-supervisor',
   'wms-integration-operator',
   'category-admin',
   'media-manager',
@@ -387,6 +390,10 @@ function App() {
     contentView = <AdminWmsView />;
   } else if (path === '/admin/orders') {
     contentView = <AdminOrdersView />;
+  } else if (path === '/admin/service') {
+    contentView = <AdminServiceView />;
+  } else if (path === '/admin/service/sla-board') {
+    contentView = <AdminServiceView section="sla-board" />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }
