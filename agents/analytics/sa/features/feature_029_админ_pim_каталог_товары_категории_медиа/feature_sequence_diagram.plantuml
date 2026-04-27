@@ -1,0 +1,91 @@
+@startuml
+title Feature 029 / Admin PIM sequence
+actor "Категорийный администратор" as CategoryAdmin
+actor "PIM-менеджер" as PimManager
+actor "Медиа-менеджер" as MediaManager
+participant "Frontend /admin/pim" as FE
+participant "Auth/RBAC context" as Auth
+participant "AdminPimController" as Controller
+participant "AdminPimService" as Service
+database "admin-pim repository" as Repo
+participant "S3/MinIO metadata" as Storage
+participant "Catalog public read model" as Catalog
+
+CategoryAdmin -> FE: открыть PIM workspace
+FE -> Auth: current session + permissions
+Auth --> FE: ADMIN_PIM_VIEW, ADMIN_PIM_MANAGE
+FE -> Controller: GET /api/admin-pim/workspace
+Controller -> Service: loadWorkspace(actor)
+Service -> Repo: counts and latest audit
+Repo --> Service: summary
+Service --> Controller: AdminPimWorkspaceResponse + STR_MNEMO_ADMIN_PIM_WORKSPACE_LOADED
+Controller --> FE: 200 summary
+
+CategoryAdmin -> FE: создать/активировать категорию face-care
+FE -> Controller: POST /categories
+Controller -> Service: createCategory(request, actor)
+Service -> Repo: validate slug and parent tree
+Repo --> Service: no conflict
+Service -> Repo: save category DRAFT + audit CATEGORY_CREATED
+Repo --> Service: categoryId
+Service --> Controller: CategoryResponse + STR_MNEMO_ADMIN_PIM_CATEGORY_SAVED
+Controller --> FE: 201 category
+FE -> Controller: POST /categories/{categoryId}/activate
+Controller -> Service: activateCategory(categoryId, actor)
+Service -> Repo: validate no cycle, active window, slug uniqueness
+Service -> Repo: update ACTIVE + audit CATEGORY_ACTIVATED
+Controller --> FE: 200 active category
+
+PimManager -> FE: создать товар BOG-SERUM-001
+FE -> Controller: POST /products
+Controller -> Service: createProduct(request, actor)
+Service -> Repo: validate unique SKU/article, active category
+Repo --> Service: valid references
+Service -> Repo: save product DRAFT + audit PRODUCT_CREATED
+Controller --> FE: 201 product detail with validationChecklist
+
+PimManager -> FE: попробовать опубликовать без главного изображения
+FE -> Controller: POST /products/{productId}/publish
+Controller -> Service: publishProduct(productId, versionComment)
+Service -> Repo: load product categories/media
+Repo --> Service: no MAIN_IMAGE APPROVED
+Service --> Controller: validation error STR_MNEMO_ADMIN_PIM_PRODUCT_MAIN_IMAGE_REQUIRED
+Controller --> FE: 400 mnemonic + field mainImage
+
+MediaManager -> FE: добавить metadata главного изображения
+FE -> Controller: POST /products/{productId}/media
+Controller -> Service: addMediaMetadata(productId, request, actor)
+Service -> Storage: validate fileReferenceId/checksum metadata
+Storage --> Service: metadata accepted
+Service -> Repo: save media DRAFT + audit PRODUCT_MEDIA_CREATED
+Controller --> FE: 201 media + STR_MNEMO_ADMIN_PIM_MEDIA_SAVED
+FE -> Controller: POST /media/{mediaId}/approve
+Controller -> Service: approveMedia(mediaId, actor)
+Service -> Repo: deactivate previous main image, approve media, audit PRODUCT_MEDIA_APPROVED
+Controller --> FE: 200 approved media
+
+PimManager -> FE: опубликовать товар
+FE -> Controller: POST /products/{productId}/publish
+Controller -> Service: publishProduct(productId, versionComment)
+Service -> Repo: validate required fields, active category, approved main image
+Service -> Repo: create product version, status PUBLISHED, audit PRODUCT_PUBLISHED
+Service -> Catalog: publish product/category render data
+Catalog --> Service: render model accepted
+Controller --> FE: 200 product + STR_MNEMO_ADMIN_PIM_PRODUCT_PUBLISHED
+
+PimManager -> FE: import/export
+FE -> Controller: POST /imports with Idempotency-Key
+Controller -> Service: startImport(request, idempotencyKey)
+Service -> Repo: find existing import by idempotencyKey
+alt existing job
+  Repo --> Service: existing import job
+else new job
+  Service -> Repo: validate rows, apply changes, audit IMPORT_JOB_APPLIED
+end
+Controller --> FE: 201 import job
+FE -> Controller: POST /exports
+Controller -> Service: createExport(filter, actor)
+Service -> Repo: collect filtered catalog and checksum
+Service -> Repo: save export job + audit CATALOG_EXPORTED
+Controller --> FE: 201 export summary
+@enduml

@@ -1,0 +1,180 @@
+@startuml
+title Module admin-pim / full ER diagram
+
+entity "admin_pim_category" as category {
+  *category_id : uuid <<PK>>
+  parent_id : uuid <<FK admin_pim_category.category_id>>
+  *slug : varchar(160)
+  *locale : varchar(12)
+  *name : varchar(255)
+  description : text
+  *status : varchar(32)
+  *audience : varchar(64)
+  *sort_order : integer
+  active_from : timestamptz
+  active_to : timestamptz
+  seo_title : varchar(255)
+  seo_description : text
+  preview_media_id : uuid
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_pim_brand" as brand {
+  *brand_id : uuid <<PK>>
+  *brand_code : varchar(80) <<UQ>>
+  *display_name : varchar(255)
+  status : varchar(32)
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_pim_product" as product {
+  *product_id : uuid <<PK>>
+  *sku : varchar(80) <<UQ>>
+  *article_code : varchar(80) <<UQ>>
+  brand_id : uuid <<FK admin_pim_brand.brand_id>>
+  *locale : varchar(12)
+  *name : varchar(255)
+  short_description : text
+  description : text
+  composition : text
+  usage_instructions : text
+  restrictions : text
+  *status : varchar(32)
+  storefront_visibility : varchar(128)
+  published_version_id : uuid
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_pim_product_category" as product_category {
+  *product_id : uuid <<FK admin_pim_product.product_id>>
+  *category_id : uuid <<FK admin_pim_category.category_id>>
+  primary_category : boolean
+}
+
+entity "admin_pim_attribute_definition" as attribute_def {
+  *attribute_id : uuid <<PK>>
+  *attribute_code : varchar(100) <<UQ>>
+  *display_name : varchar(255)
+  *value_type : varchar(32)
+  unit_code : varchar(32)
+  filterable : boolean
+  searchable : boolean
+  allowed_values_json : jsonb
+  status : varchar(32)
+}
+
+entity "admin_pim_product_attribute" as product_attr {
+  *product_id : uuid <<FK admin_pim_product.product_id>>
+  *attribute_id : uuid <<FK admin_pim_attribute_definition.attribute_id>>
+  value_json : jsonb
+}
+
+entity "admin_pim_tag" as tag {
+  *tag_id : uuid <<PK>>
+  *tag_code : varchar(100) <<UQ>>
+  *display_name : varchar(255)
+  usage_scope : varchar(64)
+  status : varchar(32)
+}
+
+entity "admin_pim_product_tag" as product_tag {
+  *product_id : uuid <<FK admin_pim_product.product_id>>
+  *tag_id : uuid <<FK admin_pim_tag.tag_id>>
+}
+
+entity "admin_pim_media" as media {
+  *media_id : uuid <<PK>>
+  product_id : uuid <<FK admin_pim_product.product_id>>
+  *usage_type : varchar(64)
+  *file_name : varchar(255)
+  *mime_type : varchar(120)
+  *size_bytes : bigint
+  *checksum : varchar(160)
+  alt_text : varchar(500)
+  locale : varchar(12)
+  *version_number : integer
+  *status : varchar(32)
+  file_reference_id : varchar(255)
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_pim_recommendation" as recommendation {
+  *recommendation_id : uuid <<PK>>
+  *source_product_id : uuid <<FK admin_pim_product.product_id>>
+  *target_product_id : uuid <<FK admin_pim_product.product_id>>
+  *relation_type : varchar(32)
+  sort_order : integer
+  active_from : timestamptz
+  active_to : timestamptz
+  status : varchar(32)
+}
+
+entity "admin_pim_merchandising_block" as block {
+  *block_id : uuid <<PK>>
+  *block_code : varchar(100) <<UQ>>
+  title_key : varchar(160)
+  placement : varchar(80)
+  status : varchar(32)
+  active_from : timestamptz
+  active_to : timestamptz
+}
+
+entity "admin_pim_import_job" as import_job {
+  *import_job_id : uuid <<PK>>
+  *job_code : varchar(120)
+  *idempotency_key : varchar(160) <<UQ>>
+  *data_type : varchar(64)
+  *status : varchar(32)
+  source_file_name : varchar(255)
+  row_count : integer
+  applied_count : integer
+  error_count : integer
+  validation_summary_json : jsonb
+  created_by : uuid
+  created_at : timestamptz
+}
+
+entity "admin_pim_export_job" as export_job {
+  *export_job_id : uuid <<PK>>
+  *job_code : varchar(120)
+  *status : varchar(32)
+  filter_json : jsonb
+  product_count : integer
+  category_count : integer
+  checksum : varchar(160)
+  file_reference_id : varchar(255)
+  created_by : uuid
+  created_at : timestamptz
+}
+
+entity "admin_pim_audit_event" as audit_event {
+  *audit_event_id : uuid <<PK>>
+  actor_user_id : uuid
+  *action_code : varchar(100)
+  *entity_type : varchar(80)
+  *entity_id : uuid
+  old_value_json : jsonb
+  new_value_json : jsonb
+  reason_code : varchar(100)
+  correlation_id : varchar(160)
+  occurred_at : timestamptz
+}
+
+category ||--o{ category : parent
+brand ||--o{ product : owns
+product ||--o{ product_category : categorized
+category ||--o{ product_category : contains
+attribute_def ||--o{ product_attr : defines
+product ||--o{ product_attr : has
+product ||--o{ product_tag : tagged
+tag ||--o{ product_tag : applied
+product ||--o{ media : owns
+product ||--o{ recommendation : source
+product ||--o{ recommendation : target
+@enduml

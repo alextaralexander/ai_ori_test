@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 028
+title Best Ori Gin monolith architecture through feature 029
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -20,6 +20,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminReferralFunnel UI]
   [AdminReferralAnalytics UI]
   [AdminReferralAudit UI]
+  [AdminPim UI]
+  [AdminPimProducts UI]
+  [AdminPimCategories UI]
+  [AdminPimMedia UI]
+  [AdminPimImportExport UI]
+  [AdminPimAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -56,6 +62,7 @@ package "backend/monolith/monolith-app" {
   [admin-rbac]
   [admin-cms]
   [admin-referral]
+  [admin-pim]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -87,7 +94,12 @@ cloud "Hybrid Pixel" as hybrid
 [AdminReferralFunnel UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/funnels, /attribution-policy
 [AdminReferralAnalytics UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/analytics/conversions
 [AdminReferralAudit UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/audit
-[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
+[AdminPim UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/workspace, /products, /categories
+[AdminPimProducts UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/products, /products/{productId}/publish
+[AdminPimCategories UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/categories, /categories/{categoryId}/activate
+[AdminPimMedia UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/products/{productId}/media, /media/{mediaId}/approve
+[AdminPimImportExport UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/imports, /exports
+[AdminPimAudit UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/audit[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
 [EmployeePartnerCard UI] --> [employee] : HTTP/JSON /api/employee/partner-card, /partner-card/{partnerId}
@@ -121,7 +133,12 @@ cloud "Hybrid Pixel" as hybrid
 [admin-referral] --> [partner-onboarding] : referral code validation and sponsor attribution context
 [admin-referral] --> [platform-experience] : conversion analytics diagnostics and mnemonic message contract
 [admin-referral] --> db : landing variants, versions, funnels, referral codes, attribution, conversion events and audit
-[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
+[admin-pim] --> [authorization] : admin PIM permission, scope and elevated checks
+[admin-pim] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-pim] --> [catalog] : published product/category render data for public catalog and product card
+[admin-pim] --> [admin-cms] : published product/category references for CMS product links
+[admin-pim] --> s3 : product media, PDF, certificate fileReferenceId metadata
+[admin-pim] --> db : categories, brands, products, attributes, tags, media, recommendations, import/export jobs and audit[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
 [AnalyticsProvider] --> hybrid : consent-aware pixel events

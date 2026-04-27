@@ -234,3 +234,28 @@
     И спорная ручная корректировка attribution требует reason code, комментарий и отдельный permission scope
     И audit trail содержит landing variant, referral code, attribution policy, actorUserId и correlationId
     И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_REFERRAL_*` для предопределенных сообщений
+
+  Сценарий: PIM-администраторы публикуют товар и публичный каталог использует актуальные данные
+    Допустим категорийный администратор авторизован и имеет permission scope `ADMIN_PIM_MANAGE`
+    И PIM-менеджер авторизован и имеет permission scope `ADMIN_PIM_MANAGE`
+    И медиа-менеджер авторизован и имеет permission scope `ADMIN_PIM_MEDIA_MANAGE`
+    Когда категорийный администратор открывает `/admin/pim`
+    И создает активную категорию `face-care` с валидным slug, locale, audience и publication window
+    И PIM-менеджер создает товар `BOG-SERUM-001` с SKU, артикулом, брендом, описанием, составом, ограничениями, атрибутами и тегами
+    И медиа-менеджер загружает и утверждает главное изображение с checksum и alt text
+    И PIM-менеджер публикует товар с комментарием версии
+    Тогда публичный каталог показывает товар в категории `face-care`
+    И карточка товара показывает опубликованное описание, состав, ограничения, атрибуты и approved media
+    И audit trail содержит события `CATEGORY_ACTIVATED`, `PRODUCT_CREATED`, `PRODUCT_MEDIA_APPROVED` и `PRODUCT_PUBLISHED`
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_PIM_*` для предопределенных сообщений
+
+  Сценарий: PIM import/export не создает дубли и сохраняет проверяемый audit trail
+    Допустим PIM-менеджер авторизован и имеет permission scope `ADMIN_PIM_IMPORT_EXPORT`
+    Когда PIM-менеджер запускает import job каталога с idempotency key `pim-import-may-2026`
+    И файл содержит категории, товары, атрибуты и media references
+    Тогда система валидирует строки и применяет корректные изменения каталога
+    Когда PIM-менеджер повторяет import job с idempotency key `pim-import-may-2026`
+    Тогда система возвращает существующий import job без дублей товаров, категорий и медиа
+    Когда PIM-менеджер экспортирует опубликованные товары категории `face-care`
+    Тогда система возвращает export summary с количеством сущностей и checksum файла
+    И audit trail содержит import/export actorUserId, entity counts, row validation summary и correlationId

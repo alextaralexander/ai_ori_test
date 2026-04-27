@@ -12,6 +12,7 @@ import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
 import { AdminCmsView } from './components/AdminCmsView';
+import { AdminPimView } from './components/AdminPimView';
 import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
@@ -66,6 +67,10 @@ const testLoginRoles = new Set([
   'legal-reviewer',
   'marketing-admin',
   'crm-admin',
+  'pim-manager',
+  'category-admin',
+  'media-manager',
+  'commercial-admin',
 ]);
 
 function resolveAudience(): Audience {
@@ -356,6 +361,8 @@ function App() {
     contentView = <AdminReferralView section="analytics" />;
   } else if (path === '/admin/referrals/audit') {
     contentView = <AdminReferralView section="audit" />;
+  } else if (path === '/admin/pim') {
+    contentView = <AdminPimView />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

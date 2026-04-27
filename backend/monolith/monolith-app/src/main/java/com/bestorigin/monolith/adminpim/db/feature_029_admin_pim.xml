@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-029-admin-pim-metadata" author="codex">
+        <createTable tableName="admin_pim_category">
+            <column name="category_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parent_id" type="uuid"/>
+            <column name="slug" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locale_code" type="varchar(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pim_product">
+            <column name="product_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="article_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="brand_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locale_code" type="varchar(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pim_media">
+            <column name="media_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usage_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mime_type" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="checksum" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_reference_id" type="varchar(255)"/>
+        </createTable>
+        <createTable tableName="admin_pim_import_job">
+            <column name="import_job_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="varchar(160)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="job_code" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pim_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_type" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="uuid"/>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="action_code" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="correlation_id" type="varchar(160)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <createIndex tableName="admin_pim_category" indexName="idx_admin_pim_category_slug_locale">
+            <column name="slug"/>
+            <column name="locale_code"/>
+        </createIndex>
+        <createIndex tableName="admin_pim_product" indexName="idx_admin_pim_product_status_brand">
+            <column name="status"/>
+            <column name="brand_code"/>
+        </createIndex>
+        <createIndex tableName="admin_pim_media" indexName="idx_admin_pim_media_product_usage_status">
+            <column name="product_id"/>
+            <column name="usage_type"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="admin_pim_audit_event" indexName="idx_admin_pim_audit_entity_action">
+            <column name="entity_type"/>
+            <column name="action_code"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

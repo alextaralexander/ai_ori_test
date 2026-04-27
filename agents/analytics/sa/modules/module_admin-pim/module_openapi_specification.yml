@@ -1,0 +1,574 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Admin PIM API
+  version: 1.0.0
+  description: Admin endpoints for PIM categories, products, media, attributes, recommendations, import/export and audit.
+servers:
+  - url: /api/admin-pim
+paths:
+  /workspace:
+    get:
+      tags: [Admin PIM Workspace]
+      summary: Get PIM workspace summary
+      responses:
+        '200':
+          description: Workspace summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimWorkspaceResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /categories:
+    get:
+      tags: [Admin PIM Categories]
+      summary: Search category tree
+      parameters:
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Category tree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimCategoryListResponse'
+    post:
+      tags: [Admin PIM Categories]
+      summary: Create category draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimCategoryUpsertRequest'
+      responses:
+        '201':
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimCategoryResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /categories/{categoryId}:
+    put:
+      tags: [Admin PIM Categories]
+      summary: Update category
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimCategoryUpsertRequest'
+      responses:
+        '200':
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimCategoryResponse'
+  /categories/{categoryId}/activate:
+    post:
+      tags: [Admin PIM Categories]
+      summary: Activate category
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '200':
+          description: Activated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimCategoryResponse'
+  /products:
+    get:
+      tags: [Admin PIM Products]
+      summary: Search products
+      parameters:
+        - $ref: '#/components/parameters/Status'
+        - name: categoryId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: brandCode
+          in: query
+          schema: { type: string }
+        - name: readyForPublication
+          in: query
+          schema: { type: boolean }
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimProductListResponse'
+    post:
+      tags: [Admin PIM Products]
+      summary: Create product draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimProductUpsertRequest'
+      responses:
+        '201':
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimProductDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /products/{productId}:
+    get:
+      tags: [Admin PIM Products]
+      summary: Get product detail
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimProductDetailResponse'
+    put:
+      tags: [Admin PIM Products]
+      summary: Update product draft
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimProductUpsertRequest'
+      responses:
+        '200':
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimProductDetailResponse'
+  /products/{productId}/publish:
+    post:
+      tags: [Admin PIM Products]
+      summary: Publish product version
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimPublishRequest'
+      responses:
+        '200':
+          description: Published product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimProductDetailResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /products/{productId}/media:
+    post:
+      tags: [Admin PIM Media]
+      summary: Add media metadata to product
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimMediaCreateRequest'
+      responses:
+        '201':
+          description: Media metadata created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimMediaResponse'
+  /media/{mediaId}/approve:
+    post:
+      tags: [Admin PIM Media]
+      summary: Approve media version
+      parameters:
+        - $ref: '#/components/parameters/MediaId'
+      responses:
+        '200':
+          description: Approved media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimMediaResponse'
+  /attributes:
+    post:
+      tags: [Admin PIM Attributes]
+      summary: Create attribute definition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimAttributeDefinitionRequest'
+      responses:
+        '201':
+          description: Created attribute definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimAttributeDefinitionResponse'
+  /recommendations:
+    post:
+      tags: [Admin PIM Recommendations]
+      summary: Create product recommendation relation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimRecommendationRequest'
+      responses:
+        '201':
+          description: Created recommendation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimRecommendationResponse'
+  /imports:
+    post:
+      tags: [Admin PIM Import Export]
+      summary: Start import job
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimImportRequest'
+      responses:
+        '201':
+          description: Import job accepted or existing idempotent result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimImportJobResponse'
+  /exports:
+    post:
+      tags: [Admin PIM Import Export]
+      summary: Create export job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPimExportRequest'
+      responses:
+        '201':
+          description: Export summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimExportJobResponse'
+  /audit:
+    get:
+      tags: [Admin PIM Audit]
+      summary: Search PIM audit events
+      parameters:
+        - name: entityType
+          in: query
+          schema: { type: string }
+        - name: entityId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPimAuditResponse'
+components:
+  parameters:
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    MediaId:
+      name: mediaId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Status:
+      name: status
+      in: query
+      schema: { type: string }
+    Locale:
+      name: locale
+      in: query
+      schema: { type: string }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, maxLength: 160 }
+  responses:
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AdminPimErrorResponse' }
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AdminPimErrorResponse' }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AdminPimErrorResponse' }
+  schemas:
+    AdminPimStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, HIDDEN, ARCHIVED, PUBLISHED, REJECTED, APPROVED]
+    AdminPimWorkspaceResponse:
+      type: object
+      required: [categoryCount, productCount, mediaCount, draftProductCount, messageCode]
+      properties:
+        categoryCount: { type: integer }
+        productCount: { type: integer }
+        mediaCount: { type: integer }
+        draftProductCount: { type: integer }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_WORKSPACE_LOADED }
+    AdminPimCategoryUpsertRequest:
+      type: object
+      required: [slug, locale, name, audience, sortOrder]
+      properties:
+        parentId: { type: string, format: uuid, nullable: true }
+        slug: { type: string, maxLength: 160 }
+        locale: { type: string }
+        name: { type: string, maxLength: 255 }
+        description: { type: string }
+        audience: { type: string }
+        sortOrder: { type: integer }
+        activeFrom: { type: string, format: date-time, nullable: true }
+        activeTo: { type: string, format: date-time, nullable: true }
+    AdminPimCategoryResponse:
+      type: object
+      required: [categoryId, slug, name, status, messageCode]
+      properties:
+        categoryId: { type: string, format: uuid }
+        parentId: { type: string, format: uuid, nullable: true }
+        slug: { type: string }
+        locale: { type: string }
+        name: { type: string }
+        status: { type: string }
+        sortOrder: { type: integer }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_CATEGORY_SAVED }
+    AdminPimCategoryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AdminPimCategoryResponse' }
+        total: { type: integer }
+    AdminPimProductUpsertRequest:
+      type: object
+      required: [sku, articleCode, brandCode, locale, name, categoryIds]
+      properties:
+        sku: { type: string, maxLength: 80 }
+        articleCode: { type: string, maxLength: 80 }
+        brandCode: { type: string, maxLength: 80 }
+        locale: { type: string }
+        name: { type: string, maxLength: 255 }
+        shortDescription: { type: string }
+        description: { type: string }
+        composition: { type: string }
+        usageInstructions: { type: string }
+        restrictions: { type: string }
+        categoryIds:
+          type: array
+          items: { type: string, format: uuid }
+        tags:
+          type: array
+          items: { type: string }
+    AdminPimProductSummary:
+      type: object
+      properties:
+        productId: { type: string, format: uuid }
+        sku: { type: string }
+        articleCode: { type: string }
+        name: { type: string }
+        status: { type: string }
+        readyForPublication: { type: boolean }
+        mainImageReady: { type: boolean }
+    AdminPimProductListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AdminPimProductSummary' }
+        total: { type: integer }
+    AdminPimProductDetailResponse:
+      type: object
+      properties:
+        product: { $ref: '#/components/schemas/AdminPimProductSummary' }
+        validationChecklist:
+          type: array
+          items: { type: string }
+        media:
+          type: array
+          items: { $ref: '#/components/schemas/AdminPimMediaResponse' }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_PRODUCT_SAVED }
+    AdminPimPublishRequest:
+      type: object
+      properties:
+        versionComment: { type: string, maxLength: 500 }
+    AdminPimMediaCreateRequest:
+      type: object
+      required: [usageType, fileName, mimeType, sizeBytes, checksum]
+      properties:
+        usageType: { type: string, enum: [MAIN_IMAGE, GALLERY_IMAGE, VIDEO_PREVIEW, PDF_INSTRUCTION, CERTIFICATE, ATTACHMENT] }
+        fileName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer, format: int64 }
+        checksum: { type: string }
+        altText: { type: string }
+        locale: { type: string }
+        fileReferenceId: { type: string }
+    AdminPimMediaResponse:
+      type: object
+      properties:
+        mediaId: { type: string, format: uuid }
+        usageType: { type: string }
+        fileName: { type: string }
+        mimeType: { type: string }
+        checksum: { type: string }
+        status: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_MEDIA_SAVED }
+    AdminPimAttributeDefinitionRequest:
+      type: object
+      required: [attributeCode, displayName, valueType]
+      properties:
+        attributeCode: { type: string }
+        displayName: { type: string }
+        valueType: { type: string, enum: [TEXT, NUMBER, BOOLEAN, SELECT, MULTI_SELECT] }
+        filterable: { type: boolean }
+        searchable: { type: boolean }
+        allowedValues:
+          type: array
+          items: { type: string }
+    AdminPimAttributeDefinitionResponse:
+      type: object
+      properties:
+        attributeId: { type: string, format: uuid }
+        attributeCode: { type: string }
+        valueType: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_ATTRIBUTE_SAVED }
+    AdminPimRecommendationRequest:
+      type: object
+      required: [sourceProductId, targetProductId, relationType]
+      properties:
+        sourceProductId: { type: string, format: uuid }
+        targetProductId: { type: string, format: uuid }
+        relationType: { type: string, enum: [CROSS_SELL, ALTERNATIVE, BUNDLE, RECOMMENDATION] }
+        sortOrder: { type: integer }
+    AdminPimRecommendationResponse:
+      type: object
+      properties:
+        recommendationId: { type: string, format: uuid }
+        relationType: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_RECOMMENDATION_SAVED }
+    AdminPimImportRequest:
+      type: object
+      required: [jobCode, dataType, sourceFileName]
+      properties:
+        jobCode: { type: string }
+        dataType: { type: string, enum: [PRODUCTS, CATEGORIES, ATTRIBUTES, MEDIA_REFERENCES, FULL_CATALOG] }
+        sourceFileName: { type: string }
+    AdminPimImportJobResponse:
+      type: object
+      properties:
+        importJobId: { type: string, format: uuid }
+        status: { type: string }
+        rowCount: { type: integer }
+        appliedCount: { type: integer }
+        errorCount: { type: integer }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_IMPORT_APPLIED }
+    AdminPimExportRequest:
+      type: object
+      properties:
+        categoryId: { type: string, format: uuid, nullable: true }
+        status: { type: string, nullable: true }
+    AdminPimExportJobResponse:
+      type: object
+      properties:
+        exportJobId: { type: string, format: uuid }
+        status: { type: string }
+        productCount: { type: integer }
+        categoryCount: { type: integer }
+        checksum: { type: string }
+        messageCode: { type: string, example: STR_MNEMO_ADMIN_PIM_EXPORT_CREATED }
+    AdminPimAuditResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              auditEventId: { type: string, format: uuid }
+              entityType: { type: string }
+              entityId: { type: string, format: uuid }
+              actionCode: { type: string }
+              actorUserId: { type: string, format: uuid }
+              correlationId: { type: string }
+              occurredAt: { type: string, format: date-time }
+    AdminPimErrorResponse:
+      type: object
+      required: [messageCode]
+      properties:
+        messageCode:
+          type: string
+          enum:
+            - STR_MNEMO_ADMIN_PIM_FORBIDDEN
+            - STR_MNEMO_ADMIN_PIM_CATEGORY_CYCLE_FORBIDDEN
+            - STR_MNEMO_ADMIN_PIM_CATEGORY_SLUG_CONFLICT
+            - STR_MNEMO_ADMIN_PIM_PRODUCT_DUPLICATE_SKU
+            - STR_MNEMO_ADMIN_PIM_PRODUCT_MAIN_IMAGE_REQUIRED
+            - STR_MNEMO_ADMIN_PIM_MEDIA_REJECTED
+            - STR_MNEMO_ADMIN_PIM_IMPORT_VALIDATION_FAILED
+            - STR_MNEMO_ADMIN_PIM_IDEMPOTENCY_CONFLICT
+        details:
+          type: array
+          items: { type: string }
