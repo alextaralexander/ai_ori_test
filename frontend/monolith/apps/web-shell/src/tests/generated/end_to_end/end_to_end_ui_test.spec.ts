@@ -28,3 +28,4 @@ import '../feature_026_админ_rbac_и_учетные_записи/feature_ui
 import '../feature_027_админ_cms_контент_новости_faq_документы/feature_ui_flow';
 import '../feature_028_админ_лендинги_инвайты_и_рефералы/feature_ui_flow';
 import '../feature_029_админ_pim_каталог_товары_категории_медиа/feature_ui_flow';
+import '../feature_030_админ_каталоги_кампаний_и_pdf/feature_ui_flow';

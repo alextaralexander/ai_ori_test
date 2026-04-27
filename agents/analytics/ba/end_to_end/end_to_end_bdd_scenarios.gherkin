@@ -259,3 +259,20 @@
     Когда PIM-менеджер экспортирует опубликованные товары категории `face-care`
     Тогда система возвращает export summary с количеством сущностей и checksum файла
     И audit trail содержит import/export actorUserId, entity counts, row validation summary и correlationId
+
+  Сценарий: Каталожный менеджер публикует 3-недельный PDF-каталог и выполняет rollover
+    Допустим каталожный менеджер авторизован и имеет permission scopes `ADMIN_CATALOG_MANAGE` и `ADMIN_CATALOG_ROLLOVER`
+    И контент-администратор авторизован и имеет permission scope `ADMIN_CATALOG_MEDIA_MANAGE`
+    И существует опубликованный PIM-товар `BOG-SERUM-001`
+    Когда каталожный менеджер открывает `/admin/catalogs`
+    И создает кампанию `CAM-2026-05` с 21-дневным периодом, локалью `ru`, аудиторией `CUSTOMER_AND_PARTNER` и freeze window
+    И создает следующий выпуск `ISSUE-2026-05`
+    И контент-администратор загружает approved PDF, обложку и изображение первой страницы
+    И маркетинг-менеджер добавляет hotspot страницы для SKU `BOG-SERUM-001`
+    Тогда система подтверждает готовность выпуска без битых ссылок
+    Когда каталожный менеджер запускает rollover с idempotency key `rollover-may-2026`
+    Тогда текущий выпуск архивируется
+    И выпуск `ISSUE-2026-05` становится текущим публичным цифровым каталогом
+    И архив содержит прошлый выпуск с PDF и датами действия
+    И audit trail содержит события `CAMPAIGN_CREATED`, `PDF_APPROVED`, `HOTSPOT_CREATED` и `ROLLOVER_COMPLETED`
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_CATALOG_*` для предопределенных сообщений

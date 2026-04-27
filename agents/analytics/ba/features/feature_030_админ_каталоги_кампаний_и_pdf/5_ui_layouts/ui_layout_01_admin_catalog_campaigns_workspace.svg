@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-label="Схематичный макет админского workspace каталогов кампаний">
+  <title>Feature 030 - workspace кампаний</title>
+  <rect x="0" y="0" width="1440" height="960" fill="#ffffff"/>
+  <rect x="32" y="24" width="1376" height="72" fill="none" stroke="#222222"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Каталоги кампаний</text>
+  <rect x="32" y="120" width="220" height="792" fill="none" stroke="#222222"/>
+  <text x="56" y="156" font-family="Arial" font-size="16">Навигация админки</text>
+  <text x="56" y="196" font-family="Arial" font-size="14">Кампании</text>
+  <text x="56" y="228" font-family="Arial" font-size="14">Выпуски</text>
+  <text x="56" y="260" font-family="Arial" font-size="14">PDF и страницы</text>
+  <text x="56" y="292" font-family="Arial" font-size="14">Hotspots</text>
+  <text x="56" y="324" font-family="Arial" font-size="14">Freeze / rollover</text>
+  <rect x="284" y="120" width="1124" height="96" fill="none" stroke="#222222"/>
+  <text x="308" y="156" font-family="Arial" font-size="16">Фильтры: статус, локаль, аудитория, период, поиск по коду</text>
+  <rect x="308" y="172" width="160" height="28" fill="none" stroke="#222222"/>
+  <rect x="484" y="172" width="160" height="28" fill="none" stroke="#222222"/>
+  <rect x="660" y="172" width="240" height="28" fill="none" stroke="#222222"/>
+  <rect x="916" y="172" width="180" height="28" fill="none" stroke="#222222"/>
+  <rect x="1112" y="168" width="260" height="36" fill="none" stroke="#222222"/>
+  <text x="1136" y="192" font-family="Arial" font-size="14">Создать кампанию</text>
+  <rect x="284" y="240" width="1124" height="420" fill="none" stroke="#222222"/>
+  <text x="308" y="276" font-family="Arial" font-size="16">Таблица кампаний</text>
+  <line x1="308" y1="304" x2="1372" y2="304" stroke="#222222"/>
+  <text x="308" y="336" font-family="Arial" font-size="14">campaignCode</text>
+  <text x="500" y="336" font-family="Arial" font-size="14">21-дневный период</text>
+  <text x="760" y="336" font-family="Arial" font-size="14">Текущий выпуск</text>
+  <text x="980" y="336" font-family="Arial" font-size="14">Следующий выпуск</text>
+  <text x="1220" y="336" font-family="Arial" font-size="14">Статус</text>
+  <line x1="308" y1="360" x2="1372" y2="360" stroke="#222222"/>
+  <text x="308" y="396" font-family="Arial" font-size="14">CAM-2026-05</text>
+  <text x="500" y="396" font-family="Arial" font-size="14">01.05 - 21.05</text>
+  <text x="760" y="396" font-family="Arial" font-size="14">ISSUE-2026-04</text>
+  <text x="980" y="396" font-family="Arial" font-size="14">ISSUE-2026-05</text>
+  <text x="1220" y="396" font-family="Arial" font-size="14">DRAFT</text>
+  <rect x="284" y="688" width="546" height="224" fill="none" stroke="#222222"/>
+  <text x="308" y="724" font-family="Arial" font-size="16">Карточка кампании</text>
+  <text x="308" y="760" font-family="Arial" font-size="14">Код, название, локаль, аудитория</text>
+  <text x="308" y="792" font-family="Arial" font-size="14">Даты начала и окончания</text>
+  <text x="308" y="824" font-family="Arial" font-size="14">Freeze starts / rollover window</text>
+  <rect x="862" y="688" width="546" height="224" fill="none" stroke="#222222"/>
+  <text x="886" y="724" font-family="Arial" font-size="16">Сводка готовности</text>
+  <text x="886" y="760" font-family="Arial" font-size="14">PDF approved, pages ready, hotspots valid</text>
+  <text x="886" y="792" font-family="Arial" font-size="14">Warnings: broken links, freeze active</text>
+  <text x="886" y="824" font-family="Arial" font-size="14">Audit: last publication and rollover events</text>
+</svg>

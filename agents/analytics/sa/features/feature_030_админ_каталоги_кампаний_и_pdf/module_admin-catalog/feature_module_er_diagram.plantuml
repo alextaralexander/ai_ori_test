@@ -1,0 +1,99 @@
+@startuml
+title Feature 030 - admin-catalog ER changes
+
+entity "admin_catalog_campaign" as campaign {
+  * campaign_id : uuid <<PK>>
+  --
+  campaign_code : varchar(64) <<unique active>>
+  name : varchar(255)
+  locale : varchar(16)
+  audience : varchar(64)
+  starts_at : timestamptz
+  ends_at : timestamptz
+  status : varchar(32)
+  created_by : uuid
+  updated_at : timestamptz
+}
+
+entity "admin_catalog_issue" as issue {
+  * issue_id : uuid <<PK>>
+  --
+  campaign_id : uuid <<FK>>
+  issue_code : varchar(64)
+  status : varchar(32)
+  current_flag : boolean
+  next_flag : boolean
+  archive_flag : boolean
+  publication_at : timestamptz
+  archive_at : timestamptz
+  freeze_starts_at : timestamptz
+  rollover_window_starts_at : timestamptz
+  rollover_window_ends_at : timestamptz
+}
+
+entity "admin_catalog_material" as material {
+  * material_id : uuid <<PK>>
+  --
+  issue_id : uuid <<FK>>
+  material_type : varchar(32)
+  file_name : varchar(255)
+  mime_type : varchar(128)
+  size_bytes : bigint
+  checksum : varchar(128)
+  storage_key : varchar(512)
+  version : int
+  status : varchar(32)
+}
+
+entity "admin_catalog_page" as page {
+  * page_id : uuid <<PK>>
+  --
+  issue_id : uuid <<FK>>
+  page_number : int
+  image_url : varchar(512)
+  width_px : int
+  height_px : int
+  status : varchar(32)
+}
+
+entity "admin_catalog_hotspot" as hotspot {
+  * hotspot_id : uuid <<PK>>
+  --
+  issue_id : uuid <<FK>>
+  page_number : int
+  product_id : uuid
+  sku : varchar(128)
+  promo_code : varchar(128)
+  x_ratio : numeric(6,5)
+  y_ratio : numeric(6,5)
+  width_ratio : numeric(6,5)
+  height_ratio : numeric(6,5)
+  sort_order : int
+  status : varchar(32)
+}
+
+entity "admin_catalog_audit_event" as audit {
+  * audit_event_id : uuid <<PK>>
+  --
+  entity_type : varchar(64)
+  entity_id : uuid
+  action_code : varchar(96)
+  actor_user_id : uuid
+  old_value : jsonb
+  new_value : jsonb
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+}
+
+campaign ||--o{ issue
+issue ||--o{ material
+issue ||--o{ page
+issue ||--o{ hotspot
+issue ||--o{ audit
+
+note right of hotspot
+product_id references published PIM product from feature #29 by contract.
+The first implementation keeps runtime state in service memory while XML
+changelog declares the target persistence model.
+end note
+@enduml

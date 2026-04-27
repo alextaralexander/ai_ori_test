@@ -1,0 +1,219 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin admin-catalog API
+  version: "2026-04-27-feature-030"
+paths:
+  /api/admin-catalog/workspace:
+    get:
+      summary: Load admin catalog workspace summary
+      responses:
+        "200":
+          description: Workspace summary
+  /api/admin-catalog/campaigns:
+    get:
+      summary: Search catalog campaigns
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: locale
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Campaign list
+    post:
+      summary: Create campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignCreateRequest"
+      responses:
+        "201":
+          description: Created campaign
+        "409":
+          description: Campaign code conflict
+  /api/admin-catalog/campaigns/{campaignId}/issues:
+    post:
+      summary: Create campaign issue
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueCreateRequest"
+      responses:
+        "201":
+          description: Created issue
+  /api/admin-catalog/issues/{issueId}/materials:
+    post:
+      summary: Add PDF, cover or page material metadata
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaterialCreateRequest"
+      responses:
+        "201":
+          description: Created material
+  /api/admin-catalog/materials/{materialId}/approve:
+    post:
+      summary: Approve catalog material
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Approved material
+  /api/admin-catalog/issues/{issueId}/pages:
+    post:
+      summary: Add page image metadata
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PageCreateRequest"
+      responses:
+        "201":
+          description: Created page image
+  /api/admin-catalog/issues/{issueId}/hotspots:
+    post:
+      summary: Add product hotspot
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HotspotCreateRequest"
+      responses:
+        "201":
+          description: Created hotspot
+        "400":
+          description: Invalid hotspot coordinates
+  /api/admin-catalog/issues/{issueId}/validate-links:
+    post:
+      summary: Validate product hotspots and material readiness
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Link validation report
+  /api/admin-catalog/issues/{issueId}/rollover:
+    post:
+      summary: Archive current issue and publish next issue
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: Idempotency-Key
+          in: header
+          schema: { type: string }
+      responses:
+        "200":
+          description: Rollover result
+        "409":
+          description: Freeze or readiness conflict
+  /api/admin-catalog/archive:
+    get:
+      summary: Search archived catalog issues
+      responses:
+        "200":
+          description: Archive list
+  /api/admin-catalog/audit:
+    get:
+      summary: Search admin catalog audit events
+      parameters:
+        - name: actionCode
+          in: query
+          schema: { type: string }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Audit events
+components:
+  schemas:
+    CampaignCreateRequest:
+      type: object
+      required: [campaignCode, name, locale, audience, startsAt, endsAt]
+      properties:
+        campaignCode: { type: string }
+        name: { type: string }
+        locale: { type: string }
+        audience: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+    IssueCreateRequest:
+      type: object
+      required: [issueCode, publicationAt, archiveAt, freezeStartsAt]
+      properties:
+        issueCode: { type: string }
+        publicationAt: { type: string, format: date-time }
+        archiveAt: { type: string, format: date-time }
+        freezeStartsAt: { type: string, format: date-time }
+        rolloverWindowStartsAt: { type: string, format: date-time }
+        rolloverWindowEndsAt: { type: string, format: date-time }
+    MaterialCreateRequest:
+      type: object
+      required: [materialType, fileName, mimeType, sizeBytes, checksum, storageKey]
+      properties:
+        materialType: { type: string }
+        fileName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer, format: int64 }
+        checksum: { type: string }
+        storageKey: { type: string }
+    PageCreateRequest:
+      type: object
+      required: [pageNumber, imageUrl, widthPx, heightPx]
+      properties:
+        pageNumber: { type: integer }
+        imageUrl: { type: string }
+        widthPx: { type: integer }
+        heightPx: { type: integer }
+    HotspotCreateRequest:
+      type: object
+      required: [pageNumber, sku, xRatio, yRatio, widthRatio, heightRatio]
+      properties:
+        pageNumber: { type: integer }
+        productId: { type: string, format: uuid }
+        sku: { type: string }
+        promoCode: { type: string }
+        xRatio: { type: number, format: double }
+        yRatio: { type: number, format: double }
+        widthRatio: { type: number, format: double }
+        heightRatio: { type: number, format: double }

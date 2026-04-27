@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin admin-catalog module API
+  version: "2026-04-27"
+paths:
+  /api/admin-catalog/workspace:
+    get:
+      summary: Workspace summary
+      responses:
+        "200": { description: OK }
+  /api/admin-catalog/campaigns:
+    get:
+      summary: Search campaigns
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Create campaign
+      responses:
+        "201": { description: Created }
+        "409": { description: Campaign code conflict }
+  /api/admin-catalog/campaigns/{campaignId}/issues:
+    post:
+      summary: Create issue
+      responses:
+        "201": { description: Created }
+  /api/admin-catalog/issues/{issueId}/materials:
+    post:
+      summary: Add material metadata
+      responses:
+        "201": { description: Created }
+  /api/admin-catalog/materials/{materialId}/approve:
+    post:
+      summary: Approve material
+      responses:
+        "200": { description: OK }
+  /api/admin-catalog/issues/{issueId}/pages:
+    post:
+      summary: Add page image
+      responses:
+        "201": { description: Created }
+  /api/admin-catalog/issues/{issueId}/hotspots:
+    post:
+      summary: Add hotspot
+      responses:
+        "201": { description: Created }
+        "400": { description: Invalid hotspot }
+  /api/admin-catalog/issues/{issueId}/validate-links:
+    post:
+      summary: Validate issue links
+      responses:
+        "200": { description: OK }
+  /api/admin-catalog/issues/{issueId}/rollover:
+    post:
+      summary: Execute rollover
+      responses:
+        "200": { description: OK }
+        "409": { description: Conflict }
+  /api/admin-catalog/archive:
+    get:
+      summary: Archive issues
+      responses:
+        "200": { description: OK }
+  /api/admin-catalog/audit:
+    get:
+      summary: Audit events
+      responses:
+        "200": { description: OK }

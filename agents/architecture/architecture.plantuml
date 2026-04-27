@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 029
+title Best Ori Gin monolith architecture through feature 030
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -26,6 +26,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminPimMedia UI]
   [AdminPimImportExport UI]
   [AdminPimAudit UI]
+  [AdminCatalog UI]
+  [AdminCatalogCampaigns UI]
+  [AdminCatalogMaterials UI]
+  [AdminCatalogHotspots UI]
+  [AdminCatalogRollover UI]
+  [AdminCatalogAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -63,6 +69,7 @@ package "backend/monolith/monolith-app" {
   [admin-cms]
   [admin-referral]
   [admin-pim]
+  [admin-catalog]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -99,7 +106,14 @@ cloud "Hybrid Pixel" as hybrid
 [AdminPimCategories UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/categories, /categories/{categoryId}/activate
 [AdminPimMedia UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/products/{productId}/media, /media/{mediaId}/approve
 [AdminPimImportExport UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/imports, /exports
-[AdminPimAudit UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/audit[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
+[AdminPimAudit UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/audit
+[AdminCatalog UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/workspace, /campaigns, /archive
+[AdminCatalogCampaigns UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/campaigns, /campaigns/{campaignId}/issues
+[AdminCatalogMaterials UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/materials, /materials/{materialId}/approve, /pages
+[AdminCatalogHotspots UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/hotspots, /validate-links
+[AdminCatalogRollover UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/rollover
+[AdminCatalogAudit UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/audit
+[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
 [EmployeePartnerCard UI] --> [employee] : HTTP/JSON /api/employee/partner-card, /partner-card/{partnerId}
@@ -138,7 +152,14 @@ cloud "Hybrid Pixel" as hybrid
 [admin-pim] --> [catalog] : published product/category render data for public catalog and product card
 [admin-pim] --> [admin-cms] : published product/category references for CMS product links
 [admin-pim] --> s3 : product media, PDF, certificate fileReferenceId metadata
-[admin-pim] --> db : categories, brands, products, attributes, tags, media, recommendations, import/export jobs and audit[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
+[admin-pim] --> db : categories, brands, products, attributes, tags, media, recommendations, import/export jobs and audit
+[admin-catalog] --> [authorization] : admin catalog permission, scope and elevated checks
+[admin-catalog] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-catalog] --> [admin-pim] : validate published products for catalog hotspots
+[admin-catalog] --> [catalog] : current issue, PDF pages, hotspots and archive projection for digital catalog
+[admin-catalog] --> s3 : PDF, cover and page image fileReferenceId metadata
+[admin-catalog] --> db : campaigns, issues, materials, pages, hotspots, rollover jobs and audit
+[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
 [AnalyticsProvider] --> hybrid : consent-aware pixel events

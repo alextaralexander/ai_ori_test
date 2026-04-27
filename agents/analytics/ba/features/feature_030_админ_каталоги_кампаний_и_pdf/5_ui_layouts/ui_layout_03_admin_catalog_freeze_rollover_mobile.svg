@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844" role="img" aria-label="Схематичный мобильный макет freeze и rollover каталога">
+  <title>Feature 030 - mobile freeze and rollover</title>
+  <rect x="0" y="0" width="390" height="844" fill="#ffffff"/>
+  <rect x="16" y="16" width="358" height="56" fill="none" stroke="#222222"/>
+  <text x="32" y="50" font-family="Arial" font-size="18">Freeze / rollover</text>
+  <rect x="16" y="92" width="358" height="90" fill="none" stroke="#222222"/>
+  <text x="32" y="124" font-family="Arial" font-size="14">Текущий выпуск: ISSUE-2026-04</text>
+  <text x="32" y="154" font-family="Arial" font-size="14">Следующий: ISSUE-2026-05</text>
+  <rect x="16" y="202" width="358" height="124" fill="none" stroke="#222222"/>
+  <text x="32" y="234" font-family="Arial" font-size="14">Freeze window</text>
+  <text x="32" y="264" font-family="Arial" font-size="13">20.05 18:00 - 21.05 23:59</text>
+  <text x="32" y="294" font-family="Arial" font-size="13">Изменения PDF/hotspots заблокированы</text>
+  <rect x="16" y="346" width="358" height="148" fill="none" stroke="#222222"/>
+  <text x="32" y="378" font-family="Arial" font-size="14">Готовность rollover</text>
+  <text x="32" y="410" font-family="Arial" font-size="13">PDF approved</text>
+  <text x="32" y="438" font-family="Arial" font-size="13">Pages ready</text>
+  <text x="32" y="466" font-family="Arial" font-size="13">Hotspots valid</text>
+  <rect x="16" y="514" width="358" height="52" fill="none" stroke="#222222"/>
+  <text x="80" y="546" font-family="Arial" font-size="14">Запустить rollover</text>
+  <rect x="16" y="586" width="358" height="96" fill="none" stroke="#222222"/>
+  <text x="32" y="618" font-family="Arial" font-size="14">Результат</text>
+  <text x="32" y="650" font-family="Arial" font-size="13">ISSUE-2026-05 опубликован</text>
+  <rect x="16" y="702" width="358" height="110" fill="none" stroke="#222222"/>
+  <text x="32" y="734" font-family="Arial" font-size="14">Audit</text>
+  <text x="32" y="764" font-family="Arial" font-size="13">ROLLOVER_COMPLETED</text>
+  <text x="32" y="792" font-family="Arial" font-size="13">correlationId CORR-030-AUDIT</text>
+</svg>

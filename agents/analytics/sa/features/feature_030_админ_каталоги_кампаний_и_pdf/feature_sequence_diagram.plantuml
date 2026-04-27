@@ -1,0 +1,54 @@
+@startuml
+title Feature 030 - campaign catalog publication sequence
+
+actor "Каталожный менеджер" as manager
+actor "Контент-администратор" as content
+actor "Маркетинг-менеджер" as marketing
+participant "Frontend /admin/catalogs" as frontend
+participant "admin-catalog controller" as controller
+participant "admin-catalog service" as service
+participant "admin-pim service" as pim
+database "admin_catalog_*" as db
+collections "S3/MinIO" as storage
+participant "Public digital catalog" as public_catalog
+
+manager -> frontend: Создать кампанию CAM-2026-05
+frontend -> controller: POST /api/admin-catalog/campaigns
+controller -> service: createCampaign(request, token)
+service -> db: insert campaign + audit CAMPAIGN_CREATED
+service --> frontend: CampaignResponse + STR_MNEMO_ADMIN_CATALOG_CAMPAIGN_SAVED
+
+manager -> frontend: Создать выпуск ISSUE-2026-05
+frontend -> controller: POST /campaigns/{campaignId}/issues
+service -> db: insert issue with freeze and rollover windows
+service --> frontend: IssueResponse + STR_MNEMO_ADMIN_CATALOG_ISSUE_SCHEDULED
+
+content -> storage: Загрузить PDF и страницы
+content -> frontend: Сохранить metadata материалов
+frontend -> controller: POST /issues/{issueId}/materials
+service -> db: insert material metadata
+content -> frontend: Утвердить PDF
+frontend -> controller: POST /materials/{materialId}/approve
+service -> db: update material APPROVED + audit PDF_APPROVED
+
+marketing -> frontend: Добавить hotspot для SKU BOG-SERUM-001
+frontend -> controller: POST /issues/{issueId}/hotspots
+controller -> service: createHotspot(request)
+service -> pim: validate published product by sku
+pim --> service: product published and audience allowed
+service -> db: insert hotspot + audit HOTSPOT_CREATED
+
+manager -> frontend: Проверить готовность выпуска
+frontend -> controller: POST /issues/{issueId}/validate-links
+service -> db: read PDF, pages, hotspots
+service -> pim: validate linked products
+service --> frontend: LinkValidationResponse + STR_MNEMO_ADMIN_CATALOG_LINKS_VALID
+
+manager -> frontend: Запустить rollover
+frontend -> controller: POST /issues/{issueId}/rollover with Idempotency-Key
+controller -> service: rollover(issueId, key)
+service -> db: check freeze/readiness/idempotency
+service -> db: archive current issue, publish next issue, write audit ROLLOVER_COMPLETED
+service -> public_catalog: publish current issue projection
+service --> frontend: RolloverResponse + STR_MNEMO_ADMIN_CATALOG_ROLLOVER_COMPLETED
+@enduml
