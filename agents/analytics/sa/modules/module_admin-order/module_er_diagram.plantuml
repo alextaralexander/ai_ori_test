@@ -1,0 +1,162 @@
+@startuml
+title module admin-order ER diagram
+
+entity "admin_order_order" as order {
+  * order_id : uuid <<PK>>
+  --
+  order_number : varchar(80) <<UK>>
+  parent_order_id : uuid <<FK>>
+  cart_id : varchar(80)
+  customer_id : varchar(80)
+  partner_id : varchar(80)
+  catalog_period_code : varchar(80)
+  source_channel : varchar(40)
+  order_status : varchar(40)
+  payment_status : varchar(40)
+  fulfillment_status : varchar(40)
+  warehouse_id : uuid
+  currency_code : varchar(3)
+  total_amount : numeric(19,4)
+  paid_amount : numeric(19,4)
+  refunded_amount : numeric(19,4)
+  bonus_writeoff_amount : numeric(19,4)
+  discount_amount : numeric(19,4)
+  financial_hold_active : boolean
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "admin_order_line" as line {
+  * order_line_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  sku : varchar(80)
+  product_id : varchar(80)
+  quantity : numeric(19,4)
+  unit_price : numeric(19,4)
+  discount_amount : numeric(19,4)
+  bonus_amount : numeric(19,4)
+  line_total : numeric(19,4)
+  fulfillment_group_id : uuid <<FK>>
+  line_status : varchar(40)
+}
+
+entity "admin_order_fulfillment_group" as fulfillment_group {
+  * fulfillment_group_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  warehouse_id : uuid
+  reserve_status : varchar(40)
+  shipment_reference : varchar(120)
+  fulfillment_status : varchar(40)
+  blocked_reason_code : varchar(80)
+  partial_available : boolean
+  version : bigint
+}
+
+entity "admin_order_payment_event" as payment_event {
+  * payment_event_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  provider_code : varchar(80)
+  external_payment_id : varchar(120)
+  idempotency_key : varchar(120)
+  operation_type : varchar(40)
+  payment_status : varchar(40)
+  amount : numeric(19,4)
+  currency_code : varchar(3)
+  payload_checksum : varchar(128)
+  retry_status : varchar(40)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+entity "admin_order_refund_operation" as refund {
+  * refund_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  payment_event_id : uuid <<FK>>
+  refund_type : varchar(40)
+  refund_status : varchar(40)
+  amount : numeric(19,4)
+  currency_code : varchar(3)
+  reason_code : varchar(80)
+  external_refund_id : varchar(120)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+  created_at : timestamptz
+}
+
+entity "admin_order_financial_hold" as hold {
+  * financial_hold_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  payment_event_id : uuid <<FK>>
+  hold_status : varchar(40)
+  reason_code : varchar(80)
+  comment : varchar(1000)
+  expires_at : timestamptz
+  actor_user_id : uuid
+  released_by_user_id : uuid
+  released_at : timestamptz
+}
+
+entity "admin_order_risk_event" as risk {
+  * risk_event_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  source_event_id : varchar(120)
+  risk_score : numeric(10,2)
+  rule_codes : jsonb
+  decision_status : varchar(40)
+  decision_reason_code : varchar(80)
+  provider_response : jsonb
+  actor_user_id : uuid
+  decided_at : timestamptz
+  correlation_id : varchar(120)
+}
+
+entity "admin_order_operator_action" as operator_action {
+  * operator_action_id : uuid <<PK>>
+  --
+  order_id : uuid <<FK>>
+  action_code : varchar(80)
+  action_status : varchar(40)
+  actor_user_id : uuid
+  reason_code : varchar(80)
+  old_value : jsonb
+  new_value : jsonb
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+entity "admin_order_audit_event" as audit {
+  * audit_event_id : uuid <<PK>>
+  --
+  actor_user_id : uuid
+  action_code : varchar(80)
+  entity_type : varchar(80)
+  entity_id : varchar(80)
+  old_value : jsonb
+  new_value : jsonb
+  reason_code : varchar(80)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+order ||--o{ line
+order ||--o{ fulfillment_group
+fulfillment_group ||--o{ line
+order ||--o{ payment_event
+payment_event ||--o{ refund
+order ||--o{ refund
+order ||--o{ hold
+payment_event ||--o{ hold
+order ||--o{ risk
+order ||--o{ operator_action
+order ||--o{ order : parent_supplementary
+
+@enduml

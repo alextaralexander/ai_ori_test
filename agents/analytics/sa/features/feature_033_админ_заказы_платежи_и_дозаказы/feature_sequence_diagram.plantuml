@@ -1,0 +1,99 @@
+@startuml
+title Feature 033 sequence: admin order, payment, supplementary order and refund
+
+actor "Операционный администратор" as OpsAdmin
+actor "Финансовый оператор" as Finance
+actor "Антифрод-администратор" as Fraud
+participant "Admin Web Frontend" as Frontend
+participant "AdminOrderController" as Controller
+participant "AdminOrderService" as OrderService
+participant "PaymentEventService" as PaymentService
+participant "RefundService" as RefundService
+participant "RiskDecisionService" as RiskService
+participant "RBAC/Policy" as RBAC
+database "admin_order_* tables" as DB
+participant "Admin WMS module" as WMS
+participant "Payment Provider" as Provider
+participant "Audit/Observability" as Audit
+
+OpsAdmin -> Frontend: открыть /admin/orders и применить фильтры
+Frontend -> Controller: GET /api/admin/orders?search&status&paymentStatus
+Controller -> RBAC: check ADMIN_ORDER_VIEW, region, channel
+RBAC --> Controller: allowed
+Controller -> OrderService: searchOrders(filters, principal)
+OrderService -> DB: query orders with masked sensitive fields
+DB --> OrderService: order summaries
+OrderService --> Controller: AdminOrderPage
+Controller --> Frontend: 200 AdminOrderPage
+
+OpsAdmin -> Frontend: открыть карточку заказа
+Frontend -> Controller: GET /api/admin/orders/{orderId}
+Controller -> RBAC: check ADMIN_ORDER_VIEW
+Controller -> OrderService: getOrderDetails(orderId)
+OrderService -> DB: load order, lines, payments, refunds, risks, audit
+OrderService -> WMS: get reserve and warehouse context
+WMS --> OrderService: reserve status, partial availability, blocked reasons
+OrderService --> Controller: AdminOrderDetails with allowedActions
+Controller --> Frontend: 200 AdminOrderDetails
+
+alt создание supplementary order
+  OpsAdmin -> Frontend: создать дозаказ с reasonCode
+  Frontend -> Controller: POST /orders/{orderId}/supplementary-orders + Idempotency-Key
+  Controller -> RBAC: check ADMIN_ORDER_MANAGE
+  Controller -> OrderService: createSupplementaryOrder(parentOrderId, request, key)
+  OrderService -> DB: check parent order status and financial hold
+  OrderService -> WMS: validate SKU availability and reserve possibility
+  WMS --> OrderService: availability result
+  OrderService -> RiskService: validate anti-fraud policy
+  RiskService --> OrderService: approved or blocked
+  OrderService -> DB: create child order, lines, operator action, audit
+  OrderService -> Audit: publish SUPPLEMENTARY_ORDER_CREATED
+  OrderService --> Controller: created child AdminOrderDetails
+  Controller --> Frontend: 201 AdminOrderDetails
+else запрещенный дозаказ
+  OrderService --> Controller: business conflict STR_MNEMO_ADMIN_ORDER_FORBIDDEN_ACTION
+  Controller --> Frontend: 409 ErrorResponse(code)
+end
+
+Provider -> Controller: POST /payment-events + Idempotency-Key
+Controller -> RBAC: check ADMIN_ORDER_PAYMENT_MANAGE or provider integration scope
+Controller -> PaymentService: ingestPaymentEvent(request, key)
+PaymentService -> DB: find event by provider + externalPaymentId + idempotencyKey
+alt duplicate event
+  DB --> PaymentService: existing payment event
+  PaymentService --> Controller: existing response duplicate=true
+else new event
+  PaymentService -> DB: validate order currency and financial invariant
+  PaymentService -> DB: save payment event and update order payment status
+  PaymentService -> Audit: publish PAYMENT_EVENT_INGESTED
+  PaymentService --> Controller: accepted PaymentEventResponse
+end
+Controller --> Provider: 202 PaymentEventResponse
+
+Finance -> Frontend: запустить partial refund
+Frontend -> Controller: POST /orders/{orderId}/refunds + Idempotency-Key
+Controller -> RBAC: check ADMIN_ORDER_REFUND_MANAGE
+Controller -> RefundService: createRefund(orderId, request, key)
+RefundService -> DB: load paid/refunded amounts and holds
+alt refund amount valid
+  RefundService -> Provider: request refund
+  Provider --> RefundService: externalRefundId
+  RefundService -> DB: save refund operation and audit event
+  RefundService -> Audit: publish REFUND_REQUESTED
+  RefundService --> Controller: RefundResponse REQUESTED
+else refund violates invariant
+  RefundService --> Controller: STR_MNEMO_ADMIN_ORDER_FINANCIAL_INVARIANT_FAILED
+end
+Controller --> Frontend: response
+
+Fraud -> Frontend: принять anti-fraud decision
+Frontend -> Controller: POST /orders/{orderId}/risk-decisions + Idempotency-Key
+Controller -> RBAC: check ADMIN_ORDER_RISK_MANAGE
+Controller -> RiskService: decideRiskEvent(orderId, request, key)
+RiskService -> DB: update risk event decision
+RiskService -> DB: recalculate allowed payment/fulfillment/supplementary actions
+RiskService -> Audit: publish RISK_DECISION_APPLIED
+RiskService --> Controller: RiskEventResponse
+Controller --> Frontend: 200 RiskEventResponse
+
+@enduml

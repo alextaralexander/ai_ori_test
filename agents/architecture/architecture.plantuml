@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 032
+title Best Ori Gin monolith architecture through feature 033
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -43,6 +43,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminWmsSupplies UI]
   [AdminWmsSync UI]
   [AdminWmsAudit UI]
+  [AdminOrders UI]
+  [AdminOrderCard UI]
+  [AdminOrderPayments UI]
+  [AdminOrderSupplementary UI]
+  [AdminOrderRisk UI]
+  [AdminOrderAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -83,6 +89,7 @@ package "backend/monolith/monolith-app" {
   [admin-catalog]
   [admin-pricing]
   [admin-wms]
+  [admin-order]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -137,6 +144,12 @@ cloud "Hybrid Pixel" as hybrid
 [AdminWmsSupplies UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/supplies, /supplies/{supplyId}/acceptance
 [AdminWmsSync UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/sync-runs, /sync-messages
 [AdminWmsAudit UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/audit-events
+[AdminOrders UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders, /orders/{orderId}
+[AdminOrderCard UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}, /status-transition, /operator-actions
+[AdminOrderSupplementary UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}/supplementary-orders
+[AdminOrderPayments UI] --> [admin-order] : HTTP/JSON /api/admin/orders/payment-events, /orders/{orderId}/refunds, /financial-holds
+[AdminOrderRisk UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}/risk-decisions
+[AdminOrderAudit UI] --> [admin-order] : HTTP/JSON /api/admin/orders/audit-events, /audit-events/export
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -201,6 +214,18 @@ cloud "Hybrid Pixel" as hybrid
 [admin-wms] --> [partner-office] : supply, acceptance and discrepancy context
 [admin-wms] --> wms : WMS/1C stock, supply and movement synchronization
 [admin-wms] --> db : warehouses, stock snapshots, availability rules, supplies, reservations, sync messages, discrepancies and audit
+[admin-order] --> [authorization] : admin order permission, role, region, channel and elevated checks
+[admin-order] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-order] --> [admin-wms] : reserve, warehouse, partial availability and blocked reason context
+[admin-order] --> [admin-pim] : validate published SKU/product references for supplementary order lines
+[admin-order] --> [admin-catalog] : validate catalog period and campaign context
+[admin-order] --> [admin-pricing] : validate prices, offers, gifts and bonus-affecting commercial rules
+[admin-order] --> [order] : order lifecycle read/write projection and customer history links
+[admin-order] --> [employee] : order support, operator action and audit context
+[admin-order] --> pay : payment capture, refund, dispute and chargeback protocol
+[admin-order] --> bonus : bonus writeoff and compensation consistency checks
+[admin-order] --> delivery : shipment reference and delivery blocking context
+[admin-order] --> db : orders, lines, fulfillment groups, payment events, refunds, holds, risk events, operator actions and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
@@ -221,6 +246,7 @@ cloud "Hybrid Pixel" as hybrid
 [order] --> pay : payment protocol
 [order] --> delivery : delivery protocol
 [order] --> [admin-wms] : reservation and stock availability HTTP/JSON
+[order] --> [admin-order] : administrative order support and supplementary order HTTP/JSON
 [admin-wms] --> wms : fulfillment stock/movement protocol
 [bonus-wallet] --> bonus : bonus protocol
 [partner-office] --> [admin-wms] : supply and acceptance HTTP/JSON projection

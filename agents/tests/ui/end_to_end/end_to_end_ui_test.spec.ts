@@ -33,7 +33,12 @@ import '../feature_030_админ_каталоги_кампаний_и_pdf/featu
 import '../feature_031_админ_цены_акции_предложения_и_бенефиты/feature_ui_flow';
 
 import { runFeature032AdminWmsFlow } from '../feature_032_админ_wms_1c_остатки_склады_и_поставки/feature_ui_flow';
+import { runFeature033AdminOrdersFlow } from '../feature_033_админ_заказы_платежи_и_дозаказы/feature_ui_flow';
 
 test('admin WMS green path participates in product e2e flow', async ({ page }) => {
   await runFeature032AdminWmsFlow(page);
+});
+
+test('admin orders and payments green path participates in product e2e flow', async ({ page }) => {
+  await runFeature033AdminOrdersFlow(page);
 });

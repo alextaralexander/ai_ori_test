@@ -338,3 +338,40 @@
     И публичный каталог, корзина и checkout продолжают использовать последнее подтвержденное состояние остатков
     Когда логистический администратор решает quarantine с reasonCode `CONFIRMED_EXTERNAL_CORRECTION`
     Тогда система сохраняет решение, корректирует stock movement по разрешенному правилу и записывает audit trail
+
+  Сценарий: Администратор заказов обслуживает заказ и создает дозаказ без нарушения оплаты и склада
+    Допустим операционный администратор авторизован и имеет permission scopes `ADMIN_ORDER_VIEW` и `ADMIN_ORDER_MANAGE`
+    И существует оплаченный заказ `BO-E2E-033-1` с parent catalog campaign, WMS reserve и payment event
+    Когда операционный администратор открывает `/admin/orders`
+    И фильтрует список по orderId `BO-E2E-033-1`, payment status `PAID`, fulfillment status `DELIVERED` и складу `WH-MSK-01`
+    И открывает карточку заказа
+    Тогда система показывает состав, суммы, скидки, бонусы, reserve status, delivery data, payment events и audit trail
+    Когда администратор создает supplementary order с товаром `BOG-SERUM-001` и reasonCode `CUSTOMER_REQUEST`
+    Тогда система проверяет published PIM data, catalog period, WMS availability, payment policy, anti-fraud policy и financial invariant
+    И создает дозаказ с parentOrderId `BO-E2E-033-1`
+    И клиентская история заказов, employee order support и admin order card видят единую цепочку основного заказа и дозаказа
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_ORDER_*` для предопределенных сообщений
+
+  Сценарий: Финансовый оператор обрабатывает платеж, повтор callback и частичный refund
+    Допустим финансовый оператор авторизован и имеет permission scopes `ADMIN_ORDER_PAYMENT_MANAGE` и `ADMIN_ORDER_REFUND_MANAGE`
+    И существует заказ `BO-E2E-033-2` с payable amount `12000.00 RUB`
+    Когда платежная система отправляет событие `CAPTURE` с provider `PAYMENT_PROVIDER`, externalPaymentId `EXT-E2E-033-2` и idempotencyKey `PAY-E2E-033-2`
+    Тогда admin orders/payments контур фиксирует payment event и переводит payment status заказа в `PAID`
+    Когда платежная система повторно отправляет событие `CAPTURE` с тем же externalPaymentId и idempotencyKey
+    Тогда paid amount заказа не увеличивается повторно
+    И журнал платежей показывает идемпотентную обработку
+    Когда финансовый оператор запускает partial refund на `2500.00 RUB` с reasonCode `PARTIAL_CANCEL`
+    Тогда система создает refund operation в пределах доступной к возврату суммы
+    И audit trail содержит actorUserId, reasonCode, amount, externalPaymentId и correlationId
+
+  Сценарий: Антифрод и financial hold управляют fulfillment и дозаказами
+    Допустим антифрод-администратор авторизован и имеет permission scope `ADMIN_ORDER_RISK_MANAGE`
+    И финансовый оператор авторизован и имеет permission scope `ADMIN_ORDER_PAYMENT_MANAGE`
+    И существует заказ `BO-E2E-033-3` с risk event `NEEDS_REVIEW` и активной financial hold
+    Когда операционный администратор пытается создать дозаказ к заказу `BO-E2E-033-3`
+    Тогда backend возвращает mnemonic-код `STR_MNEMO_ADMIN_ORDER_FORBIDDEN_ACTION`
+    И дозаказ не создается
+    Когда антифрод-администратор открывает risk summary и принимает решение `APPROVED` с reasonCode `MANUAL_REVIEW_PASSED`
+    И финансовый оператор снимает financial hold с reasonCode `PAYMENT_REVIEW_PASSED`
+    Тогда capture, fulfillment и supplementary order actions становятся доступны согласно RBAC и статусам заказа
+    И audit trail содержит risk decision, financial hold release, actorUserId, reasonCode и correlationId
