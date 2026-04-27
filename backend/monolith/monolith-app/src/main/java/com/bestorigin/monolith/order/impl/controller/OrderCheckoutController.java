@@ -8,6 +8,10 @@ import com.bestorigin.monolith.order.api.OrderDtos.ConfirmCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.ErrorResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCommentRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCreateRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
@@ -121,6 +125,42 @@ public class OrderCheckoutController {
     @PostMapping("/order-history/{orderNumber}/repeat")
     public RepeatOrderResponse repeatOrder(@RequestHeader HttpHeaders headers, @PathVariable String orderNumber) {
         return service.repeatOrder(userContext(headers), orderNumber, idempotencyKey(headers));
+    }
+
+    @GetMapping("/claims")
+    public OrderClaimPageResponse claims(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String resolution,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return service.searchClaims(userContext(headers), query, status, resolution, page, size);
+    }
+
+    @PostMapping("/claims")
+    public OrderClaimDetailsResponse createClaim(@RequestHeader HttpHeaders headers, @RequestBody OrderClaimCreateRequest request) {
+        return service.createClaim(userContext(headers), request, idempotencyKey(headers));
+    }
+
+    @GetMapping("/claims/{claimId}")
+    public OrderClaimDetailsResponse claimDetails(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String claimId,
+            @RequestParam(required = false) String supportCustomerId,
+            @RequestParam(required = false) String reason
+    ) {
+        return service.getClaimDetails(userContext(headers), claimId, supportCustomerId, reason);
+    }
+
+    @PostMapping("/claims/{claimId}/comments")
+    public OrderClaimDetailsResponse addClaimComment(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String claimId,
+            @RequestBody OrderClaimCommentRequest request
+    ) {
+        return service.addClaimComment(userContext(headers), claimId, request, idempotencyKey(headers));
     }
 
     @ExceptionHandler(OrderCheckoutValidationException.class)

@@ -2,6 +2,8 @@ export type CheckoutType = 'MAIN' | 'SUPPLEMENTARY';
 export type CheckoutStatus = 'DRAFT' | 'VALIDATION_REQUIRED' | 'READY_TO_CONFIRM' | 'CONFIRMED' | 'BLOCKED' | 'EXPIRED';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'CANCELLED';
 export type NextAction = 'PAYMENT_REDIRECT' | 'WAIT_PAYMENT' | 'ORDER_DETAILS' | 'FIX_CHECKOUT';
+export type ClaimStatus = 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'WAREHOUSE_CHECK' | 'APPROVED' | 'PARTIALLY_APPROVED' | 'REJECTED' | 'CLOSED';
+export type ClaimResolution = 'REFUND' | 'REPLACEMENT' | 'MISSING_ITEM' | 'SERVICE_REVIEW' | 'REJECTED';
 
 export interface StartCheckoutRequest {
   cartId: string;
@@ -194,6 +196,77 @@ export interface RepeatOrderResponse {
   reasonMnemo?: string | null;
 }
 
+export interface OrderClaimItemRequest {
+  sku: string;
+  quantity: number;
+}
+
+export interface OrderClaimCreateRequest {
+  orderNumber: string;
+  reasonCode: string;
+  requestedResolution: ClaimResolution;
+  comment?: string;
+  items: OrderClaimItemRequest[];
+}
+
+export interface OrderClaimSummaryResponse {
+  claimId: string;
+  orderNumber: string;
+  status: ClaimStatus;
+  requestedResolution: ClaimResolution;
+  refundAmount: number;
+  currencyCode: string;
+  updatedAt: string;
+  partnerImpact: boolean;
+}
+
+export interface OrderClaimPageResponse {
+  items: OrderClaimSummaryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface OrderClaimDetailsResponse extends OrderClaimSummaryResponse {
+  approvedResolution: ClaimResolution;
+  publicReasonMnemo?: string | null;
+  auditRecorded?: boolean;
+  businessVolumeDelta?: number | null;
+  items: Array<{
+    productCode: string;
+    sku: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    refundAmount: number;
+    requestedResolution: ClaimResolution;
+    approvedResolution: ClaimResolution;
+    status: string;
+    reasonMnemo?: string | null;
+  }>;
+  events: Array<{
+    eventType: string;
+    publicStatus: string;
+    sourceSystem: string;
+    descriptionMnemo?: string | null;
+    occurredAt: string;
+  }>;
+  comments: Array<{
+    authorRole: string;
+    visibility: string;
+    messageMnemo?: string | null;
+    createdAt: string;
+  }>;
+  attachments: Array<{
+    attachmentId: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
+  }>;
+  nextAction: string;
+}
+
 interface ErrorResponse {
   code: string;
   details?: ValidationReasonResponse[];
@@ -332,4 +405,28 @@ export async function repeatOrder(orderNumber: string): Promise<RepeatOrderRespo
     body: '{}',
   });
   return readJson<RepeatOrderResponse>(response);
+}
+
+export async function createOrderClaim(request: OrderClaimCreateRequest): Promise<OrderClaimDetailsResponse> {
+  const response = await fetch('/api/order/claims', {
+    method: 'POST',
+    headers: jsonHeaders(`claim-${request.orderNumber}-${request.items.map((item) => item.sku).join('-')}`),
+    body: JSON.stringify(request),
+  });
+  return readJson<OrderClaimDetailsResponse>(response);
+}
+
+export async function searchOrderClaims(params: URLSearchParams): Promise<OrderClaimPageResponse> {
+  const query = params.toString();
+  const response = await fetch(`/api/order/claims${query ? `?${query}` : ''}`, {
+    headers: authHeaders(),
+  });
+  return readJson<OrderClaimPageResponse>(response);
+}
+
+export async function getOrderClaimDetails(claimId: string): Promise<OrderClaimDetailsResponse> {
+  const response = await fetch(`/api/order/claims/${encodeURIComponent(claimId)}`, {
+    headers: authHeaders(),
+  });
+  return readJson<OrderClaimDetailsResponse>(response);
 }

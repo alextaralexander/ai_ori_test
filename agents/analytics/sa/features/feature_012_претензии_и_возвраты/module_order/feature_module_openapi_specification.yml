@@ -1,0 +1,95 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin order claims API - feature 012
+  version: 2026-04-27
+paths:
+  /api/order/claims:
+    get:
+      summary: Search order claims
+      parameters:
+        - name: query
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: resolution
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Claim history page
+    post:
+      summary: Create order claim
+      responses:
+        '200':
+          description: Created claim details
+        '400':
+          description: Validation mnemonic error
+        '403':
+          description: Access denied mnemonic error
+  /api/order/claims/{claimId}:
+    get:
+      summary: Get order claim details
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: supportCustomerId
+          in: query
+          schema: { type: string }
+        - name: reason
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Claim details
+        '403':
+          description: Access denied mnemonic error
+        '404':
+          description: Claim not found mnemonic error
+  /api/order/claims/{claimId}/comments:
+    post:
+      summary: Add public claim comment
+      responses:
+        '200':
+          description: Updated claim details
+components:
+  schemas:
+    ClaimStatus:
+      type: string
+      enum: [DRAFT, SUBMITTED, IN_REVIEW, WAREHOUSE_CHECK, APPROVED, PARTIALLY_APPROVED, REJECTED, CLOSED]
+    ClaimResolution:
+      type: string
+      enum: [REFUND, REPLACEMENT, MISSING_ITEM, SERVICE_REVIEW, REJECTED]
+    OrderClaimCreateRequest:
+      type: object
+      required: [orderNumber, items, reasonCode, requestedResolution]
+      properties:
+        orderNumber: { type: string }
+        reasonCode: { type: string }
+        requestedResolution: { $ref: '#/components/schemas/ClaimResolution' }
+        comment: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrderClaimItemRequest' }
+    OrderClaimItemRequest:
+      type: object
+      required: [sku, quantity]
+      properties:
+        sku: { type: string }
+        quantity: { type: integer, minimum: 1 }
+    OrderClaimDetailsResponse:
+      type: object
+      properties:
+        claimId: { type: string }
+        orderNumber: { type: string }
+        status: { $ref: '#/components/schemas/ClaimStatus' }
+        requestedResolution: { $ref: '#/components/schemas/ClaimResolution' }
+        approvedResolution: { $ref: '#/components/schemas/ClaimResolution' }
+        refundAmount: { type: number }
+        currencyCode: { type: string }
+        publicReasonMnemo: { type: string }
+        partnerImpact: { type: boolean }
+        auditRecorded: { type: boolean }

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Макет истории претензий desktop</title>
+  <desc id="desc">Схематичный макет списка претензий, фильтров и карточек истории.</desc>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <rect x="48" y="40" width="1104" height="72" fill="#f3f5f7" stroke="#9aa4af"/>
+  <text x="72" y="84" font-family="Arial" font-size="24">История претензий</text>
+  <rect x="48" y="136" width="1104" height="96" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="72" y="174" font-family="Arial" font-size="16">Поиск по номеру, заказу, товару</text>
+  <rect x="72" y="188" width="312" height="32" fill="#f8fafc" stroke="#667085"/>
+  <rect x="408" y="188" width="160" height="32" fill="#f8fafc" stroke="#667085"/>
+  <rect x="592" y="188" width="160" height="32" fill="#f8fafc" stroke="#667085"/>
+  <rect x="776" y="188" width="140" height="32" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="818" y="210" font-family="Arial" font-size="13">Найти</text>
+  <rect x="48" y="260" width="1104" height="132" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="72" y="298" font-family="Arial" font-size="18">CLM-012-001</text>
+  <text x="72" y="330" font-family="Arial" font-size="14">ORD-011-MAIN, возврат денег, на проверке</text>
+  <text x="820" y="330" font-family="Arial" font-size="14">1 980 RUB</text>
+  <rect x="980" y="306" width="120" height="36" fill="#ffffff" stroke="#667085"/>
+  <text x="1010" y="329" font-family="Arial" font-size="13">Детали</text>
+  <rect x="48" y="416" width="1104" height="132" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="72" y="454" font-family="Arial" font-size="18">CLM-012-002</text>
+  <text x="72" y="486" font-family="Arial" font-size="14">ORD-011-SUPP, замена, ожидает склад</text>
+  <text x="820" y="486" font-family="Arial" font-size="14">0 RUB</text>
+  <rect x="48" y="580" width="1104" height="80" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="72" y="628" font-family="Arial" font-size="14">Пагинация, empty/error states, mobile filters</text>
+</svg>

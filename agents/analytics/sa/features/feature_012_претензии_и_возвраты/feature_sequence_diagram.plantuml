@@ -1,0 +1,24 @@
+@startuml
+title Feature 012 - создание и обработка претензии
+actor User as U
+participant "Claims UI" as UI
+participant "OrderClaimController" as C
+participant "OrderClaimService" as S
+participant "Order history" as OH
+participant "Warehouse/Logistics" as WL
+participant "Payment" as P
+U -> UI: выбирает заказ и позиции
+UI -> C: POST /api/order/claims
+C -> S: createClaim(user, request, idempotencyKey)
+S -> OH: load order details and claimable lines
+OH --> S: order, lines, prices, claimAvailable
+S -> S: validate, calculate refund, create audit events
+S --> C: OrderClaimDetailsResponse
+C --> UI: claimId, status, refundAmount, mnemonic codes
+UI --> U: показывает результат
+S -> WL: route warehouse/logistics check when required
+WL --> S: check result event
+S -> P: send approved refund when resolution is REFUND
+P --> S: refund status event
+S --> UI: updated claim details on refresh
+@enduml

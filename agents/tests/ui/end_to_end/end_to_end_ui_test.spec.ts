@@ -9,3 +9,4 @@ import '../feature_008_регистрация_и_инвайты_партнеро
 import '../feature_009_корзина_и_промо_предложения/feature_ui_flow';
 import '../feature_010_оформление_заказа_и_дозаказ/feature_ui_flow';
 import '../feature_011_история_и_детали_заказов/feature_ui_flow';
+import '../feature_012_претензии_и_возвраты/feature_ui_flow';

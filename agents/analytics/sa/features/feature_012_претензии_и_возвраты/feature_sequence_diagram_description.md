@@ -1,0 +1,3 @@
+# Feature sequence diagram description. Feature 012
+
+Пользователь выбирает заказ и позиции в Claims UI. Frontend отправляет `POST /api/order/claims` с idempotency key. Controller передает user context и request в `OrderClaimService`. Service загружает детали заказа, проверяет claimAvailable, количество и срок, рассчитывает компенсацию и создает события audit trail. Если сценарий требует проверки, service маршрутизирует кейс в складской или логистический контур. После утверждения возврата payment-интеграция получает сумму компенсации, а frontend видит обновленные статусы и локализует публичные сообщения по mnemonic-кодам.

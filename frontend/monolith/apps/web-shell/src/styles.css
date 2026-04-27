@@ -745,6 +745,40 @@ body {
   background: #ffffff;
 }
 
+.order-claims-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.claim-create-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 1fr) minmax(280px, 1fr);
+}
+
+.claim-create-grid article,
+.order-claims-page section[data-testid="claim-details-events"] {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.claim-create-grid select,
+.claim-create-grid textarea {
+  display: block;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.claim-item-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-height: 40px;
+}
+
 @media (max-width: 760px) {
   .public-header {
     align-items: flex-start;
@@ -782,6 +816,7 @@ body {
     .order-form-grid,
     .order-history-filters,
     .order-history-card,
+    .claim-create-grid,
     .order-details-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;

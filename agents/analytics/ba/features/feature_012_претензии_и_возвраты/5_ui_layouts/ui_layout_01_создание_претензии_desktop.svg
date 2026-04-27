@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Макет создания претензии desktop</title>
+  <desc id="desc">Схематичный макет расположения блоков создания претензии по заказу.</desc>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <rect x="40" y="32" width="1120" height="72" fill="#f3f5f7" stroke="#9aa4af"/>
+  <text x="64" y="76" font-family="Arial" font-size="24">Создание претензии</text>
+  <rect x="40" y="132" width="320" height="628" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="64" y="168" font-family="Arial" font-size="18">Заказ и позиции</text>
+  <rect x="64" y="196" width="272" height="64" fill="#ffffff" stroke="#667085"/>
+  <text x="82" y="234" font-family="Arial" font-size="15">ORD-011-MAIN, статус доставки</text>
+  <rect x="64" y="284" width="272" height="104" fill="#ffffff" stroke="#667085"/>
+  <text x="82" y="318" font-family="Arial" font-size="15">Позиция 100-011</text>
+  <text x="82" y="350" font-family="Arial" font-size="14">Количество, чекбокс, цена</text>
+  <rect x="392" y="132" width="416" height="628" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="416" y="168" font-family="Arial" font-size="18">Причина, решение, комментарий</text>
+  <rect x="416" y="198" width="360" height="48" fill="#f8fafc" stroke="#667085"/>
+  <text x="432" y="228" font-family="Arial" font-size="14">Причина претензии</text>
+  <rect x="416" y="266" width="360" height="48" fill="#f8fafc" stroke="#667085"/>
+  <text x="432" y="296" font-family="Arial" font-size="14">Желаемое решение</text>
+  <rect x="416" y="334" width="360" height="120" fill="#f8fafc" stroke="#667085"/>
+  <text x="432" y="368" font-family="Arial" font-size="14">Комментарий пользователя</text>
+  <rect x="416" y="478" width="360" height="92" fill="#f8fafc" stroke="#667085"/>
+  <text x="432" y="526" font-family="Arial" font-size="14">Вложения</text>
+  <rect x="840" y="132" width="320" height="628" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="864" y="168" font-family="Arial" font-size="18">Итог и отправка</text>
+  <rect x="864" y="204" width="248" height="96" fill="#ffffff" stroke="#667085"/>
+  <text x="882" y="242" font-family="Arial" font-size="14">Расчет компенсации</text>
+  <rect x="864" y="332" width="248" height="48" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="900" y="362" font-family="Arial" font-size="15">Отправить претензию</text>
+  <rect x="864" y="414" width="248" height="120" fill="#ffffff" stroke="#667085"/>
+  <text x="882" y="452" font-family="Arial" font-size="14">Валидации и предупреждения</text>
+</svg>

@@ -10,6 +10,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
+import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
 import { OrderHistoryView } from './components/OrderHistoryView';
 import { ProductCardView } from './components/ProductCardView';
@@ -162,6 +163,12 @@ function App() {
     contentView = <OrderHistoryView params={params} />;
   } else if (path.startsWith('/order/order-history/')) {
     contentView = <OrderHistoryView orderNumber={decodeURIComponent(path.slice('/order/order-history/'.length))} params={params} />;
+  } else if (path === '/order/claims/claim-create') {
+    contentView = <OrderClaimsView mode="create" params={params} />;
+  } else if (path === '/order/claims/claims-history') {
+    contentView = <OrderClaimsView mode="history" params={params} />;
+  } else if (path.startsWith('/order/claims/claims-history/')) {
+    contentView = <OrderClaimsView claimId={decodeURIComponent(path.slice('/order/claims/claims-history/'.length))} mode="details" params={params} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {

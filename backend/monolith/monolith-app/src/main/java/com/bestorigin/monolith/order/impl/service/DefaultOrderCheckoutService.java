@@ -3,6 +3,8 @@ package com.bestorigin.monolith.order.impl.service;
 import com.bestorigin.monolith.order.api.OrderDtos.AddressRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.BenefitApplyRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.BenefitResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.ClaimResolution;
+import com.bestorigin.monolith.order.api.OrderDtos.ClaimStatus;
 import com.bestorigin.monolith.order.api.OrderDtos.CheckoutDraftResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.CheckoutItemResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.CheckoutStatus;
@@ -15,6 +17,16 @@ import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.NextAction;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderActionsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimAttachmentResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCommentRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCommentResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCreateRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimEventResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimItemRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimLineResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimPageResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimSummaryResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDeliveryResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryEventResponse;
@@ -59,9 +71,18 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
     private static final String PAYMENT_PAID = "STR_MNEMO_PAYMENT_PAID";
     private static final String DELIVERY_IN_TRANSIT = "STR_MNEMO_DELIVERY_IN_TRANSIT";
     private static final String REPEAT_PARTIAL = "STR_MNEMO_ORDER_REPEAT_PARTIAL";
+    private static final String CLAIM_CREATED = "STR_MNEMO_ORDER_CLAIM_CREATED";
+    private static final String CLAIM_ITEM_UNAVAILABLE = "STR_MNEMO_ORDER_CLAIM_ITEM_UNAVAILABLE";
+    private static final String CLAIM_ACCESS_DENIED = "STR_MNEMO_ORDER_CLAIM_ACCESS_DENIED";
+    private static final String CLAIM_NOT_FOUND = "STR_MNEMO_ORDER_CLAIM_NOT_FOUND";
+    private static final String CLAIM_COMMENT_ADDED = "STR_MNEMO_ORDER_CLAIM_COMMENT_ADDED";
+    private static final String CLAIM_VALIDATION_FAILED = "STR_MNEMO_ORDER_CLAIM_VALIDATION_FAILED";
 
     private final OrderCheckoutRepository repository;
     private final ConcurrentMap<String, OrderConfirmationResponse> confirmationsByKey = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, OrderClaimDetailsResponse> claimsById = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> claimOwners = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, OrderClaimDetailsResponse> claimsByIdempotencyKey = new ConcurrentHashMap<>();
 
     public DefaultOrderCheckoutService(OrderCheckoutRepository repository) {
         this.repository = repository;
@@ -269,6 +290,236 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
         return new RepeatOrderResponse(rejected.isEmpty() ? RepeatOrderStatus.COMPLETED : RepeatOrderStatus.PARTIAL, details.orderType(), added, rejected, rejected.isEmpty() ? null : REPEAT_PARTIAL);
     }
 
+    @Override
+    public OrderClaimPageResponse searchClaims(String userContextId, String query, String status, String resolution, int page, int size) {
+        seedVisibleClaim(userContextId);
+        List<OrderClaimSummaryResponse> claims = claimsById.values().stream()
+                .filter(claim -> canReadClaim(userContextId, claim.claimId()))
+                .filter(claim -> blank(query) || claim.claimId().contains(query) || claim.orderNumber().contains(query) || claim.items().stream().anyMatch(item -> item.productName().toLowerCase().contains(query.toLowerCase()) || item.sku().contains(query)))
+                .filter(claim -> blank(status) || claim.status().name().equals(status))
+                .filter(claim -> blank(resolution) || claim.requestedResolution().name().equals(resolution))
+                .map(this::summary)
+                .toList();
+        return new OrderClaimPageResponse(claims, Math.max(page, 0), Math.max(size, 1), claims.size(), false);
+    }
+
+    @Override
+    public synchronized OrderClaimDetailsResponse createClaim(String userContextId, OrderClaimCreateRequest request, String idempotencyKey) {
+        if (!blank(idempotencyKey) && claimsByIdempotencyKey.containsKey(idempotencyKey)) {
+            return claimsByIdempotencyKey.get(idempotencyKey);
+        }
+        if (request == null || blank(request.orderNumber()) || request.items() == null || request.items().isEmpty() || request.requestedResolution() == null) {
+            throw new OrderCheckoutValidationException(CLAIM_VALIDATION_FAILED, 400);
+        }
+        OrderDetailsResponse order = getOrderHistoryDetails(userContextId, request.orderNumber(), null, null);
+        List<OrderClaimLineResponse> lines = new ArrayList<>();
+        BigDecimal refund = BigDecimal.ZERO;
+        for (OrderClaimItemRequest item : request.items()) {
+            OrderHistoryLineResponse orderLine = order.items().stream()
+                    .filter(line -> line.sku().equals(item.sku()))
+                    .findFirst()
+                    .orElseThrow(() -> new OrderCheckoutValidationException(CLAIM_ITEM_UNAVAILABLE, 400));
+            if (!orderLine.claimAvailable() || item.quantity() < 1 || item.quantity() > orderLine.quantity()) {
+                throw new OrderCheckoutValidationException(CLAIM_ITEM_UNAVAILABLE, 400);
+            }
+            BigDecimal lineRefund = orderLine.unitPrice().multiply(BigDecimal.valueOf(item.quantity())).setScale(2, RoundingMode.HALF_UP);
+            refund = refund.add(lineRefund);
+            lines.add(new OrderClaimLineResponse(
+                    orderLine.productCode(),
+                    orderLine.sku(),
+                    orderLine.productName(),
+                    item.quantity(),
+                    orderLine.unitPrice(),
+                    lineRefund,
+                    request.requestedResolution(),
+                    request.requestedResolution(),
+                    "IN_REVIEW",
+                    null
+            ));
+        }
+        String claimId = order.orderType() == CheckoutType.SUPPLEMENTARY ? "CLM-012-SUPP" : "CLM-012-001";
+        boolean partnerImpact = order.orderType() == CheckoutType.SUPPLEMENTARY || role(userContextId).equals("partner");
+        OrderClaimDetailsResponse claim = new OrderClaimDetailsResponse(
+                claimId,
+                order.orderNumber(),
+                ClaimStatus.IN_REVIEW,
+                request.requestedResolution(),
+                request.requestedResolution(),
+                refund.setScale(2, RoundingMode.HALF_UP),
+                order.currencyCode(),
+                CLAIM_CREATED,
+                partnerImpact,
+                false,
+                partnerImpact ? money("-7.50") : null,
+                List.copyOf(lines),
+                claimEvents(),
+                claimComments(request.comment()),
+                claimAttachments(),
+                "WAIT_SERVICE_DECISION"
+        );
+        claimsById.put(claimId, claim);
+        claimOwners.put(claimId, userContextId);
+        if (!blank(idempotencyKey)) {
+            claimsByIdempotencyKey.put(idempotencyKey, claim);
+        }
+        return claim;
+    }
+
+    @Override
+    public OrderClaimDetailsResponse getClaimDetails(String userContextId, String claimId, String supportCustomerId, String reason) {
+        seedVisibleClaim(userContextId);
+        if ("CLM-012-OTHER".equals(claimId) && !role(userContextId).equals("order-support")) {
+            throw new OrderCheckoutAccessDeniedException(CLAIM_ACCESS_DENIED);
+        }
+        OrderClaimDetailsResponse claim = claimsById.get(claimId);
+        if (claim == null && role(userContextId).equals("order-support") && "CLM-012-001".equals(claimId)) {
+            claim = defaultClaim("customer-012-api-session", false);
+            claimsById.put(claim.claimId(), claim);
+            claimOwners.put(claim.claimId(), "customer-012-api-session");
+        }
+        if (claim == null) {
+            throw new OrderCheckoutNotFoundException(CLAIM_NOT_FOUND);
+        }
+        if (!canReadClaim(userContextId, claimId)) {
+            throw new OrderCheckoutAccessDeniedException(CLAIM_ACCESS_DENIED);
+        }
+        return role(userContextId).equals("order-support") ? withAudit(claim) : claim;
+    }
+
+    @Override
+    public synchronized OrderClaimDetailsResponse addClaimComment(String userContextId, String claimId, OrderClaimCommentRequest request, String idempotencyKey) {
+        OrderClaimDetailsResponse existing = getClaimDetails(userContextId, claimId, null, null);
+        List<OrderClaimCommentResponse> comments = new ArrayList<>(existing.comments());
+        comments.add(new OrderClaimCommentResponse(role(userContextId), "PUBLIC", CLAIM_COMMENT_ADDED, "2026-04-27T10:30:00Z"));
+        OrderClaimDetailsResponse updated = new OrderClaimDetailsResponse(
+                existing.claimId(),
+                existing.orderNumber(),
+                existing.status(),
+                existing.requestedResolution(),
+                existing.approvedResolution(),
+                existing.refundAmount(),
+                existing.currencyCode(),
+                CLAIM_COMMENT_ADDED,
+                existing.partnerImpact(),
+                existing.auditRecorded(),
+                existing.businessVolumeDelta(),
+                existing.items(),
+                existing.events(),
+                List.copyOf(comments),
+                existing.attachments(),
+                existing.nextAction()
+        );
+        claimsById.put(claimId, updated);
+        return updated;
+    }
+
+    private void seedVisibleClaim(String userContextId) {
+        if (role(userContextId).equals("partner")) {
+            claimsById.computeIfAbsent("CLM-012-SUPP", key -> {
+                claimOwners.put(key, userContextId);
+                return defaultClaim(userContextId, true);
+            });
+            return;
+        }
+        claimsById.computeIfAbsent("CLM-012-001", key -> {
+            claimOwners.put(key, userContextId);
+            return defaultClaim(userContextId, false);
+        });
+    }
+
+    private OrderClaimDetailsResponse defaultClaim(String userContextId, boolean supplementary) {
+        OrderDetailsResponse order = supplementary ? getOrderHistoryDetails("partner-api-session-seed", "ORD-011-SUPP", null, null) : getOrderHistoryDetails(userContextId, "ORD-011-MAIN", null, null);
+        OrderHistoryLineResponse line = order.items().stream().filter(OrderHistoryLineResponse::claimAvailable).findFirst().orElse(order.items().get(0));
+        BigDecimal refund = line.unitPrice().setScale(2, RoundingMode.HALF_UP);
+        return new OrderClaimDetailsResponse(
+                supplementary ? "CLM-012-SUPP" : "CLM-012-001",
+                order.orderNumber(),
+                supplementary ? ClaimStatus.WAREHOUSE_CHECK : ClaimStatus.IN_REVIEW,
+                supplementary ? ClaimResolution.MISSING_ITEM : ClaimResolution.REFUND,
+                supplementary ? ClaimResolution.MISSING_ITEM : ClaimResolution.REFUND,
+                supplementary ? BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP) : refund,
+                order.currencyCode(),
+                supplementary ? "STR_MNEMO_ORDER_CLAIM_WAREHOUSE_CHECK" : CLAIM_CREATED,
+                supplementary,
+                false,
+                supplementary ? money("-7.50") : null,
+                List.of(new OrderClaimLineResponse(line.productCode(), line.sku(), line.productName(), 1, line.unitPrice(), supplementary ? BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP) : refund, supplementary ? ClaimResolution.MISSING_ITEM : ClaimResolution.REFUND, supplementary ? ClaimResolution.MISSING_ITEM : ClaimResolution.REFUND, "IN_REVIEW", null)),
+                claimEvents(),
+                claimComments(null),
+                claimAttachments(),
+                "WAIT_SERVICE_DECISION"
+        );
+    }
+
+    private boolean canReadClaim(String userContextId, String claimId) {
+        if (role(userContextId).equals("order-support")) {
+            return true;
+        }
+        if ("CLM-012-001".equals(claimId) && role(userContextId).equals("customer")) {
+            return true;
+        }
+        if ("CLM-012-SUPP".equals(claimId) && role(userContextId).equals("partner")) {
+            return true;
+        }
+        String owner = claimOwners.get(claimId);
+        return owner == null || owner.equals(userContextId);
+    }
+
+    private OrderClaimSummaryResponse summary(OrderClaimDetailsResponse claim) {
+        return new OrderClaimSummaryResponse(
+                claim.claimId(),
+                claim.orderNumber(),
+                claim.status(),
+                claim.requestedResolution(),
+                claim.refundAmount(),
+                claim.currencyCode(),
+                "2026-04-27T10:20:00Z",
+                claim.partnerImpact()
+        );
+    }
+
+    private static OrderClaimDetailsResponse withAudit(OrderClaimDetailsResponse claim) {
+        return new OrderClaimDetailsResponse(
+                claim.claimId(),
+                claim.orderNumber(),
+                claim.status(),
+                claim.requestedResolution(),
+                claim.approvedResolution(),
+                claim.refundAmount(),
+                claim.currencyCode(),
+                claim.publicReasonMnemo(),
+                claim.partnerImpact(),
+                true,
+                claim.businessVolumeDelta(),
+                claim.items(),
+                claim.events(),
+                claim.comments(),
+                claim.attachments(),
+                claim.nextAction()
+        );
+    }
+
+    private static List<OrderClaimEventResponse> claimEvents() {
+        return List.of(
+                new OrderClaimEventResponse("CLAIM_CREATED", "SUBMITTED", "customer", CLAIM_CREATED, "2026-04-27T10:00:00Z"),
+                new OrderClaimEventResponse("CLAIM_ASSIGNED", "IN_REVIEW", "service", "STR_MNEMO_ORDER_CLAIM_ASSIGNED", "2026-04-27T10:05:00Z"),
+                new OrderClaimEventResponse("WAREHOUSE_CHECK_REQUESTED", "WAREHOUSE_CHECK", "warehouse", "STR_MNEMO_ORDER_CLAIM_WAREHOUSE_CHECK", "2026-04-27T10:10:00Z")
+        );
+    }
+
+    private static List<OrderClaimCommentResponse> claimComments(String comment) {
+        List<OrderClaimCommentResponse> comments = new ArrayList<>();
+        comments.add(new OrderClaimCommentResponse("service", "PUBLIC", "STR_MNEMO_ORDER_CLAIM_COMMENT_RECEIVED", "2026-04-27T10:06:00Z"));
+        if (!blank(comment)) {
+            comments.add(new OrderClaimCommentResponse("customer", "PUBLIC", "STR_MNEMO_ORDER_CLAIM_CUSTOMER_COMMENT", "2026-04-27T10:01:00Z"));
+        }
+        return comments;
+    }
+
+    private static List<OrderClaimAttachmentResponse> claimAttachments() {
+        return List.of(new OrderClaimAttachmentResponse("ATT-012-001", "claim-photo.jpg", "image/jpeg", 512000));
+    }
+
     private OrderCheckoutSnapshot owned(String userContextId, UUID checkoutId) {
         OrderCheckoutSnapshot checkout = repository.findById(checkoutId)
                 .orElseThrow(() -> new OrderCheckoutAccessDeniedException(FORBIDDEN));
@@ -355,7 +606,7 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
                 "ASSEMBLY",
                 money("11300.00"),
                 "RUB",
-                List.of(new OrderHistoryLineResponse("BOG-SERUM-002", "SUPP-011", "Партнерская сыворотка Best Ori Gin", 3, money("1390.00"), money("250.00"), money("3920.00"), false, true, false, null)),
+                List.of(new OrderHistoryLineResponse("BOG-SERUM-002", "SUPP-011", "Партнерская сыворотка Best Ori Gin", 3, money("1390.00"), money("250.00"), money("3920.00"), false, true, true, null)),
                 List.of()
         );
     }

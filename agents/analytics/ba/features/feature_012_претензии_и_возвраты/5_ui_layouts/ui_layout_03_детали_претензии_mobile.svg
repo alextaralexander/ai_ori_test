@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="900" viewBox="0 0 390 900" role="img" aria-labelledby="title desc">
+  <title id="title">Макет деталей претензии mobile</title>
+  <desc id="desc">Схематичный мобильный макет деталей претензии.</desc>
+  <rect width="390" height="900" fill="#ffffff"/>
+  <rect x="16" y="24" width="358" height="64" fill="#f3f5f7" stroke="#9aa4af"/>
+  <text x="32" y="64" font-family="Arial" font-size="20">CLM-012-001</text>
+  <rect x="16" y="112" width="358" height="128" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="32" y="150" font-family="Arial" font-size="16">Статус и решение</text>
+  <text x="32" y="184" font-family="Arial" font-size="13">На проверке, возврат денег</text>
+  <rect x="16" y="264" width="358" height="160" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="32" y="302" font-family="Arial" font-size="16">Позиции и компенсация</text>
+  <text x="32" y="338" font-family="Arial" font-size="13">100-011 x 1, 1 980 RUB</text>
+  <rect x="16" y="448" width="358" height="144" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="32" y="486" font-family="Arial" font-size="16">Комментарии и вложения</text>
+  <rect x="16" y="616" width="358" height="160" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="32" y="654" font-family="Arial" font-size="16">История событий</text>
+  <text x="32" y="690" font-family="Arial" font-size="13">Создано, назначено, проверено</text>
+  <rect x="16" y="808" width="358" height="48" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="96" y="838" font-family="Arial" font-size="15">Следующее действие</text>
+</svg>

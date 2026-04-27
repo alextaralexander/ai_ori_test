@@ -7,6 +7,10 @@ import com.bestorigin.monolith.order.api.OrderDtos.CheckoutValidationResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.ConfirmCheckoutRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.DeliverySelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderConfirmationResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCommentRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimCreateRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
@@ -42,4 +46,12 @@ public interface OrderCheckoutService {
     OrderDetailsResponse getOrderHistoryDetails(String userContextId, String orderNumber, String supportCustomerId, String reason);
 
     RepeatOrderResponse repeatOrder(String userContextId, String orderNumber, String idempotencyKey);
+
+    OrderClaimPageResponse searchClaims(String userContextId, String query, String status, String resolution, int page, int size);
+
+    OrderClaimDetailsResponse createClaim(String userContextId, OrderClaimCreateRequest request, String idempotencyKey);
+
+    OrderClaimDetailsResponse getClaimDetails(String userContextId, String claimId, String supportCustomerId, String reason);
+
+    OrderClaimDetailsResponse addClaimComment(String userContextId, String claimId, OrderClaimCommentRequest request, String idempotencyKey);
 }

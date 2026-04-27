@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-012-order-claims-001" author="codex">
+        <createTable tableName="order_claim">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="owner_user_id" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_number" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="claim_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_resolution" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approved_resolution" type="varchar(32)"/>
+            <column name="refund_amount" type="numeric(19,2)" defaultValueNumeric="0.00"/>
+            <column name="currency_code" type="varchar(3)" defaultValue="RUB"/>
+            <column name="partner_impact" type="boolean" defaultValueBoolean="false"/>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="order_claim" indexName="idx_order_claim_owner_status">
+            <column name="owner_user_id"/>
+            <column name="claim_status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-012-order-claims-002" author="codex">
+        <createTable tableName="order_claim_item">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_name_snapshot" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" type="numeric(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refund_amount" type="numeric(19,2)" defaultValueNumeric="0.00"/>
+            <column name="requested_resolution" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approved_resolution" type="varchar(32)"/>
+            <column name="item_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_mnemo" type="varchar(128)"/>
+        </createTable>
+        <createIndex tableName="order_claim_item" indexName="idx_order_claim_item_claim">
+            <column name="claim_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-012-order-claims-003" author="codex">
+        <createTable tableName="order_claim_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="claim_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="public_status" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_mnemo" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

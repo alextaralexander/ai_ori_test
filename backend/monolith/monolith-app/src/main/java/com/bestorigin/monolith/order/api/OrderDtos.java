@@ -45,6 +45,25 @@ public final class OrderDtos {
         REJECTED
     }
 
+    public enum ClaimStatus {
+        DRAFT,
+        SUBMITTED,
+        IN_REVIEW,
+        WAREHOUSE_CHECK,
+        APPROVED,
+        PARTIALLY_APPROVED,
+        REJECTED,
+        CLOSED
+    }
+
+    public enum ClaimResolution {
+        REFUND,
+        REPLACEMENT,
+        MISSING_ITEM,
+        SERVICE_REVIEW,
+        REJECTED
+    }
+
     public record StartCheckoutRequest(
             String cartId,
             CheckoutType checkoutType,
@@ -288,6 +307,104 @@ public final class OrderDtos {
             List<OrderHistoryLineResponse> addedItems,
             List<OrderHistoryLineResponse> rejectedItems,
             String reasonMnemo
+    ) {
+    }
+
+    public record OrderClaimItemRequest(
+            String sku,
+            int quantity
+    ) {
+    }
+
+    public record OrderClaimCreateRequest(
+            String orderNumber,
+            String reasonCode,
+            ClaimResolution requestedResolution,
+            String comment,
+            List<OrderClaimItemRequest> items
+    ) {
+    }
+
+    public record OrderClaimCommentRequest(String comment) {
+    }
+
+    public record OrderClaimPageResponse(
+            List<OrderClaimSummaryResponse> items,
+            int page,
+            int size,
+            long totalElements,
+            boolean hasNext
+    ) {
+    }
+
+    public record OrderClaimSummaryResponse(
+            String claimId,
+            String orderNumber,
+            ClaimStatus status,
+            ClaimResolution requestedResolution,
+            BigDecimal refundAmount,
+            String currencyCode,
+            String updatedAt,
+            boolean partnerImpact
+    ) {
+    }
+
+    public record OrderClaimDetailsResponse(
+            String claimId,
+            String orderNumber,
+            ClaimStatus status,
+            ClaimResolution requestedResolution,
+            ClaimResolution approvedResolution,
+            BigDecimal refundAmount,
+            String currencyCode,
+            String publicReasonMnemo,
+            boolean partnerImpact,
+            Boolean auditRecorded,
+            BigDecimal businessVolumeDelta,
+            List<OrderClaimLineResponse> items,
+            List<OrderClaimEventResponse> events,
+            List<OrderClaimCommentResponse> comments,
+            List<OrderClaimAttachmentResponse> attachments,
+            String nextAction
+    ) {
+    }
+
+    public record OrderClaimLineResponse(
+            String productCode,
+            String sku,
+            String productName,
+            int quantity,
+            BigDecimal unitPrice,
+            BigDecimal refundAmount,
+            ClaimResolution requestedResolution,
+            ClaimResolution approvedResolution,
+            String status,
+            String reasonMnemo
+    ) {
+    }
+
+    public record OrderClaimEventResponse(
+            String eventType,
+            String publicStatus,
+            String sourceSystem,
+            String descriptionMnemo,
+            String occurredAt
+    ) {
+    }
+
+    public record OrderClaimCommentResponse(
+            String authorRole,
+            String visibility,
+            String messageMnemo,
+            String createdAt
+    ) {
+    }
+
+    public record OrderClaimAttachmentResponse(
+            String attachmentId,
+            String fileName,
+            String contentType,
+            long sizeBytes
     ) {
     }
 
