@@ -11,6 +11,7 @@ import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
+import { PartnerGrowthView } from './components/PartnerGrowthView';
 import { PartnerReportsView } from './components/PartnerReportsView';
 import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
@@ -51,7 +52,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller')) {
+  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -85,7 +86,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -194,6 +195,18 @@ function App() {
     contentView = <BonusWalletFinanceView targetUserId={decodeURIComponent(path.slice('/profile/transactions/finance/'.length))} />;
   } else if (path.startsWith('/profile/transactions/')) {
     contentView = <BonusWalletView params={params} transactionType={decodeURIComponent(path.slice('/profile/transactions/'.length))} />;
+  } else if (path === '/business') {
+    contentView = <PartnerGrowthView mode="dashboard" params={params} />;
+  } else if (path === '/business/beauty-community') {
+    contentView = <PartnerGrowthView mode="community" params={params} />;
+  } else if (path === '/business/conversion') {
+    contentView = <PartnerGrowthView mode="conversion" params={params} />;
+  } else if (path === '/business/team-activity') {
+    contentView = <PartnerGrowthView mode="activity" params={params} />;
+  } else if (path === '/business/upgrade') {
+    contentView = <PartnerGrowthView mode="upgrade" params={params} />;
+  } else if (path.startsWith('/business/partner-card/')) {
+    contentView = <PartnerGrowthView mode="partner-card" params={params} personNumber={decodeURIComponent(path.slice('/business/partner-card/'.length))} />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {

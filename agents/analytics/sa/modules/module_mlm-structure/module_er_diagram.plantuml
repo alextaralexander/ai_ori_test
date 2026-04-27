@@ -1,0 +1,45 @@
+@startuml
+entity mlm_partner_node {
+  * partner_node_id : uuid <<PK>>
+  --
+  person_number : varchar(32) <<UK>>
+  sponsor_person_number : varchar(32)
+  branch_id : varchar(64)
+  structure_level : int
+  partner_role : varchar(32)
+  partner_status : varchar(32)
+  joined_at : timestamptz
+}
+entity mlm_campaign_metric {
+  * metric_id : uuid <<PK>>
+  --
+  person_number : varchar(32) <<FK>>
+  campaign_id : varchar(32)
+  personal_volume : numeric(14,2)
+  group_volume : numeric(14,2)
+  active_downline_count : int
+  risk_score : numeric(5,2)
+}
+entity mlm_qualification_progress {
+  * progress_id : uuid <<PK>>
+  --
+  person_number : varchar(32) <<FK>>
+  campaign_id : varchar(32)
+  current_rank : varchar(32)
+  next_rank : varchar(32)
+  completion_percent : numeric(5,2)
+  deadline_at : timestamptz
+}
+entity mlm_team_activity {
+  * activity_id : uuid <<PK>>
+  --
+  person_number : varchar(32) <<FK>>
+  campaign_id : varchar(32)
+  activity_type : varchar(48)
+  activity_status : varchar(32)
+  occurred_at : timestamptz
+}
+mlm_partner_node ||--o{ mlm_campaign_metric
+mlm_partner_node ||--o{ mlm_qualification_progress
+mlm_partner_node ||--o{ mlm_team_activity
+@enduml

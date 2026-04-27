@@ -882,6 +882,86 @@ body {
   display: block;
 }
 
+.partner-growth-page {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.partner-growth-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.partner-growth-heading h1 {
+  margin: 0;
+}
+
+.partner-growth-metrics {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.partner-growth-card,
+.partner-growth-metric,
+.partner-growth-row {
+  background: #ffffff;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.partner-growth-card {
+  display: grid;
+  gap: 12px;
+}
+
+.partner-growth-card dl {
+  display: grid;
+  gap: 8px 16px;
+  grid-template-columns: max-content minmax(120px, 1fr);
+  margin: 0;
+}
+
+.partner-growth-card dt,
+.partner-growth-card dd {
+  margin: 0;
+}
+
+.partner-growth-card div[data-testid="mlm-partner-linked-actions"] {
+  display: grid;
+  gap: 8px;
+}
+
+.partner-growth-metric {
+  display: grid;
+  gap: 8px;
+}
+
+.partner-growth-metric strong {
+  font-size: 20px;
+}
+
+.partner-growth-list {
+  display: grid;
+  gap: 12px;
+}
+
+.partner-growth-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(140px, 0.9fr) minmax(160px, 1fr) repeat(4, minmax(90px, auto));
+}
+
+.partner-growth-row strong,
+.partner-growth-row span {
+  display: block;
+}
+
 .claim-create-grid {
   display: grid;
   gap: 18px;
@@ -952,6 +1032,7 @@ body {
     .bonus-wallet-transaction,
     .partner-report-filters,
     .partner-report-row,
+    .partner-growth-row,
     .order-details-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-016-mlm-partner-node" author="codex">
+        <createTable tableName="mlm_partner_node">
+            <column name="partner_node_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(32)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_mlm_partner_node_person_number"/>
+            </column>
+            <column name="sponsor_person_number" type="varchar(32)"/>
+            <column name="branch_id" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="structure_level" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_role" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="joined_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="mlm_partner_node" indexName="idx_mlm_partner_node_sponsor">
+            <column name="sponsor_person_number"/>
+        </createIndex>
+        <createIndex tableName="mlm_partner_node" indexName="idx_mlm_partner_node_branch_level">
+            <column name="branch_id"/>
+            <column name="structure_level"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-016-mlm-campaign-metric" author="codex">
+        <createTable tableName="mlm_campaign_metric">
+            <column name="metric_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(32)">
+                <constraints nullable="false" foreignKeyName="fk_mlm_campaign_metric_partner" references="mlm_partner_node(person_number)"/>
+            </column>
+            <column name="campaign_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="personal_volume" type="numeric(14,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_volume" type="numeric(14,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_downline_count" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="risk_score" type="numeric(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="mlm_campaign_metric" columnNames="person_number,campaign_id" constraintName="uk_mlm_campaign_metric_partner_campaign"/>
+    </changeSet>
+
+    <changeSet id="feature-016-mlm-qualification-activity" author="codex">
+        <createTable tableName="mlm_qualification_progress">
+            <column name="progress_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(32)">
+                <constraints nullable="false" foreignKeyName="fk_mlm_qualification_partner" references="mlm_partner_node(person_number)"/>
+            </column>
+            <column name="campaign_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_rank" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="next_rank" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completion_percent" type="numeric(5,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deadline_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="mlm_team_activity">
+            <column name="activity_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="person_number" type="varchar(32)">
+                <constraints nullable="false" foreignKeyName="fk_mlm_team_activity_partner" references="mlm_partner_node(person_number)"/>
+            </column>
+            <column name="campaign_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_type" type="varchar(48)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occurred_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-label="Макет desktop структуры и карточки партнера">
+  <rect width="1280" height="900" fill="#ffffff"/>
+  <text x="40" y="50" font-family="Arial" font-size="24">/business/beauty-community + partner-card</text>
+  <rect x="40" y="90" width="300" height="730" fill="none" stroke="#222"/><text x="60" y="130" font-family="Arial" font-size="18">Список веток downline</text>
+  <rect x="370" y="90" width="500" height="730" fill="none" stroke="#222"/><text x="390" y="130" font-family="Arial" font-size="18">Таблица партнеров по уровням</text>
+  <rect x="900" y="90" width="340" height="730" fill="none" stroke="#222"/><text x="920" y="130" font-family="Arial" font-size="18">Карточка BOG-016-002</text>
+  <rect x="930" y="180" width="280" height="80" fill="none" stroke="#222"/><text x="950" y="225" font-family="Arial" font-size="16">Статус и роль</text>
+  <rect x="930" y="290" width="280" height="150" fill="none" stroke="#222"/><text x="950" y="365" font-family="Arial" font-size="16">Qualification progress</text>
+  <rect x="930" y="470" width="280" height="210" fill="none" stroke="#222"/><text x="950" y="575" font-family="Arial" font-size="16">Переходы: orders/bonus/supply</text>
+</svg>

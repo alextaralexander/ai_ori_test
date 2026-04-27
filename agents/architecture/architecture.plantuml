@@ -1,78 +1,31 @@
 @startuml
-title Best Ori Gin target architecture after feature 015
-package "Frontend web-shell" {
-  [PublicShell]
-  [ProfileSettingsView]
-  [BonusWalletView]
-  [PartnerReportsView]
-  [OrderCheckoutView]
-  [OrderHistoryView]
-  [OrderClaimsView]
-  [i18n resources]
-}
-package "Backend monolith" {
-  package "module_profile" {
-    [Profile API]
-    [ProfileReadinessService]
-    [ProfileAuditService]
-  }
-  package "module_bonus-wallet" {
-    [Bonus Wallet API]
-    [Wallet Ledger Service]
-    [Wallet Limit Service]
-  }
-  package "module_partner-reporting" {
-    [Partner Reporting API]
-    [Partner Report Service]
-    [Partner Document Service]
-    [Partner Finance Reconciliation Service]
-  }
-  package "module_order" {
-    [Checkout API]
-    [Order history API]
-    [Order claims API]
-    [OrderClaimService]
-  }
-  package "module_catalog" {
-    [Catalog API]
-  }
-  package "module_public-content" {
-    [Public content API]
-  }
-}
-package "External systems" {
-  [Payment]
-  [Warehouse and logistics]
-  [S3 or MinIO attachments]
-}
-[ProfileSettingsView] --> [Profile API]
-[BonusWalletView] --> [Bonus Wallet API]
-[PartnerReportsView] --> [Partner Reporting API]
-[Profile API] --> [ProfileReadinessService]
-[Profile API] --> [ProfileAuditService]
-[ProfileSettingsView] --> [i18n resources]
-[Checkout API] --> [ProfileReadinessService]
-[Checkout API] --> [Wallet Limit Service]
-[Order claims API] --> [ProfileReadinessService]
-[Order claims API] --> [Wallet Ledger Service]
-[OrderClaimsView] --> [Order claims API]
-[Order claims API] --> [OrderClaimService]
-[OrderClaimService] --> [Order history API]
-[Partner Reporting API] --> [Partner Report Service]
-[Partner Reporting API] --> [Partner Document Service]
-[Partner Reporting API] --> [Partner Finance Reconciliation Service]
-[PartnerReportsView] --> [i18n resources]
-[Partner Report Service] --> [Order history API]
-[Partner Report Service] --> [Wallet Ledger Service]
-[Partner Report Service] --> [Partner Document Service]
-[Partner Finance Reconciliation Service] --> [Partner Report Service]
-[Partner Finance Reconciliation Service] --> [Payment]
-[Partner Document Service] --> [S3 or MinIO attachments]
-[OrderClaimService] --> [Payment]
-[OrderClaimService] --> [Warehouse and logistics]
-[OrderClaimService] --> [S3 or MinIO attachments]
-[OrderClaimsView] --> [i18n resources]
-[BonusWalletView] --> [i18n resources]
-[Wallet Ledger Service] --> [Order history API]
-[OrderClaimService] --> [Partner Report Service]
+skinparam componentStyle rectangle
+component "web-shell frontend" as Web
+component "public-content" as PublicContent
+component "catalog" as Catalog
+component "cart" as Cart
+component "order" as Order
+component "profile" as Profile
+component "bonus-wallet" as Bonus
+component "partner-onboarding" as Onboarding
+component "partner-reporting" as Reporting
+component "mlm-structure" as MLM
+component "WMS/1C" as WMS
+component "Payment" as Payment
+component "Delivery" as Delivery
+Web --> PublicContent : HTTP JSON
+Web --> Catalog : HTTP JSON
+Web --> Cart : HTTP JSON
+Web --> Order : HTTP JSON
+Web --> Profile : HTTP JSON
+Web --> Bonus : HTTP JSON
+Web --> Onboarding : HTTP JSON
+Web --> Reporting : HTTP JSON
+Web --> MLM : HTTP JSON /api/mlm-structure
+MLM --> Order : route/link context for partner orders
+MLM --> Bonus : route/link context for bonus wallet
+MLM --> Reporting : route/link context for commissions and reports
+Order --> Payment : payment API
+Order --> WMS : stock/reservation API
+Order --> Delivery : delivery API
 @enduml

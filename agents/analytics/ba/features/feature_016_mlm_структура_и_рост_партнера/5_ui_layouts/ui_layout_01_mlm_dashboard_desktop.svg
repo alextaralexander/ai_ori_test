@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-label="Макет desktop dashboard MLM">
+  <rect width="1280" height="900" fill="#ffffff"/>
+  <text x="40" y="50" font-family="Arial" font-size="24">/business dashboard</text>
+  <rect x="40" y="80" width="1200" height="72" fill="none" stroke="#222"/>
+  <text x="60" y="125" font-family="Arial" font-size="18">Фильтры: campaignId, branchId, level</text>
+  <rect x="40" y="180" width="280" height="130" fill="none" stroke="#222"/><text x="60" y="250" font-family="Arial" font-size="18">Личный объем</text>
+  <rect x="340" y="180" width="280" height="130" fill="none" stroke="#222"/><text x="360" y="250" font-family="Arial" font-size="18">Групповой объем</text>
+  <rect x="640" y="180" width="280" height="130" fill="none" stroke="#222"/><text x="660" y="250" font-family="Arial" font-size="18">Активные партнеры</text>
+  <rect x="940" y="180" width="300" height="130" fill="none" stroke="#222"/><text x="960" y="250" font-family="Arial" font-size="18">Ранг и апгрейд</text>
+  <rect x="40" y="340" width="760" height="480" fill="none" stroke="#222"/><text x="60" y="380" font-family="Arial" font-size="18">График веток и уровней структуры</text>
+  <rect x="830" y="340" width="410" height="220" fill="none" stroke="#222"/><text x="850" y="380" font-family="Arial" font-size="18">Следующие действия</text>
+  <rect x="830" y="590" width="410" height="230" fill="none" stroke="#222"/><text x="850" y="630" font-family="Arial" font-size="18">Риски и уведомления</text>
+</svg>

@@ -1,0 +1,24 @@
+@startuml
+actor "Партнер-лидер" as Partner
+actor "Бизнес-менеджер" as Manager
+participant "Web shell" as Frontend
+participant "mlm-structure API" as MLM
+participant "partner-reporting" as Reports
+participant "bonus-wallet" as Bonus
+participant "order" as Order
+Partner -> Frontend: open /business
+Frontend -> MLM: GET /api/mlm-structure/dashboard?campaignId=CAT-2026-05
+MLM --> Frontend: MlmDashboardResponse + STR_MNEMO_MLM_STRUCTURE_DASHBOARD_READY
+Partner -> Frontend: open /business/beauty-community
+Frontend -> MLM: GET /api/mlm-structure/community
+MLM --> Frontend: Downline levels and branches
+Manager -> Frontend: open /business/conversion
+Frontend -> MLM: GET /api/mlm-structure/conversion
+MLM --> Frontend: Invite funnel
+Partner -> Frontend: open /business/partner-card/BOG-016-002
+Frontend -> MLM: GET /api/mlm-structure/partners/BOG-016-002
+MLM -> Order: links to order history route
+MLM -> Bonus: links to bonus wallet route
+MLM -> Reports: links to partner report route
+MLM --> Frontend: Partner card with linkedActions
+@enduml
