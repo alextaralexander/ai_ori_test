@@ -17,6 +17,7 @@ import { AdminPimView } from './components/AdminPimView';
 import { AdminPricingView } from './components/AdminPricingView';
 import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
+import { AdminWmsView } from './components/AdminWmsView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
 import { EmployeeOrderHistoryView } from './components/EmployeeOrderHistoryView';
 import { EmployeePartnerCardView } from './components/EmployeePartnerCardView';
@@ -72,6 +73,10 @@ const testLoginRoles = new Set([
   'pim-manager',
   'pricing-manager',
   'promotions-manager',
+  'logistics-admin',
+  'warehouse-operator',
+  'order-admin',
+  'wms-integration-operator',
   'category-admin',
   'media-manager',
   'commercial-admin',
@@ -373,6 +378,8 @@ function App() {
     contentView = <AdminCatalogView />;
   } else if (path === '/admin/pricing') {
     contentView = <AdminPricingView />;
+  } else if (path === '/admin/wms') {
+    contentView = <AdminWmsView />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

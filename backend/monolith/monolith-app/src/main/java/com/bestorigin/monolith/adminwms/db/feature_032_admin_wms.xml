@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-032-admin-wms" author="codex">
+        <createTable tableName="admin_wms_warehouse">
+            <column name="warehouse_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="warehouse_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warehouse_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_code" type="varchar(40)"/>
+            <column name="source_system" type="varchar(40)"/>
+            <column name="external_warehouse_id" type="varchar(120)"/>
+            <column name="sales_channels" type="jsonb"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_wms_stock_item">
+            <column name="stock_item_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="warehouse_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel_code" type="varchar(40)"/>
+            <column name="catalog_period_code" type="varchar(40)"/>
+            <column name="available_qty" type="int" defaultValueNumeric="0"/>
+            <column name="reserved_qty" type="int" defaultValueNumeric="0"/>
+            <column name="availability_policy" type="varchar(32)"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="last_sync_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_wms_supply">
+            <column name="supply_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="supply_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="warehouse_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(40)"/>
+            <column name="external_document_id" type="varchar(120)"/>
+            <column name="expected_at" type="timestamp with time zone"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+        </createTable>
+        <createTable tableName="admin_wms_supply_line">
+            <column name="supply_line_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="supply_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="planned_qty" type="int"/>
+            <column name="accepted_qty" type="int"/>
+            <column name="damaged_qty" type="int"/>
+            <column name="shortage_qty" type="int"/>
+            <column name="surplus_qty" type="int"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="external_line_id" type="varchar(80)"/>
+        </createTable>
+        <createTable tableName="admin_wms_reservation">
+            <column name="reservation_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warehouse_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+        </createTable>
+        <createTable tableName="admin_wms_sync_run">
+            <column name="sync_run_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(40)"/>
+            <column name="warehouse_id" type="uuid"/>
+            <column name="sku_filter" type="varchar(80)"/>
+            <column name="document_type" type="varchar(60)"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="started_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_wms_sync_message">
+            <column name="sync_message_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sync_run_id" type="uuid"/>
+            <column name="source_system" type="varchar(40)"/>
+            <column name="entity_type" type="varchar(80)"/>
+            <column name="entity_id" type="varchar(120)"/>
+            <column name="message_status" type="varchar(32)"/>
+            <column name="quarantine_reason_code" type="varchar(80)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+        </createTable>
+        <createTable tableName="admin_wms_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="action_code" type="varchar(80)"/>
+            <column name="entity_type" type="varchar(80)"/>
+            <column name="entity_id" type="varchar(120)"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <createIndex tableName="admin_wms_stock_item" indexName="idx_admin_wms_stock_sku_channel">
+            <column name="sku"/>
+            <column name="channel_code"/>
+            <column name="catalog_period_code"/>
+        </createIndex>
+        <createIndex tableName="admin_wms_audit_event" indexName="idx_admin_wms_audit_entity_correlation">
+            <column name="entity_type"/>
+            <column name="entity_id"/>
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 031
+title Best Ori Gin monolith architecture through feature 032
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -37,6 +37,12 @@ package "frontend/monolith apps/web-shell" {
   [AdminPricingPromotions UI]
   [AdminPricingImportExport UI]
   [AdminPricingAudit UI]
+  [AdminWms UI]
+  [AdminWmsWarehouses UI]
+  [AdminWmsStocks UI]
+  [AdminWmsSupplies UI]
+  [AdminWmsSync UI]
+  [AdminWmsAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -76,6 +82,7 @@ package "backend/monolith/monolith-app" {
   [admin-pim]
   [admin-catalog]
   [admin-pricing]
+  [admin-wms]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -124,6 +131,12 @@ cloud "Hybrid Pixel" as hybrid
 [AdminPricingPromotions UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/promotions, /offers, /gift-rules, /publish, /pause
 [AdminPricingImportExport UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/imports, /exports
 [AdminPricingAudit UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/audit-events
+[AdminWms UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/warehouses, /stocks, /supplies
+[AdminWmsWarehouses UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/warehouses, /warehouses/{warehouseId}
+[AdminWmsStocks UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/stocks, /availability-rule, /reservations
+[AdminWmsSupplies UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/supplies, /supplies/{supplyId}/acceptance
+[AdminWmsSync UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/sync-runs, /sync-messages
+[AdminWmsAudit UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/audit-events
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -178,6 +191,16 @@ cloud "Hybrid Pixel" as hybrid
 [admin-pricing] --> [cart] : active shopping offers, gift rules and threshold benefits
 [admin-pricing] --> [order] : checkout validation for prices, offers and gifts
 [admin-pricing] --> db : price lists, prices, promo prices, segment rules, promotions, offers, gifts, import/export jobs and audit
+[admin-wms] --> [authorization] : admin WMS permission, warehouse scope and elevated checks
+[admin-wms] --> [admin-rbac] : permission matrix, service account scopes and responsibility scopes
+[admin-wms] --> [admin-pim] : validate published SKU/product references for stock and supply lines
+[admin-wms] --> [admin-catalog] : validate catalog periods and channel availability windows
+[admin-wms] --> [catalog] : stock availability, ATP and mnemonic availability reasons for storefront
+[admin-wms] --> [cart] : reservation availability and backorder possibility
+[admin-wms] --> [order] : reserve, release, partial shipment and stock conflict responses
+[admin-wms] --> [partner-office] : supply, acceptance and discrepancy context
+[admin-wms] --> wms : WMS/1C stock, supply and movement synchronization
+[admin-wms] --> db : warehouses, stock snapshots, availability rules, supplies, reservations, sync messages, discrepancies and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
@@ -190,15 +213,16 @@ cloud "Hybrid Pixel" as hybrid
 [employee] --> [bonus-wallet] : partner bonus balance and volume links
 [employee] --> claims : claim ids, claim creation and claim deep links
 [employee] --> pay : payment events, refund and compensation tasks
-[employee] --> wms : WMS batch, fulfillment and warehouse review tasks
+[employee] --> [admin-wms] : WMS batch, reservation, discrepancy and warehouse review read models
 [employee] --> delivery : delivery tracking links and delayed delivery signals
 [employee] --> s3 : employee document fileReferenceId verification
 [employee] --> db : employee support/order-history/claims/partner/profile/elevated read models and audit tables
 
 [order] --> pay : payment protocol
 [order] --> delivery : delivery protocol
-[order] --> wms : fulfillment protocol
+[order] --> [admin-wms] : reservation and stock availability HTTP/JSON
+[admin-wms] --> wms : fulfillment stock/movement protocol
 [bonus-wallet] --> bonus : bonus protocol
-[partner-office] --> wms : supply and acceptance protocol
+[partner-office] --> [admin-wms] : supply and acceptance HTTP/JSON projection
 
 @enduml

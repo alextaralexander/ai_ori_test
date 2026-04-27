@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-label="Схематичный макет списка складов и остатков">
+  <title>Feature 032 - список складов и остатков</title>
+  <rect x="20" y="20" width="1240" height="780" fill="white" stroke="black"/>
+  <text x="48" y="58" font-size="24">Админка / WMS и 1C / Склады и остатки</text>
+  <rect x="48" y="88" width="1184" height="64" fill="none" stroke="black"/>
+  <text x="72" y="126" font-size="16">Фильтры: склад, регион, статус, SKU, каталог, канал продаж, источник, ошибки синхронизации</text>
+  <rect x="48" y="176" width="330" height="560" fill="none" stroke="black"/>
+  <text x="72" y="210" font-size="18">Склады</text>
+  <line x1="72" y1="230" x2="354" y2="230" stroke="black"/>
+  <text x="72" y="265" font-size="14">WH-MSK-01 / ACTIVE / WMS</text>
+  <text x="72" y="300" font-size="14">WH-SPB-02 / MAINTENANCE / 1C</text>
+  <text x="72" y="335" font-size="14">WH-EKB-03 / BLOCKED / WMS</text>
+  <rect x="406" y="176" width="826" height="560" fill="none" stroke="black"/>
+  <text x="430" y="210" font-size="18">Остатки по SKU</text>
+  <line x1="430" y1="230" x2="1208" y2="230" stroke="black"/>
+  <text x="430" y="262" font-size="14">SKU | Товар | Sellable | Reserved | Blocked | Inbound | ATP | Availability | Last sync</text>
+  <line x1="430" y1="278" x2="1208" y2="278" stroke="black"/>
+  <text x="430" y="310" font-size="14">SKU-ROSE-001 | Крем | 245 | 30 | 5 | 120 | 215 | SELLABLE | 27.04.2026 23:00</text>
+  <text x="430" y="345" font-size="14">SKU-SERUM-002 | Сыворотка | 18 | 12 | 0 | 80 | 6 | RESERVED_ONLY | 27.04.2026 23:02</text>
+  <text x="430" y="380" font-size="14">SKU-MASK-003 | Маска | 0 | 0 | 0 | 300 | 0 | BACKORDER_ALLOWED | 27.04.2026 23:03</text>
+  <rect x="430" y="430" width="360" height="62" fill="none" stroke="black"/>
+  <text x="450" y="466" font-size="14">Действие: изменить правило доступности</text>
+  <rect x="820" y="430" width="360" height="62" fill="none" stroke="black"/>
+  <text x="840" y="466" font-size="14">Действие: открыть историю движений SKU</text>
+  <rect x="48" y="756" width="1184" height="24" fill="none" stroke="black"/>
+  <text x="72" y="774" font-size="12">Статусная зона: localized mnemonic, loading/error/empty states, audit correlationId</text>
+</svg>

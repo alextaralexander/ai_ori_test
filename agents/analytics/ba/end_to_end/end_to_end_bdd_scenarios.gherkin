@@ -304,3 +304,37 @@
     И опубликованные базовые цены остаются доступными каталогу и карточке товара
     И audit trail содержит событие `SHOPPING_OFFER_PAUSED`, reasonCode и correlationId
     И frontend показывает локализованный результат через i18n dictionaries
+  Сценарий: Логистический администратор управляет WMS/1C остатками для каталога и checkout
+    Допустим логистический администратор авторизован и имеет permission scopes `ADMIN_WMS_READ` и `ADMIN_WMS_WRITE`
+    И существует опубликованный PIM-товар `BOG-SERUM-001`
+    И существует текущая catalog campaign `CAM-2026-05`
+    Когда логистический администратор открывает `/admin/wms/stocks`
+    И фильтрует остатки по складу `WH-MSK-01`, SKU `BOG-SERUM-001` и каналу `WEB`
+    И задает availability policy `SELLABLE`
+    Тогда публичный каталог и карточка товара получают актуальную доступность SKU
+    Когда покупатель добавляет SKU `BOG-SERUM-001` в корзину и переходит в checkout
+    Тогда checkout повторно проверяет sellable quantity, reserved quantity и blocked quantity
+    И заказ не может создать отрицательный sellable stock
+    И audit trail содержит изменение availability policy, actorUserId и correlationId
+
+  Сценарий: WMS/1C поставка обновляет партнерский офис и order workflow без дублей
+    Допустим оператор интеграции WMS/1C авторизован и имеет permission scope `ADMIN_WMS_SYNC_RUN`
+    И партнерский офис ожидает supply-поставку `SUP-032-E2E`
+    Когда WMS/1C отправляет документ поставки с externalDocumentId `WMS-E2E-100` и idempotencyKey `WMS-E2E-100-L1`
+    Тогда admin WMS-контур создает или обновляет поставку и строки SKU
+    И партнерский офис видит поставку в своем supply-разделе
+    И order workflow получает доступность для резервирования товаров из принятой поставки
+    Когда WMS/1C повторно отправляет документ с тем же externalDocumentId и idempotencyKey
+    Тогда остатки и поставка не дублируются
+    И журнал обмена показывает идемпотентную обработку
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_WMS_*` для предопределенных сообщений
+
+  Сценарий: Конфликт синхронизации WMS/1C не ломает пользовательскую продажу
+    Допустим оператор интеграции WMS/1C авторизован и имеет permission scope `ADMIN_WMS_SYNC_RUN`
+    И существует подтвержденное движение по externalDocumentId `WMS-E2E-CONFLICT`
+    Когда WMS/1C отправляет конфликтующее сообщение по тому же externalDocumentId с другим количеством
+    Тогда сообщение получает статус `QUARANTINED`
+    И sellable stock не изменяется до ручной проверки
+    И публичный каталог, корзина и checkout продолжают использовать последнее подтвержденное состояние остатков
+    Когда логистический администратор решает quarantine с reasonCode `CONFIRMED_EXTERNAL_CORRECTION`
+    Тогда система сохраняет решение, корректирует stock movement по разрешенному правилу и записывает audit trail

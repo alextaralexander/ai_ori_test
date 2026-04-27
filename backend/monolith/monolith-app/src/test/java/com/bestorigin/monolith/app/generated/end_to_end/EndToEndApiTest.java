@@ -1,4 +1,4 @@
-// GENERATED FROM agents/tests/api; DO NOT EDIT MANUALLY.
+// Synchronized from agents/tests. Do not edit this generated runtime copy manually.
 package com.bestorigin.tests.endtoend;
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
@@ -39,5 +39,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature029.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature030.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature031.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature032.FeatureApiTest().assertFeatureGreenPath();
     }
 }

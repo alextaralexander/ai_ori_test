@@ -1,0 +1,84 @@
+@startuml
+title Feature 032 - admin WMS/1C, stocks, warehouses and supplies
+
+actor "Логистический администратор" as LogisticAdmin
+actor "Складской оператор" as WarehouseOperator
+actor "Оператор интеграции WMS/1C" as IntegrationOperator
+participant "Admin frontend\n/admin/wms" as AdminUi
+participant "admin-wms API\n/module admin-wms" as AdminWms
+database "admin_wms_*" as WmsDb
+participant "admin-pim API\npublished products" as AdminPim
+participant "admin-catalog API\ncatalog periods" as AdminCatalog
+participant "order/checkout workflow" as OrderFlow
+participant "partner-office workflow" as PartnerOffice
+participant "WMS/1C external systems" as WmsOneC
+participant "Audit trail" as Audit
+
+LogisticAdmin -> AdminUi: открывает список складов и остатков
+AdminUi -> AdminWms: GET /warehouses, GET /stocks
+AdminWms -> WmsDb: search warehouses and stock snapshots
+WmsDb --> AdminWms: pages
+AdminWms --> AdminUi: WarehousePage, StockPage
+
+LogisticAdmin -> AdminUi: меняет availability policy SKU
+AdminUi -> AdminWms: POST /stocks/{stockItemId}/availability-rule
+AdminWms -> AdminPim: validate SKU is published
+AdminPim --> AdminWms: product published
+AdminWms -> AdminCatalog: validate catalog period and channel
+AdminCatalog --> AdminWms: period valid
+AdminWms -> WmsDb: update availability rule and stock snapshot
+AdminWms -> Audit: ADMIN_WMS_AVAILABILITY_CHANGED
+AdminWms --> AdminUi: StockResponse with mnemonic result
+
+WarehouseOperator -> AdminUi: создает поставку и начинает приемку
+AdminUi -> AdminWms: POST /supplies with Idempotency-Key
+AdminWms -> WmsDb: insert supply and lines
+AdminWms -> Audit: ADMIN_WMS_SUPPLY_CREATED
+AdminWms --> AdminUi: SupplyResponse
+WarehouseOperator -> AdminUi: подтверждает приемку строк
+AdminUi -> AdminWms: POST /supplies/{id}/acceptance with Idempotency-Key
+AdminWms -> WmsDb: check idempotency and current supply status
+alt repeated idempotency key
+  AdminWms --> AdminUi: existing SupplyResponse without duplicate movement
+else first acceptance
+  AdminWms -> WmsDb: insert stock movements, update stock snapshots, create discrepancies
+  AdminWms -> PartnerOffice: publish supply acceptance context
+  AdminWms -> Audit: ADMIN_WMS_SUPPLY_ACCEPTED
+  AdminWms --> AdminUi: SupplyResponse(ACCEPTED or PARTIALLY_ACCEPTED)
+end
+
+OrderFlow -> AdminWms: POST /reservations with order id and SKU
+AdminWms -> WmsDb: lock stock row and validate sellable quantity
+alt enough stock
+  AdminWms -> WmsDb: create reservation, decrement sellable, increment reserved
+  AdminWms -> Audit: ADMIN_WMS_RESERVATION_HELD
+  AdminWms --> OrderFlow: ReservationResponse(HELD)
+else not enough stock
+  AdminWms --> OrderFlow: 409 STR_MNEMO_ADMIN_WMS_STOCK_NOT_ENOUGH with available quantity
+end
+OrderFlow -> AdminWms: POST /reservations/{id}/release
+AdminWms -> WmsDb: release once by idempotency key
+AdminWms -> Audit: ADMIN_WMS_RESERVATION_RELEASED
+AdminWms --> OrderFlow: ReservationResponse(RELEASED)
+
+IntegrationOperator -> AdminUi: запускает ручную синхронизацию
+AdminUi -> AdminWms: POST /sync-runs with Idempotency-Key
+AdminWms -> WmsDb: create sync run STARTED
+AdminWms -> WmsOneC: request stock/supply documents
+WmsOneC --> AdminWms: messages with externalDocumentId and idempotencyKey
+loop each message
+  AdminWms -> WmsDb: check sourceSystem + externalDocumentId + externalLineId + idempotencyKey
+  alt duplicate
+    AdminWms -> WmsDb: mark DUPLICATE_IGNORED
+  else conflict with confirmed movement
+    AdminWms -> WmsDb: store sync message QUARANTINED
+    AdminWms -> Audit: ADMIN_WMS_SYNC_QUARANTINED
+  else valid message
+    AdminWms -> WmsDb: apply movement or supply update
+    AdminWms -> Audit: ADMIN_WMS_SYNC_MESSAGE_PROCESSED
+  end
+end
+AdminWms -> WmsDb: finish sync run counters
+AdminWms --> AdminUi: SyncRunResponse with counters
+
+@enduml
