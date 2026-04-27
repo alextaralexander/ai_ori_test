@@ -11,3 +11,4 @@ import '../feature_009_корзина_и_промо_предложения/featu
 import '../feature_010_оформление_заказа_и_дозаказ/feature_ui_flow';
 import '../feature_011_история_и_детали_заказов/feature_ui_flow';
 import '../feature_012_претензии_и_возвраты/feature_ui_flow';
+import '../feature_013_профиль_и_настройки_пользователя/feature_ui_flow';

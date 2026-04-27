@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Макет контактов и адресов desktop</title>
+  <desc id="desc">Схематичный макет разделов /profile-settings/contacts и /profile-settings/addresses.</desc>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <rect x="40" y="32" width="1120" height="72" fill="#f3f5f7" stroke="#9aa4af"/>
+  <text x="64" y="76" font-family="Arial" font-size="24">Контакты и адреса</text>
+  <rect x="40" y="132" width="536" height="628" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="64" y="168" font-family="Arial" font-size="18">Контакты</text>
+  <rect x="64" y="198" width="232" height="92" fill="#f8fafc" stroke="#667085"/>
+  <text x="84" y="232" font-family="Arial" font-size="15">Основной email</text>
+  <text x="84" y="260" font-family="Arial" font-size="13">masked value, status</text>
+  <rect x="320" y="198" width="232" height="92" fill="#f8fafc" stroke="#667085"/>
+  <text x="340" y="232" font-family="Arial" font-size="15">Основной телефон</text>
+  <text x="340" y="260" font-family="Arial" font-size="13">masked value, status</text>
+  <rect x="64" y="322" width="488" height="180" fill="#f8fafc" stroke="#667085"/>
+  <text x="84" y="356" font-family="Arial" font-size="15">Форма добавления контакта</text>
+  <rect x="84" y="382" width="208" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="102" y="410" font-family="Arial" font-size="13">Тип контакта</text>
+  <rect x="320" y="382" width="208" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="338" y="410" font-family="Arial" font-size="13">Значение</text>
+  <rect x="84" y="446" width="168" height="40" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="112" y="472" font-family="Arial" font-size="14">Сохранить</text>
+  <rect x="276" y="446" width="200" height="40" fill="#ffffff" stroke="#667085"/>
+  <text x="298" y="472" font-family="Arial" font-size="14">Подтвердить контакт</text>
+  <rect x="624" y="132" width="536" height="628" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="648" y="168" font-family="Arial" font-size="18">Адресная книга</text>
+  <rect x="648" y="198" width="488" height="96" fill="#ffffff" stroke="#667085"/>
+  <text x="668" y="232" font-family="Arial" font-size="15">Адрес по умолчанию</text>
+  <text x="668" y="260" font-family="Arial" font-size="13">город, улица, индекс, readiness</text>
+  <rect x="648" y="324" width="488" height="256" fill="#ffffff" stroke="#667085"/>
+  <text x="668" y="358" font-family="Arial" font-size="15">Форма адреса</text>
+  <rect x="668" y="384" width="204" height="40" fill="#f8fafc" stroke="#667085"/>
+  <text x="686" y="410" font-family="Arial" font-size="13">Город</text>
+  <rect x="900" y="384" width="204" height="40" fill="#f8fafc" stroke="#667085"/>
+  <text x="918" y="410" font-family="Arial" font-size="13">Индекс</text>
+  <rect x="668" y="444" width="436" height="40" fill="#f8fafc" stroke="#667085"/>
+  <text x="686" y="470" font-family="Arial" font-size="13">Улица, дом, квартира</text>
+  <rect x="668" y="504" width="204" height="44" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="706" y="532" font-family="Arial" font-size="14">Сохранить адрес</text>
+  <rect x="900" y="504" width="204" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="918" y="532" font-family="Arial" font-size="14">Сделать основным</text>
+  <rect x="648" y="612" width="488" height="72" fill="#ffffff" stroke="#667085"/>
+  <text x="668" y="648" font-family="Arial" font-size="14">Блокировка удаления активным заказом</text>
+</svg>

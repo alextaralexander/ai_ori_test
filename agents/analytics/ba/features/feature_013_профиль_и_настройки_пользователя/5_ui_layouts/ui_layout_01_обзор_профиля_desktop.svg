@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Макет обзора профиля desktop</title>
+  <desc id="desc">Схематичный макет страницы /profile-settings со сводкой секций профиля и готовностью к связанным flow.</desc>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <rect x="40" y="32" width="1120" height="72" fill="#f3f5f7" stroke="#9aa4af"/>
+  <text x="64" y="76" font-family="Arial" font-size="24">Профиль и настройки</text>
+  <rect x="40" y="132" width="248" height="628" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="64" y="168" font-family="Arial" font-size="18">Навигация</text>
+  <rect x="64" y="196" width="200" height="44" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="84" y="224" font-family="Arial" font-size="14">Обзор</text>
+  <rect x="64" y="252" width="200" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="84" y="280" font-family="Arial" font-size="14">Основные данные</text>
+  <rect x="64" y="308" width="200" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="84" y="336" font-family="Arial" font-size="14">Контакты</text>
+  <rect x="64" y="364" width="200" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="84" y="392" font-family="Arial" font-size="14">Адреса</text>
+  <rect x="64" y="420" width="200" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="84" y="448" font-family="Arial" font-size="14">Документы</text>
+  <rect x="64" y="476" width="200" height="44" fill="#ffffff" stroke="#667085"/>
+  <text x="84" y="504" font-family="Arial" font-size="14">Безопасность</text>
+  <rect x="320" y="132" width="520" height="628" fill="#ffffff" stroke="#9aa4af"/>
+  <text x="344" y="168" font-family="Arial" font-size="18">Сводка секций</text>
+  <rect x="344" y="196" width="216" height="104" fill="#f8fafc" stroke="#667085"/>
+  <text x="364" y="230" font-family="Arial" font-size="15">Основные данные</text>
+  <text x="364" y="260" font-family="Arial" font-size="13">COMPLETE / INCOMPLETE</text>
+  <rect x="584" y="196" width="216" height="104" fill="#f8fafc" stroke="#667085"/>
+  <text x="604" y="230" font-family="Arial" font-size="15">Контакты</text>
+  <text x="604" y="260" font-family="Arial" font-size="13">REQUIRES_VERIFICATION</text>
+  <rect x="344" y="324" width="216" height="104" fill="#f8fafc" stroke="#667085"/>
+  <text x="364" y="358" font-family="Arial" font-size="15">Адреса</text>
+  <text x="364" y="388" font-family="Arial" font-size="13">Default address</text>
+  <rect x="584" y="324" width="216" height="104" fill="#f8fafc" stroke="#667085"/>
+  <text x="604" y="358" font-family="Arial" font-size="15">Документы</text>
+  <text x="604" y="388" font-family="Arial" font-size="13">Masked document</text>
+  <rect x="344" y="452" width="456" height="120" fill="#f8fafc" stroke="#667085"/>
+  <text x="364" y="486" font-family="Arial" font-size="15">Безопасность и последние события</text>
+  <text x="364" y="520" font-family="Arial" font-size="13">Password, trusted devices, audit events</text>
+  <rect x="872" y="132" width="288" height="628" fill="#f8fafc" stroke="#9aa4af"/>
+  <text x="896" y="168" font-family="Arial" font-size="18">Готовность</text>
+  <rect x="896" y="204" width="232" height="92" fill="#ffffff" stroke="#667085"/>
+  <text x="914" y="240" font-family="Arial" font-size="14">Checkout readiness</text>
+  <rect x="896" y="320" width="232" height="92" fill="#ffffff" stroke="#667085"/>
+  <text x="914" y="356" font-family="Arial" font-size="14">Delivery readiness</text>
+  <rect x="896" y="436" width="232" height="92" fill="#ffffff" stroke="#667085"/>
+  <text x="914" y="472" font-family="Arial" font-size="14">Claim readiness</text>
+  <rect x="896" y="560" width="232" height="56" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="926" y="594" font-family="Arial" font-size="15">Заполнить недостающие</text>
+</svg>

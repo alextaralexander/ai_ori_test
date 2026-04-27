@@ -1,0 +1,57 @@
+@startuml
+title Feature 013 - профиль и настройки пользователя
+
+actor "Покупатель/партнер" as User
+actor "Оператор поддержки" as Support
+participant "Frontend web-shell" as FE
+participant "profile controller" as ProfileController
+participant "profile service" as ProfileService
+database "profile DB" as ProfileDb
+participant "order/claim flows" as OrderFlows
+participant "auth/security context" as Auth
+
+User -> FE: Открывает /profile-settings
+FE -> ProfileController: GET /api/profile
+ProfileController -> Auth: Проверить текущего пользователя
+ProfileController -> ProfileService: loadOverview(currentUser)
+ProfileService -> ProfileDb: Прочитать profile, contacts, addresses, documents, events
+ProfileService -> ProfileService: Рассчитать readiness и masked values
+ProfileService --> ProfileController: ProfileOverviewResponse
+ProfileController --> FE: sections, readiness, mnemonic codes
+FE --> User: Показывает обзор профиля
+
+User -> FE: Сохраняет general/contact/address/document section
+FE -> ProfileController: PUT/POST /api/profile/** + Idempotency-Key
+ProfileController -> Auth: Проверить ownership
+ProfileController -> ProfileService: validateAndSave(sectionPayload)
+ProfileService -> ProfileDb: Сохранить изменения секции
+ProfileService -> ProfileDb: Записать profile_audit_event
+ProfileService --> ProfileController: Updated section response
+ProfileController --> FE: masked values, section status, message mnemo
+FE --> User: Показывает результат сохранения
+
+User -> FE: Меняет пароль
+FE -> ProfileController: POST /api/profile/security/password
+ProfileController -> Auth: Проверить текущего пользователя/challenge
+ProfileController -> ProfileService: changePassword(request)
+ProfileService -> ProfileDb: Записать profile_security_event и audit event
+ProfileService --> ProfileController: success or STR_MNEMO_PROFILE_PASSWORD_WEAK
+ProfileController --> FE: status / mnemonic
+FE --> User: Показывает локализованный результат
+
+OrderFlows -> ProfileController: GET /api/profile/readiness?flow=CHECKOUT|CLAIM
+ProfileController -> ProfileService: evaluateReadiness(currentUser, flow)
+ProfileService -> ProfileDb: Прочитать обязательные секции
+ProfileService --> ProfileController: ProfileReadinessResponse
+ProfileController --> OrderFlows: ready, missingFields, messageMnemo
+
+Support -> FE: Открывает support view профиля с reason
+FE -> ProfileController: GET /api/profile/support/{userId}?reason=PROFILE_HELP
+ProfileController -> Auth: Проверить support permission
+ProfileController -> ProfileService: loadSupportView(userId, reason)
+ProfileService -> ProfileDb: Записать support audit event
+ProfileService -> ProfileDb: Прочитать профиль без secrets
+ProfileService --> ProfileController: ProfileOverviewResponse(auditRecorded=true)
+ProfileController --> FE: masked support profile
+FE --> Support: Показывает разрешенный support view
+@enduml

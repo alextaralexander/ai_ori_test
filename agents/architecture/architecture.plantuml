@@ -1,13 +1,19 @@
 @startuml
-title Best Ori Gin target architecture after feature 012
+title Best Ori Gin target architecture after feature 013
 package "Frontend web-shell" {
   [PublicShell]
+  [ProfileSettingsView]
   [OrderCheckoutView]
   [OrderHistoryView]
   [OrderClaimsView]
   [i18n resources]
 }
 package "Backend monolith" {
+  package "module_profile" {
+    [Profile API]
+    [ProfileReadinessService]
+    [ProfileAuditService]
+  }
   package "module_order" {
     [Checkout API]
     [Order history API]
@@ -26,6 +32,12 @@ package "External systems" {
   [Warehouse and logistics]
   [S3 or MinIO attachments]
 }
+[ProfileSettingsView] --> [Profile API]
+[Profile API] --> [ProfileReadinessService]
+[Profile API] --> [ProfileAuditService]
+[ProfileSettingsView] --> [i18n resources]
+[Checkout API] --> [ProfileReadinessService]
+[Order claims API] --> [ProfileReadinessService]
 [OrderClaimsView] --> [Order claims API]
 [Order claims API] --> [OrderClaimService]
 [OrderClaimService] --> [Order history API]

@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin profile API - feature 013
+  version: 2026-04-27
+paths:
+  /api/profile:
+    get:
+      summary: Get current user profile overview
+      responses:
+        '200':
+          description: Profile overview with readiness statuses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileOverviewResponse'
+        '403':
+          description: Access denied mnemonic error
+  /api/profile/general:
+    put:
+      summary: Update current user general profile data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileGeneralUpdateRequest'
+      responses:
+        '200':
+          description: Updated general section
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileGeneralResponse'
+        '400':
+          description: Validation mnemonic error
+  /api/profile/contacts:
+    post:
+      summary: Add contact for current user
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileContactCreateRequest'
+      responses:
+        '200':
+          description: Updated contact list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileContactsResponse'
+  /api/profile/contacts/{contactId}/verification:
+    post:
+      summary: Start contact verification
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Contact verification status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileContactResponse'
+        '400':
+          description: Verification mnemonic error
+  /api/profile/addresses:
+    post:
+      summary: Add address for current user
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileAddressUpsertRequest'
+      responses:
+        '200':
+          description: Updated address book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileAddressesResponse'
+  /api/profile/addresses/{addressId}:
+    put:
+      summary: Update address
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileAddressUpsertRequest'
+      responses:
+        '200':
+          description: Updated address book
+    delete:
+      summary: Delete address when it is not locked by active flows
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Address deleted
+        '409':
+          description: Address locked mnemonic error
+  /api/profile/documents:
+    post:
+      summary: Add or replace active document data
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileDocumentUpsertRequest'
+      responses:
+        '200':
+          description: Updated document list with masked values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDocumentsResponse'
+  /api/profile/security/password:
+    post:
+      summary: Change current user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilePasswordChangeRequest'
+      responses:
+        '200':
+          description: Password changed and security event recorded
+        '400':
+          description: Password policy mnemonic error
+  /api/profile/audit-events:
+    get:
+      summary: Get current user critical profile change history
+      responses:
+        '200':
+          description: Audit event list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileAuditEventsResponse'
+  /api/profile/readiness:
+    get:
+      summary: Get profile readiness for checkout, delivery and claim flows
+      parameters:
+        - name: flow
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProfileReadinessFlow'
+      responses:
+        '200':
+          description: Readiness result for requested flow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileReadinessResponse'
+  /api/profile/support/{userId}:
+    get:
+      summary: Get support view of user profile with audit reason
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: reason
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Support profile view with auditRecorded flag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileOverviewResponse'
+        '403':
+          description: Support access denied mnemonic error
+components:
+  schemas:
+    ProfileSectionStatus:
+      type: string
+      enum: [COMPLETE, INCOMPLETE, REQUIRES_VERIFICATION, LOCKED]
+    ProfileReadinessFlow:
+      type: string
+      enum: [CHECKOUT, DELIVERY, CLAIM]
+    ContactType:
+      type: string
+      enum: [EMAIL, PHONE]
+    VerificationStatus:
+      type: string
+      enum: [UNVERIFIED, REQUIRES_VERIFICATION, VERIFIED, FAILED]
+    ProfileOverviewResponse:
+      type: object
+      properties:
+        profileId: { type: string, format: uuid }
+        ownerUserId: { type: string }
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileSectionSummary'
+        readiness:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileReadinessResponse'
+        auditRecorded: { type: boolean }
+    ProfileSectionSummary:
+      type: object
+      properties:
+        sectionKey: { type: string }
+        status:
+          $ref: '#/components/schemas/ProfileSectionStatus'
+        missingFields:
+          type: array
+          items: { type: string }
+        messageMnemo: { type: string }
+    ProfileGeneralUpdateRequest:
+      type: object
+      required: [firstName, lastName, preferredLanguage]
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        middleName: { type: string }
+        birthDate: { type: string, format: date }
+        gender: { type: string, enum: [FEMALE, MALE, NOT_SPECIFIED] }
+        preferredLanguage: { type: string }
+    ProfileGeneralResponse:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        middleName: { type: string }
+        birthDate: { type: string, format: date }
+        gender: { type: string }
+        preferredLanguage: { type: string }
+    ProfileContactCreateRequest:
+      type: object
+      required: [contactType, value]
+      properties:
+        contactType:
+          $ref: '#/components/schemas/ContactType'
+        value: { type: string }
+        primary: { type: boolean }
+    ProfileContactResponse:
+      type: object
+      properties:
+        contactId: { type: string, format: uuid }
+        contactType:
+          $ref: '#/components/schemas/ContactType'
+        maskedValue: { type: string }
+        primary: { type: boolean }
+        verificationStatus:
+          $ref: '#/components/schemas/VerificationStatus'
+        messageMnemo: { type: string }
+    ProfileContactsResponse:
+      type: object
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileContactResponse'
+    ProfileAddressUpsertRequest:
+      type: object
+      required: [countryCode, city, street, house, postalCode]
+      properties:
+        countryCode: { type: string }
+        region: { type: string }
+        city: { type: string }
+        street: { type: string }
+        house: { type: string }
+        building: { type: string }
+        apartment: { type: string }
+        postalCode: { type: string }
+        deliveryComment: { type: string }
+        default: { type: boolean }
+    ProfileAddressResponse:
+      type: object
+      properties:
+        addressId: { type: string, format: uuid }
+        city: { type: string }
+        street: { type: string }
+        house: { type: string }
+        postalCode: { type: string }
+        default: { type: boolean }
+        lockReason: { type: string }
+        messageMnemo: { type: string }
+    ProfileAddressesResponse:
+      type: object
+      properties:
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileAddressResponse'
+    ProfileDocumentUpsertRequest:
+      type: object
+      required: [documentType, documentPayload]
+      properties:
+        documentType: { type: string }
+        documentPayload:
+          type: object
+          additionalProperties: true
+    ProfileDocumentResponse:
+      type: object
+      properties:
+        documentId: { type: string, format: uuid }
+        documentType: { type: string }
+        documentNumberMasked: { type: string }
+        active: { type: boolean }
+        verificationStatus:
+          $ref: '#/components/schemas/VerificationStatus'
+    ProfileDocumentsResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileDocumentResponse'
+    ProfilePasswordChangeRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string, format: password }
+        newPassword: { type: string, format: password }
+    ProfileAuditEventResponse:
+      type: object
+      properties:
+        sectionKey: { type: string }
+        fieldKey: { type: string }
+        actorType: { type: string }
+        businessReason: { type: string }
+        oldValueMasked: { type: string }
+        newValueMasked: { type: string }
+        occurredAt: { type: string, format: date-time }
+    ProfileAuditEventsResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileAuditEventResponse'
+    ProfileReadinessResponse:
+      type: object
+      properties:
+        flow:
+          $ref: '#/components/schemas/ProfileReadinessFlow'
+        ready: { type: boolean }
+        missingFields:
+          type: array
+          items: { type: string }
+        messageMnemo: { type: string }

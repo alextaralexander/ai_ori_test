@@ -1,0 +1,90 @@
+@startuml
+title Feature 013 - изменения ER для module_profile
+
+entity profile_user {
+  * profile_id : uuid
+  --
+  owner_user_id : string
+  first_name : string
+  last_name : string
+  middle_name : string
+  birth_date : date
+  gender : enum
+  preferred_language : string
+  profile_status : enum
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity profile_contact {
+  * contact_id : uuid
+  --
+  profile_id : uuid
+  contact_type : enum
+  contact_value_encrypted : string
+  contact_value_masked : string
+  primary_flag : boolean
+  verification_status : enum
+  verification_requested_at : timestamp
+  verified_at : timestamp
+}
+
+entity profile_address {
+  * address_id : uuid
+  --
+  profile_id : uuid
+  country_code : string
+  region : string
+  city : string
+  street : string
+  house : string
+  building : string
+  apartment : string
+  postal_code : string
+  delivery_comment : string
+  default_flag : boolean
+  lock_reason : string
+}
+
+entity profile_document {
+  * document_id : uuid
+  --
+  profile_id : uuid
+  document_type : enum
+  document_payload_encrypted : text
+  document_number_masked : string
+  active_flag : boolean
+  verification_status : enum
+  updated_at : timestamp
+}
+
+entity profile_security_event {
+  * security_event_id : uuid
+  --
+  profile_id : uuid
+  event_type : string
+  source_channel : string
+  metadata_json : jsonb
+  occurred_at : timestamp
+}
+
+entity profile_audit_event {
+  * audit_event_id : uuid
+  --
+  profile_id : uuid
+  section_key : string
+  field_key : string
+  actor_type : enum
+  actor_id : string
+  business_reason : string
+  old_value_masked : string
+  new_value_masked : string
+  occurred_at : timestamp
+}
+
+profile_user ||--o{ profile_contact
+profile_user ||--o{ profile_address
+profile_user ||--o{ profile_document
+profile_user ||--o{ profile_security_event
+profile_user ||--o{ profile_audit_event
+@enduml

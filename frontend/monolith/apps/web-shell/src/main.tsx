@@ -14,6 +14,7 @@ import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
 import { OrderHistoryView } from './components/OrderHistoryView';
 import { ProductCardView } from './components/ProductCardView';
+import { ProfileSettingsView } from './components/ProfileSettingsView';
 import { ContentPageView, ContentUnavailableView, DocumentsPageView, FaqPageView, InfoPageView, NewsPage, OfferPageView } from './components/PublicContentViews';
 import { PublicShell } from './components/PublicShell';
 
@@ -48,7 +49,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support')) {
+    if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -82,7 +83,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -169,6 +170,20 @@ function App() {
     contentView = <OrderClaimsView mode="history" params={params} />;
   } else if (path.startsWith('/order/claims/claims-history/')) {
     contentView = <OrderClaimsView claimId={decodeURIComponent(path.slice('/order/claims/claims-history/'.length))} mode="details" params={params} />;
+  } else if (path === '/profile-settings') {
+    contentView = <ProfileSettingsView mode="overview" />;
+  } else if (path === '/profile-settings/general') {
+    contentView = <ProfileSettingsView mode="general" />;
+  } else if (path === '/profile-settings/contacts') {
+    contentView = <ProfileSettingsView mode="contacts" />;
+  } else if (path === '/profile-settings/addresses') {
+    contentView = <ProfileSettingsView mode="addresses" />;
+  } else if (path === '/profile-settings/documents') {
+    contentView = <ProfileSettingsView mode="documents" />;
+  } else if (path === '/profile-settings/security') {
+    contentView = <ProfileSettingsView mode="security" />;
+  } else if (path.startsWith('/profile-settings/support/')) {
+    contentView = <ProfileSettingsView mode="forbidden" />;
   } else if (path.startsWith('/support/carts/')) {
     contentView = <CartView cartType={(params.get('cartType') === 'SUPPLEMENTARY' ? 'SUPPLEMENTARY' : 'MAIN')} mode="support" supportUserId={decodeURIComponent(path.slice('/support/carts/'.length))} />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {

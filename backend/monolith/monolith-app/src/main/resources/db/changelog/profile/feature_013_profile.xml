@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-013-profile-001" author="codex">
+        <createTable tableName="profile_user">
+            <column name="profile_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_user_id" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="first_name" type="varchar(128)"/>
+            <column name="last_name" type="varchar(128)"/>
+            <column name="middle_name" type="varchar(128)"/>
+            <column name="birth_date" type="date"/>
+            <column name="gender" type="varchar(32)"/>
+            <column name="preferred_language" type="varchar(16)"/>
+            <column name="profile_status" type="varchar(32)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="feature-013-profile-002" author="codex">
+        <createTable tableName="profile_contact">
+            <column name="contact_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="profile_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_value_encrypted" type="varchar(512)"/>
+            <column name="contact_value_masked" type="varchar(256)"/>
+            <column name="primary_flag" type="boolean"/>
+            <column name="verification_status" type="varchar(32)"/>
+            <column name="verification_requested_at" type="timestamp"/>
+            <column name="verified_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_contact" baseColumnNames="profile_id"
+                                 referencedTableName="profile_user" referencedColumnNames="profile_id"
+                                 constraintName="fk_profile_contact_user"/>
+    </changeSet>
+
+    <changeSet id="feature-013-profile-003" author="codex">
+        <createTable tableName="profile_address">
+            <column name="address_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="profile_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_code" type="varchar(8)"/>
+            <column name="region" type="varchar(128)"/>
+            <column name="city" type="varchar(128)"/>
+            <column name="street" type="varchar(256)"/>
+            <column name="house" type="varchar(64)"/>
+            <column name="building" type="varchar(64)"/>
+            <column name="apartment" type="varchar(64)"/>
+            <column name="postal_code" type="varchar(32)"/>
+            <column name="delivery_comment" type="varchar(512)"/>
+            <column name="default_flag" type="boolean"/>
+            <column name="lock_reason" type="varchar(128)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_address" baseColumnNames="profile_id"
+                                 referencedTableName="profile_user" referencedColumnNames="profile_id"
+                                 constraintName="fk_profile_address_user"/>
+    </changeSet>
+
+    <changeSet id="feature-013-profile-004" author="codex">
+        <createTable tableName="profile_document">
+            <column name="document_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="profile_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_type" type="varchar(64)"/>
+            <column name="document_payload_encrypted" type="text"/>
+            <column name="document_number_masked" type="varchar(128)"/>
+            <column name="active_flag" type="boolean"/>
+            <column name="verification_status" type="varchar(32)"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_document" baseColumnNames="profile_id"
+                                 referencedTableName="profile_user" referencedColumnNames="profile_id"
+                                 constraintName="fk_profile_document_user"/>
+    </changeSet>
+
+    <changeSet id="feature-013-profile-005" author="codex">
+        <createTable tableName="profile_security_event">
+            <column name="security_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="profile_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="varchar(128)"/>
+            <column name="source_channel" type="varchar(64)"/>
+            <column name="metadata_json" type="jsonb"/>
+            <column name="occurred_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_security_event" baseColumnNames="profile_id"
+                                 referencedTableName="profile_user" referencedColumnNames="profile_id"
+                                 constraintName="fk_profile_security_event_user"/>
+    </changeSet>
+
+    <changeSet id="feature-013-profile-006" author="codex">
+        <createTable tableName="profile_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="profile_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="section_key" type="varchar(64)"/>
+            <column name="field_key" type="varchar(128)"/>
+            <column name="actor_type" type="varchar(32)"/>
+            <column name="actor_id" type="varchar(128)"/>
+            <column name="business_reason" type="varchar(256)"/>
+            <column name="old_value_masked" type="varchar(256)"/>
+            <column name="new_value_masked" type="varchar(256)"/>
+            <column name="occurred_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_audit_event" baseColumnNames="profile_id"
+                                 referencedTableName="profile_user" referencedColumnNames="profile_id"
+                                 constraintName="fk_profile_audit_event_user"/>
+    </changeSet>
+</databaseChangeLog>
