@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-017-partner-offline-order-projection" author="codex">
+        <createTable tableName="partner_offline_order">
+            <column name="order_number" type="varchar(32)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_offline_order"/>
+            </column>
+            <column name="campaign_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_person_number" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_segment" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bonus_accrual_status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_volume" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grand_total_amount" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="char(3)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="partner_offline_order_event">
+            <column name="event_id" type="varchar(64)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_offline_order_event"/>
+            </column>
+            <column name="order_number" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message_mnemo" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="partner_offline_order_event"
+                                 baseColumnNames="order_number"
+                                 constraintName="fk_partner_offline_order_event_order"
+                                 referencedTableName="partner_offline_order"
+                                 referencedColumnNames="order_number"/>
+        <createIndex tableName="partner_offline_order" indexName="idx_partner_offline_order_campaign_partner">
+            <column name="campaign_id"/>
+            <column name="partner_person_number"/>
+        </createIndex>
+        <createIndex tableName="partner_offline_order" indexName="idx_partner_offline_order_customer">
+            <column name="customer_id"/>
+        </createIndex>
+        <createIndex tableName="partner_offline_order" indexName="idx_partner_offline_order_statuses">
+            <column name="order_status"/>
+            <column name="payment_status"/>
+            <column name="delivery_status"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

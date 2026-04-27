@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 017: список VIP-заказов партнера</title>
+  <desc id="desc">Схематичный desktop layout без стилей для списка клиентских офлайн-заказов.</desc>
+  <rect x="24" y="24" width="1152" height="712" fill="white" stroke="#222"/>
+  <text x="48" y="64" font-family="Arial" font-size="28">VIP-заказы клиентов</text>
+  <rect x="48" y="96" width="1104" height="88" fill="none" stroke="#555"/>
+  <text x="72" y="130" font-family="Arial" font-size="16">Фильтры: campaignId, поиск, статус заказа, оплата, доставка, сегмент клиента</text>
+  <rect x="48" y="216" width="1104" height="400" fill="none" stroke="#555"/>
+  <text x="72" y="250" font-family="Arial" font-size="16">Карточки заказов: orderNumber, customerId, partnerPersonNumber, сумма, paymentStatus, deliveryStatus, bonusAccrualStatus</text>
+  <rect x="72" y="280" width="1056" height="88" fill="none" stroke="#777"/>
+  <rect x="72" y="392" width="1056" height="88" fill="none" stroke="#777"/>
+  <rect x="72" y="504" width="1056" height="88" fill="none" stroke="#777"/>
+  <rect x="48" y="648" width="360" height="48" fill="none" stroke="#555"/>
+  <text x="72" y="678" font-family="Arial" font-size="16">Пагинация и загрузка следующей страницы</text>
+</svg>

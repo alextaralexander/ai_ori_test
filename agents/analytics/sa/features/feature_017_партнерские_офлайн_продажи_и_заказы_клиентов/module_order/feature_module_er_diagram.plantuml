@@ -1,0 +1,28 @@
+@startuml
+title Feature 017 - module_order ER delta
+entity partner_offline_order {
+  * order_number : varchar(32)
+  --
+  campaign_id : varchar(32)
+  partner_person_number : varchar(32)
+  customer_id : varchar(32)
+  customer_segment : varchar(32)
+  order_status : varchar(32)
+  payment_status : varchar(32)
+  delivery_status : varchar(32)
+  bonus_accrual_status : varchar(32)
+  business_volume : numeric(12,2)
+  grand_total_amount : numeric(12,2)
+  currency_code : char(3)
+}
+entity partner_offline_order_event {
+  * event_id : varchar(64)
+  --
+  order_number : varchar(32)
+  event_type : varchar(64)
+  source_system : varchar(64)
+  message_mnemo : varchar(128)
+  occurred_at : timestamp
+}
+partner_offline_order ||--o{ partner_offline_order_event : order_number
+@enduml

@@ -962,6 +962,73 @@ body {
   display: block;
 }
 
+.partner-offline-page {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.partner-offline-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.partner-offline-heading h1 {
+  margin: 0;
+}
+
+.partner-offline-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  max-width: 720px;
+}
+
+.partner-offline-list {
+  display: grid;
+  gap: 12px;
+}
+
+.partner-offline-card {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 1fr) minmax(140px, auto) auto auto auto auto auto;
+  padding: 16px;
+}
+
+.partner-offline-card h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.partner-offline-card strong,
+.partner-offline-card span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.partner-offline-details-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+}
+
+.partner-offline-details-grid article,
+.partner-offline-timeline {
+  background: #ffffff;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
 .claim-create-grid {
   display: grid;
   gap: 18px;
@@ -1033,6 +1100,9 @@ body {
     .partner-report-filters,
     .partner-report-row,
     .partner-growth-row,
+    .partner-offline-filters,
+    .partner-offline-card,
+    .partner-offline-details-grid,
     .order-details-grid,
     .cart-line .ant-card-body {
     grid-template-columns: 1fr;

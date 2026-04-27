@@ -64,6 +64,11 @@ public final class OrderDtos {
         REJECTED
     }
 
+    public enum PartnerOfflineOrderActionType {
+        REPEAT_ORDER,
+        SERVICE_ADJUSTMENT
+    }
+
     public record StartCheckoutRequest(
             String cartId,
             CheckoutType checkoutType,
@@ -405,6 +410,73 @@ public final class OrderDtos {
             String fileName,
             String contentType,
             long sizeBytes
+    ) {
+    }
+
+    public record PartnerOfflineOrderPageResponse(
+            List<PartnerOfflineOrderSummaryResponse> items,
+            int page,
+            int size,
+            long totalElements,
+            boolean hasNext,
+            String messageMnemo
+    ) {
+    }
+
+    public record PartnerOfflineOrderSummaryResponse(
+            String orderNumber,
+            String campaignId,
+            String createdAt,
+            String customerId,
+            String customerName,
+            String customerSegment,
+            String partnerPersonNumber,
+            String partnerDisplayName,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            String deliveryStatus,
+            String bonusAccrualStatus,
+            BigDecimal businessVolume,
+            BigDecimal grandTotalAmount,
+            String currencyCode,
+            List<ValidationReasonResponse> warnings
+    ) {
+    }
+
+    public record PartnerOfflineOrderDetailsResponse(
+            String orderNumber,
+            String campaignId,
+            String createdAt,
+            String customerId,
+            String customerName,
+            String customerSegment,
+            String partnerPersonNumber,
+            String partnerDisplayName,
+            String orderStatus,
+            PaymentStatus paymentStatus,
+            String deliveryStatus,
+            String bonusAccrualStatus,
+            BigDecimal businessVolume,
+            BigDecimal grandTotalAmount,
+            String currencyCode,
+            List<OrderHistoryLineResponse> items,
+            OrderDeliveryResponse delivery,
+            OrderPaymentResponse payment,
+            List<OrderHistoryEventResponse> events,
+            List<String> availableActions,
+            Map<String, String> linkedEntities,
+            String messageMnemo
+    ) {
+    }
+
+    public record PartnerOfflineOrderActionRequest(PartnerOfflineOrderActionType actionType) {
+    }
+
+    public record PartnerOfflineOrderActionResponse(
+            String orderNumber,
+            PartnerOfflineOrderActionType actionType,
+            String resultMnemo,
+            List<OrderHistoryEventResponse> events
     ) {
     }
 

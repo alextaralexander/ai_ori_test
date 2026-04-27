@@ -37,6 +37,12 @@ import com.bestorigin.monolith.order.api.OrderDtos.OrderPaymentResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentStatus;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionType;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderPageResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderSummaryResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderStatus;
@@ -49,6 +55,7 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -77,6 +84,12 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
     private static final String CLAIM_NOT_FOUND = "STR_MNEMO_ORDER_CLAIM_NOT_FOUND";
     private static final String CLAIM_COMMENT_ADDED = "STR_MNEMO_ORDER_CLAIM_COMMENT_ADDED";
     private static final String CLAIM_VALIDATION_FAILED = "STR_MNEMO_ORDER_CLAIM_VALIDATION_FAILED";
+    private static final String PARTNER_OFFLINE_READY = "STR_MNEMO_PARTNER_OFFLINE_ORDER_READY";
+    private static final String PARTNER_OFFLINE_ACCESS_DENIED = "STR_MNEMO_PARTNER_OFFLINE_ORDER_ACCESS_DENIED";
+    private static final String PARTNER_OFFLINE_FILTER_INVALID = "STR_MNEMO_PARTNER_OFFLINE_ORDER_FILTER_INVALID";
+    private static final String PARTNER_OFFLINE_NOT_FOUND = "STR_MNEMO_PARTNER_OFFLINE_ORDER_NOT_FOUND";
+    private static final String PARTNER_OFFLINE_REPEAT_CREATED = "STR_MNEMO_PARTNER_OFFLINE_ORDER_REPEAT_CREATED";
+    private static final String PARTNER_OFFLINE_ADJUSTMENT_RECORDED = "STR_MNEMO_PARTNER_OFFLINE_ORDER_ADJUSTMENT_RECORDED";
 
     private final OrderCheckoutRepository repository;
     private final ConcurrentMap<String, OrderConfirmationResponse> confirmationsByKey = new ConcurrentHashMap<>();
@@ -411,6 +424,169 @@ public class DefaultOrderCheckoutService implements OrderCheckoutService {
         );
         claimsById.put(claimId, updated);
         return updated;
+    }
+
+    @Override
+    public PartnerOfflineOrderPageResponse searchPartnerOfflineOrders(
+            String userContextId,
+            String campaignId,
+            String query,
+            String orderStatus,
+            String paymentStatus,
+            String deliveryStatus,
+            String customerSegment,
+            String partnerPersonNumber,
+            int page,
+            int size
+    ) {
+        ensurePartnerOfflineAccess(userContextId);
+        if (containsInvalidFilter(campaignId, orderStatus, paymentStatus, deliveryStatus, customerSegment, partnerPersonNumber)) {
+            throw new OrderCheckoutValidationException(PARTNER_OFFLINE_FILTER_INVALID, 400);
+        }
+        List<PartnerOfflineOrderSummaryResponse> filtered = seededPartnerOfflineOrders().stream()
+                .filter(order -> blank(campaignId) || order.campaignId().equals(campaignId))
+                .filter(order -> blank(query) || order.orderNumber().contains(query) || order.customerId().contains(query) || order.customerName().toLowerCase().contains(query.toLowerCase()))
+                .filter(order -> blank(orderStatus) || order.orderStatus().equals(orderStatus))
+                .filter(order -> blank(paymentStatus) || order.paymentStatus().name().equals(paymentStatus))
+                .filter(order -> blank(deliveryStatus) || order.deliveryStatus().equals(deliveryStatus))
+                .filter(order -> blank(customerSegment) || order.customerSegment().equals(customerSegment))
+                .filter(order -> blank(partnerPersonNumber) || order.partnerPersonNumber().equals(partnerPersonNumber))
+                .toList();
+        return new PartnerOfflineOrderPageResponse(filtered, Math.max(page, 0), Math.max(size, 1), filtered.size(), false, PARTNER_OFFLINE_READY);
+    }
+
+    @Override
+    public PartnerOfflineOrderDetailsResponse getPartnerOfflineOrder(String userContextId, String orderNumber) {
+        ensurePartnerOfflineAccess(userContextId);
+        PartnerOfflineOrderSummaryResponse summary = seededPartnerOfflineOrders().stream()
+                .filter(order -> order.orderNumber().equals(orderNumber))
+                .findFirst()
+                .orElseThrow(() -> new OrderCheckoutNotFoundException(PARTNER_OFFLINE_NOT_FOUND));
+        return partnerOfflineDetails(summary, partnerOfflineEvents(summary.paymentStatus()));
+    }
+
+    @Override
+    public PartnerOfflineOrderActionResponse executePartnerOfflineOrderAction(String userContextId, String orderNumber, PartnerOfflineOrderActionRequest request, String idempotencyKey) {
+        ensurePartnerOfflineAccess(userContextId);
+        PartnerOfflineOrderActionType action = request == null || request.actionType() == null ? PartnerOfflineOrderActionType.REPEAT_ORDER : request.actionType();
+        PartnerOfflineOrderDetailsResponse details = getPartnerOfflineOrder(userContextId, orderNumber);
+        if (action == PartnerOfflineOrderActionType.SERVICE_ADJUSTMENT && !role(userContextId).equals("order-support")) {
+            throw new OrderCheckoutAccessDeniedException(PARTNER_OFFLINE_ACCESS_DENIED);
+        }
+        String result = action == PartnerOfflineOrderActionType.SERVICE_ADJUSTMENT ? PARTNER_OFFLINE_ADJUSTMENT_RECORDED : PARTNER_OFFLINE_REPEAT_CREATED;
+        List<OrderHistoryEventResponse> events = new ArrayList<>(details.events());
+        events.add(new OrderHistoryEventResponse(action.name(), "RECORDED", "order-service", result, "2026-04-27T12:00:00Z"));
+        return new PartnerOfflineOrderActionResponse(orderNumber, action, result, List.copyOf(events));
+    }
+
+    private static void ensurePartnerOfflineAccess(String userContextId) {
+        String role = role(userContextId);
+        if (!role.equals("partner") && !role.equals("order-support")) {
+            throw new OrderCheckoutAccessDeniedException(PARTNER_OFFLINE_ACCESS_DENIED);
+        }
+    }
+
+    private static boolean containsInvalidFilter(String campaignId, String orderStatus, String paymentStatus, String deliveryStatus, String customerSegment, String partnerPersonNumber) {
+        return containsUnsafeFilter(campaignId)
+                || containsUnsafeFilter(orderStatus)
+                || containsUnsafeFilter(paymentStatus)
+                || containsUnsafeFilter(deliveryStatus)
+                || containsUnsafeFilter(customerSegment)
+                || containsUnsafeFilter(partnerPersonNumber);
+    }
+
+    private static boolean containsUnsafeFilter(String value) {
+        return value != null && (value.length() > 64 || value.contains("'") || value.contains(";"));
+    }
+
+    private static List<PartnerOfflineOrderSummaryResponse> seededPartnerOfflineOrders() {
+        return List.of(
+                new PartnerOfflineOrderSummaryResponse(
+                        "BOG-VIP-017-001",
+                        "CAT-2026-05",
+                        "2026-04-19T08:30:00Z",
+                        "VIP-017-001",
+                        "Анна VIP",
+                        "VIP",
+                        "BOG-016-002",
+                        "Мария Партнер",
+                        "ASSEMBLY",
+                        PaymentStatus.PAID,
+                        "IN_TRANSIT",
+                        "ACCRUED",
+                        money("178.40"),
+                        money("12640.00"),
+                        "RUB",
+                        List.of(reason(PARTNER_OFFLINE_READY, "INFO", "partnerOfflineOrder"))
+                ),
+                new PartnerOfflineOrderSummaryResponse(
+                        "BOG-VIP-017-002",
+                        "CAT-2026-05",
+                        "2026-04-20T10:15:00Z",
+                        "VIP-017-002",
+                        "Елена VIP",
+                        "VIP",
+                        "BOG-016-002",
+                        "Мария Партнер",
+                        "SERVICE_REVIEW",
+                        PaymentStatus.PAID,
+                        "PICKUP_READY",
+                        "PENDING_RECALCULATION",
+                        money("92.10"),
+                        money("7340.00"),
+                        "RUB",
+                        List.of(reason(PARTNER_OFFLINE_ADJUSTMENT_RECORDED, "WARNING", "service"))
+                )
+        );
+    }
+
+    private static PartnerOfflineOrderDetailsResponse partnerOfflineDetails(PartnerOfflineOrderSummaryResponse summary, List<OrderHistoryEventResponse> events) {
+        return new PartnerOfflineOrderDetailsResponse(
+                summary.orderNumber(),
+                summary.campaignId(),
+                summary.createdAt(),
+                summary.customerId(),
+                summary.customerName(),
+                summary.customerSegment(),
+                summary.partnerPersonNumber(),
+                summary.partnerDisplayName(),
+                summary.orderStatus(),
+                summary.paymentStatus(),
+                summary.deliveryStatus(),
+                summary.bonusAccrualStatus(),
+                summary.businessVolume(),
+                summary.grandTotalAmount(),
+                summary.currencyCode(),
+                partnerOfflineItems(),
+                new OrderDeliveryResponse("PICKUP_POINT", "Анна V.", "+7 *** *** 17 01", "Москва", "ПВЗ Best Ori Gin 017", "1-2 дня", "TRK-VIP-017-001"),
+                new OrderPaymentResponse("ONLINE_CARD", summary.paymentStatus(), BigDecimal.ZERO, summary.grandTotalAmount(), false),
+                events,
+                List.of("REPEAT_ORDER", "SERVICE_ADJUSTMENT", "OPEN_PARTNER_CARD"),
+                Map.of(
+                        "partnerCardPath", "/business/partner-card/" + summary.partnerPersonNumber(),
+                        "bonusWalletPath", "/profile/transactions/bonus",
+                        "partnerReportPath", "/report/order-history?partnerPersonNumber=" + summary.partnerPersonNumber()
+                ),
+                PARTNER_OFFLINE_READY
+        );
+    }
+
+    private static List<OrderHistoryLineResponse> partnerOfflineItems() {
+        return List.of(
+                new OrderHistoryLineResponse("BOG-CREAM-017", "VIP-017-CREAM", "Питательный крем Best Ori Gin", 2, money("3290.00"), money("300.00"), money("6280.00"), false, true, true, null),
+                new OrderHistoryLineResponse("BOG-SERUM-017", "VIP-017-SERUM", "Сыворотка для офлайн-продаж", 1, money("6360.00"), money("0.00"), money("6360.00"), false, true, true, null)
+        );
+    }
+
+    private static List<OrderHistoryEventResponse> partnerOfflineEvents(PaymentStatus paymentStatus) {
+        List<OrderHistoryEventResponse> events = new ArrayList<>();
+        events.add(new OrderHistoryEventResponse("ORDER_CREATED", "CREATED", "partner-offline", PARTNER_OFFLINE_READY, "2026-04-19T08:30:00Z"));
+        if (paymentStatus == PaymentStatus.PAID) {
+            events.add(new OrderHistoryEventResponse("PAYMENT_PAID", "PAID", "payment", PAYMENT_PAID, "2026-04-19T08:35:00Z"));
+            events.add(new OrderHistoryEventResponse("BONUS_ACCRUED", "ACCRUED", "bonus-wallet", "STR_MNEMO_BONUS_WALLET_TRANSACTION_READY", "2026-04-19T08:40:00Z"));
+            events.add(new OrderHistoryEventResponse("DELIVERY_IN_TRANSIT", "IN_TRANSIT", "delivery", DELIVERY_IN_TRANSIT, "2026-04-20T11:00:00Z"));
+        }
+        return events;
     }
 
     private void seedVisibleClaim(String userContextId) {

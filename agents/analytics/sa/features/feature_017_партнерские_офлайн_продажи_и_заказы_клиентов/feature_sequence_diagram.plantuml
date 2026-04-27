@@ -1,0 +1,22 @@
+@startuml
+title Feature 017 partner offline orders sequence
+actor Partner
+actor Support
+participant "web-shell" as Web
+participant "order module" as Order
+participant "bonus-wallet" as Bonus
+participant "mlm-structure" as MLM
+participant "partner-reporting" as Reporting
+Partner -> Web : open /vip-orders or /business/tools/order-management/vip-orders/partner-orders
+Web -> Order : GET /api/order/partner-offline-orders?campaignId=CAT-2026-05
+Order --> Web : page with BOG-VIP-017-001
+Partner -> Web : open order details
+Web -> Order : GET /api/order/partner-offline-orders/BOG-VIP-017-001
+Order -> Bonus : read bonus accrual status
+Order -> MLM : expose partnerPersonNumber/businessVolume link
+Order -> Reporting : expose order reporting link
+Order --> Web : details, events, availableActions
+Support -> Web : execute SERVICE_ADJUSTMENT
+Web -> Order : POST /actions
+Order --> Web : STR_MNEMO_PARTNER_OFFLINE_ORDER_ADJUSTMENT_RECORDED
+@enduml

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 017: карточка офлайн-заказа клиента</title>
+  <desc id="desc">Схематичный desktop layout без стилей для детальной карточки заказа.</desc>
+  <rect x="24" y="24" width="1152" height="772" fill="white" stroke="#222"/>
+  <text x="48" y="64" font-family="Arial" font-size="28">BOG-VIP-017-001</text>
+  <rect x="48" y="96" width="520" height="144" fill="none" stroke="#555"/>
+  <text x="72" y="130" font-family="Arial" font-size="16">Клиент, партнер, campaignId, сегмент</text>
+  <rect x="632" y="96" width="520" height="144" fill="none" stroke="#555"/>
+  <text x="656" y="130" font-family="Arial" font-size="16">Оплата, доставка, businessVolume, бонусы</text>
+  <rect x="48" y="272" width="520" height="300" fill="none" stroke="#555"/>
+  <text x="72" y="306" font-family="Arial" font-size="16">Состав заказа и доступность повторного заказа</text>
+  <rect x="632" y="272" width="520" height="300" fill="none" stroke="#555"/>
+  <text x="656" y="306" font-family="Arial" font-size="16">Timeline событий: оплата, сборка, доставка, корректировки</text>
+  <rect x="48" y="624" width="1104" height="88" fill="none" stroke="#555"/>
+  <text x="72" y="658" font-family="Arial" font-size="16">Действия: повторный заказ, сервисная корректировка, переход к карточке партнера</text>
+</svg>

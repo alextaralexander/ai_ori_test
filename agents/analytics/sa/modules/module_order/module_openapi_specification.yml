@@ -10,3 +10,6 @@ paths:
   /api/order/claims: { get: { summary: Search claims }, post: { summary: Create claim } }
   /api/order/claims/{claimId}: { get: { summary: Get claim details } }
   /api/order/claims/{claimId}/comments: { post: { summary: Add claim comment } }
+  /api/order/partner-offline-orders: { get: { summary: Search partner offline customer orders } }
+  /api/order/partner-offline-orders/{orderNumber}: { get: { summary: Get partner offline order details } }
+  /api/order/partner-offline-orders/{orderNumber}/actions: { post: { summary: Execute partner offline order action } }

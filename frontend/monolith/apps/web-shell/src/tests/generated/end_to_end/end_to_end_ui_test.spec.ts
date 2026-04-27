@@ -15,3 +15,4 @@ import '../feature_013_профиль_и_настройки_пользовате
 import '../feature_014_бонусный_кошелек_и_транзакции/feature_ui_flow';
 import '../feature_015_партнерские_отчеты_комиссии_и_документы/feature_ui_flow';
 import '../feature_016_mlm_структура_и_рост_партнера/feature_ui_flow';
+import '../feature_017_партнерские_офлайн_продажи_и_заказы_клиентов/feature_ui_flow';

@@ -12,6 +12,7 @@ import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { PartnerGrowthView } from './components/PartnerGrowthView';
+import { PartnerOfflineOrdersView } from './components/PartnerOfflineOrdersView';
 import { PartnerReportsView } from './components/PartnerReportsView';
 import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
@@ -165,6 +166,10 @@ function App() {
     contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
   } else if (path === '/order/order-history') {
     contentView = <OrderHistoryView params={params} />;
+  } else if (path === '/vip-orders' || path === '/business/tools/order-management/vip-orders/partner-orders') {
+    contentView = <PartnerOfflineOrdersView params={params} />;
+  } else if (path.startsWith('/business/tools/order-management/vip-orders/partner-orders/')) {
+    contentView = <PartnerOfflineOrdersView orderNumber={decodeURIComponent(path.slice('/business/tools/order-management/vip-orders/partner-orders/'.length))} params={params} />;
   } else if (path === '/report/order-history') {
     contentView = <PartnerReportsView mode="orders" params={params} />;
   } else if (path === '/report/info-reciept') {

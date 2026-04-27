@@ -1,5 +1,5 @@
 @startuml
-title Module order - aggregate ER after feature 012
+title Module order - aggregate ER after feature 017
 entity order_checkout_snapshot
 entity order_history_projection
 entity order_claim
@@ -7,9 +7,13 @@ entity order_claim_item
 entity order_claim_event
 entity order_claim_comment
 entity order_claim_attachment
+entity partner_offline_order
+entity partner_offline_order_event
 order_history_projection ||--o{ order_claim : orderNumber
 order_claim ||--o{ order_claim_item
 order_claim ||--o{ order_claim_event
 order_claim ||--o{ order_claim_comment
 order_claim ||--o{ order_claim_attachment
+partner_offline_order ||--o{ partner_offline_order_event : orderNumber
+partner_offline_order }o--|| order_history_projection : optional source order
 @enduml

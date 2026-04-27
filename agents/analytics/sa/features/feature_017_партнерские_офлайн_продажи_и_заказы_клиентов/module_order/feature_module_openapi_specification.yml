@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Feature 017 Partner Offline Orders API
+  version: 2026-04-27
+paths:
+  /api/order/partner-offline-orders:
+    get:
+      summary: Search partner offline customer orders
+      parameters:
+        - { name: campaignId, in: query, schema: { type: string } }
+        - { name: query, in: query, schema: { type: string } }
+        - { name: orderStatus, in: query, schema: { type: string } }
+        - { name: paymentStatus, in: query, schema: { type: string } }
+        - { name: deliveryStatus, in: query, schema: { type: string } }
+        - { name: customerSegment, in: query, schema: { type: string } }
+        - { name: partnerPersonNumber, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Partner offline order page }
+        '400': { description: STR_MNEMO_PARTNER_OFFLINE_ORDER_FILTER_INVALID }
+        '403': { description: STR_MNEMO_PARTNER_OFFLINE_ORDER_ACCESS_DENIED }
+  /api/order/partner-offline-orders/{orderNumber}:
+    get:
+      summary: Get partner offline order details
+      parameters:
+        - { name: orderNumber, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Partner offline order details }
+        '404': { description: STR_MNEMO_PARTNER_OFFLINE_ORDER_NOT_FOUND }
+  /api/order/partner-offline-orders/{orderNumber}/actions:
+    post:
+      summary: Execute partner offline order action
+      responses:
+        '200': { description: Action result mnemonic }
+components:
+  schemas:
+    PartnerOfflineOrderPageResponse: { type: object }
+    PartnerOfflineOrderDetailsResponse: { type: object }
+    PartnerOfflineOrderActionRequest: { type: object }

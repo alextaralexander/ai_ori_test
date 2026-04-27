@@ -16,15 +16,16 @@ component "Delivery" as Delivery
 Web --> PublicContent : HTTP JSON
 Web --> Catalog : HTTP JSON
 Web --> Cart : HTTP JSON
-Web --> Order : HTTP JSON
+Web --> Order : HTTP JSON /api/order
 Web --> Profile : HTTP JSON
 Web --> Bonus : HTTP JSON
 Web --> Onboarding : HTTP JSON
 Web --> Reporting : HTTP JSON
 Web --> MLM : HTTP JSON /api/mlm-structure
 MLM --> Order : route/link context for partner orders
-MLM --> Bonus : route/link context for bonus wallet
-MLM --> Reporting : route/link context for commissions and reports
+Order --> Bonus : bonus accrual status for offline orders
+Order --> MLM : partnerPersonNumber/businessVolume context
+Order --> Reporting : partner order report context
 Order --> Payment : payment API
 Order --> WMS : stock/reservation API
 Order --> Delivery : delivery API

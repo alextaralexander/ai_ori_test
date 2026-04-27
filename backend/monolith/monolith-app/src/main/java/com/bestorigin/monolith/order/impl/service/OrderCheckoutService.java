@@ -14,6 +14,10 @@ import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.StartCheckoutRequest;
@@ -54,4 +58,26 @@ public interface OrderCheckoutService {
     OrderClaimDetailsResponse getClaimDetails(String userContextId, String claimId, String supportCustomerId, String reason);
 
     OrderClaimDetailsResponse addClaimComment(String userContextId, String claimId, OrderClaimCommentRequest request, String idempotencyKey);
+
+    PartnerOfflineOrderPageResponse searchPartnerOfflineOrders(
+            String userContextId,
+            String campaignId,
+            String query,
+            String orderStatus,
+            String paymentStatus,
+            String deliveryStatus,
+            String customerSegment,
+            String partnerPersonNumber,
+            int page,
+            int size
+    );
+
+    PartnerOfflineOrderDetailsResponse getPartnerOfflineOrder(String userContextId, String orderNumber);
+
+    PartnerOfflineOrderActionResponse executePartnerOfflineOrderAction(
+            String userContextId,
+            String orderNumber,
+            PartnerOfflineOrderActionRequest request,
+            String idempotencyKey
+    );
 }

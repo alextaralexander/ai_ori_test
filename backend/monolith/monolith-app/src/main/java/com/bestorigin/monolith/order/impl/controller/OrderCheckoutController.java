@@ -14,6 +14,10 @@ import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderClaimPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderDetailsResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.OrderHistoryPageResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionRequest;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderActionResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderDetailsResponse;
+import com.bestorigin.monolith.order.api.OrderDtos.PartnerOfflineOrderPageResponse;
 import com.bestorigin.monolith.order.api.OrderDtos.PaymentSelectionRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RecipientRequest;
 import com.bestorigin.monolith.order.api.OrderDtos.RepeatOrderResponse;
@@ -161,6 +165,50 @@ public class OrderCheckoutController {
             @RequestBody OrderClaimCommentRequest request
     ) {
         return service.addClaimComment(userContext(headers), claimId, request, idempotencyKey(headers));
+    }
+
+    @GetMapping("/partner-offline-orders")
+    public PartnerOfflineOrderPageResponse partnerOfflineOrders(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) String campaignId,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) String paymentStatus,
+            @RequestParam(required = false) String deliveryStatus,
+            @RequestParam(required = false) String customerSegment,
+            @RequestParam(required = false) String partnerPersonNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return service.searchPartnerOfflineOrders(
+                userContext(headers),
+                campaignId,
+                query,
+                orderStatus,
+                paymentStatus,
+                deliveryStatus,
+                customerSegment,
+                partnerPersonNumber,
+                page,
+                size
+        );
+    }
+
+    @GetMapping("/partner-offline-orders/{orderNumber}")
+    public PartnerOfflineOrderDetailsResponse partnerOfflineOrder(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String orderNumber
+    ) {
+        return service.getPartnerOfflineOrder(userContext(headers), orderNumber);
+    }
+
+    @PostMapping("/partner-offline-orders/{orderNumber}/actions")
+    public PartnerOfflineOrderActionResponse partnerOfflineOrderAction(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String orderNumber,
+            @RequestBody PartnerOfflineOrderActionRequest request
+    ) {
+        return service.executePartnerOfflineOrderAction(userContext(headers), orderNumber, request, idempotencyKey(headers));
     }
 
     @ExceptionHandler(OrderCheckoutValidationException.class)

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="900" viewBox="0 0 390 900" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 017: mobile layout офлайн-заказов</title>
+  <desc id="desc">Схематичный mobile layout без стилей для списка и карточки заказа.</desc>
+  <rect x="12" y="12" width="366" height="876" fill="white" stroke="#222"/>
+  <text x="28" y="48" font-family="Arial" font-size="20">VIP-заказы</text>
+  <rect x="28" y="72" width="334" height="120" fill="none" stroke="#555"/>
+  <text x="44" y="108" font-family="Arial" font-size="13">Свернутые фильтры в одну колонку</text>
+  <rect x="28" y="216" width="334" height="140" fill="none" stroke="#555"/>
+  <text x="44" y="252" font-family="Arial" font-size="13">Карточка заказа с переносом длинных id</text>
+  <rect x="28" y="380" width="334" height="140" fill="none" stroke="#555"/>
+  <text x="44" y="416" font-family="Arial" font-size="13">Payment, delivery, bonus status</text>
+  <rect x="28" y="552" width="334" height="260" fill="none" stroke="#555"/>
+  <text x="44" y="588" font-family="Arial" font-size="13">Timeline и действия под карточкой</text>
+</svg>

@@ -4,6 +4,7 @@ export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'CANCELL
 export type NextAction = 'PAYMENT_REDIRECT' | 'WAIT_PAYMENT' | 'ORDER_DETAILS' | 'FIX_CHECKOUT';
 export type ClaimStatus = 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'WAREHOUSE_CHECK' | 'APPROVED' | 'PARTIALLY_APPROVED' | 'REJECTED' | 'CLOSED';
 export type ClaimResolution = 'REFUND' | 'REPLACEMENT' | 'MISSING_ITEM' | 'SERVICE_REVIEW' | 'REJECTED';
+export type PartnerOfflineOrderActionType = 'REPEAT_ORDER' | 'SERVICE_ADJUSTMENT';
 
 export interface StartCheckoutRequest {
   cartId: string;
@@ -267,6 +268,50 @@ export interface OrderClaimDetailsResponse extends OrderClaimSummaryResponse {
   nextAction: string;
 }
 
+export interface PartnerOfflineOrderSummaryResponse {
+  orderNumber: string;
+  campaignId: string;
+  createdAt: string;
+  customerId: string;
+  customerName: string;
+  customerSegment: string;
+  partnerPersonNumber: string;
+  partnerDisplayName: string;
+  orderStatus: string;
+  paymentStatus: PaymentStatus;
+  deliveryStatus: string;
+  bonusAccrualStatus: string;
+  businessVolume: number;
+  grandTotalAmount: number;
+  currencyCode: string;
+  warnings: ValidationReasonResponse[];
+}
+
+export interface PartnerOfflineOrderPageResponse {
+  items: PartnerOfflineOrderSummaryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  hasNext: boolean;
+  messageMnemo: string;
+}
+
+export interface PartnerOfflineOrderDetailsResponse extends PartnerOfflineOrderSummaryResponse {
+  items: OrderHistoryLineResponse[];
+  delivery: OrderDetailsResponse['delivery'];
+  payment: OrderDetailsResponse['payment'];
+  events: OrderDetailsResponse['events'];
+  availableActions: string[];
+  linkedEntities: Record<string, string>;
+}
+
+export interface PartnerOfflineOrderActionResponse {
+  orderNumber: string;
+  actionType: PartnerOfflineOrderActionType;
+  resultMnemo: string;
+  events: OrderDetailsResponse['events'];
+}
+
 interface ErrorResponse {
   code: string;
   details?: ValidationReasonResponse[];
@@ -429,4 +474,28 @@ export async function getOrderClaimDetails(claimId: string): Promise<OrderClaimD
     headers: authHeaders(),
   });
   return readJson<OrderClaimDetailsResponse>(response);
+}
+
+export async function searchPartnerOfflineOrders(params: URLSearchParams): Promise<PartnerOfflineOrderPageResponse> {
+  const query = params.toString();
+  const response = await fetch(`/api/order/partner-offline-orders${query ? `?${query}` : ''}`, {
+    headers: authHeaders(),
+  });
+  return readJson<PartnerOfflineOrderPageResponse>(response);
+}
+
+export async function getPartnerOfflineOrder(orderNumber: string): Promise<PartnerOfflineOrderDetailsResponse> {
+  const response = await fetch(`/api/order/partner-offline-orders/${encodeURIComponent(orderNumber)}`, {
+    headers: authHeaders(),
+  });
+  return readJson<PartnerOfflineOrderDetailsResponse>(response);
+}
+
+export async function executePartnerOfflineOrderAction(orderNumber: string, actionType: PartnerOfflineOrderActionType): Promise<PartnerOfflineOrderActionResponse> {
+  const response = await fetch(`/api/order/partner-offline-orders/${encodeURIComponent(orderNumber)}/actions`, {
+    method: 'POST',
+    headers: jsonHeaders(`partner-offline-${orderNumber}-${actionType}`),
+    body: JSON.stringify({ actionType }),
+  });
+  return readJson<PartnerOfflineOrderActionResponse>(response);
 }
