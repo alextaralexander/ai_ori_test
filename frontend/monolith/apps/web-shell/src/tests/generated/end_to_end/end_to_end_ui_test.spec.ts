@@ -1,4 +1,4 @@
-// AUTO-GENERATED from agents/tests/. Do not edit manually.
+// GENERATED FROM agents/tests/. DO NOT EDIT MANUALLY.
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
 import '../feature_002_контентные_страницы_и_новости/feature_ui_flow';
 import '../feature_003_faq_инфо_и_документы/feature_ui_flow';
@@ -16,3 +16,4 @@ import '../feature_014_бонусный_кошелек_и_транзакции/f
 import '../feature_015_партнерские_отчеты_комиссии_и_документы/feature_ui_flow';
 import '../feature_016_mlm_структура_и_рост_партнера/feature_ui_flow';
 import '../feature_017_партнерские_офлайн_продажи_и_заказы_клиентов/feature_ui_flow';
+import '../feature_018_партнерский_офис_поставки_и_логистика/feature_ui_flow';

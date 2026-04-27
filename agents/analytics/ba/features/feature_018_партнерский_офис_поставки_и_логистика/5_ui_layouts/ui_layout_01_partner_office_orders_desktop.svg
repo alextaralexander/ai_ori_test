@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 018: список всех заказов партнерского офиса</title>
+  <desc id="desc">Схематичный desktop layout без стилей для маршрута /partner-office/all-orders.</desc>
+  <rect x="24" y="24" width="1232" height="772" fill="white" stroke="#222"/>
+  <text x="48" y="64" font-family="Arial" font-size="28">Все заказы партнерского офиса</text>
+  <rect x="48" y="92" width="1184" height="92" fill="none" stroke="#555"/>
+  <text x="72" y="126" font-family="Arial" font-size="16">Фильтры: период, catalog, officeId, regionId, поиск, статусы, supplyId, pickupPoint, отклонения</text>
+  <rect x="48" y="208" width="1184" height="96" fill="none" stroke="#555"/>
+  <text x="72" y="242" font-family="Arial" font-size="16">KPI: заказы, отгружено, принято, недостачи, SLA доставки, SLA приемки, эскалации</text>
+  <rect x="48" y="328" width="1184" height="360" fill="none" stroke="#555"/>
+  <text x="72" y="362" font-family="Arial" font-size="16">Таблица заказов: orderNumber, партнер, клиент, campaignId, supplyId, оплата, сборка, доставка, отклонение</text>
+  <rect x="72" y="392" width="1136" height="58" fill="none" stroke="#777"/>
+  <rect x="72" y="466" width="1136" height="58" fill="none" stroke="#777"/>
+  <rect x="72" y="540" width="1136" height="58" fill="none" stroke="#777"/>
+  <rect x="72" y="614" width="1136" height="58" fill="none" stroke="#777"/>
+  <rect x="48" y="716" width="360" height="48" fill="none" stroke="#555"/>
+  <text x="72" y="746" font-family="Arial" font-size="16">Пагинация и загрузка следующей страницы</text>
+</svg>

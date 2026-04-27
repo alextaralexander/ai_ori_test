@@ -13,6 +13,7 @@ import { DigitalCatalogueView } from './components/DigitalCatalogueView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { PartnerGrowthView } from './components/PartnerGrowthView';
 import { PartnerOfflineOrdersView } from './components/PartnerOfflineOrdersView';
+import { PartnerOfficeView } from './components/PartnerOfficeView';
 import { PartnerReportsView } from './components/PartnerReportsView';
 import { OrderClaimsView } from './components/OrderClaimsView';
 import { OrderCheckoutView } from './components/OrderCheckoutView';
@@ -53,7 +54,7 @@ function App() {
   const audience = useMemo(resolveAudience, [path, loginRole]);
 
   useEffect(() => {
-  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller')) {
+  if (path === '/test-login' && (loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller' || loginRole === 'partner-office' || loginRole === 'partner-office-foreign' || loginRole === 'logistics-operator' || loginRole === 'regional-manager')) {
       window.localStorage.setItem('bestorigin.role', loginRole);
       setPage(null);
       return;
@@ -87,7 +88,7 @@ function App() {
   }, [audience, loginRole, path]);
 
   if (path === '/test-login') {
-    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller'
+    const role = loginRole === 'customer' || loginRole === 'partner' || loginRole === 'partner-leader' || loginRole === 'business-manager' || loginRole === 'mlm-analyst' || loginRole === 'content-manager' || loginRole === 'catalog-manager' || loginRole === 'guest' || loginRole === 'sponsor' || loginRole === 'invited-partner' || loginRole === 'order-support' || loginRole === 'support' || loginRole === 'finance' || loginRole === 'accountant' || loginRole === 'finance-controller' || loginRole === 'partner-office' || loginRole === 'partner-office-foreign' || loginRole === 'logistics-operator' || loginRole === 'regional-manager'
       ? loginRole
       : window.localStorage.getItem('bestorigin.role') ?? 'guest';
     return <div data-testid="session-ready">{role}</div>;
@@ -170,6 +171,16 @@ function App() {
     contentView = <PartnerOfflineOrdersView params={params} />;
   } else if (path.startsWith('/business/tools/order-management/vip-orders/partner-orders/')) {
     contentView = <PartnerOfflineOrdersView orderNumber={decodeURIComponent(path.slice('/business/tools/order-management/vip-orders/partner-orders/'.length))} params={params} />;
+  } else if (path === '/partner-office/all-orders') {
+    contentView = <PartnerOfficeView mode="orders" params={params} />;
+  } else if (path === '/partner-office/report') {
+    contentView = <PartnerOfficeView mode="report" params={params} />;
+  } else if (path === '/partner-office/supply') {
+    contentView = <PartnerOfficeView mode="supply" params={params} />;
+  } else if (path.startsWith('/partner-office/supply/orders/')) {
+    contentView = <PartnerOfficeView mode="supply-order" orderNumber={decodeURIComponent(path.slice('/partner-office/supply/orders/'.length))} params={params} />;
+  } else if (path.startsWith('/partner-office/supply/')) {
+    contentView = <PartnerOfficeView mode="supply-details" params={params} supplyId={decodeURIComponent(path.slice('/partner-office/supply/'.length))} />;
   } else if (path === '/report/order-history') {
     contentView = <PartnerReportsView mode="orders" params={params} />;
   } else if (path === '/report/info-reciept') {

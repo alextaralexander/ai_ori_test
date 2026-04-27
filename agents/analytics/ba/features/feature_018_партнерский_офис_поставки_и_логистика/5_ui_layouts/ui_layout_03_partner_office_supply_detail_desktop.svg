@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 018: карточка supply-поставки</title>
+  <desc id="desc">Схематичный desktop layout без стилей для маршрута /partner-office/supply/:supplyId.</desc>
+  <rect x="24" y="24" width="1232" height="852" fill="white" stroke="#222"/>
+  <text x="48" y="64" font-family="Arial" font-size="28">Supply BOG-SUP-018-001</text>
+  <rect x="48" y="92" width="760" height="108" fill="none" stroke="#555"/>
+  <text x="72" y="126" font-family="Arial" font-size="16">Шапка: status, officeId, warehouseId, даты, WMS/1C document, available actions</text>
+  <rect x="840" y="92" width="392" height="108" fill="none" stroke="#555"/>
+  <text x="864" y="126" font-family="Arial" font-size="16">Actions: start acceptance, record deviation, escalation</text>
+  <rect x="48" y="232" width="560" height="250" fill="none" stroke="#555"/>
+  <text x="72" y="266" font-family="Arial" font-size="16">Связанные заказы: orderNumber, customerId, box, completeness, delivery</text>
+  <rect x="640" y="232" width="592" height="250" fill="none" stroke="#555"/>
+  <text x="664" y="266" font-family="Arial" font-size="16">Timeline статусов supply и складских движений</text>
+  <rect x="48" y="520" width="560" height="220" fill="none" stroke="#555"/>
+  <text x="72" y="554" font-family="Arial" font-size="16">Панель отклонений: shortage, surplus, damaged, reasonCode, claim link</text>
+  <rect x="640" y="520" width="592" height="220" fill="none" stroke="#555"/>
+  <text x="664" y="554" font-family="Arial" font-size="16">Audit metadata: actor, timestamp, sourceReference, correlationId</text>
+  <rect x="48" y="780" width="1184" height="56" fill="none" stroke="#555"/>
+  <text x="72" y="814" font-family="Arial" font-size="16">Переходы: order details, claim workflow, pickup workflow, delivery workflow</text>
+</svg>

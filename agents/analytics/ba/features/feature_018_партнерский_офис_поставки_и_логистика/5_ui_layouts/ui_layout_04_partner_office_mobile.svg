@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="980" viewBox="0 0 390 980" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 018: mobile layout партнерского офиса</title>
+  <desc id="desc">Схематичный mobile layout без стилей для заказов, поставок и карточки supply.</desc>
+  <rect x="12" y="12" width="366" height="956" fill="white" stroke="#222"/>
+  <text x="24" y="48" font-family="Arial" font-size="20">Партнерский офис</text>
+  <rect x="24" y="68" width="342" height="52" fill="none" stroke="#555"/>
+  <text x="40" y="100" font-family="Arial" font-size="14">Tabs: заказы / поставки / отчет</text>
+  <rect x="24" y="140" width="342" height="104" fill="none" stroke="#555"/>
+  <text x="40" y="172" font-family="Arial" font-size="14">Свернутые фильтры и поиск</text>
+  <rect x="24" y="264" width="342" height="92" fill="none" stroke="#555"/>
+  <text x="40" y="296" font-family="Arial" font-size="14">KPI карточки: SLA, недостачи, поставки</text>
+  <rect x="24" y="380" width="342" height="120" fill="none" stroke="#777"/>
+  <text x="40" y="412" font-family="Arial" font-size="14">Карточка заказа BOG-ORD-018-001</text>
+  <text x="40" y="438" font-family="Arial" font-size="14">status, supplyId, delivery, deviation</text>
+  <rect x="24" y="520" width="342" height="120" fill="none" stroke="#777"/>
+  <text x="40" y="552" font-family="Arial" font-size="14">Карточка supply BOG-SUP-018-001</text>
+  <text x="40" y="578" font-family="Arial" font-size="14">dates, boxes, SKU, WMS document</text>
+  <rect x="24" y="660" width="342" height="144" fill="none" stroke="#555"/>
+  <text x="40" y="692" font-family="Arial" font-size="14">Timeline и складские движения</text>
+  <rect x="24" y="824" width="342" height="104" fill="none" stroke="#555"/>
+  <text x="40" y="856" font-family="Arial" font-size="14">Actions: приемка, отклонение, переходы</text>
+</svg>

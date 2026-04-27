@@ -1,0 +1,94 @@
+@startuml
+' Feature 018 partner-office ER changes.
+entity "partner_office_supply" as supply {
+  * supply_id : varchar(64)
+  --
+  office_id : varchar(64)
+  region_id : varchar(64)
+  warehouse_id : varchar(64)
+  external_wms_document_id : varchar(128)
+  campaign_id : varchar(64)
+  status : varchar(32)
+  planned_shipment_at : timestamptz
+  planned_arrival_at : timestamptz
+  actual_arrival_at : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "partner_office_supply_order" as supply_order {
+  * supply_order_id : uuid
+  --
+  supply_id : varchar(64)
+  order_number : varchar(64)
+  partner_person_number : varchar(64)
+  customer_id : varchar(64)
+  pickup_point_id : varchar(64)
+  order_status : varchar(32)
+  payment_status : varchar(32)
+  assembly_status : varchar(32)
+  delivery_status : varchar(32)
+  grand_total_amount : numeric(19,2)
+  currency : varchar(3)
+  has_deviation : boolean
+}
+
+entity "partner_office_supply_item" as supply_item {
+  * supply_item_id : uuid
+  --
+  supply_id : varchar(64)
+  order_number : varchar(64)
+  sku : varchar(64)
+  product_name : varchar(255)
+  expected_quantity : integer
+  accepted_quantity : integer
+  box_number : varchar(64)
+}
+
+entity "partner_office_movement" as movement {
+  * movement_id : uuid
+  --
+  supply_id : varchar(64)
+  order_number : varchar(64)
+  movement_type : varchar(48)
+  source_system : varchar(32)
+  external_reference : varchar(128)
+  occurred_at : timestamptz
+  actor_id : varchar(64)
+}
+
+entity "partner_office_deviation" as deviation {
+  * deviation_id : uuid
+  --
+  supply_id : varchar(64)
+  order_number : varchar(64)
+  sku : varchar(64)
+  deviation_type : varchar(32)
+  quantity : integer
+  reason_code : varchar(64)
+  comment : text
+  claim_id : varchar(64)
+  created_at : timestamptz
+  created_by : varchar(64)
+}
+
+entity "partner_office_escalation" as escalation {
+  * escalation_id : uuid
+  --
+  supply_id : varchar(64)
+  reason_code : varchar(64)
+  owner_user_id : varchar(64)
+  due_at : timestamptz
+  status : varchar(32)
+  comment : text
+  created_at : timestamptz
+}
+
+supply ||--o{ supply_order : contains
+supply ||--o{ supply_item : includes
+supply ||--o{ movement : tracks
+supply ||--o{ deviation : records
+supply ||--o{ escalation : escalates
+supply_order ||--o{ supply_item : order lines
+supply_order ||--o{ deviation : order deviations
+@enduml

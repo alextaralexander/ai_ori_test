@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="860" viewBox="0 0 1280 860" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 018: supply-поставки и отчет партнерского офиса</title>
+  <desc id="desc">Схематичный desktop layout без стилей для маршрутов /partner-office/supply и /partner-office/report.</desc>
+  <rect x="24" y="24" width="1232" height="812" fill="white" stroke="#222"/>
+  <text x="48" y="64" font-family="Arial" font-size="28">Поставки и отчет офиса</text>
+  <rect x="48" y="92" width="1184" height="76" fill="none" stroke="#555"/>
+  <text x="72" y="124" font-family="Arial" font-size="16">Переключатель вкладок: supply-поставки / отчет / проблемные маршруты</text>
+  <rect x="48" y="192" width="1184" height="88" fill="none" stroke="#555"/>
+  <text x="72" y="226" font-family="Arial" font-size="16">Фильтры: период, офис, регион, warehouseId, status, plannedArrivalDate, hasDeviation</text>
+  <rect x="48" y="304" width="548" height="208" fill="none" stroke="#555"/>
+  <text x="72" y="338" font-family="Arial" font-size="16">KPI отчета: supplyCount, boxCount, skuCount, accepted, shortage, damaged, SLA</text>
+  <rect x="636" y="304" width="596" height="208" fill="none" stroke="#555"/>
+  <text x="660" y="338" font-family="Arial" font-size="16">Проблемные маршруты и эскалации: reasonCode, owner, dueAt</text>
+  <rect x="48" y="544" width="1184" height="220" fill="none" stroke="#555"/>
+  <text x="72" y="578" font-family="Arial" font-size="16">Список supply: supplyId, status, planned dates, orders, boxes, SKU, deviationCount, WMS document</text>
+  <rect x="72" y="608" width="1136" height="52" fill="none" stroke="#777"/>
+  <rect x="72" y="676" width="1136" height="52" fill="none" stroke="#777"/>
+  <rect x="72" y="744" width="1136" height="52" fill="none" stroke="#777"/>
+</svg>

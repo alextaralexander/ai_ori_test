@@ -1,4 +1,4 @@
-// AUTO-GENERATED from agents/tests/. Do not edit manually.
+// GENERATED FROM agents/tests/. DO NOT EDIT MANUALLY.
 package com.bestorigin.tests.endtoend;
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
@@ -25,5 +25,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature015.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature016.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature017.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature018.FeatureApiTest().assertFeatureGreenPath();
     }
 }

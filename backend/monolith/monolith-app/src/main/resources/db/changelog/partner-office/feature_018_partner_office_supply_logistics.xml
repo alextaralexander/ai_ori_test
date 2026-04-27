@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-018-partner-office-supply-logistics" author="codex">
+        <createTable tableName="partner_office_supply">
+            <column name="supply_id" type="varchar(64)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_supply"/>
+            </column>
+            <column name="office_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="region_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="warehouse_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="external_wms_document_id" type="varchar(128)"/>
+            <column name="campaign_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="planned_shipment_at" type="timestamp"/>
+            <column name="planned_arrival_at" type="timestamp"/>
+            <column name="actual_arrival_at" type="timestamp"/>
+            <column name="created_at" type="timestamp"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="partner_office_supply_order">
+            <column name="supply_order_id" type="varchar(64)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_supply_order"/></column>
+            <column name="supply_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="order_number" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="partner_person_number" type="varchar(64)"/>
+            <column name="customer_id" type="varchar(64)"/>
+            <column name="pickup_point_id" type="varchar(64)"/>
+            <column name="order_status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="payment_status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="assembly_status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="delivery_status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="grand_total_amount" type="numeric(19,2)"/>
+            <column name="currency" type="char(3)"/>
+            <column name="has_deviation" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="partner_office_supply_item">
+            <column name="supply_item_id" type="varchar(64)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_supply_item"/></column>
+            <column name="supply_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="order_number" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="sku" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="product_name" type="varchar(255)"/>
+            <column name="expected_quantity" type="int"><constraints nullable="false"/></column>
+            <column name="accepted_quantity" type="int"><constraints nullable="false"/></column>
+            <column name="box_number" type="varchar(64)"/>
+        </createTable>
+
+        <createTable tableName="partner_office_movement">
+            <column name="movement_id" type="varchar(64)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_movement"/></column>
+            <column name="supply_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="order_number" type="varchar(64)"/>
+            <column name="movement_type" type="varchar(48)"><constraints nullable="false"/></column>
+            <column name="source_system" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="external_reference" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamp"><constraints nullable="false"/></column>
+            <column name="actor_id" type="varchar(64)"/>
+        </createTable>
+
+        <createTable tableName="partner_office_deviation">
+            <column name="deviation_id" type="varchar(64)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_deviation"/></column>
+            <column name="supply_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="order_number" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="sku" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="deviation_type" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="quantity" type="int"><constraints nullable="false"/></column>
+            <column name="reason_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="comment" type="text"/>
+            <column name="claim_id" type="varchar(64)"/>
+            <column name="created_at" type="timestamp"><constraints nullable="false"/></column>
+            <column name="created_by" type="varchar(64)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="partner_office_escalation">
+            <column name="escalation_id" type="varchar(64)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_partner_office_escalation"/></column>
+            <column name="supply_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="reason_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="owner_user_id" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="due_at" type="timestamp"/>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="comment" type="text"/>
+            <column name="created_at" type="timestamp"><constraints nullable="false"/></column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="partner_office_supply_order" baseColumnNames="supply_id" constraintName="fk_partner_office_supply_order_supply" referencedTableName="partner_office_supply" referencedColumnNames="supply_id"/>
+        <addForeignKeyConstraint baseTableName="partner_office_supply_item" baseColumnNames="supply_id" constraintName="fk_partner_office_supply_item_supply" referencedTableName="partner_office_supply" referencedColumnNames="supply_id"/>
+        <addForeignKeyConstraint baseTableName="partner_office_movement" baseColumnNames="supply_id" constraintName="fk_partner_office_movement_supply" referencedTableName="partner_office_supply" referencedColumnNames="supply_id"/>
+        <addForeignKeyConstraint baseTableName="partner_office_deviation" baseColumnNames="supply_id" constraintName="fk_partner_office_deviation_supply" referencedTableName="partner_office_supply" referencedColumnNames="supply_id"/>
+        <addForeignKeyConstraint baseTableName="partner_office_escalation" baseColumnNames="supply_id" constraintName="fk_partner_office_escalation_supply" referencedTableName="partner_office_supply" referencedColumnNames="supply_id"/>
+        <addUniqueConstraint tableName="partner_office_supply_order" columnNames="supply_id, order_number" constraintName="uk_partner_office_supply_order"/>
+        <createIndex tableName="partner_office_supply" indexName="idx_partner_office_supply_office_status"><column name="office_id"/><column name="status"/></createIndex>
+        <createIndex tableName="partner_office_supply" indexName="idx_partner_office_supply_region_status"><column name="region_id"/><column name="status"/></createIndex>
+        <createIndex tableName="partner_office_supply_order" indexName="idx_partner_office_supply_order_order_number"><column name="order_number"/></createIndex>
+        <createIndex tableName="partner_office_deviation" indexName="idx_partner_office_deviation_supply"><column name="supply_id"/><column name="deviation_type"/></createIndex>
+    </changeSet>
+</databaseChangeLog>

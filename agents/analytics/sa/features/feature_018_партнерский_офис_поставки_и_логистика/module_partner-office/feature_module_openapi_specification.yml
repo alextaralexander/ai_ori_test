@@ -1,0 +1,419 @@
+openapi: 3.1.0
+info:
+  title: Best Ori Gin Partner Office API - Feature 018
+  version: 1.0.0
+  description: API для партнерского офиса, supply-поставок, приемки, отклонений и логистической отчетности.
+servers:
+  - url: /api/partner-office
+tags:
+  - name: PartnerOfficeOrders
+  - name: PartnerOfficeSupply
+  - name: PartnerOfficeReport
+paths:
+  /orders:
+    get:
+      tags: [PartnerOfficeOrders]
+      summary: Список всех заказов партнерского офиса
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date }
+        - name: campaignId
+          in: query
+          schema: { type: string }
+        - name: officeId
+          in: query
+          schema: { type: string }
+        - name: regionId
+          in: query
+          schema: { type: string }
+        - name: query
+          in: query
+          schema: { type: string }
+        - name: orderStatus
+          in: query
+          schema: { type: string }
+        - name: paymentStatus
+          in: query
+          schema: { type: string }
+        - name: assemblyStatus
+          in: query
+          schema: { type: string }
+        - name: supplyId
+          in: query
+          schema: { type: string }
+        - name: deliveryStatus
+          in: query
+          schema: { type: string }
+        - name: pickupPointId
+          in: query
+          schema: { type: string }
+        - name: hasDeviation
+          in: query
+          schema: { type: boolean }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Страница заказов офиса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerOfficeOrderPageResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+  /supply:
+    get:
+      tags: [PartnerOfficeSupply]
+      summary: Список supply-поставок партнерского офиса
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: officeId
+          in: query
+          schema: { type: string }
+        - name: regionId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: hasDeviation
+          in: query
+          schema: { type: boolean }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Страница supply-поставок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerOfficeSupplyPageResponse'
+  /supply/{supplyId}:
+    get:
+      tags: [PartnerOfficeSupply]
+      summary: Детали supply-поставки
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: supplyId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Карточка supply-поставки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerOfficeSupplyDetailsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /supply/{supplyId}/transition:
+    post:
+      tags: [PartnerOfficeSupply]
+      summary: Изменить статус supply-поставки
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+        - name: supplyId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplyTransitionRequest'
+      responses:
+        '200':
+          description: Статус обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplyActionResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /supply/orders/{orderNumber}:
+    get:
+      tags: [PartnerOfficeSupply]
+      summary: Заказ внутри supply-поставки
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: orderNumber
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Заказ в контексте поставки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerOfficeSupplyOrderDetailsResponse'
+  /supply/orders/{orderNumber}/deviations:
+    post:
+      tags: [PartnerOfficeSupply]
+      summary: Зафиксировать отклонение приемки
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+        - name: orderNumber
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviationCreateRequest'
+      responses:
+        '200':
+          description: Отклонение зафиксировано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplyActionResponse'
+  /report:
+    get:
+      tags: [PartnerOfficeReport]
+      summary: Отчет партнерского офиса
+      parameters:
+        - $ref: '#/components/parameters/UserContextId'
+        - name: officeId
+          in: query
+          schema: { type: string }
+        - name: regionId
+          in: query
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: KPI и проблемные маршруты офиса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerOfficeReportResponse'
+components:
+  parameters:
+    UserContextId:
+      name: X-User-Context-Id
+      in: header
+      required: true
+      schema: { type: string }
+  responses:
+    AccessDenied:
+      description: Доступ запрещен
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: Сущность не найдена
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    PartnerOfficeOrderPageResponse:
+      type: object
+      required: [items, page, size, totalElements]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PartnerOfficeOrderSummary' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+    PartnerOfficeOrderSummary:
+      type: object
+      required: [orderNumber, officeId, campaignId, orderStatus, paymentStatus, assemblyStatus, deliveryStatus, grandTotalAmount, currency]
+      properties:
+        orderNumber: { type: string }
+        officeId: { type: string }
+        regionId: { type: string }
+        partnerPersonNumber: { type: string }
+        customerId: { type: string }
+        campaignId: { type: string }
+        supplyId: { type: string }
+        pickupPointId: { type: string }
+        orderStatus: { type: string }
+        paymentStatus: { type: string }
+        assemblyStatus: { type: string }
+        deliveryStatus: { type: string }
+        hasDeviation: { type: boolean }
+        grandTotalAmount: { type: string }
+        currency: { type: string }
+    PartnerOfficeSupplyPageResponse:
+      type: object
+      required: [items, page, size, totalElements]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PartnerOfficeSupplySummary' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+    PartnerOfficeSupplySummary:
+      type: object
+      properties:
+        supplyId: { type: string }
+        officeId: { type: string }
+        regionId: { type: string }
+        warehouseId: { type: string }
+        externalWmsDocumentId: { type: string }
+        status: { type: string }
+        plannedShipmentAt: { type: string, format: date-time }
+        plannedArrivalAt: { type: string, format: date-time }
+        actualArrivalAt: { type: string, format: date-time }
+        orderCount: { type: integer }
+        boxCount: { type: integer }
+        skuCount: { type: integer }
+        deviationCount: { type: integer }
+    PartnerOfficeSupplyDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/PartnerOfficeSupplySummary'
+        - type: object
+          properties:
+            orders:
+              type: array
+              items: { $ref: '#/components/schemas/PartnerOfficeOrderSummary' }
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/SupplyItemResponse' }
+            movements:
+              type: array
+              items: { $ref: '#/components/schemas/MovementResponse' }
+            deviations:
+              type: array
+              items: { $ref: '#/components/schemas/DeviationResponse' }
+            availableActions:
+              type: array
+              items: { type: string }
+    PartnerOfficeSupplyOrderDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/PartnerOfficeOrderSummary'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/SupplyItemResponse' }
+            movements:
+              type: array
+              items: { $ref: '#/components/schemas/MovementResponse' }
+            deviations:
+              type: array
+              items: { $ref: '#/components/schemas/DeviationResponse' }
+            workflowLinks:
+              type: object
+              additionalProperties: { type: string }
+    SupplyItemResponse:
+      type: object
+      properties:
+        sku: { type: string }
+        productName: { type: string }
+        expectedQuantity: { type: integer }
+        acceptedQuantity: { type: integer }
+        boxNumber: { type: string }
+    MovementResponse:
+      type: object
+      properties:
+        movementType: { type: string }
+        sourceSystem: { type: string }
+        externalReference: { type: string }
+        occurredAt: { type: string, format: date-time }
+        actorId: { type: string }
+    DeviationResponse:
+      type: object
+      properties:
+        deviationId: { type: string }
+        deviationType: { type: string }
+        sku: { type: string }
+        quantity: { type: integer }
+        reasonCode: { type: string }
+        comment: { type: string }
+        claimId: { type: string }
+    SupplyTransitionRequest:
+      type: object
+      required: [targetStatus]
+      properties:
+        targetStatus: { type: string }
+        reasonCode: { type: string }
+        comment: { type: string }
+    DeviationCreateRequest:
+      type: object
+      required: [supplyId, deviationType, sku, quantity, reasonCode]
+      properties:
+        supplyId: { type: string }
+        deviationType: { type: string }
+        sku: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        reasonCode: { type: string }
+        comment: { type: string }
+    SupplyActionResponse:
+      type: object
+      required: [messageCode, correlationId]
+      properties:
+        messageCode: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        correlationId: { type: string }
+    PartnerOfficeReportResponse:
+      type: object
+      properties:
+        officeId: { type: string }
+        regionId: { type: string }
+        supplyCount: { type: integer }
+        orderCount: { type: integer }
+        shortageCount: { type: integer }
+        damagedCount: { type: integer }
+        shipmentSlaPercent: { type: string }
+        acceptanceSlaPercent: { type: string }
+        escalations:
+          type: array
+          items:
+            type: object
+            properties:
+              supplyId: { type: string }
+              reasonCode: { type: string }
+              ownerUserId: { type: string }
+              dueAt: { type: string, format: date-time }
+              status: { type: string }
+    ErrorResponse:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        details:
+          type: array
+          items: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true

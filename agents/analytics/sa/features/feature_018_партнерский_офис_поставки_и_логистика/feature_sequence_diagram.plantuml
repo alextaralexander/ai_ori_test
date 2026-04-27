@@ -1,0 +1,66 @@
+@startuml
+' Feature 018 partner-office sequence.
+actor "Партнер-офис" as Office
+actor "Логистический оператор" as Logistics
+actor "Региональный менеджер" as Manager
+participant "Frontend web-shell\n/partner-office/*" as FE
+participant "partner-office Controller" as Controller
+participant "partner-office Service" as Service
+database "partner-office DB" as DB
+participant "order module" as Order
+participant "claim workflow" as Claim
+participant "delivery/pickup workflow" as Delivery
+participant "WMS/1C adapter" as WMS
+
+Office -> FE : Открывает /partner-office/all-orders
+FE -> Controller : GET /api/partner-office/orders\nX-User-Context-Id
+Controller -> Service : searchOrders(filters, userContext)
+Service -> DB : load office orders page
+Service -> Order : enrich order references
+Service -> Delivery : enrich delivery and pickup links
+Service --> Controller : PartnerOfficeOrderPageResponse
+Controller --> FE : 200 JSON
+FE --> Office : Список заказов, статусы, supplyId, deviation
+
+Office -> FE : Открывает /partner-office/supply/BOG-SUP-018-001
+FE -> Controller : GET /api/partner-office/supply/{supplyId}
+Controller -> Service : getSupplyDetails(supplyId, userContext)
+Service -> DB : load supply, orders, items, movements, deviations
+Service -> WMS : optional latest external status snapshot
+Service --> Controller : PartnerOfficeSupplyDetailsResponse
+Controller --> FE : 200 JSON
+FE --> Office : Карточка supply, timeline, actions
+
+Logistics -> FE : Выполняет transition ARRIVED
+FE -> Controller : POST /api/partner-office/supply/{supplyId}/transition\nIdempotency-Key
+Controller -> Service : transitionSupply(targetStatus, reason)
+Service -> DB : validate lifecycle and persist status movement
+Service --> Controller : STR_MNEMO_PARTNER_OFFICE_SUPPLY_STATUS_UPDATED
+Controller --> FE : 200 SupplyActionResponse
+FE --> Logistics : Локализованное сообщение из i18n
+
+Office -> FE : Фиксирует недостачу по заказу
+FE -> Controller : POST /api/partner-office/supply/orders/{orderNumber}/deviations
+Controller -> Service : recordDeviation(request, userContext)
+Service -> DB : persist deviation and movement
+Service -> Claim : expose claim reference data
+Service --> Controller : STR_MNEMO_PARTNER_OFFICE_DEVIATION_RECORDED
+Controller --> FE : 200 SupplyActionResponse
+FE --> Office : Отклонение видно в карточке заказа
+
+Manager -> FE : Открывает /partner-office/report
+FE -> Controller : GET /api/partner-office/report
+Controller -> Service : buildReport(filters, userContext)
+Service -> DB : aggregate SLA, shortages, damaged, escalations
+Service --> Controller : PartnerOfficeReportResponse
+Controller --> FE : 200 JSON
+FE --> Manager : KPI, проблемные маршруты и эскалации
+
+Office -> FE : Запрашивает чужой supply
+FE -> Controller : GET /api/partner-office/supply/foreign
+Controller -> Service : getSupplyDetails(foreign, userContext)
+Service -> DB : check access by officeId/regionId
+Service --> Controller : access denied
+Controller --> FE : 403 STR_MNEMO_PARTNER_OFFICE_ACCESS_DENIED
+FE --> Office : Локализованное сообщение без раскрытия данных
+@enduml
