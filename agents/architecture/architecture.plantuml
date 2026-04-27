@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 030
+title Best Ori Gin monolith architecture through feature 031
 
 package "frontend/monolith apps/web-shell" {
   [I18nProvider]
@@ -32,6 +32,11 @@ package "frontend/monolith apps/web-shell" {
   [AdminCatalogHotspots UI]
   [AdminCatalogRollover UI]
   [AdminCatalogAudit UI]
+  [AdminPricing UI]
+  [AdminPricingPriceLists UI]
+  [AdminPricingPromotions UI]
+  [AdminPricingImportExport UI]
+  [AdminPricingAudit UI]
   [AuthProvider]
   [RoleRouter]
   [ActivePartnerSwitcher]
@@ -70,6 +75,7 @@ package "backend/monolith/monolith-app" {
   [admin-referral]
   [admin-pim]
   [admin-catalog]
+  [admin-pricing]
 }
 
 database "Postgres/Liquibase XML" as db
@@ -113,6 +119,11 @@ cloud "Hybrid Pixel" as hybrid
 [AdminCatalogHotspots UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/hotspots, /validate-links
 [AdminCatalogRollover UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/rollover
 [AdminCatalogAudit UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/audit
+[AdminPricing UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/price-lists, /promotions
+[AdminPricingPriceLists UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/price-lists, /prices, /promo-prices, /segment-rules
+[AdminPricingPromotions UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/promotions, /offers, /gift-rules, /publish, /pause
+[AdminPricingImportExport UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/imports, /exports
+[AdminPricingAudit UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/audit-events
 [EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
 [EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
 [EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
@@ -159,6 +170,14 @@ cloud "Hybrid Pixel" as hybrid
 [admin-catalog] --> [catalog] : current issue, PDF pages, hotspots and archive projection for digital catalog
 [admin-catalog] --> s3 : PDF, cover and page image fileReferenceId metadata
 [admin-catalog] --> db : campaigns, issues, materials, pages, hotspots, rollover jobs and audit
+[admin-pricing] --> [authorization] : admin pricing permission, scope and elevated checks
+[admin-pricing] --> [admin-rbac] : permission matrix and responsibility scopes
+[admin-pricing] --> [admin-pim] : validate published products, bundle items and gift SKU
+[admin-pricing] --> [admin-catalog] : validate campaign windows and current/next catalog context
+[admin-pricing] --> [catalog] : active price lists, promo prices, offers and gifts for storefront
+[admin-pricing] --> [cart] : active shopping offers, gift rules and threshold benefits
+[admin-pricing] --> [order] : checkout validation for prices, offers and gifts
+[admin-pricing] --> db : price lists, prices, promo prices, segment rules, promotions, offers, gifts, import/export jobs and audit
 [platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
 [AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
 [AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events

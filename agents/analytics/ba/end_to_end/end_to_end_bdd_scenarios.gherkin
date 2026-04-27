@@ -276,3 +276,31 @@
     И архив содержит прошлый выпуск с PDF и датами действия
     И audit trail содержит события `CAMPAIGN_CREATED`, `PDF_APPROVED`, `HOTSPOT_CREATED` и `ROLLOVER_COMPLETED`
     И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_CATALOG_*` для предопределенных сообщений
+
+  Сценарий: Pricing и promotions публикуют цены, offers и подарки для кампании
+    Допустим pricing manager авторизован и имеет permission scopes `ADMIN_PRICING_MANAGE` и `ADMIN_PRICING_PUBLISH`
+    И promotions manager авторизован и имеет permission scope `ADMIN_PROMOTION_MANAGE`
+    И существует опубликованный PIM-товар `BOG-SERUM-001`
+    И существует текущая кампания `CAM-2026-05`
+    Когда pricing manager открывает `/admin/pricing`
+    И создает price list `PL-RU-2026-05` для кампании `CAM-2026-05`, страны `RU`, валюты `RUB` и канала `WEB`
+    И добавляет базовую цену SKU `BOG-SERUM-001` и promo price для segmentCode `PARTNER`
+    И promotions manager создает promotion `MAY-BEAUTY-BUNDLE`
+    И настраивает shopping offer `MAY-SERUM-CREAM-BUNDLE` и gift rule для threshold amount `5000.00`
+    И бизнес-администратор запускает preflight validation и publish с idempotency key `publish-pricing-may-2026`
+    Тогда price list, promo price, shopping offer и gift rule становятся активными
+    И публичный каталог показывает действующую цену товара
+    И корзина feature #009 показывает offer, прогресс до подарка и применимые segment rules
+    И checkout feature #010 повторно валидирует цену, offer и gift перед созданием заказа
+    И партнерский офлайн-заказ feature #017 использует те же опубликованные segment rules
+    И audit trail содержит события `PRICE_LIST_CREATED`, `PROMO_PRICE_CREATED`, `SHOPPING_OFFER_CREATED`, `GIFT_RULE_CREATED` и `PRICING_PUBLISHED`
+    И backend response содержит только mnemonic-коды `STR_MNEMO_ADMIN_PRICING_*` для предопределенных сообщений
+
+  Сценарий: Ошибочный shopping offer срочно отключается без удаления истории
+    Допустим бизнес-администратор авторизован и имеет permission scope `ADMIN_PRICING_PUBLISH`
+    И существует активный shopping offer `MAY-SERUM-CREAM-BUNDLE`
+    Когда бизнес-администратор выполняет emergency pause с reasonCode `INCORRECT_DISCOUNT`
+    Тогда корзина и checkout больше не применяют offer `MAY-SERUM-CREAM-BUNDLE`
+    И опубликованные базовые цены остаются доступными каталогу и карточке товара
+    И audit trail содержит событие `SHOPPING_OFFER_PAUSED`, reasonCode и correlationId
+    И frontend показывает локализованный результат через i18n dictionaries

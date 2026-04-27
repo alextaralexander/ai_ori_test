@@ -1,0 +1,88 @@
+@startuml
+title Feature 031 - цены, акции, offers, gifts и бенефиты
+
+actor "Pricing manager" as PricingManager
+actor "Promotions manager" as PromotionsManager
+actor "Бизнес-администратор" as BusinessAdmin
+participant "Admin frontend\n/admin/pricing" as AdminUi
+participant "admin-pricing API\n/module admin-pricing" as AdminPricing
+database "admin_pricing_*" as PricingDb
+participant "admin-pim API\npublished products" as AdminPim
+participant "admin-catalog API\ncampaign windows" as AdminCatalog
+participant "catalog/cart/checkout\npricing consumers" as Consumers
+participant "Audit trail" as Audit
+
+PricingManager -> AdminUi: открывает workspace цен и промо
+AdminUi -> AdminPricing: GET /price-lists?campaignId=CAM-2026-05
+AdminPricing -> PricingDb: search price lists
+PricingDb --> AdminPricing: page
+AdminPricing --> AdminUi: PriceListPage
+
+PricingManager -> AdminUi: создает price list PL-RU-2026-05
+AdminUi -> AdminPricing: POST /price-lists
+AdminPricing -> AdminCatalog: validate campaignId and active window
+AdminCatalog --> AdminPricing: campaign valid
+AdminPricing -> PricingDb: insert admin_pricing_price_list
+AdminPricing -> Audit: PRICE_LIST_CREATED
+AdminPricing --> AdminUi: PriceListResponse
+
+PricingManager -> AdminUi: добавляет базовую цену SKU
+AdminUi -> AdminPricing: POST /price-lists/{id}/prices
+AdminPricing -> AdminPim: validate SKU is published
+AdminPim --> AdminPricing: product published
+AdminPricing -> PricingDb: check active interval overlap
+alt price period overlaps
+  AdminPricing --> AdminUi: 409 STR_MNEMO_ADMIN_PRICING_PRICE_PERIOD_OVERLAP
+else valid price
+  AdminPricing -> PricingDb: insert admin_pricing_price
+  AdminPricing -> Audit: PRICE_CREATED
+  AdminPricing --> AdminUi: BasePriceResponse
+end
+
+PricingManager -> AdminUi: добавляет promo price и segment rule
+AdminUi -> AdminPricing: POST /promo-prices, POST /segment-rules
+AdminPricing -> PricingDb: validate currency, margin, priority
+AdminPricing -> PricingDb: insert promo_price and segment_rule
+AdminPricing -> Audit: PROMO_PRICE_CREATED, SEGMENT_RULE_CREATED
+AdminPricing --> AdminUi: responses with status DRAFT
+
+PromotionsManager -> AdminUi: создает promotion, offer, bundle и gift
+AdminUi -> AdminPricing: POST /promotions
+AdminPricing -> PricingDb: insert admin_pricing_promotion
+AdminPricing -> Audit: PROMOTION_CREATED
+AdminUi -> AdminPricing: POST /promotions/{id}/offers
+AdminPricing -> AdminPim: validate offer item SKU list
+AdminPricing -> PricingDb: insert shopping_offer and offer_item
+AdminPricing -> Audit: SHOPPING_OFFER_CREATED
+AdminUi -> AdminPricing: POST /promotions/{id}/gift-rules
+AdminPricing -> AdminPim: validate gift SKU is published
+AdminPricing -> PricingDb: insert gift_rule
+AdminPricing -> Audit: GIFT_RULE_CREATED
+
+BusinessAdmin -> AdminUi: запускает publish с Idempotency-Key
+AdminUi -> AdminPricing: POST /publish
+AdminPricing -> PricingDb: load price list, prices, promotions, offers, gifts
+AdminPricing -> AdminPim: validate published products and gift SKUs
+AdminPricing -> AdminCatalog: validate campaign window
+AdminPricing -> PricingDb: preflight overlap, margin, compatibility
+alt preflight failed
+  AdminPricing -> Audit: PRICING_PUBLISH_REJECTED
+  AdminPricing --> AdminUi: 409 STR_MNEMO_ADMIN_PRICING_PREFLIGHT_FAILED
+else preflight valid
+  AdminPricing -> PricingDb: activate price list and promotions atomically
+  AdminPricing -> Audit: PRICING_PUBLISHED
+  AdminPricing --> AdminUi: PublishPricingResponse(PUBLISHED)
+  Consumers -> AdminPricing: read active price rules/offers by campaign and segment
+  AdminPricing -> PricingDb: query active commercial conditions
+  AdminPricing --> Consumers: base price, promo price, offers, gifts, mnemonic reasons
+end
+
+BusinessAdmin -> AdminUi: emergency pause offer
+AdminUi -> AdminPricing: POST /offers/{offerId}/pause
+AdminPricing -> PricingDb: set offer status PAUSED
+AdminPricing -> Audit: SHOPPING_OFFER_PAUSED(reasonCode)
+AdminPricing --> AdminUi: ShoppingOfferResponse(PAUSED)
+Consumers -> AdminPricing: recalculation request
+AdminPricing --> Consumers: paused offer excluded
+
+@enduml

@@ -14,6 +14,7 @@ import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionVie
 import { AdminCatalogView } from './components/AdminCatalogView';
 import { AdminCmsView } from './components/AdminCmsView';
 import { AdminPimView } from './components/AdminPimView';
+import { AdminPricingView } from './components/AdminPricingView';
 import { AdminReferralView } from './components/AdminReferralView';
 import { AdminRbacView } from './components/AdminRbacView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
@@ -69,9 +70,12 @@ const testLoginRoles = new Set([
   'marketing-admin',
   'crm-admin',
   'pim-manager',
+  'pricing-manager',
+  'promotions-manager',
   'category-admin',
   'media-manager',
   'commercial-admin',
+  'business-admin',
   'catalog-manager',
 ]);
 
@@ -367,6 +371,8 @@ function App() {
     contentView = <AdminPimView />;
   } else if (path === '/admin/catalogs') {
     contentView = <AdminCatalogView />;
+  } else if (path === '/admin/pricing') {
+    contentView = <AdminPricingView />;
   } else if (path !== '/' && path !== '/home' && path !== '/community') {
     return <div data-testid="route-opened" />;
   }

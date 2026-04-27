@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-031-admin-pricing" author="codex">
+        <createTable tableName="admin_pricing_price_list">
+            <column name="price_list_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="price_list_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_code" type="varchar(2)"/>
+            <column name="currency_code" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel_code" type="varchar(40)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="version" type="bigint" defaultValueNumeric="0"/>
+            <column name="created_by" type="uuid"/>
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="updated_at" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pricing_price">
+            <column name="price_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="price_list_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="varchar(80)"/>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_price" type="numeric(19,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_mode" type="varchar(32)"/>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="version" type="bigint" defaultValueNumeric="0"/>
+        </createTable>
+        <createTable tableName="admin_pricing_promo_price">
+            <column name="promo_price_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="price_list_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promo_price" type="numeric(19,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_type" type="varchar(32)"/>
+            <column name="discount_value" type="numeric(19,4)"/>
+            <column name="segment_code" type="varchar(80)"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pricing_segment_rule">
+            <column name="rule_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="campaign_id" type="varchar(80)"/>
+            <column name="segment_code" type="varchar(80)"/>
+            <column name="role_code" type="varchar(80)"/>
+            <column name="partner_level" type="varchar(80)"/>
+            <column name="customer_type" type="varchar(80)"/>
+            <column name="region_code" type="varchar(40)"/>
+            <column name="priority" type="int"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pricing_promotion">
+            <column name="promotion_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="promotion_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_key" type="varchar(160)"/>
+            <column name="campaign_id" type="varchar(80)"/>
+            <column name="audience" type="varchar(80)"/>
+            <column name="channel_code" type="varchar(40)"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+            <column name="version" type="bigint" defaultValueNumeric="0"/>
+        </createTable>
+        <createTable tableName="admin_pricing_shopping_offer">
+            <column name="offer_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="promotion_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offer_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="offer_type" type="varchar(40)"/>
+            <column name="title_key" type="varchar(160)"/>
+            <column name="description_key" type="varchar(160)"/>
+            <column name="priority" type="int"/>
+            <column name="stackable" type="boolean"/>
+            <column name="mutually_exclusive_group" type="varchar(80)"/>
+            <column name="status" type="varchar(32)"/>
+        </createTable>
+        <createTable tableName="admin_pricing_offer_item">
+            <column name="offer_item_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="offer_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(80)"/>
+            <column name="quantity" type="int"/>
+            <column name="item_role" type="varchar(32)"/>
+            <column name="sort_order" type="int"/>
+        </createTable>
+        <createTable tableName="admin_pricing_gift_rule">
+            <column name="gift_rule_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="promotion_id" type="uuid"/>
+            <column name="gift_sku" type="varchar(80)"/>
+            <column name="trigger_type" type="varchar(40)"/>
+            <column name="threshold_amount" type="numeric(19,4)"/>
+            <column name="trigger_sku" type="varchar(80)"/>
+            <column name="max_gift_quantity" type="int"/>
+            <column name="status" type="varchar(32)"/>
+            <column name="active_from" type="timestamp with time zone"/>
+            <column name="active_to" type="timestamp with time zone"/>
+        </createTable>
+        <createTable tableName="admin_pricing_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="action_code" type="varchar(80)"/>
+            <column name="entity_type" type="varchar(80)"/>
+            <column name="entity_id" type="varchar(80)"/>
+            <column name="old_value" type="jsonb"/>
+            <column name="new_value" type="jsonb"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="occurred_at" type="timestamp with time zone"/>
+        </createTable>
+        <createIndex tableName="admin_pricing_price" indexName="idx_admin_pricing_price_list_sku_window">
+            <column name="price_list_id"/>
+            <column name="sku"/>
+            <column name="active_from"/>
+            <column name="active_to"/>
+        </createIndex>
+        <createIndex tableName="admin_pricing_audit_event" indexName="idx_admin_pricing_audit_entity_correlation">
+            <column name="entity_type"/>
+            <column name="entity_id"/>
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

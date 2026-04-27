@@ -1,0 +1,113 @@
+# language: ru
+Функция: Feature 031. Админ: цены, акции, предложения и бенефиты
+  Административный модуль pricing/promotions Best Ori Gin позволяет управлять
+  прайс-листами, базовыми и промо-ценами, сегментными правилами, shopping offers,
+  подарками, наборами и пороговыми бенефитами без hardcoded пользовательского
+  текста в backend responses.
+
+  Предыстория:
+    Дано пользователь с ролью "Pricing manager" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_PRICING_MANAGE"
+    И пользователь открыл раздел "Цены и промо"
+
+  Сценарий: Создание price list для 21-дневной кампании
+    Когда pricing manager создает price list "PL-RU-2026-05" с названием "Цены майской кампании"
+    И задает campaignId "CAM-2026-05", страну "RU", валюту "RUB", канал "WEB" и даты действия "2026-05-01" - "2026-05-21"
+    Тогда система сохраняет price list со статусом "DRAFT"
+    И audit trail содержит событие "PRICE_LIST_CREATED"
+
+  Сценарий: Запрет дубля кода price list
+    Дано существует draft price list "PL-RU-2026-05"
+    Когда pricing manager повторно создает price list с кодом "PL-RU-2026-05"
+    Тогда backend возвращает статус 409 и код "STR_MNEMO_ADMIN_PRICING_PRICE_LIST_CODE_CONFLICT"
+    И frontend показывает локализованное сообщение из i18n dictionary
+
+  Сценарий: Добавление базовой цены товара
+    Дано существует опубликованный PIM-товар SKU "BOG-SERUM-001"
+    И существует price list "PL-RU-2026-05"
+    Когда pricing manager добавляет базовую цену "1890.00" RUB для SKU "BOG-SERUM-001"
+    И задает период действия "2026-05-01T00:00:00Z" - "2026-05-21T23:59:59Z"
+    Тогда система сохраняет цену со статусом "DRAFT"
+    И price list содержит одну позицию цены для SKU "BOG-SERUM-001"
+
+  Сценарий: Запрет пересечения периодов активных цен
+    Дано для SKU "BOG-SERUM-001" уже существует активная цена в price list "PL-RU-2026-05"
+    Когда pricing manager добавляет вторую активную цену с пересекающимся периодом
+    Тогда backend возвращает статус 409 и код "STR_MNEMO_ADMIN_PRICING_PRICE_PERIOD_OVERLAP"
+    И новая цена не сохраняется
+
+  Сценарий: Создание promo price для сегмента партнеров
+    Дано существует price list "PL-RU-2026-05" с базовой ценой SKU "BOG-SERUM-001"
+    Когда pricing manager создает promo price "1590.00" RUB для SKU "BOG-SERUM-001"
+    И задает segmentCode "PARTNER", reasonCode "MAY_PARTNER_PROMO" и период майской кампании
+    Тогда система сохраняет promo price со статусом "DRAFT"
+    И audit trail содержит событие "PROMO_PRICE_CREATED"
+
+  Сценарий: Создание segment rule для партнерского уровня
+    Когда pricing manager создает segment rule для roleCode "PARTNER", partnerLevel "VIP" и regionCode "RU"
+    И задает priority "100" и campaignId "CAM-2026-05"
+    Тогда система сохраняет правило со статусом "DRAFT"
+    И публичный расчет цены может выбрать правило по роли и уровню партнера
+
+  Сценарий: Создание акции и shopping offer
+    Дано пользователь с ролью "Promotions manager" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_PROMOTION_MANAGE"
+    Когда promotions manager создает акцию "MAY-BEAUTY-BUNDLE" для кампании "CAM-2026-05"
+    И добавляет shopping offer типа "BUNDLE" с кодом "MAY-SERUM-CREAM-BUNDLE"
+    Тогда система сохраняет promotion и offer со статусом "DRAFT"
+    И audit trail содержит события "PROMOTION_CREATED" и "SHOPPING_OFFER_CREATED"
+
+  Сценарий: Настройка bundle offer из опубликованных товаров
+    Дано существует shopping offer "MAY-SERUM-CREAM-BUNDLE"
+    И существуют опубликованные SKU "BOG-SERUM-001" и "BOG-CREAM-002"
+    Когда promotions manager добавляет обязательную позицию SKU "BOG-SERUM-001" количеством "1"
+    И добавляет опциональную позицию SKU "BOG-CREAM-002" количеством "1"
+    И задает bundle price "2990.00" RUB
+    Тогда система сохраняет bundle configuration
+    И offer готов к preflight validation
+
+  Сценарий: Настройка подарка по порогу корзины
+    Дано существует promotion "MAY-BEAUTY-BUNDLE"
+    И существует опубликованный gift SKU "BOG-GIFT-MASK-001"
+    Когда promotions manager создает gift rule с thresholdAmount "5000.00" RUB
+    И связывает gift rule с gift SKU "BOG-GIFT-MASK-001"
+    Тогда система сохраняет gift rule со статусом "DRAFT"
+    И корзина feature #009 сможет показать прогресс до подарка
+
+  Сценарий: Dry-run импорт цен и промо без изменения данных
+    Дано пользователь с ролью "Pricing manager" успешно вошел в административный интерфейс
+    И пользователь имеет RBAC scope "ADMIN_PRICING_IMPORT_EXPORT"
+    Когда pricing manager запускает dry-run import job "PRICING_MAY_2026" с idempotency key "pricing-import-may-2026"
+    И файл содержит базовые цены, promo prices, segment rules и offers
+    Тогда система валидирует строки и возвращает import summary
+    И бизнес-данные price list и offers не изменяются
+    И audit trail содержит событие "PRICING_IMPORT_DRY_RUN"
+
+  Сценарий: Публикация price list и promotion после preflight validation
+    Дано существует price list "PL-RU-2026-05" с валидными ценами
+    И существует promotion "MAY-BEAUTY-BUNDLE" с валидными offers и gift rules
+    Когда бизнес-администратор запускает публикацию с idempotency key "publish-pricing-may-2026"
+    Тогда система выполняет preflight validation
+    И переводит price list и promotion в статус "ACTIVE"
+    И каталог, корзина и checkout получают опубликованные коммерческие условия
+    И audit trail содержит событие "PRICING_PUBLISHED"
+
+  Сценарий: Emergency pause ошибочного offer
+    Дано существует активный shopping offer "MAY-SERUM-CREAM-BUNDLE"
+    Когда бизнес-администратор приостанавливает offer с reasonCode "INCORRECT_DISCOUNT"
+    Тогда система переводит offer в статус "PAUSED"
+    И корзина feature #009 больше не применяет этот offer
+    И audit trail содержит событие "SHOPPING_OFFER_PAUSED"
+
+  Сценарий: Просмотр истории изменения цены
+    Дано для SKU "BOG-SERUM-001" были созданы base price и promo price
+    Когда администратор аудита ищет события по SKU "BOG-SERUM-001" и campaignId "CAM-2026-05"
+    Тогда система показывает oldValue, newValue, actorUserId, actionCode и correlationId
+    И audit view не раскрывает секреты или внутренние stack traces
+
+  Сценарий: Запрет доступа без pricing scope
+    Дано пользователь с ролью "Редактор CMS" успешно вошел в административный интерфейс
+    И пользователь не имеет RBAC scope "ADMIN_PRICING_VIEW"
+    Когда пользователь открывает раздел "Цены и промо"
+    Тогда backend возвращает статус 403 и код "STR_MNEMO_ADMIN_PRICING_FORBIDDEN"
+    И frontend показывает локализованное состояние запрета доступа

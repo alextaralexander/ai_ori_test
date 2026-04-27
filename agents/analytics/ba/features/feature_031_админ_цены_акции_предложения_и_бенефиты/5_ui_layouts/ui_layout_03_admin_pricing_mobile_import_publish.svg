@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="920" viewBox="0 0 390 920" role="img" aria-label="Схематичный мобильный макет импорта и публикации цен">
+  <title>Feature 031 - mobile import and publish</title>
+  <rect x="0" y="0" width="390" height="920" fill="#ffffff"/>
+  <rect x="16" y="16" width="358" height="56" fill="none" stroke="#222222"/>
+  <text x="32" y="50" font-family="Arial" font-size="18">Цены и промо</text>
+
+  <rect x="16" y="92" width="358" height="44" fill="none" stroke="#222222"/>
+  <text x="32" y="120" font-family="Arial" font-size="14">Tabs: Lists | Offers | Import | Audit</text>
+
+  <rect x="16" y="156" width="358" height="132" fill="none" stroke="#222222"/>
+  <text x="32" y="188" font-family="Arial" font-size="15">Import job</text>
+  <text x="32" y="220" font-family="Arial" font-size="13">File: pricing_may_2026.xlsx</text>
+  <text x="32" y="248" font-family="Arial" font-size="13">Mode: dry-run</text>
+  <rect x="248" y="238" width="96" height="32" fill="none" stroke="#222222"/>
+  <text x="268" y="258" font-family="Arial" font-size="13">Run</text>
+
+  <rect x="16" y="308" width="358" height="164" fill="none" stroke="#222222"/>
+  <text x="32" y="340" font-family="Arial" font-size="15">Dry-run summary</text>
+  <text x="32" y="372" font-family="Arial" font-size="13">Rows valid: 1842</text>
+  <text x="32" y="400" font-family="Arial" font-size="13">Warnings: 12 margin threshold</text>
+  <text x="32" y="428" font-family="Arial" font-size="13">Errors: 0 critical</text>
+  <rect x="32" y="444" width="132" height="24" fill="none" stroke="#222222"/>
+  <text x="44" y="462" font-family="Arial" font-size="12">Open row errors</text>
+
+  <rect x="16" y="492" width="358" height="160" fill="none" stroke="#222222"/>
+  <text x="32" y="524" font-family="Arial" font-size="15">Publish preflight</text>
+  <text x="32" y="556" font-family="Arial" font-size="13">PIM products: valid</text>
+  <text x="32" y="584" font-family="Arial" font-size="13">Campaign window: valid</text>
+  <text x="32" y="612" font-family="Arial" font-size="13">Price overlaps: none</text>
+  <rect x="232" y="604" width="112" height="32" fill="none" stroke="#222222"/>
+  <text x="256" y="624" font-family="Arial" font-size="13">Publish</text>
+
+  <rect x="16" y="672" width="358" height="112" fill="none" stroke="#222222"/>
+  <text x="32" y="704" font-family="Arial" font-size="15">Conflict state</text>
+  <text x="32" y="736" font-family="Arial" font-size="13">Mnemonic: STR_MNEMO_ADMIN_PRICING_PRICE_PERIOD_OVERLAP</text>
+  <text x="32" y="764" font-family="Arial" font-size="13">CorrelationId shown with copy action</text>
+
+  <rect x="16" y="804" width="358" height="84" fill="none" stroke="#222222"/>
+  <text x="32" y="836" font-family="Arial" font-size="15">Audit latest events</text>
+  <text x="32" y="864" font-family="Arial" font-size="13">IMPORT_DRY_RUN, PRICING_PUBLISHED</text>
+</svg>

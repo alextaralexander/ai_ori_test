@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-label="Схематичный макет настройки промо, shopping offers и подарков">
+  <title>Feature 031 - promotions, offers and gifts</title>
+  <rect x="0" y="0" width="1440" height="960" fill="#ffffff"/>
+  <rect x="32" y="24" width="1376" height="72" fill="none" stroke="#222222"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Promotions / Shopping offers / Gifts</text>
+  <text x="1100" y="68" font-family="Arial" font-size="14">Роль: Promotions manager</text>
+
+  <rect x="32" y="120" width="416" height="792" fill="none" stroke="#222222"/>
+  <text x="56" y="156" font-family="Arial" font-size="16">Список акций</text>
+  <rect x="56" y="180" width="160" height="28" fill="none" stroke="#222222"/>
+  <rect x="232" y="180" width="176" height="28" fill="none" stroke="#222222"/>
+  <line x1="56" y1="236" x2="424" y2="236" stroke="#222222"/>
+  <text x="56" y="272" font-family="Arial" font-size="14">MAY-BEAUTY-BUNDLE</text>
+  <text x="56" y="304" font-family="Arial" font-size="14">Campaign: CAM-2026-05</text>
+  <text x="56" y="336" font-family="Arial" font-size="14">Status: DRAFT</text>
+  <line x1="56" y1="368" x2="424" y2="368" stroke="#222222"/>
+  <text x="56" y="404" font-family="Arial" font-size="14">WELCOME-GIFT-2026-05</text>
+  <text x="56" y="436" font-family="Arial" font-size="14">Status: SCHEDULED</text>
+  <rect x="56" y="840" width="180" height="36" fill="none" stroke="#222222"/>
+  <text x="78" y="864" font-family="Arial" font-size="14">Создать акцию</text>
+
+  <rect x="480" y="120" width="928" height="236" fill="none" stroke="#222222"/>
+  <text x="504" y="156" font-family="Arial" font-size="16">Promotion details</text>
+  <text x="504" y="192" font-family="Arial" font-size="14">promotionCode, nameKey, campaignId, audience, channel, active window, status</text>
+  <rect x="504" y="216" width="180" height="32" fill="none" stroke="#222222"/>
+  <text x="528" y="238" font-family="Arial" font-size="14">READY_FOR_REVIEW</text>
+  <rect x="704" y="216" width="160" height="32" fill="none" stroke="#222222"/>
+  <text x="732" y="238" font-family="Arial" font-size="14">Publish</text>
+  <rect x="884" y="216" width="176" height="32" fill="none" stroke="#222222"/>
+  <text x="910" y="238" font-family="Arial" font-size="14">Emergency pause</text>
+  <rect x="1080" y="216" width="192" height="32" fill="none" stroke="#222222"/>
+  <text x="1108" y="238" font-family="Arial" font-size="14">Open audit trail</text>
+
+  <rect x="480" y="384" width="444" height="528" fill="none" stroke="#222222"/>
+  <text x="504" y="420" font-family="Arial" font-size="16">Shopping offers</text>
+  <line x1="504" y1="448" x2="900" y2="448" stroke="#222222"/>
+  <text x="504" y="480" font-family="Arial" font-size="14">offerCode</text>
+  <text x="676" y="480" font-family="Arial" font-size="14">type</text>
+  <text x="796" y="480" font-family="Arial" font-size="14">priority</text>
+  <line x1="504" y1="504" x2="900" y2="504" stroke="#222222"/>
+  <text x="504" y="536" font-family="Arial" font-size="14">MAY-SERUM-CREAM-BUNDLE</text>
+  <text x="676" y="536" font-family="Arial" font-size="14">BUNDLE</text>
+  <text x="796" y="536" font-family="Arial" font-size="14">100</text>
+  <text x="504" y="592" font-family="Arial" font-size="14">Eligibility: segment, role, cart amount, SKU</text>
+  <text x="504" y="624" font-family="Arial" font-size="14">Compatibility: stackable, exclusion group</text>
+  <text x="504" y="656" font-family="Arial" font-size="14">Bundle positions: required / optional SKU</text>
+  <rect x="504" y="836" width="164" height="36" fill="none" stroke="#222222"/>
+  <text x="528" y="860" font-family="Arial" font-size="14">Добавить offer</text>
+
+  <rect x="952" y="384" width="456" height="528" fill="none" stroke="#222222"/>
+  <text x="976" y="420" font-family="Arial" font-size="16">Gifts and threshold benefits</text>
+  <text x="976" y="464" font-family="Arial" font-size="14">Gift SKU: BOG-GIFT-MASK-001</text>
+  <text x="976" y="496" font-family="Arial" font-size="14">Threshold amount: 5000 RUB</text>
+  <text x="976" y="528" font-family="Arial" font-size="14">Max gift quantity: 1</text>
+  <line x1="976" y1="560" x2="1384" y2="560" stroke="#222222"/>
+  <text x="976" y="604" font-family="Arial" font-size="14">Benefit progress strategy</text>
+  <rect x="976" y="628" width="360" height="28" fill="none" stroke="#222222"/>
+  <text x="996" y="648" font-family="Arial" font-size="14">cart.amount / threshold.amount</text>
+  <text x="976" y="704" font-family="Arial" font-size="14">Validation: PIM published, campaign active, price exists</text>
+  <text x="976" y="736" font-family="Arial" font-size="14">Frontend reason codes from backend mnemonic</text>
+  <rect x="976" y="836" width="180" height="36" fill="none" stroke="#222222"/>
+  <text x="1000" y="860" font-family="Arial" font-size="14">Добавить подарок</text>
+</svg>

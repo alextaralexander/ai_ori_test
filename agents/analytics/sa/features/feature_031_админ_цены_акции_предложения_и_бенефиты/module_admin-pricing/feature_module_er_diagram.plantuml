@@ -1,0 +1,177 @@
+@startuml
+title Feature 031 / module admin-pricing - ER changes
+
+entity "admin_pricing_price_list" as price_list {
+  * price_list_id : uuid <<PK>>
+  --
+  * price_list_code : varchar(80) <<UK>>
+  * name : varchar(255)
+  * campaign_id : varchar(80)
+  * country_code : varchar(2)
+  * currency_code : varchar(3)
+  * channel_code : varchar(40)
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+  * version : bigint
+  * created_by : uuid
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "admin_pricing_price" as price {
+  * price_id : uuid <<PK>>
+  --
+  * price_list_id : uuid <<FK>>
+  * product_id : varchar(80)
+  * sku : varchar(80)
+  * base_price : numeric(19,4)
+  * tax_mode : varchar(32)
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+  * version : bigint
+}
+
+entity "admin_pricing_promo_price" as promo_price {
+  * promo_price_id : uuid <<PK>>
+  --
+  * price_list_id : uuid <<FK>>
+  * sku : varchar(80)
+  * promo_price : numeric(19,4)
+  * discount_type : varchar(32)
+  * discount_value : numeric(19,4)
+  * segment_code : varchar(80)
+  * reason_code : varchar(80)
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+}
+
+entity "admin_pricing_segment_rule" as segment_rule {
+  * rule_id : uuid <<PK>>
+  --
+  * campaign_id : varchar(80)
+  * segment_code : varchar(80)
+  * role_code : varchar(80)
+  partner_level : varchar(80)
+  customer_type : varchar(80)
+  region_code : varchar(40)
+  * priority : integer
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+}
+
+entity "admin_pricing_promotion" as promotion {
+  * promotion_id : uuid <<PK>>
+  --
+  * promotion_code : varchar(80) <<UK>>
+  * name_key : varchar(160)
+  * campaign_id : varchar(80)
+  * audience : varchar(80)
+  * channel_code : varchar(40)
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+  * version : bigint
+}
+
+entity "admin_pricing_shopping_offer" as offer {
+  * offer_id : uuid <<PK>>
+  --
+  * promotion_id : uuid <<FK>>
+  * offer_code : varchar(80) <<UK>>
+  * offer_type : varchar(40)
+  * title_key : varchar(160)
+  description_key : varchar(160)
+  * priority : integer
+  * stackable : boolean
+  mutually_exclusive_group : varchar(80)
+  * status : varchar(32)
+}
+
+entity "admin_pricing_offer_item" as offer_item {
+  * offer_item_id : uuid <<PK>>
+  --
+  * offer_id : uuid <<FK>>
+  * sku : varchar(80)
+  * quantity : integer
+  * item_role : varchar(32)
+  * sort_order : integer
+}
+
+entity "admin_pricing_gift_rule" as gift_rule {
+  * gift_rule_id : uuid <<PK>>
+  --
+  * promotion_id : uuid <<FK>>
+  * gift_sku : varchar(80)
+  * trigger_type : varchar(40)
+  threshold_amount : numeric(19,4)
+  trigger_sku : varchar(80)
+  * max_gift_quantity : integer
+  * status : varchar(32)
+  * active_from : timestamptz
+  * active_to : timestamptz
+}
+
+entity "admin_pricing_threshold_benefit" as benefit {
+  * benefit_id : uuid <<PK>>
+  --
+  * promotion_id : uuid <<FK>>
+  * benefit_type : varchar(40)
+  threshold_amount : numeric(19,4)
+  threshold_quantity : integer
+  * progress_strategy : varchar(80)
+  * reward_code : varchar(80)
+  * status : varchar(32)
+}
+
+entity "admin_pricing_import_job" as import_job {
+  * job_id : uuid <<PK>>
+  --
+  * source_file_name : varchar(255)
+  * idempotency_key : varchar(120) <<UK>>
+  * dry_run : boolean
+  * status : varchar(32)
+  row_count : integer
+  error_count : integer
+  checksum : varchar(128)
+  * created_by : uuid
+  * created_at : timestamptz
+}
+
+entity "admin_pricing_audit_event" as audit_event {
+  * audit_event_id : uuid <<PK>>
+  --
+  * actor_user_id : uuid
+  * action_code : varchar(80)
+  * entity_type : varchar(80)
+  * entity_id : varchar(80)
+  old_value : jsonb
+  new_value : jsonb
+  reason_code : varchar(80)
+  idempotency_key : varchar(120)
+  * correlation_id : varchar(120)
+  * occurred_at : timestamptz
+}
+
+price_list ||--o{ price
+price_list ||--o{ promo_price
+promotion ||--o{ offer
+promotion ||--o{ gift_rule
+promotion ||--o{ benefit
+offer ||--o{ offer_item
+
+note right of price
+  Unique active interval:
+  price_list_id + sku + segment context
+  must not overlap by active window.
+end note
+
+note right of audit_event
+  Immutable audit trail.
+  No secrets, tokens, passwords or stack traces.
+end note
+
+@enduml
