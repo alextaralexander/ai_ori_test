@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 041 - редактор программы и dry-run</title>
+  <desc id="desc">Схематичный макет формы создания программы преимуществ с вкладками типа, eligibility, совместимости, dry-run и публикации.</desc>
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 18px; fill: #1f2937; }
+    .small { font-size: 14px; }
+    .title { font-size: 26px; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+    .muted { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
+    .header { fill: #e2e8f0; stroke: #334155; stroke-width: 2; }
+    .line { stroke: #64748b; stroke-width: 1.5; }
+  </style>
+  <rect x="20" y="20" width="1400" height="1000" class="box"/>
+  <text x="50" y="62" class="title">Создание программы преимуществ</text>
+  <rect x="1120" y="34" width="130" height="44" class="box"/>
+  <text x="1154" y="62" class="small">Сохранить</text>
+  <rect x="1260" y="34" width="130" height="44" class="box"/>
+  <text x="1292" y="62" class="small">Отмена</text>
+
+  <rect x="50" y="100" width="1340" height="56" class="header"/>
+  <text x="80" y="135">Основное</text>
+  <text x="245" y="135">Eligibility</text>
+  <text x="445" y="135">Совместимость</text>
+  <text x="690" y="135">Dry-run</text>
+  <text x="850" y="135">Публикация</text>
+  <text x="1060" y="135">Аудит</text>
+
+  <rect x="50" y="185" width="640" height="385" class="box"/>
+  <text x="75" y="220">Основные параметры</text>
+  <rect x="75" y="245" width="260" height="44" class="muted"/>
+  <text x="92" y="273" class="small">Код программы</text>
+  <rect x="355" y="245" width="260" height="44" class="muted"/>
+  <text x="372" y="273" class="small">Тип программы</text>
+  <rect x="75" y="310" width="260" height="44" class="muted"/>
+  <text x="92" y="338" class="small">CatalogId</text>
+  <rect x="355" y="310" width="260" height="44" class="muted"/>
+  <text x="372" y="338" class="small">Период действия</text>
+  <rect x="75" y="375" width="260" height="44" class="muted"/>
+  <text x="92" y="403" class="small">Статус</text>
+  <rect x="355" y="375" width="260" height="44" class="muted"/>
+  <text x="372" y="403" class="small">Владелец</text>
+  <rect x="75" y="440" width="540" height="90" class="muted"/>
+  <text x="92" y="470" class="small">Описание и внутренние заметки</text>
+
+  <rect x="720" y="185" width="670" height="385" class="box"/>
+  <text x="745" y="220">Параметры выбранного типа</text>
+  <rect x="745" y="245" width="190" height="44" class="muted"/>
+  <text x="762" y="273" class="small">Cashback model</text>
+  <rect x="955" y="245" width="190" height="44" class="muted"/>
+  <text x="972" y="273" class="small">Rate / amount</text>
+  <rect x="1165" y="245" width="190" height="44" class="muted"/>
+  <text x="1182" y="273" class="small">Currency</text>
+  <rect x="745" y="310" width="190" height="44" class="muted"/>
+  <text x="762" y="338" class="small">Order limit</text>
+  <rect x="955" y="310" width="190" height="44" class="muted"/>
+  <text x="972" y="338" class="small">User limit</text>
+  <rect x="1165" y="310" width="190" height="44" class="muted"/>
+  <text x="1182" y="338" class="small">Expiration</text>
+  <rect x="745" y="385" width="610" height="62" class="muted"/>
+  <text x="762" y="420" class="small">Reservation / subscription settings when selected</text>
+  <rect x="745" y="465" width="610" height="62" class="muted"/>
+  <text x="762" y="500" class="small">Reward shop / free shipping settings when selected</text>
+
+  <rect x="50" y="600" width="640" height="360" class="box"/>
+  <text x="75" y="635">Eligibility и совместимость</text>
+  <rect x="75" y="660" width="260" height="44" class="muted"/>
+  <text x="92" y="688" class="small">Роль / уровень</text>
+  <rect x="355" y="660" width="260" height="44" class="muted"/>
+  <text x="372" y="688" class="small">Регион / канал</text>
+  <rect x="75" y="725" width="260" height="44" class="muted"/>
+  <text x="92" y="753" class="small">ББ / сумма заказов</text>
+  <rect x="355" y="725" width="260" height="44" class="muted"/>
+  <text x="372" y="753" class="small">Risk score</text>
+  <rect x="75" y="790" width="260" height="44" class="muted"/>
+  <text x="92" y="818" class="small">Priority</text>
+  <rect x="355" y="790" width="260" height="44" class="muted"/>
+  <text x="372" y="818" class="small">Stackability</text>
+  <rect x="75" y="855" width="540" height="62" class="muted"/>
+  <text x="92" y="890" class="small">Mutual exclusion / max benefit rules</text>
+
+  <rect x="720" y="600" width="670" height="360" class="box"/>
+  <text x="745" y="635">Dry-run preview</text>
+  <rect x="745" y="660" width="190" height="44" class="muted"/>
+  <text x="762" y="688" class="small">PartnerNumber</text>
+  <rect x="955" y="660" width="190" height="44" class="muted"/>
+  <text x="972" y="688" class="small">CartId</text>
+  <rect x="1165" y="660" width="190" height="44" class="muted"/>
+  <text x="1182" y="688" class="small">Scenario</text>
+  <rect x="745" y="725" width="180" height="42" class="box"/>
+  <text x="772" y="753" class="small">Запустить dry-run</text>
+  <rect x="745" y="790" width="610" height="130" class="muted"/>
+  <text x="762" y="820" class="small">Результат: применимо / отказано / mnemonic / сумма / warnings / correlationId</text>
+</svg>

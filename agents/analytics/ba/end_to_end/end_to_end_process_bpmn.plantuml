@@ -1,7 +1,10 @@
 @startuml
-title Best Ori Gin platform end-to-end flow with feature 040
+title Best Ori Gin platform end-to-end flow with feature 041
 start
 :Гость, покупатель или партнер входит в платформу;
+:Администратор программ преимуществ настраивает cashback, referral discount, welcome, reward shop, free shipping, reservation, subscription и retention правила;
+:CRM, финансовый администратор и аудитор проверяют eligibility, бюджеты, dry-run, публикацию, интеграции и audit trail программ;
+:Опубликованные версии программ становятся доступными partner benefits, bonus wallet, cart, checkout и notification contours;
 :Пользователь изучает каталог, акции и добавляет товары в корзину;
 :Партнер или VIP-клиент открывает программу преимуществ, видит welcome-выгоды, referral link, кешбэк, награды и retention offers;
 if (Пользователь использует referral или reward?) then (да)
@@ -48,6 +51,7 @@ endif
 :Финансовый менеджер согласовывает и отправляет payout batch во внешний bonus/payment contour идемпотентно;
 :Admin platform KPI обновляет продажи, delivery SLA, bonus accruals, payout status и problem rate;
 :CRM и notification contour отправляют локализованные сообщения о доступных, истекающих и использованных выгодах;
+:Администратор программ преимуществ анализирует activation, redemption, repeat order, retention uplift, budget usage и корректирует следующие каталоги;
 :Audit trail фиксирует actorRole, actionCode, reasonCode, subjectRef, externalId и correlationId;
 stop
 @enduml

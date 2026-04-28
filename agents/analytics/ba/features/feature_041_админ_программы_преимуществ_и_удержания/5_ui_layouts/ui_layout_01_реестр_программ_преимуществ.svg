@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 041 - реестр программ преимуществ и удержания</title>
+  <desc id="desc">Схематичный макет административного реестра программ преимуществ: навигация, фильтры, таблица, панель действий и сводка статусов.</desc>
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 18px; fill: #1f2937; }
+    .small { font-size: 14px; }
+    .title { font-size: 26px; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+    .muted { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
+    .header { fill: #e2e8f0; stroke: #334155; stroke-width: 2; }
+    .line { stroke: #64748b; stroke-width: 1.5; }
+  </style>
+  <rect x="20" y="20" width="1400" height="920" class="box"/>
+  <rect x="20" y="20" width="260" height="920" class="header"/>
+  <text x="42" y="62" class="title">Админка</text>
+  <rect x="42" y="100" width="210" height="44" class="muted"/>
+  <text x="56" y="128">Программы выгод</text>
+  <rect x="42" y="158" width="210" height="44" class="box"/>
+  <text x="56" y="186">Каталоги</text>
+  <rect x="42" y="216" width="210" height="44" class="box"/>
+  <text x="56" y="244">Заказы</text>
+  <rect x="42" y="274" width="210" height="44" class="box"/>
+  <text x="56" y="302">Бонусный кошелек</text>
+  <rect x="42" y="332" width="210" height="44" class="box"/>
+  <text x="56" y="360">Аудит</text>
+
+  <text x="310" y="62" class="title">Программы преимуществ и удержания</text>
+  <rect x="1160" y="36" width="220" height="48" class="box"/>
+  <text x="1194" y="66">Создать программу</text>
+
+  <rect x="310" y="105" width="1070" height="150" class="box"/>
+  <text x="330" y="135">Фильтры</text>
+  <rect x="330" y="155" width="180" height="42" class="muted"/>
+  <text x="346" y="183" class="small">Код программы</text>
+  <rect x="525" y="155" width="160" height="42" class="muted"/>
+  <text x="542" y="183" class="small">Тип</text>
+  <rect x="700" y="155" width="160" height="42" class="muted"/>
+  <text x="718" y="183" class="small">Статус</text>
+  <rect x="875" y="155" width="170" height="42" class="muted"/>
+  <text x="892" y="183" class="small">CatalogId</text>
+  <rect x="1060" y="155" width="190" height="42" class="muted"/>
+  <text x="1076" y="183" class="small">Период действия</text>
+  <rect x="330" y="207" width="220" height="36" class="box"/>
+  <text x="348" y="231" class="small">Применить фильтры</text>
+  <rect x="565" y="207" width="180" height="36" class="box"/>
+  <text x="584" y="231" class="small">Сбросить</text>
+
+  <rect x="310" y="275" width="820" height="610" class="box"/>
+  <rect x="310" y="275" width="820" height="52" class="header"/>
+  <text x="330" y="307" class="small">Код</text>
+  <text x="505" y="307" class="small">Тип</text>
+  <text x="670" y="307" class="small">Статус</text>
+  <text x="820" y="307" class="small">Каталог</text>
+  <text x="960" y="307" class="small">Владелец</text>
+  <line x1="475" y1="275" x2="475" y2="885" class="line"/>
+  <line x1="635" y1="275" x2="635" y2="885" class="line"/>
+  <line x1="790" y1="275" x2="790" y2="885" class="line"/>
+  <line x1="935" y1="275" x2="935" y2="885" class="line"/>
+  <line x1="310" y1="365" x2="1130" y2="365" class="line"/>
+  <line x1="310" y1="445" x2="1130" y2="445" class="line"/>
+  <line x1="310" y1="525" x2="1130" y2="525" class="line"/>
+  <text x="330" y="352" class="small">CAT-2026-08-CASHBACK</text>
+  <text x="505" y="352" class="small">Cashback</text>
+  <text x="670" y="352" class="small">ACTIVE</text>
+  <text x="820" y="352" class="small">CAT-2026-08</text>
+  <text x="960" y="352" class="small">CRM</text>
+  <text x="330" y="432" class="small">RETENTION-RISK-08</text>
+  <text x="505" y="432" class="small">Retention</text>
+  <text x="670" y="432" class="small">SCHEDULED</text>
+  <text x="820" y="432" class="small">CAT-2026-08</text>
+  <text x="960" y="432" class="small">Retention</text>
+
+  <rect x="1160" y="275" width="220" height="610" class="box"/>
+  <text x="1180" y="307">Сводка</text>
+  <rect x="1180" y="335" width="170" height="42" class="muted"/>
+  <text x="1194" y="363" class="small">ACTIVE: 12</text>
+  <rect x="1180" y="390" width="170" height="42" class="muted"/>
+  <text x="1194" y="418" class="small">SCHEDULED: 4</text>
+  <rect x="1180" y="445" width="170" height="42" class="muted"/>
+  <text x="1194" y="473" class="small">DRAFT: 7</text>
+  <rect x="1180" y="530" width="170" height="42" class="box"/>
+  <text x="1194" y="558" class="small">Dry-run</text>
+  <rect x="1180" y="585" width="170" height="42" class="box"/>
+  <text x="1194" y="613" class="small">Опубликовать</text>
+  <rect x="1180" y="640" width="170" height="42" class="box"/>
+  <text x="1194" y="668" class="small">Пауза</text>
+  <rect x="1180" y="695" width="170" height="42" class="box"/>
+  <text x="1194" y="723" class="small">Аудит</text>
+</svg>

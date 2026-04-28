@@ -1,0 +1,119 @@
+@startuml
+title Feature 041 - admin-benefit-program ER diagram
+
+entity "benefit_program" as benefit_program {
+  * id : uuid <<PK>>
+  --
+  * code : varchar(80) <<UK>>
+  * type : varchar(40)
+  * status : varchar(32)
+  * owner_role : varchar(80)
+  * catalog_id : varchar(80)
+  * active_from : timestamptz
+  * active_to : timestamptz
+  * current_version : integer
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "benefit_program_version" as program_version {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * version : integer
+  * rules_json : jsonb
+  * eligibility_json : jsonb
+  * compatibility_json : jsonb
+  * lifecycle_json : jsonb
+  * created_by_user_id : uuid
+  * created_at : timestamptz
+}
+
+entity "benefit_program_budget" as budget {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * currency : varchar(3)
+  * total_budget : numeric(19,4)
+  * used_budget : numeric(19,4)
+  * cashback_limit : numeric(19,4)
+  * discount_limit : numeric(19,4)
+  * redemption_limit : integer
+  * stop_on_exhausted : boolean
+}
+
+entity "benefit_program_reward" as reward {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * reward_code : varchar(80)
+  * cost_amount : numeric(19,4)
+  * currency : varchar(3)
+  * region_code : varchar(40)
+  * warehouse_code : varchar(40)
+  * active_from : timestamptz
+  * active_to : timestamptz
+  * redemption_limit : integer
+}
+
+entity "benefit_program_manual_adjustment" as adjustment {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * target_user_id : uuid
+  * target_partner_number : varchar(80)
+  * adjustment_type : varchar(40)
+  * amount : numeric(19,4)
+  * currency : varchar(3)
+  * reason_code : varchar(80)
+  * evidence_ref : varchar(255)
+  * approval_status : varchar(32)
+  * created_at : timestamptz
+}
+
+entity "benefit_program_audit_event" as audit_event {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * actor_user_id : uuid
+  * actor_role : varchar(80)
+  * action_code : varchar(80)
+  * entity_type : varchar(80)
+  * entity_id : uuid
+  * before_summary_json : jsonb
+  * after_summary_json : jsonb
+  * reason_code : varchar(80)
+  * correlation_id : varchar(120)
+  * created_at : timestamptz
+}
+
+entity "benefit_program_integration_event" as integration_event {
+  * id : uuid <<PK>>
+  --
+  * program_id : uuid <<FK>>
+  * target_context : varchar(80)
+  * event_type : varchar(80)
+  * idempotency_key : varchar(120) <<UK>>
+  * payload_checksum : varchar(120)
+  * status : varchar(32)
+  * retry_count : integer
+  * last_error_mnemonic : varchar(160)
+  * correlation_id : varchar(120)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+benefit_program ||--o{ program_version
+benefit_program ||--o{ budget
+benefit_program ||--o{ reward
+benefit_program ||--o{ adjustment
+benefit_program ||--o{ audit_event
+benefit_program ||--o{ integration_event
+
+note right of benefit_program
+  Owning backend module: admin-benefit-program.
+  Java package prefix: com.bestorigin.monolith.adminbenefitprogram.
+  db package contains only Liquibase XML changelogs.
+end note
+
+@enduml

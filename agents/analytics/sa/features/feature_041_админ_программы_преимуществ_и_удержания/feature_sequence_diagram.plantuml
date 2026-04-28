@@ -1,0 +1,75 @@
+@startuml
+title Feature 041 - sequence diagram
+
+actor "Администратор программ" as admin
+actor "CRM/retention manager" as crm
+actor "Финансовый администратор" as finance
+actor "Аудитор" as auditor
+participant "Admin Frontend\n/admin/benefit-programs" as frontend
+participant "admin-benefit-program\ncontroller/service" as adminBenefit
+database "admin-benefit-program db" as db
+participant "partnerbenefits" as partnerBenefits
+participant "bonuswallet" as bonusWallet
+participant "cart" as cart
+participant "checkout/order" as checkout
+participant "notification" as notification
+participant "adminplatform KPI/audit" as platform
+
+admin -> frontend: create cashback/referral/welcome/reward/free-shipping program
+frontend -> adminBenefit: POST /programs
+adminBenefit -> adminBenefit: validate DTO, scopes, code uniqueness, period, type rules
+adminBenefit -> db: insert benefit_program + benefit_program_version + audit_event
+db --> adminBenefit: persisted draft version
+adminBenefit --> frontend: 201 BenefitProgramResponse + STR_MNEMO_ADMIN_BENEFIT_PROGRAM_CREATED
+
+crm -> frontend: configure eligibility, reservation, subscription, retention trigger
+frontend -> adminBenefit: PUT /programs/{id} If-Match
+adminBenefit -> db: insert next benefit_program_version
+adminBenefit -> db: insert audit_event UPDATE
+adminBenefit --> frontend: 200 updated version
+
+admin -> frontend: run dry-run
+frontend -> adminBenefit: POST /programs/{id}/dry-run
+adminBenefit -> partnerBenefits: read partner segment and benefit context
+adminBenefit -> cart: read cart/order simulation context
+adminBenefit -> checkout: preview checkout compatibility
+adminBenefit -> adminBenefit: calculate applicable/rejected/warnings without side effects
+adminBenefit -> db: insert audit_event DRY_RUN
+adminBenefit --> frontend: DryRunResponse(applicable, rejected mnemonics, amounts, correlationId)
+
+finance -> frontend: approve budget and limits
+frontend -> adminBenefit: PUT /programs/{id}/budgets
+adminBenefit -> adminBenefit: check ADMIN_BENEFIT_PROGRAM_FINANCE
+adminBenefit -> db: upsert benefit_program_budget + audit_event
+adminBenefit --> frontend: BudgetResponse
+
+admin -> frontend: schedule or activate program
+frontend -> adminBenefit: POST /programs/{id}/status If-Match
+adminBenefit -> adminBenefit: validate status transition and financial approval
+adminBenefit -> db: update benefit_program.status/current_version
+adminBenefit -> db: insert integration events for downstream contexts
+adminBenefit -> partnerBenefits: publish active program version
+adminBenefit -> bonusWallet: publish cashback/adjustment policy event
+adminBenefit -> cart: publish reservation/free-shipping rule event
+adminBenefit -> checkout: publish compatibility rule event
+adminBenefit -> notification: publish notification trigger event
+adminBenefit -> platform: publish KPI/audit projection event
+adminBenefit --> frontend: ProgramResponse + STR_MNEMO_ADMIN_BENEFIT_PROGRAM_PUBLISHED
+
+finance -> frontend: create manual adjustment
+frontend -> adminBenefit: POST /programs/{id}/manual-adjustments
+adminBenefit -> adminBenefit: validate target, reasonCode, evidence, limits
+adminBenefit -> db: insert manual_adjustment + audit_event
+adminBenefit -> bonusWallet: publish idempotent adjustment event
+adminBenefit -> partnerBenefits: publish recalculation trigger
+adminBenefit --> frontend: ManualAdjustmentResponse
+
+auditor -> frontend: search audit and integration events
+frontend -> adminBenefit: GET /programs/{id}/audit-events
+adminBenefit -> db: query audit_event with masks
+adminBenefit --> frontend: AuditEventPage
+frontend -> adminBenefit: GET /programs/{id}/integration-events
+adminBenefit -> db: query integration_event without secrets
+adminBenefit --> frontend: IntegrationEventPage
+
+@enduml

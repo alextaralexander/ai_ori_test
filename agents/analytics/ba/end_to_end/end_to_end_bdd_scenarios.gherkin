@@ -612,3 +612,37 @@
     Когда сотрудник запускает разрешенный повторный расчет применимости
     Тогда результат возвращается mnemonic-кодом семейства "STR_MNEMO_PARTNER_BENEFITS_*"
     И audit trail содержит действие сотрудника без раскрытия лишних персональных данных
+
+  Сценарий: Администратор публикует программу преимуществ для текущего каталога
+    Допустим пользователь вошел с ролью "admin-benefit-program-manager"
+    И открыт административный workspace "/admin/benefit-programs"
+    Когда администратор создает cashback-программу для catalogId "CAT-2026-08"
+    И задает eligibility, лимиты, срок жизни, совместимость и dry-run preview
+    И переводит программу в статус "SCHEDULED"
+    Тогда active version программы становится доступна partner benefits, bonus wallet, cart, checkout и notification contours
+    И audit trail содержит создание, проверку и публикацию программы с actorRole, actionCode и correlationId
+    И backend response содержит только mnemonic-коды "STR_MNEMO_ADMIN_BENEFIT_PROGRAM_*" для предопределенных сообщений
+
+  Сценарий: CRM-менеджер запускает retention-оффер и партнер использует его в checkout
+    Допустим пользователь вошел с ролью "crm-retention-manager"
+    И существует сегмент партнеров с падающей активностью и незавершенной корзиной
+    Когда CRM-менеджер публикует retention-оффер с reservation TTL и notification trigger
+    Тогда notification contour получает локализуемое событие доступной выгоды
+    Допустим пользователь вошел с ролью "partner"
+    И партнер принадлежит опубликованному retention-сегменту
+    Когда партнер открывает "/member-benefits"
+    И переходит в корзину с reservation retention-оффера
+    И подтверждает checkout до истечения TTL
+    Тогда checkout повторно проверяет owner, catalogId, status, expiry, eligibility и лимиты оффера
+    И заказ получает только подтвержденную backend выгоду
+    И история программы преимуществ содержит reservation и consumption events с correlationId
+
+  Сценарий: Финансовый администратор корректирует спорный cashback с аудитом
+    Допустим пользователь вошел с ролью "admin-benefit-program-finance"
+    И существует партнер с оспоренным cashback событием по опубликованной программе feature 041
+    Когда финансовый администратор создает ручную корректировку с reasonCode, evidence и approval status
+    Тогда bonus wallet получает идемпотентное adjustment event
+    И исходная история cashback не переписывается задним числом
+    И audit trail показывает actorUserId, before/after summary, reasonCode и correlationId
+    Когда аудитор открывает "/admin/benefit-programs/audit"
+    Тогда он видит ручную корректировку, интеграционное событие и маскированные персональные данные

@@ -21,6 +21,7 @@ import { AdminRbacView } from './components/AdminRbacView';
 import { AdminIdentityView } from './components/AdminIdentityView';
 import { AdminOrdersView } from './components/AdminOrdersView';
 import { AdminPlatformView } from './components/AdminPlatformView';
+import { AdminBenefitProgramView } from './components/AdminBenefitProgramView';
 import { AdminBonusView } from './components/AdminBonusView';
 import { AdminFulfillmentView } from './components/AdminFulfillmentView';
 import { AdminServiceView } from './components/AdminServiceView';
@@ -110,6 +111,9 @@ const testLoginRoles = new Set([
   'pickup-network-admin',
   'support-operator',
   'partner-support',
+  'admin-benefit-program-manager',
+  'admin-benefit-program-finance',
+  'admin-benefit-program-auditor',
   'pickup-owner',
   'delivery-operator',
   'catalog-manager',
@@ -409,6 +413,8 @@ function App() {
     contentView = <AdminPlatformView section="integrations" />;
   } else if (path === '/admin/platform/audit') {
     contentView = <AdminPlatformView section="audit" />;
+  } else if (path === '/admin/benefit-programs') {
+    contentView = <AdminBenefitProgramView />;
   } else if (path === '/admin/bonus-program') {
     contentView = <AdminBonusView />;
   } else if (path === '/admin/bonus-program/calculations') {

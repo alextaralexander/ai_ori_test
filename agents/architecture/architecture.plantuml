@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 040
+title Best Ori Gin monolith architecture through feature 041
 
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
@@ -14,6 +14,7 @@ package "frontend/monolith apps/web-shell" {
   [AdminPlatform UI]
   [AdminBonus UI]
   [AdminFulfillment UI]
+  [AdminBenefitPrograms UI]
   [PartnerBenefits UI]
   [RewardShop UI]
   [ReferralSocialSelling UI]
@@ -52,6 +53,7 @@ package "backend/monolith/monolith-app" {
   [admin-platform]
   [admin-bonus]
   [admin-fulfillment]
+  [admin-benefit-program]
   [partner-benefits]
 }
 
@@ -78,6 +80,7 @@ cloud "Hybrid Pixel" as hybrid
 [AdminPlatform UI] --> [admin-platform] : HTTP/JSON KPI, audit, integrations
 [AdminBonus UI] --> [admin-bonus] : HTTP/JSON /api/admin/bonus-program/*
 [AdminFulfillment UI] --> [admin-fulfillment] : HTTP/JSON /api/admin/fulfillment/*
+[AdminBenefitPrograms UI] --> [admin-benefit-program] : HTTP/JSON /api/admin/benefit-programs/*
 [PartnerBenefits UI] --> [partner-benefits] : HTTP/JSON /api/partner-benefits/me/summary, apply-preview
 [RewardShop UI] --> [partner-benefits] : HTTP/JSON /me/rewards, /redemptions
 [ReferralSocialSelling UI] --> [partner-benefits] : HTTP/JSON /me/referral-link, /referral-events
@@ -122,6 +125,12 @@ cloud "Hybrid Pixel" as hybrid
 [admin-service] --> [admin-bonus] : service compensation and reversal events
 [admin-platform] --> [delivery] : delivery integration status and KPI read-model
 [admin-bonus] --> [admin-platform] : bonus accruals, payout status and integration health
+[admin-benefit-program] --> [partner-benefits] : HTTP/JSON publish active benefit program versions
+[admin-benefit-program] --> [bonus-wallet] : HTTP/JSON cashback, expiration and manual adjustment events
+[admin-benefit-program] --> [cart] : HTTP/JSON reservation and free-shipping rules
+[admin-benefit-program] --> [order] : HTTP/JSON checkout compatibility and validation rules
+[admin-benefit-program] --> [platform-experience] : HTTP/JSON notification triggers and i18n diagnostics
+[admin-benefit-program] --> [admin-platform] : HTTP/JSON activation, redemption, retention and integration KPI
 [partner-benefits] --> [auth] : HTTP/JSON session, role and activePartner ownership checks
 [partner-benefits] --> [catalog] : HTTP/JSON current and next catalog periods
 [partner-benefits] --> [admin-pricing] : HTTP/JSON benefit compatibility and offer rules
@@ -165,6 +174,7 @@ cloud "Hybrid Pixel" as hybrid
 [admin-platform] --> db
 [admin-bonus] --> db
 [admin-fulfillment] --> db
+[admin-benefit-program] --> db
 [partner-benefits] --> db
 [admin-cms] --> s3 : content documents/media metadata
 [admin-pim] --> s3 : product media metadata

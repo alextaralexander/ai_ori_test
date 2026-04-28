@@ -1358,3 +1358,41 @@ body {
     font-size: 30px;
   }
 }
+
+.admin-benefit-program-page {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-benefit-program-header,
+.admin-benefit-program-table,
+.admin-benefit-program-form,
+.admin-benefit-program-panel,
+.admin-benefit-program-tabs {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-benefit-program-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.admin-benefit-program-table {
+  grid-template-columns: minmax(120px, 0.8fr) minmax(180px, 1.5fr) repeat(3, minmax(100px, 1fr));
+}
+
+.admin-benefit-program-form,
+.admin-benefit-program-panel {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.admin-benefit-program-tabs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.admin-benefit-program-options {
+  display: flex;
+  gap: 8px;
+}

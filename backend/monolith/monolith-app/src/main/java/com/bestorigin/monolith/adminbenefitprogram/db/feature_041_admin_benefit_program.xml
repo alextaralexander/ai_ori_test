@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-041-admin-benefit-program-core" author="codex">
+        <createTable tableName="admin_benefit_program">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="code" type="varchar(80)"><constraints nullable="false" unique="true"/></column>
+            <column name="program_type" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="catalog_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="owner_role" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="active_from" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="active_to" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="rules_json" type="jsonb"><constraints nullable="false"/></column>
+            <column name="eligibility_json" type="jsonb"><constraints nullable="false"/></column>
+            <column name="compatibility_json" type="jsonb"><constraints nullable="false"/></column>
+            <column name="lifecycle_json" type="jsonb"><constraints nullable="false"/></column>
+            <column name="version" type="int" defaultValueNumeric="1"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex tableName="admin_benefit_program" indexName="idx_admin_benefit_program_lookup">
+            <column name="catalog_id"/>
+            <column name="status"/>
+            <column name="program_type"/>
+            <column name="owner_role"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-041-admin-benefit-program-finance" author="codex">
+        <createTable tableName="admin_benefit_program_budget">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="program_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="currency" type="varchar(3)"><constraints nullable="false"/></column>
+            <column name="total_budget" type="numeric(19,4)"><constraints nullable="false"/></column>
+            <column name="cashback_limit" type="numeric(19,4)"/>
+            <column name="discount_limit" type="numeric(19,4)"/>
+            <column name="redemption_limit" type="int"/>
+            <column name="stop_on_exhausted" type="boolean" defaultValueBoolean="true"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(24)"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="admin_benefit_program_budget"
+                                 baseColumnNames="program_id"
+                                 constraintName="fk_admin_benefit_budget_program"
+                                 referencedTableName="admin_benefit_program"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="feature-041-admin-benefit-program-audit-integration" author="codex">
+        <createTable tableName="admin_benefit_program_audit_event">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="program_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="action_code" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="actor_role" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="correlation_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createTable tableName="admin_benefit_program_integration_event">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="program_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="target_context" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="event_type" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="idempotency_key" type="varchar(100)"><constraints nullable="false"/></column>
+            <column name="correlation_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

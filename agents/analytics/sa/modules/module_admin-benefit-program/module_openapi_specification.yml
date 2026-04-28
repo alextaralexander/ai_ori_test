@@ -1,0 +1,704 @@
+openapi: 3.0.3
+info:
+  title: Feature 041 Admin Benefit Program API
+  version: 1.0.0
+  description: API административного модуля admin-benefit-program для настройки программ преимуществ и удержания Best Ori Gin.
+servers:
+  - url: /api/admin/benefit-programs
+tags:
+  - name: AdminBenefitPrograms
+    description: Управление программами преимуществ и удержания
+  - name: AdminBenefitProgramAudit
+    description: Аудит и интеграционные события программ
+paths:
+  /programs:
+    get:
+      tags: [AdminBenefitPrograms]
+      summary: Поиск программ преимуществ
+      operationId: searchBenefitPrograms
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BenefitProgramType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/BenefitProgramStatus'
+        - name: catalogId
+          in: query
+          schema:
+            type: string
+        - name: ownerRole
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Найдена страница программ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramPage'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [AdminBenefitPrograms]
+      summary: Создание программы преимуществ
+      operationId: createBenefitProgram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramCreateRequest'
+      responses:
+        '201':
+          description: Программа создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /programs/{programId}:
+    get:
+      tags: [AdminBenefitPrograms]
+      summary: Получение программы
+      operationId: getBenefitProgram
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+      responses:
+        '200':
+          description: Программа найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [AdminBenefitPrograms]
+      summary: Обновление программы и создание новой версии правил
+      operationId: updateBenefitProgram
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Текущая версия optimistic locking.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramUpdateRequest'
+      responses:
+        '200':
+          description: Программа обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /programs/{programId}/dry-run:
+    post:
+      tags: [AdminBenefitPrograms]
+      summary: Dry-run применимости программы
+      operationId: dryRunBenefitProgram
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramDryRunRequest'
+      responses:
+        '200':
+          description: Результат dry-run без побочных эффектов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramDryRunResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /programs/{programId}/status:
+    post:
+      tags: [AdminBenefitPrograms]
+      summary: Изменение статуса программы
+      operationId: changeBenefitProgramStatus
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramStatusChangeRequest'
+      responses:
+        '200':
+          description: Статус изменен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /programs/{programId}/budgets:
+    put:
+      tags: [AdminBenefitPrograms]
+      summary: Обновление финансовых лимитов программы
+      operationId: updateBenefitProgramBudget
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramBudgetRequest'
+      responses:
+        '200':
+          description: Бюджет обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramBudgetResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /programs/{programId}/rewards:
+    post:
+      tags: [AdminBenefitPrograms]
+      summary: Добавление награды reward shop
+      operationId: addBenefitProgramReward
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramRewardRequest'
+      responses:
+        '201':
+          description: Награда добавлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramRewardResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /programs/{programId}/manual-adjustments:
+    post:
+      tags: [AdminBenefitPrograms]
+      summary: Создание ручной корректировки
+      operationId: createBenefitProgramManualAdjustment
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitProgramManualAdjustmentRequest'
+      responses:
+        '201':
+          description: Корректировка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramManualAdjustmentResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /programs/{programId}/audit-events:
+    get:
+      tags: [AdminBenefitProgramAudit]
+      summary: Журнал аудита программы
+      operationId: searchBenefitProgramAuditEvents
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - name: actionCode
+          in: query
+          schema:
+            type: string
+        - name: correlationId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Найдена страница audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramAuditEventPage'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /programs/{programId}/integration-events:
+    get:
+      tags: [AdminBenefitProgramAudit]
+      summary: Исходящие интеграционные события программы
+      operationId: searchBenefitProgramIntegrationEvents
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - name: targetContext
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Найдена страница integration events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenefitProgramIntegrationEventPage'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    ProgramId:
+      name: programId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminBenefitProgramErrorResponse'
+    Forbidden:
+      description: Недостаточно прав
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminBenefitProgramErrorResponse'
+    NotFound:
+      description: Сущность не найдена
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminBenefitProgramErrorResponse'
+    Conflict:
+      description: Конфликт версии или бизнес-состояния
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminBenefitProgramErrorResponse'
+  schemas:
+    BenefitProgramType:
+      type: string
+      enum: [CASHBACK, REFERRAL_DISCOUNT, WELCOME, REWARD_SHOP, FREE_SHIPPING, RESERVATION, SUBSCRIPTION, RETENTION_OFFER]
+    BenefitProgramStatus:
+      type: string
+      enum: [DRAFT, READY_FOR_REVIEW, SCHEDULED, ACTIVE, PAUSED, ARCHIVED]
+    MoneyAmount:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: number
+          format: decimal
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+    BenefitProgramCreateRequest:
+      type: object
+      required: [code, type, catalogId, activeFrom, activeTo, ownerRole, rules, eligibility, compatibility, lifecycle]
+      properties:
+        code:
+          type: string
+          maxLength: 80
+        type:
+          $ref: '#/components/schemas/BenefitProgramType'
+        catalogId:
+          type: string
+          maxLength: 80
+        activeFrom:
+          type: string
+          format: date-time
+        activeTo:
+          type: string
+          format: date-time
+        ownerRole:
+          type: string
+          maxLength: 80
+        rules:
+          type: object
+          additionalProperties: true
+        eligibility:
+          type: object
+          additionalProperties: true
+        compatibility:
+          type: object
+          additionalProperties: true
+        lifecycle:
+          type: object
+          additionalProperties: true
+    BenefitProgramUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/BenefitProgramCreateRequest'
+    BenefitProgramResponse:
+      type: object
+      required: [id, code, type, status, catalogId, activeFrom, activeTo, currentVersion, ownerRole]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        type:
+          $ref: '#/components/schemas/BenefitProgramType'
+        status:
+          $ref: '#/components/schemas/BenefitProgramStatus'
+        catalogId:
+          type: string
+        activeFrom:
+          type: string
+          format: date-time
+        activeTo:
+          type: string
+          format: date-time
+        currentVersion:
+          type: integer
+        ownerRole:
+          type: string
+        messageMnemonic:
+          type: string
+          example: STR_MNEMO_ADMIN_BENEFIT_PROGRAM_UPDATED
+    BenefitProgramPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitProgramResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    BenefitProgramDryRunRequest:
+      type: object
+      required: [catalogId, scenario]
+      properties:
+        partnerNumber:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        catalogId:
+          type: string
+        cartId:
+          type: string
+        orderId:
+          type: string
+        scenario:
+          type: string
+          enum: [CATALOG_VIEW, CART, CHECKOUT, REWARD_REDEMPTION, SUBSCRIPTION_RENEWAL]
+    BenefitProgramDryRunResponse:
+      type: object
+      required: [applicable, rejected, warnings, correlationId]
+      properties:
+        applicable:
+          type: array
+          items:
+            type: string
+        rejected:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitProgramRejection'
+        calculatedDiscount:
+          $ref: '#/components/schemas/MoneyAmount'
+        calculatedCashback:
+          $ref: '#/components/schemas/MoneyAmount'
+        warnings:
+          type: array
+          items:
+            type: string
+        correlationId:
+          type: string
+    BenefitProgramRejection:
+      type: object
+      required: [programCode, reasonMnemonic]
+      properties:
+        programCode:
+          type: string
+        reasonMnemonic:
+          type: string
+          example: STR_MNEMO_ADMIN_BENEFIT_PROGRAM_ELIGIBILITY_DENIED
+    BenefitProgramStatusChangeRequest:
+      type: object
+      required: [targetStatus, reasonCode]
+      properties:
+        targetStatus:
+          $ref: '#/components/schemas/BenefitProgramStatus'
+        reasonCode:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+    BenefitProgramBudgetRequest:
+      type: object
+      required: [currency, totalBudget, stopOnExhausted]
+      properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        totalBudget:
+          type: number
+          minimum: 0
+        cashbackLimit:
+          type: number
+          minimum: 0
+        discountLimit:
+          type: number
+          minimum: 0
+        redemptionLimit:
+          type: integer
+          minimum: 1
+        stopOnExhausted:
+          type: boolean
+    BenefitProgramBudgetResponse:
+      allOf:
+        - $ref: '#/components/schemas/BenefitProgramBudgetRequest'
+        - type: object
+          required: [id, usedBudget]
+          properties:
+            id:
+              type: string
+              format: uuid
+            usedBudget:
+              type: number
+              minimum: 0
+    BenefitProgramRewardRequest:
+      type: object
+      required: [rewardCode, costAmount, currency, activeFrom, activeTo, redemptionLimit]
+      properties:
+        rewardCode:
+          type: string
+          maxLength: 80
+        costAmount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        regionCode:
+          type: string
+        warehouseCode:
+          type: string
+        activeFrom:
+          type: string
+          format: date-time
+        activeTo:
+          type: string
+          format: date-time
+        redemptionLimit:
+          type: integer
+          minimum: 1
+    BenefitProgramRewardResponse:
+      allOf:
+        - $ref: '#/components/schemas/BenefitProgramRewardRequest'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+    BenefitProgramManualAdjustmentRequest:
+      type: object
+      required: [adjustmentType, reasonCode, evidenceRef]
+      properties:
+        targetUserId:
+          type: string
+          format: uuid
+        targetPartnerNumber:
+          type: string
+        adjustmentType:
+          type: string
+          enum: [CASHBACK, REWARD_ELIGIBILITY, RESERVATION, SUBSCRIPTION]
+        amount:
+          type: number
+        currency:
+          type: string
+        reasonCode:
+          type: string
+        evidenceRef:
+          type: string
+    BenefitProgramManualAdjustmentResponse:
+      allOf:
+        - $ref: '#/components/schemas/BenefitProgramManualAdjustmentRequest'
+        - type: object
+          required: [id, approvalStatus]
+          properties:
+            id:
+              type: string
+              format: uuid
+            approvalStatus:
+              type: string
+              enum: [DRAFT, APPROVED, REJECTED, APPLIED]
+    BenefitProgramAuditEventPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitProgramAuditEvent'
+    BenefitProgramAuditEvent:
+      type: object
+      required: [id, actorUserId, actorRole, actionCode, entityType, correlationId, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        actorUserId:
+          type: string
+          format: uuid
+        actorRole:
+          type: string
+        actionCode:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        beforeSummary:
+          type: object
+          additionalProperties: true
+        afterSummary:
+          type: object
+          additionalProperties: true
+        reasonCode:
+          type: string
+        correlationId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    BenefitProgramIntegrationEventPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitProgramIntegrationEvent'
+    BenefitProgramIntegrationEvent:
+      type: object
+      required: [id, targetContext, eventType, idempotencyKey, status, correlationId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        targetContext:
+          type: string
+        eventType:
+          type: string
+        idempotencyKey:
+          type: string
+        payloadChecksum:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, SENT, FAILED, SKIPPED]
+        retryCount:
+          type: integer
+        lastErrorMnemonic:
+          type: string
+        correlationId:
+          type: string
+    AdminBenefitProgramErrorResponse:
+      type: object
+      required: [mnemonic, correlationId]
+      properties:
+        mnemonic:
+          type: string
+          example: STR_MNEMO_ADMIN_BENEFIT_PROGRAM_VALIDATION_FAILED
+        details:
+          type: array
+          items:
+            type: string
+        correlationId:
+          type: string

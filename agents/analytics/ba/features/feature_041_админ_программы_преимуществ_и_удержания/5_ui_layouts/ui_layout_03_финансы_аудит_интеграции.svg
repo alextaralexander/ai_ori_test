@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980" role="img" aria-labelledby="title desc">
+  <title id="title">Feature 041 - финансы, аудит и интеграции программы</title>
+  <desc id="desc">Схематичный макет финансового контроля, ручных корректировок, журнала аудита и интеграционных событий программы преимуществ.</desc>
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 18px; fill: #1f2937; }
+    .small { font-size: 14px; }
+    .title { font-size: 26px; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+    .muted { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
+    .header { fill: #e2e8f0; stroke: #334155; stroke-width: 2; }
+    .line { stroke: #64748b; stroke-width: 1.5; }
+  </style>
+  <rect x="20" y="20" width="1400" height="940" class="box"/>
+  <text x="50" y="62" class="title">Финансы, аудит и интеграции программы</text>
+  <rect x="50" y="95" width="410" height="360" class="box"/>
+  <text x="75" y="130">Финансовые лимиты</text>
+  <rect x="75" y="155" width="160" height="42" class="muted"/>
+  <text x="92" y="183" class="small">Budget</text>
+  <rect x="255" y="155" width="160" height="42" class="muted"/>
+  <text x="272" y="183" class="small">Currency</text>
+  <rect x="75" y="215" width="160" height="42" class="muted"/>
+  <text x="92" y="243" class="small">Cashback limit</text>
+  <rect x="255" y="215" width="160" height="42" class="muted"/>
+  <text x="272" y="243" class="small">Discount limit</text>
+  <rect x="75" y="275" width="340" height="42" class="muted"/>
+  <text x="92" y="303" class="small">Stop rule on budget exhausted</text>
+  <rect x="75" y="340" width="150" height="42" class="box"/>
+  <text x="98" y="368" class="small">Approve</text>
+  <rect x="245" y="340" width="150" height="42" class="box"/>
+  <text x="270" y="368" class="small">Reject</text>
+
+  <rect x="500" y="95" width="410" height="360" class="box"/>
+  <text x="525" y="130">Ручная корректировка</text>
+  <rect x="525" y="155" width="160" height="42" class="muted"/>
+  <text x="542" y="183" class="small">PartnerNumber</text>
+  <rect x="705" y="155" width="160" height="42" class="muted"/>
+  <text x="722" y="183" class="small">Benefit type</text>
+  <rect x="525" y="215" width="160" height="42" class="muted"/>
+  <text x="542" y="243" class="small">Delta</text>
+  <rect x="705" y="215" width="160" height="42" class="muted"/>
+  <text x="722" y="243" class="small">Reason code</text>
+  <rect x="525" y="275" width="340" height="70" class="muted"/>
+  <text x="542" y="310" class="small">Evidence / support case</text>
+  <rect x="525" y="360" width="160" height="42" class="box"/>
+  <text x="548" y="388" class="small">Submit</text>
+  <rect x="705" y="360" width="160" height="42" class="box"/>
+  <text x="728" y="388" class="small">Escalate</text>
+
+  <rect x="950" y="95" width="410" height="360" class="box"/>
+  <text x="975" y="130">Интеграции</text>
+  <rect x="975" y="155" width="330" height="42" class="muted"/>
+  <text x="992" y="183" class="small">Partner benefits sync</text>
+  <rect x="975" y="215" width="330" height="42" class="muted"/>
+  <text x="992" y="243" class="small">Bonus wallet events</text>
+  <rect x="975" y="275" width="330" height="42" class="muted"/>
+  <text x="992" y="303" class="small">Cart / checkout rules</text>
+  <rect x="975" y="335" width="330" height="42" class="muted"/>
+  <text x="992" y="363" class="small">Notification triggers</text>
+  <rect x="975" y="395" width="150" height="42" class="box"/>
+  <text x="1000" y="423" class="small">Retry</text>
+  <rect x="1145" y="395" width="160" height="42" class="box"/>
+  <text x="1172" y="423" class="small">Open log</text>
+
+  <rect x="50" y="500" width="1310" height="390" class="box"/>
+  <rect x="50" y="500" width="1310" height="52" class="header"/>
+  <text x="75" y="532" class="small">Время</text>
+  <text x="235" y="532" class="small">Actor</text>
+  <text x="395" y="532" class="small">Action</text>
+  <text x="620" y="532" class="small">Entity</text>
+  <text x="820" y="532" class="small">Before / after summary</text>
+  <text x="1120" y="532" class="small">CorrelationId</text>
+  <line x1="210" y1="500" x2="210" y2="890" class="line"/>
+  <line x1="370" y1="500" x2="370" y2="890" class="line"/>
+  <line x1="595" y1="500" x2="595" y2="890" class="line"/>
+  <line x1="795" y1="500" x2="795" y2="890" class="line"/>
+  <line x1="1100" y1="500" x2="1100" y2="890" class="line"/>
+  <line x1="50" y1="625" x2="1360" y2="625" class="line"/>
+  <line x1="50" y1="700" x2="1360" y2="700" class="line"/>
+  <line x1="50" y1="775" x2="1360" y2="775" class="line"/>
+  <text x="75" y="595" class="small">28.04.2026 10:20</text>
+  <text x="235" y="595" class="small">CRM manager</text>
+  <text x="395" y="595" class="small">PUBLISH</text>
+  <text x="620" y="595" class="small">Program v4</text>
+  <text x="820" y="595" class="small">status READY -> ACTIVE</text>
+  <text x="1120" y="595" class="small">corr-001</text>
+  <text x="75" y="670" class="small">28.04.2026 11:05</text>
+  <text x="235" y="670" class="small">Finance</text>
+  <text x="395" y="670" class="small">ADJUST</text>
+  <text x="620" y="670" class="small">Cashback</text>
+  <text x="820" y="670" class="small">delta +500 RUB, reason</text>
+  <text x="1120" y="670" class="small">corr-002</text>
+</svg>
