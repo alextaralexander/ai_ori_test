@@ -529,3 +529,43 @@
     Тогда batch проходит статусы "DRAFT", "APPROVED" и "SENT"
     И повторная отправка с тем же externalId не создает дублей выплат
     И admin platform KPI показывает bonus accruals и payout status
+
+  Сценарий: Логистический администратор проводит заказ через конвейер до передачи в доставку
+    Допустим пользователь вошел с ролью "fulfillment-admin"
+    И существует оплаченный заказ `BO-E2E-039-1` с резервом WMS и способом доставки "PICKUP_POINT"
+    Когда логистический администратор открывает "/admin/fulfillment"
+    И фильтрует операционную панель по заказу `BO-E2E-039-1`, складу `WH-MSK-01` и SLA-risk
+    Тогда система показывает текущий этап, deadline SLA, источник последнего события, delivery method, pickupPointId и correlationId
+    Когда оператор конвейера последовательно выполняет pick, pack и sort с idempotency keys
+    Тогда заказ получает этап "READY_TO_SHIP"
+    И fulfillment contour передает shipment во внешний delivery contour без дублей
+    И audit trail содержит actorRole, actionCode, sourceSystem и correlationId
+
+  Сценарий: Администратор доставки публикует службу и контролирует интеграционный обмен
+    Допустим пользователь вошел с ролью "delivery-admin"
+    И существует зона обслуживания `RU-MSK` и активное SLA-правило доставки
+    Когда администратор открывает "/admin/fulfillment/delivery-services"
+    И создает службу доставки с тарифом, расписанием отгрузок и интеграционным endpoint alias
+    И активирует службу доставки
+    Тогда способ доставки доступен checkout и fulfillment routing
+    Когда fulfillment contour передает shipment с externalShipmentId `EXT-E2E-039-2`
+    Тогда интеграционный журнал показывает checksum, retryCount, endpoint alias и correlationId
+    И повторная передача с externalShipmentId `EXT-E2E-039-2` не создает дубль отправления
+
+  Сценарий: Администратор сети ПВЗ закрывает перегруженную точку без потери назначенных отправлений
+    Допустим пользователь вошел с ролью "pickup-network-admin"
+    И существует активная точка выдачи `PVZ-E2E-039-1` с назначенными отправлениями
+    Когда администратор открывает "/admin/fulfillment/pickup-points"
+    И переводит точку `PVZ-E2E-039-1` в статус "TEMPORARILY_CLOSED" с reasonCode "OVERLOAD"
+    Тогда checkout и fulfillment routing не предлагают эту точку для новых заказов
+    И уже назначенные отправления остаются видимыми ответственному владельцу ПВЗ
+    И frontend показывает причину недоступности через mnemonic-код "STR_MNEMO_DELIVERY_PICKUP_POINT_TEMPORARILY_CLOSED"
+
+  Сценарий: Невыкуп в ПВЗ запускает возвратную логистику и корректировку бонусов
+    Допустим пользователь вошел с ролью "pickup-owner"
+    И существует партнерский shipment `SHP-E2E-039-3` со статусом "READY_FOR_PICKUP" и истекшим сроком хранения
+    Когда владелец ПВЗ фиксирует невыкуп с reasonCode "STORAGE_EXPIRED"
+    Тогда shipment получает статус "NOT_COLLECTED"
+    И fulfillment contour создает задачу возврата в WMS/логистику
+    И orders, service, payment, delivery и bonus contour получают согласованные структурированные события
+    И bonus contour создает reversal или adjustment без изменения исходного начисления задним числом

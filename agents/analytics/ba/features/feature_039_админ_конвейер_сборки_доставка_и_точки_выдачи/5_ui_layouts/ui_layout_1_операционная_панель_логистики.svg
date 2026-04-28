@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет операционной панели логистики feature 039</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Админ: конвейер сборки, доставка и точки выдачи</text>
+  <rect x="32" y="116" width="250" height="596" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="18">Разделы</text>
+  <text x="56" y="196" font-family="Arial" font-size="15">Операционная панель</text>
+  <text x="56" y="232" font-family="Arial" font-size="15">Конвейер сборки</text>
+  <text x="56" y="268" font-family="Arial" font-size="15">Службы доставки</text>
+  <text x="56" y="304" font-family="Arial" font-size="15">Точки выдачи</text>
+  <text x="56" y="340" font-family="Arial" font-size="15">Проблемные кейсы</text>
+  <rect x="312" y="116" width="904" height="108" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="340" y="154" font-family="Arial" font-size="18">Фильтры: склад / статус / SLA-risk / доставка / ПВЗ / correlationId</text>
+  <rect x="340" y="176" width="126" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="360" y="197" font-family="Arial" font-size="14">Применить</text>
+  <rect x="312" y="252" width="210" height="116" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="340" y="292" font-family="Arial" font-size="17">Pick/Pack</text>
+  <text x="340" y="326" font-family="Arial" font-size="14">Очередь и SLA</text>
+  <rect x="544" y="252" width="210" height="116" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="572" y="292" font-family="Arial" font-size="17">Sort/Ship</text>
+  <text x="572" y="326" font-family="Arial" font-size="14">Готово к отгрузке</text>
+  <rect x="776" y="252" width="210" height="116" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="804" y="292" font-family="Arial" font-size="17">Доставка</text>
+  <text x="804" y="326" font-family="Arial" font-size="14">Статусы служб</text>
+  <rect x="1008" y="252" width="208" height="116" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="1036" y="292" font-family="Arial" font-size="17">ПВЗ</text>
+  <text x="1036" y="326" font-family="Arial" font-size="14">Приемка и выдача</text>
+  <rect x="312" y="396" width="904" height="316" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="340" y="434" font-family="Arial" font-size="18">Таблица заказов и отправлений</text>
+  <line x1="340" y1="468" x2="1188" y2="468" stroke="#8aa1b4"/>
+  <text x="340" y="500" font-family="Arial" font-size="14">Заказ</text>
+  <text x="480" y="500" font-family="Arial" font-size="14">Этап</text>
+  <text x="620" y="500" font-family="Arial" font-size="14">SLA</text>
+  <text x="760" y="500" font-family="Arial" font-size="14">Доставка/ПВЗ</text>
+  <text x="960" y="500" font-family="Arial" font-size="14">Действия</text>
+</svg>

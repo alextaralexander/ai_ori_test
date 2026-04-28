@@ -22,6 +22,7 @@ import { AdminIdentityView } from './components/AdminIdentityView';
 import { AdminOrdersView } from './components/AdminOrdersView';
 import { AdminPlatformView } from './components/AdminPlatformView';
 import { AdminBonusView } from './components/AdminBonusView';
+import { AdminFulfillmentView } from './components/AdminFulfillmentView';
 import { AdminServiceView } from './components/AdminServiceView';
 import { AdminWmsView } from './components/AdminWmsView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
@@ -102,6 +103,11 @@ const testLoginRoles = new Set([
   'bonus-admin',
   'mlm-manager',
   'finance-manager',
+  'fulfillment-admin',
+  'conveyor-operator',
+  'delivery-admin',
+  'pickup-network-admin',
+  'support-operator',
   'pickup-owner',
   'delivery-operator',
   'catalog-manager',
@@ -399,6 +405,16 @@ function App() {
     contentView = <AdminBonusView section="calculations" />;
   } else if (path === '/admin/bonus-program/payout-batches') {
     contentView = <AdminBonusView section="payout-batches" />;
+  } else if (path === '/admin/fulfillment') {
+    contentView = <AdminFulfillmentView />;
+  } else if (path === '/admin/fulfillment/conveyor') {
+    contentView = <AdminFulfillmentView section="conveyor" />;
+  } else if (path === '/admin/fulfillment/delivery-services') {
+    contentView = <AdminFulfillmentView section="delivery-services" />;
+  } else if (path === '/admin/fulfillment/pickup-points') {
+    contentView = <AdminFulfillmentView section="pickup-points" />;
+  } else if (path === '/admin/fulfillment/pickup-owner') {
+    contentView = <AdminFulfillmentView section="pickup-owner" />;
   } else if (path === '/admin/identity') {
     contentView = <AdminIdentityView />;
   } else if (path.startsWith('/admin/identity/partners/')) {

@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin platform end-to-end flow with feature 038
+title Best Ori Gin platform end-to-end flow with feature 039
 start
 :Гость, покупатель или партнер входит в платформу;
 :Пользователь изучает каталог, акции и добавляет товары в корзину;
@@ -11,7 +11,14 @@ else (самовывоз из ПВЗ)
   :Пользователь выбирает точку выдачи по адресу, графику, сроку хранения и лимитам;
   :Платформа резервирует pickupPointId и создает shipment для ПВЗ;
 endif
-:Оплата, WMS/1C и сборочный контур подтверждают заказ;
+:Оплата и WMS/1C подтверждают заказ, резервы и складскую готовность;
+:Admin fulfillment contour feature 039 управляет pick, pack, sort, ship, SLA и exception задачами;
+if (Сборка прошла без отклонений?) then (да)
+  :Fulfillment contour передает shipment в delivery contour идемпотентно;
+else (нет)
+  :Логистический администратор разбирает exception, hold, reroute, redelivery или return;
+endif
+:Admin delivery и pickup contour feature 039 управляет службами доставки, тарифами, ПВЗ, владельцами точек и лимитами хранения;
 :Delivery contour передает статусы SHIPPED, IN_TRANSIT, READY_FOR_PICKUP и DELIVERED;
 :Пользователь и партнер видят tracking timeline и локализованные уведомления;
 if (Заказ влияет на партнерскую программу?) then (да)
@@ -21,8 +28,9 @@ if (Заказ влияет на партнерскую программу?) the
 else (нет)
   :Платформа завершает клиентский заказный поток без партнерских начислений;
 endif
-if (Есть возврат, претензия или частичная выдача?) then (да)
-  :Orders, service, payment, delivery и WMS публикуют корректирующие события;
+if (Есть возврат, претензия, невыкуп или частичная выдача?) then (да)
+  :Orders, service, payment, delivery, fulfillment и WMS публикуют корректирующие события;
+  :Feature 039 создает задачи возвратной логистики и синхронизирует статусы ПВЗ;
   :Bonus contour создает reversal или adjustment без изменения исходной записи задним числом;
 else (нет)
   :Начисления остаются готовыми к выплате по правилам периода;

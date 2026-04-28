@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-039-admin-fulfillment-001" author="codex">
+        <comment>Feature 039 admin fulfillment, delivery services and pickup point operation tables.</comment>
+        <createTable tableName="admin_fulfillment_task">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_code" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shipment_id" type="varchar(80)"/>
+            <column name="warehouse_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_code" type="varchar(64)"/>
+            <column name="stage" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="int"/>
+            <column name="sla_deadline_at" type="timestamptz"/>
+            <column name="assigned_actor_id" type="varchar(80)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+        <createIndex tableName="admin_fulfillment_task" indexName="idx_admin_fulfillment_task_stage_status_sla">
+            <column name="stage"/>
+            <column name="status"/>
+            <column name="sla_deadline_at"/>
+        </createIndex>
+        <createIndex tableName="admin_fulfillment_task" indexName="idx_admin_fulfillment_task_order">
+            <column name="order_id"/>
+        </createIndex>
+        <createIndex tableName="admin_fulfillment_task" indexName="idx_admin_fulfillment_task_correlation">
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-039-admin-fulfillment-002" author="codex">
+        <createTable tableName="admin_fulfillment_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="uuid"/>
+            <column name="order_id" type="varchar(80)"/>
+            <column name="shipment_id" type="varchar(80)"/>
+            <column name="event_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stage_from" type="varchar(40)"/>
+            <column name="stage_to" type="varchar(40)"/>
+            <column name="source_system" type="varchar(64)"/>
+            <column name="actor_id" type="varchar(80)"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="occurred_at" type="timestamptz"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="admin_fulfillment_event" baseColumnNames="task_id" referencedTableName="admin_fulfillment_task" referencedColumnNames="id" constraintName="fk_admin_fulfillment_event_task"/>
+        <createIndex tableName="admin_fulfillment_event" indexName="idx_admin_fulfillment_event_task_time">
+            <column name="task_id"/>
+            <column name="occurred_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-039-admin-fulfillment-003" author="codex">
+        <createTable tableName="admin_delivery_service">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="service_code" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="display_name_key" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="integration_mode" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="endpoint_alias" type="varchar(80)"/>
+            <column name="version" type="int"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+        <createTable tableName="admin_delivery_tariff">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="service_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_method" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_amount" type="numeric(19,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valid_from" type="timestamptz"/>
+            <column name="valid_to" type="timestamptz"/>
+            <column name="priority" type="int"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="admin_delivery_tariff" baseColumnNames="service_id" referencedTableName="admin_delivery_service" referencedColumnNames="id" constraintName="fk_admin_delivery_tariff_service"/>
+        <createTable tableName="admin_delivery_sla_rule">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="service_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_code" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stage" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration_minutes" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="admin_delivery_sla_rule" baseColumnNames="service_id" referencedTableName="admin_delivery_service" referencedColumnNames="id" constraintName="fk_admin_delivery_sla_service"/>
+    </changeSet>
+
+    <changeSet id="feature-039-admin-fulfillment-004" author="codex">
+        <createTable tableName="admin_pickup_point">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pickup_point_code" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="owner_user_id" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_text" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="numeric(10,7)"/>
+            <column name="longitude" type="numeric(10,7)"/>
+            <column name="storage_limit_days" type="int"/>
+            <column name="shipment_limit" type="int"/>
+            <column name="version" type="int"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+        <createTable tableName="admin_pickup_shipment">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pickup_point_id" type="uuid"/>
+            <column name="shipment_id" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="varchar(80)"/>
+            <column name="status" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipient_check_code_hash" type="varchar(160)"/>
+            <column name="storage_expires_at" type="timestamptz"/>
+            <column name="last_reason_code" type="varchar(80)"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="admin_pickup_shipment" baseColumnNames="pickup_point_id" referencedTableName="admin_pickup_point" referencedColumnNames="id" constraintName="fk_admin_pickup_shipment_point"/>
+    </changeSet>
+
+    <changeSet id="feature-039-admin-fulfillment-005" author="codex">
+        <createTable tableName="admin_fulfillment_integration_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="direction" type="varchar(16)"/>
+            <column name="source_system" type="varchar(64)"/>
+            <column name="endpoint_alias" type="varchar(80)"/>
+            <column name="external_id" type="varchar(120)"/>
+            <column name="status" type="varchar(24)"/>
+            <column name="checksum" type="varchar(128)"/>
+            <column name="retry_count" type="int"/>
+            <column name="last_error_code" type="varchar(80)"/>
+            <column name="last_error_message_mnemonic" type="varchar(120)"/>
+            <column name="idempotency_key" type="varchar(120)"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="created_at" type="timestamptz"/>
+        </createTable>
+        <createTable tableName="admin_fulfillment_audit_event">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="actor_id" type="varchar(80)"/>
+            <column name="actor_role" type="varchar(80)"/>
+            <column name="action_code" type="varchar(80)"/>
+            <column name="entity_type" type="varchar(80)"/>
+            <column name="entity_id" type="uuid"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="source_system" type="varchar(64)"/>
+            <column name="before_summary" type="text"/>
+            <column name="after_summary" type="text"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="created_at" type="timestamptz"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

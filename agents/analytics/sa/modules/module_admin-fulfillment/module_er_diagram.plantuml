@@ -1,0 +1,152 @@
+@startuml
+title Module admin-fulfillment complete ER diagram
+entity admin_fulfillment_task {
+  * id : uuid
+  --
+  task_code : varchar(80)
+  order_id : varchar(80)
+  shipment_id : varchar(80)
+  warehouse_code : varchar(64)
+  zone_code : varchar(64)
+  stage : varchar(40)
+  status : varchar(32)
+  priority : int
+  sla_deadline_at : timestamptz
+  assigned_actor_id : varchar(80)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+entity admin_fulfillment_event {
+  * id : uuid
+  --
+  task_id : uuid
+  order_id : varchar(80)
+  shipment_id : varchar(80)
+  event_type : varchar(64)
+  stage_from : varchar(40)
+  stage_to : varchar(40)
+  source_system : varchar(64)
+  actor_id : varchar(80)
+  reason_code : varchar(80)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(80)
+  occurred_at : timestamptz
+}
+entity admin_delivery_service {
+  * id : uuid
+  --
+  service_code : varchar(64)
+  display_name_key : varchar(120)
+  status : varchar(24)
+  integration_mode : varchar(32)
+  endpoint_alias : varchar(80)
+  version : int
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+entity admin_delivery_tariff {
+  * id : uuid
+  --
+  service_id : uuid
+  zone_code : varchar(64)
+  delivery_method : varchar(32)
+  currency : varchar(3)
+  base_amount : numeric(19,4)
+  valid_from : timestamptz
+  valid_to : timestamptz
+  priority : int
+}
+entity admin_delivery_sla_rule {
+  * id : uuid
+  --
+  service_id : uuid
+  zone_code : varchar(64)
+  stage : varchar(40)
+  duration_minutes : int
+  status : varchar(24)
+  valid_from : timestamptz
+  valid_to : timestamptz
+}
+entity admin_pickup_point {
+  * id : uuid
+  --
+  pickup_point_code : varchar(64)
+  owner_user_id : varchar(80)
+  status : varchar(32)
+  address_text : varchar(500)
+  latitude : numeric(10,7)
+  longitude : numeric(10,7)
+  storage_limit_days : int
+  shipment_limit : int
+  version : int
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+entity admin_pickup_point_schedule {
+  * id : uuid
+  --
+  pickup_point_id : uuid
+  day_of_week : int
+  open_time : time
+  close_time : time
+  temporary_closed : boolean
+  reason_code : varchar(80)
+}
+entity admin_pickup_shipment {
+  * id : uuid
+  --
+  pickup_point_id : uuid
+  shipment_id : varchar(80)
+  order_id : varchar(80)
+  status : varchar(40)
+  recipient_check_code_hash : varchar(160)
+  storage_expires_at : timestamptz
+  last_reason_code : varchar(80)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+entity admin_fulfillment_integration_event {
+  * id : uuid
+  --
+  direction : varchar(16)
+  source_system : varchar(64)
+  endpoint_alias : varchar(80)
+  external_id : varchar(120)
+  status : varchar(24)
+  checksum : varchar(128)
+  retry_count : int
+  last_error_code : varchar(80)
+  last_error_message_mnemonic : varchar(120)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+entity admin_fulfillment_audit_event {
+  * id : uuid
+  --
+  actor_id : varchar(80)
+  actor_role : varchar(80)
+  action_code : varchar(80)
+  entity_type : varchar(80)
+  entity_id : uuid
+  reason_code : varchar(80)
+  source_system : varchar(64)
+  before_summary : text
+  after_summary : text
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+admin_fulfillment_task ||--o{ admin_fulfillment_event : emits
+admin_delivery_service ||--o{ admin_delivery_tariff : has
+admin_delivery_service ||--o{ admin_delivery_sla_rule : has
+admin_delivery_service ||--o{ admin_fulfillment_integration_event : exchanges
+admin_pickup_point ||--o{ admin_pickup_point_schedule : has
+admin_pickup_point ||--o{ admin_pickup_shipment : stores
+admin_pickup_shipment ||--o{ admin_fulfillment_event : changes
+admin_fulfillment_task ||--o{ admin_fulfillment_audit_event : audited
+admin_delivery_service ||--o{ admin_fulfillment_audit_event : audited
+admin_pickup_point ||--o{ admin_fulfillment_audit_event : audited
+@enduml

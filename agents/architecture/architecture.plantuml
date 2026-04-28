@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 038
+title Best Ori Gin monolith architecture through feature 039
 
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
@@ -13,6 +13,7 @@ package "frontend/monolith apps/web-shell" {
   [AdminService UI]
   [AdminPlatform UI]
   [AdminBonus UI]
+  [AdminFulfillment UI]
   [I18nProvider]
   [NotificationProvider]
   [OfflineStatusProvider]
@@ -46,6 +47,7 @@ package "backend/monolith/monolith-app" {
   [admin-identity]
   [admin-platform]
   [admin-bonus]
+  [admin-fulfillment]
 }
 
 database "Postgres / Liquibase XML" as db
@@ -70,6 +72,7 @@ cloud "Hybrid Pixel" as hybrid
 [AdminService UI] --> [admin-service] : HTTP/JSON service cases and decisions
 [AdminPlatform UI] --> [admin-platform] : HTTP/JSON KPI, audit, integrations
 [AdminBonus UI] --> [admin-bonus] : HTTP/JSON /api/admin/bonus-program/*
+[AdminFulfillment UI] --> [admin-fulfillment] : HTTP/JSON /api/admin/fulfillment/*
 [I18nProvider] --> [platform-experience] : HTTP/JSON i18n diagnostics
 [NotificationProvider] --> [platform-experience] : HTTP/JSON notification preferences
 [OfflineStatusProvider] --> [auth] : HTTP/JSON session check
@@ -96,6 +99,14 @@ cloud "Hybrid Pixel" as hybrid
 [delivery] --> [admin-platform] : delivery SLA and problem-rate events
 [delivery] --> [bonus-wallet] : bonus-affecting delivery outcome events
 [delivery] --> [admin-bonus] : delivered, partial and not-collected events
+[admin-fulfillment] --> [admin-wms] : HTTP/JSON reserve readiness, return tasks
+[admin-fulfillment] --> [order] : HTTP/JSON shipment lifecycle and return events
+[admin-fulfillment] --> [admin-order] : HTTP/JSON admin order fulfillment context
+[admin-fulfillment] --> [delivery] : HTTP/JSON shipment transfer and tracking sync
+[admin-fulfillment] --> deliveryProvider : HTTP/JSON delivery service exchange
+[admin-fulfillment] --> [admin-bonus] : HTTP/JSON not-collected, partial and return events
+[admin-fulfillment] --> [admin-platform] : HTTP/JSON fulfillment SLA, pickup load, integration health
+[admin-fulfillment] --> [admin-identity] : HTTP/JSON pickup owner and operator scope
 [employee] --> [delivery] : tracking links and delayed delivery signals
 [admin-order] --> [delivery] : shipment reference and delivery blocking context
 [admin-service] --> [delivery] : replacement delivery and issue context
@@ -134,6 +145,7 @@ cloud "Hybrid Pixel" as hybrid
 [admin-identity] --> db
 [admin-platform] --> db
 [admin-bonus] --> db
+[admin-fulfillment] --> db
 [admin-cms] --> s3 : content documents/media metadata
 [admin-pim] --> s3 : product media metadata
 [admin-service] --> s3 : claim attachments metadata

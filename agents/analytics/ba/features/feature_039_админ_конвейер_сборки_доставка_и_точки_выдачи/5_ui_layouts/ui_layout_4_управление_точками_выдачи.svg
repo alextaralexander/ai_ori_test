@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет управления точками выдачи feature 039</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Управление сетью точек выдачи</text>
+  <rect x="32" y="116" width="320" height="596" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="18">Фильтры ПВЗ</text>
+  <text x="56" y="204" font-family="Arial" font-size="15">Статус</text>
+  <text x="56" y="248" font-family="Arial" font-size="15">Зона обслуживания</text>
+  <text x="56" y="292" font-family="Arial" font-size="15">Владелец</text>
+  <text x="56" y="336" font-family="Arial" font-size="15">Перегрузка / лимит</text>
+  <rect x="388" y="116" width="398" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="416" y="154" font-family="Arial" font-size="18">Список точек выдачи</text>
+  <rect x="416" y="184" width="332" height="68" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="440" y="224" font-family="Arial" font-size="15">ACTIVE / доступна</text>
+  <rect x="416" y="272" width="332" height="68" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="440" y="312" font-family="Arial" font-size="15">TEMPORARILY_CLOSED</text>
+  <rect x="416" y="360" width="332" height="68" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="440" y="400" font-family="Arial" font-size="15">SUSPENDED / перегрузка</text>
+  <rect x="820" y="116" width="396" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="848" y="154" font-family="Arial" font-size="18">Карточка ПВЗ</text>
+  <text x="848" y="204" font-family="Arial" font-size="15">Адрес / координаты / график</text>
+  <text x="848" y="248" font-family="Arial" font-size="15">Владелец / операторы / контакты</text>
+  <text x="848" y="292" font-family="Arial" font-size="15">Лимит хранения / лимит отправлений</text>
+  <text x="848" y="336" font-family="Arial" font-size="15">Зоны обслуживания / статус</text>
+  <rect x="848" y="384" width="140" height="42" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="874" y="411" font-family="Arial" font-size="15">Сохранить</text>
+  <rect x="1008" y="384" width="154" height="42" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="1036" y="411" font-family="Arial" font-size="15">Закрыть ПВЗ</text>
+</svg>

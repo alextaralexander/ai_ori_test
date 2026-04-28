@@ -39,6 +39,7 @@ import { runFeature035AdminIdentityFlow } from '../feature_035_админ_пол
 import { runFeature036AdminPlatformFlow } from '../feature_036_админ_kpi_аудит_и_интеграции_платформы/feature_ui_flow';
 import { runFeature037DeliveryFlow } from '../feature_037_доставка_отслеживание_и_точки_выдачи/feature_ui_flow';
 import { runFeature038AdminBonusFlow } from '../feature_038_админ_бонусная_система_и_компенсационный_план/feature_ui_flow';
+import { runFeature039AdminFulfillmentFlow } from '../feature_039_админ_конвейер_сборки_доставка_и_точки_выдачи/feature_ui_flow';
 
 test('admin WMS green path participates in product e2e flow', async ({ page }) => {
   await runFeature032AdminWmsFlow(page);
@@ -67,4 +68,8 @@ test('delivery tracking and pickup points green path participates in product e2e
 
 test('admin bonus compensation plan and payout green path participates in product e2e flow', async ({ page }) => {
   await runFeature038AdminBonusFlow(page);
+});
+
+test('admin fulfillment conveyor delivery and pickup points green path participates in product e2e flow', async ({ page }) => {
+  await runFeature039AdminFulfillmentFlow(page);
 });

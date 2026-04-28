@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет управления службами доставки и интеграциями feature 039</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Службы доставки и интеграции</text>
+  <rect x="32" y="116" width="462" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="60" y="154" font-family="Arial" font-size="18">Список служб доставки</text>
+  <line x1="60" y1="188" x2="466" y2="188" stroke="#8aa1b4"/>
+  <text x="60" y="222" font-family="Arial" font-size="14">Код</text>
+  <text x="170" y="222" font-family="Arial" font-size="14">Статус</text>
+  <text x="290" y="222" font-family="Arial" font-size="14">SLA</text>
+  <text x="390" y="222" font-family="Arial" font-size="14">Тариф</text>
+  <rect x="526" y="116" width="690" height="262" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="554" y="154" font-family="Arial" font-size="18">Редактор службы</text>
+  <text x="554" y="202" font-family="Arial" font-size="15">Код / название / зоны обслуживания / расписание</text>
+  <text x="554" y="242" font-family="Arial" font-size="15">Тарифы / SLA-правила / статусы доступности</text>
+  <rect x="554" y="286" width="152" height="42" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="588" y="313" font-family="Arial" font-size="15">Сохранить</text>
+  <rect x="526" y="414" width="690" height="298" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="554" y="452" font-family="Arial" font-size="18">Интеграционный журнал</text>
+  <text x="554" y="500" font-family="Arial" font-size="15">Последний обмен / ошибка / retryCount / checksum</text>
+  <text x="554" y="540" font-family="Arial" font-size="15">endpoint alias / sourceSystem / correlationId</text>
+  <rect x="554" y="584" width="178" height="42" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="590" y="611" font-family="Arial" font-size="15">Безопасный retry</text>
+</svg>

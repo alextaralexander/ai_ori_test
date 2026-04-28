@@ -1,0 +1,558 @@
+openapi: 3.0.3
+info:
+  title: Admin Fulfillment API
+  version: 1.0.0
+  description: Feature 039 API for fulfillment conveyor, delivery services, pickup points and logistics exception operations.
+servers:
+  - url: /api/admin/fulfillment
+paths:
+  /dashboard/shipments:
+    get:
+      summary: Search fulfillment shipments and tasks
+      operationId: searchFulfillmentShipments
+      parameters:
+        - name: warehouseCode
+          in: query
+          schema: { type: string }
+        - name: stage
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: slaRisk
+          in: query
+          schema: { type: boolean }
+        - name: pickupPointId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Fulfillment shipment page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillmentShipmentPage'
+  /tasks:
+    post:
+      summary: Create fulfillment task for order or shipment
+      operationId: createFulfillmentTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FulfillmentTaskRequest'
+      responses:
+        '201':
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillmentTask'
+  /tasks/{taskId}/stage:
+    post:
+      summary: Move fulfillment task to next conveyor stage
+      operationId: moveFulfillmentTaskStage
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StageTransitionRequest'
+      responses:
+        '200':
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillmentTask'
+        '409':
+          description: Invalid stage transition mnemonic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MnemonicError'
+  /tasks/{taskId}/exceptions:
+    post:
+      summary: Create fulfillment exception
+      operationId: createFulfillmentException
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FulfillmentExceptionRequest'
+      responses:
+        '201':
+          description: Created exception event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillmentEvent'
+  /delivery-services:
+    get:
+      summary: Search delivery services
+      operationId: searchDeliveryServices
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: zoneCode
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Delivery service page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryServicePage'
+    post:
+      summary: Create delivery service draft
+      operationId: createDeliveryService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryServiceRequest'
+      responses:
+        '201':
+          description: Created service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryService'
+  /delivery-services/{serviceId}/activate:
+    post:
+      summary: Activate delivery service
+      operationId: activateDeliveryService
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+      responses:
+        '200':
+          description: Activated service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryService'
+  /delivery-services/{serviceId}/tariffs:
+    post:
+      summary: Add delivery tariff
+      operationId: addDeliveryTariff
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryTariffRequest'
+      responses:
+        '201':
+          description: Created tariff
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryTariff'
+  /delivery-services/{serviceId}/sla-rules:
+    post:
+      summary: Add delivery SLA rule
+      operationId: addDeliverySlaRule
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliverySlaRuleRequest'
+      responses:
+        '201':
+          description: Created SLA rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliverySlaRule'
+  /pickup-points:
+    get:
+      summary: Search pickup points
+      operationId: searchPickupPoints
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: ownerUserId
+          in: query
+          schema: { type: string }
+        - name: zoneCode
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Pickup point page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupPointPage'
+    post:
+      summary: Create pickup point draft
+      operationId: createPickupPoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupPointRequest'
+      responses:
+        '201':
+          description: Created pickup point
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupPoint'
+  /pickup-points/{pickupPointId}/activate:
+    post:
+      summary: Activate pickup point after validation
+      operationId: activatePickupPoint
+      parameters:
+        - $ref: '#/components/parameters/PickupPointId'
+      responses:
+        '200':
+          description: Activated pickup point
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupPoint'
+  /pickup-points/{pickupPointId}/temporary-close:
+    post:
+      summary: Temporarily close pickup point
+      operationId: temporarilyClosePickupPoint
+      parameters:
+        - $ref: '#/components/parameters/PickupPointId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Closed pickup point
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupPoint'
+  /pickup-shipments/{shipmentId}/accept:
+    post:
+      summary: Accept shipment at pickup point
+      operationId: acceptPickupShipment
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Accepted shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupShipment'
+  /pickup-shipments/{shipmentId}/deliver:
+    post:
+      summary: Deliver shipment to recipient
+      operationId: deliverPickupShipment
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupDeliveryRequest'
+      responses:
+        '200':
+          description: Delivered shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupShipment'
+  /pickup-shipments/{shipmentId}/not-collected:
+    post:
+      summary: Mark shipment as not collected and start return logistics
+      operationId: markPickupShipmentNotCollected
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Not collected shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupShipment'
+  /integration-events:
+    get:
+      summary: Search fulfillment integration events
+      operationId: searchFulfillmentIntegrationEvents
+      parameters:
+        - name: sourceSystem
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Integration event page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationEventPage'
+components:
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ServiceId:
+      name: serviceId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PickupPointId:
+      name: pickupPointId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ShipmentId:
+      name: shipmentId
+      in: path
+      required: true
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 120 }
+  schemas:
+    FulfillmentShipmentPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/FulfillmentShipmentSummary' }
+    FulfillmentShipmentSummary:
+      type: object
+      properties:
+        taskId: { type: string, format: uuid }
+        orderId: { type: string }
+        shipmentId: { type: string }
+        stage: { type: string }
+        status: { type: string }
+        slaDeadlineAt: { type: string, format: date-time }
+        deliveryMethod: { type: string }
+        pickupPointId: { type: string, format: uuid }
+        lastReasonMnemonic: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        correlationId: { type: string }
+    FulfillmentTaskRequest:
+      type: object
+      required: [taskCode, orderId, warehouseCode, stage]
+      properties:
+        taskCode: { type: string, maxLength: 80 }
+        orderId: { type: string, maxLength: 80 }
+        shipmentId: { type: string, maxLength: 80 }
+        warehouseCode: { type: string, maxLength: 64 }
+        zoneCode: { type: string, maxLength: 64 }
+        stage: { type: string }
+        priority: { type: integer }
+        slaDeadlineAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    FulfillmentTask:
+      allOf:
+        - $ref: '#/components/schemas/FulfillmentTaskRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string, enum: [OPEN, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED] }
+            updatedAt: { type: string, format: date-time }
+    StageTransitionRequest:
+      type: object
+      required: [targetStage]
+      properties:
+        targetStage: { type: string }
+        scannedOrderCode: { type: string }
+        scannedSkuCodes:
+          type: array
+          items: { type: string }
+        reasonCode: { type: string }
+        correlationId: { type: string }
+    FulfillmentExceptionRequest:
+      type: object
+      required: [reasonCode]
+      properties:
+        reasonCode: { type: string, maxLength: 80 }
+        internalComment: { type: string, maxLength: 2000 }
+        targetStatus: { type: string, enum: [EXCEPTION, ON_HOLD, REROUTE_REQUESTED, RETURN_REQUESTED, LOST] }
+        correlationId: { type: string }
+    FulfillmentEvent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        eventType: { type: string }
+        stageFrom: { type: string }
+        stageTo: { type: string }
+        reasonCode: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }
+    DeliveryServiceRequest:
+      type: object
+      required: [serviceCode, displayNameKey, integrationMode]
+      properties:
+        serviceCode: { type: string, maxLength: 64 }
+        displayNameKey: { type: string, maxLength: 120 }
+        integrationMode: { type: string, enum: [INTERNAL, EXTERNAL_API, MANUAL] }
+        endpointAlias: { type: string, maxLength: 80 }
+    DeliveryService:
+      allOf:
+        - $ref: '#/components/schemas/DeliveryServiceRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string, enum: [DRAFT, ACTIVE, SUSPENDED, ARCHIVED] }
+            version: { type: integer }
+    DeliveryServicePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/DeliveryService' }
+    DeliveryTariffRequest:
+      type: object
+      required: [zoneCode, deliveryMethod, currency, baseAmount, validFrom]
+      properties:
+        zoneCode: { type: string }
+        deliveryMethod: { type: string, enum: [HOME_DELIVERY, COURIER_DELIVERY, PICKUP_POINT] }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        baseAmount: { type: number, minimum: 0 }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        priority: { type: integer }
+    DeliveryTariff:
+      allOf:
+        - $ref: '#/components/schemas/DeliveryTariffRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+    DeliverySlaRuleRequest:
+      type: object
+      required: [zoneCode, stage, durationMinutes]
+      properties:
+        zoneCode: { type: string }
+        stage: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+    DeliverySlaRule:
+      allOf:
+        - $ref: '#/components/schemas/DeliverySlaRuleRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string }
+    PickupPointRequest:
+      type: object
+      required: [pickupPointCode, ownerUserId, addressText, storageLimitDays, shipmentLimit]
+      properties:
+        pickupPointCode: { type: string, maxLength: 64 }
+        ownerUserId: { type: string, maxLength: 80 }
+        addressText: { type: string, maxLength: 500 }
+        latitude: { type: number }
+        longitude: { type: number }
+        storageLimitDays: { type: integer, minimum: 1 }
+        shipmentLimit: { type: integer, minimum: 1 }
+        zoneCodes:
+          type: array
+          items: { type: string }
+    PickupPoint:
+      allOf:
+        - $ref: '#/components/schemas/PickupPointRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string, enum: [DRAFT, ACTIVE, TEMPORARILY_CLOSED, SUSPENDED, ARCHIVED] }
+            version: { type: integer }
+    PickupPointPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PickupPoint' }
+    PickupDeliveryRequest:
+      type: object
+      required: [recipientCheckCode]
+      properties:
+        recipientCheckCode: { type: string, minLength: 4, maxLength: 32 }
+        partialDelivery: { type: boolean }
+        deliveredSkuCodes:
+          type: array
+          items: { type: string }
+        reasonCode: { type: string }
+    PickupShipment:
+      type: object
+      properties:
+        shipmentId: { type: string }
+        orderId: { type: string }
+        pickupPointId: { type: string, format: uuid }
+        status: { type: string }
+        storageExpiresAt: { type: string, format: date-time }
+        lastReasonCode: { type: string }
+        correlationId: { type: string }
+    ReasonRequest:
+      type: object
+      required: [reasonCode]
+      properties:
+        reasonCode: { type: string, maxLength: 80 }
+        internalComment: { type: string, maxLength: 2000 }
+        correlationId: { type: string }
+    IntegrationEventPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/IntegrationEvent' }
+    IntegrationEvent:
+      type: object
+      properties:
+        sourceSystem: { type: string }
+        endpointAlias: { type: string }
+        externalId: { type: string }
+        status: { type: string }
+        checksum: { type: string }
+        retryCount: { type: integer }
+        lastErrorCode: { type: string }
+        lastErrorMessageMnemonic: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        correlationId: { type: string }
+    MnemonicError:
+      type: object
+      properties:
+        code: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        correlationId: { type: string }

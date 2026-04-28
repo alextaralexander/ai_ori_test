@@ -1,6 +1,5 @@
+// AUTO-GENERATED from agents/tests/. Do not edit this synchronized runtime copy manually.
 package com.bestorigin.tests.endtoend;
-
-// Generated from agents/tests/api. Do not edit this runtime copy manually.
 
 import com.bestorigin.tests.feature001.FeatureApiTest;
 import org.junit.jupiter.api.Test;
@@ -47,5 +46,6 @@ public class EndToEndApiTest {
         new com.bestorigin.tests.feature036.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature037.FeatureApiTest().assertFeatureGreenPath();
         new com.bestorigin.tests.feature038.FeatureApiTest().assertFeatureGreenPath();
+        new com.bestorigin.tests.feature039.FeatureApiTest().assertFeatureGreenPath();
     }
 }

@@ -1,0 +1,71 @@
+@startuml
+title Feature 039 fulfillment, delivery and pickup sequence
+actor "Логистический администратор" as FulfillmentAdmin
+actor "Оператор конвейера" as ConveyorOperator
+actor "Администратор доставки" as DeliveryAdmin
+actor "Владелец ПВЗ" as PickupOwner
+participant "Frontend /admin/fulfillment" as Frontend
+participant "admin-fulfillment API" as AdminFulfillment
+participant "admin-wms module" as AdminWms
+participant "order/admin-order modules" as Orders
+participant "delivery module" as Delivery
+participant "admin-bonus module" as Bonus
+participant "admin-platform KPI/audit" as Platform
+database "PostgreSQL admin_fulfillment_*" as Db
+
+FulfillmentAdmin -> Frontend: открыть операционную панель
+Frontend -> AdminFulfillment: GET /dashboard/shipments?stage&slaRisk&correlationId
+AdminFulfillment -> Db: read tasks, shipments, pickup points, events
+AdminFulfillment -> Platform: audit ADMIN_FULFILLMENT_DASHBOARD_VIEWED
+AdminFulfillment --> Frontend: shipment page with mnemonic reason codes
+
+AdminWms -> AdminFulfillment: reserve/order readiness event
+AdminFulfillment -> Db: create admin_fulfillment_task
+AdminFulfillment -> Platform: publish fulfillment SLA metric
+
+ConveyorOperator -> Frontend: scan order, items and package
+Frontend -> AdminFulfillment: POST /tasks/{taskId}/stage with Idempotency-Key
+AdminFulfillment -> Db: validate stage and write immutable event
+AdminFulfillment -> Platform: audit stage transition
+AdminFulfillment --> Frontend: updated task
+
+alt invalid stage transition
+  AdminFulfillment --> Frontend: STR_MNEMO_FULFILLMENT_INVALID_STAGE_TRANSITION
+else ready to ship
+  AdminFulfillment -> Delivery: create shipment or send shipment update idempotently
+  Delivery --> AdminFulfillment: externalShipmentId, status
+  AdminFulfillment -> Db: write integration event checksum/retry/correlationId
+end
+
+DeliveryAdmin -> Frontend: manage delivery service
+Frontend -> AdminFulfillment: POST /delivery-services and activate
+AdminFulfillment -> Db: validate tariffs, SLA rules and store versioned service
+AdminFulfillment -> Platform: audit DELIVERY_SERVICE_ACTIVATED
+AdminFulfillment --> Frontend: delivery service response
+
+FulfillmentAdmin -> Frontend: manage pickup point
+Frontend -> AdminFulfillment: POST /pickup-points/{id}/temporary-close
+AdminFulfillment -> Db: update pickup point status with reasonCode
+AdminFulfillment -> Platform: audit PICKUP_POINT_TEMPORARILY_CLOSED
+AdminFulfillment --> Frontend: pickup point response
+
+PickupOwner -> Frontend: accept and deliver shipment
+Frontend -> AdminFulfillment: POST /pickup-shipments/{shipmentId}/accept
+AdminFulfillment -> Db: set ACCEPTED idempotently
+Frontend -> AdminFulfillment: POST /pickup-shipments/{shipmentId}/deliver
+AdminFulfillment -> Db: verify recipient code hash and set DELIVERED
+AdminFulfillment -> Orders: publish shipment delivered event
+AdminFulfillment -> Platform: audit PICKUP_SHIPMENT_DELIVERED
+AdminFulfillment --> Frontend: pickup shipment response
+
+alt not collected or partial delivery
+  PickupOwner -> Frontend: mark not collected or partial delivery
+  Frontend -> AdminFulfillment: POST /pickup-shipments/{shipmentId}/not-collected
+  AdminFulfillment -> Db: write return logistics event
+  AdminFulfillment -> Orders: publish return event
+  AdminFulfillment -> Delivery: update shipment lifecycle
+  AdminFulfillment -> Bonus: publish reversal/adjustment event
+  AdminFulfillment -> Platform: update problem rate and pickup load
+  AdminFulfillment --> Frontend: status with STR_MNEMO_DELIVERY_*
+end
+@enduml
