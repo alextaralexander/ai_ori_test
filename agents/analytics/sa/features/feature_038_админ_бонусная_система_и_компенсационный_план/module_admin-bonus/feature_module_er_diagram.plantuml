@@ -1,0 +1,101 @@
+@startuml
+title Feature 038 admin-bonus ER changes
+entity admin_bonus_rule {
+  * id : uuid
+  --
+  rule_code : varchar(64)
+  rule_type : varchar(40)
+  status : varchar(24)
+  priority : int
+  currency : varchar(3)
+  rate_value : numeric(19,4)
+  valid_from : timestamptz
+  valid_to : timestamptz
+  version : int
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+entity admin_bonus_qualification {
+  * id : uuid
+  --
+  qualification_code : varchar(64)
+  level_number : int
+  personal_volume_threshold : numeric(19,4)
+  group_volume_threshold : numeric(19,4)
+  structure_depth : int
+  active_from : timestamptz
+  active_to : timestamptz
+  version : int
+}
+entity admin_bonus_calculation_period {
+  * id : uuid
+  --
+  period_code : varchar(32)
+  status : varchar(24)
+  started_at : timestamptz
+  closed_at : timestamptz
+  correlation_id : varchar(80)
+}
+entity admin_bonus_accrual {
+  * id : uuid
+  --
+  period_id : uuid
+  partner_id : varchar(80)
+  source_order_id : varchar(80)
+  source_transaction_id : varchar(80)
+  rule_id : uuid
+  status : varchar(24)
+  amount : numeric(19,4)
+  currency : varchar(3)
+  reason_code : varchar(64)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+entity admin_bonus_payout_batch {
+  * id : uuid
+  --
+  batch_code : varchar(64)
+  period_id : uuid
+  status : varchar(24)
+  total_amount : numeric(19,4)
+  currency : varchar(3)
+  external_id : varchar(100)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+entity admin_bonus_integration_event {
+  * id : uuid
+  --
+  direction : varchar(16)
+  endpoint_alias : varchar(80)
+  status : varchar(24)
+  checksum : varchar(128)
+  retry_count : int
+  last_error_code : varchar(80)
+  last_error_message_mnemonic : varchar(120)
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+entity admin_bonus_audit_event {
+  * id : uuid
+  --
+  actor_id : varchar(80)
+  actor_role : varchar(80)
+  action_code : varchar(80)
+  entity_type : varchar(80)
+  entity_id : uuid
+  reason_code : varchar(80)
+  before_summary : text
+  after_summary : text
+  correlation_id : varchar(80)
+  created_at : timestamptz
+}
+admin_bonus_rule ||--o{ admin_bonus_accrual : applies
+admin_bonus_calculation_period ||--o{ admin_bonus_accrual : contains
+admin_bonus_calculation_period ||--o{ admin_bonus_payout_batch : pays
+admin_bonus_payout_batch ||--o{ admin_bonus_accrual : includes
+admin_bonus_payout_batch ||--o{ admin_bonus_integration_event : sends
+admin_bonus_rule ||--o{ admin_bonus_audit_event : audited
+admin_bonus_qualification ||--o{ admin_bonus_audit_event : audited
+admin_bonus_payout_batch ||--o{ admin_bonus_audit_event : audited
+@enduml

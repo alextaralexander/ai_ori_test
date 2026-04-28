@@ -21,6 +21,7 @@ import { AdminRbacView } from './components/AdminRbacView';
 import { AdminIdentityView } from './components/AdminIdentityView';
 import { AdminOrdersView } from './components/AdminOrdersView';
 import { AdminPlatformView } from './components/AdminPlatformView';
+import { AdminBonusView } from './components/AdminBonusView';
 import { AdminServiceView } from './components/AdminServiceView';
 import { AdminWmsView } from './components/AdminWmsView';
 import { EmployeeClaimsView } from './components/EmployeeClaimsView';
@@ -98,6 +99,9 @@ const testLoginRoles = new Set([
   'business-admin',
   'bi-analyst',
   'integration-admin',
+  'bonus-admin',
+  'mlm-manager',
+  'finance-manager',
   'pickup-owner',
   'delivery-operator',
   'catalog-manager',
@@ -389,6 +393,12 @@ function App() {
     contentView = <AdminPlatformView section="integrations" />;
   } else if (path === '/admin/platform/audit') {
     contentView = <AdminPlatformView section="audit" />;
+  } else if (path === '/admin/bonus-program') {
+    contentView = <AdminBonusView />;
+  } else if (path === '/admin/bonus-program/calculations') {
+    contentView = <AdminBonusView section="calculations" />;
+  } else if (path === '/admin/bonus-program/payout-batches') {
+    contentView = <AdminBonusView section="payout-batches" />;
   } else if (path === '/admin/identity') {
     contentView = <AdminIdentityView />;
   } else if (path.startsWith('/admin/identity/partners/')) {

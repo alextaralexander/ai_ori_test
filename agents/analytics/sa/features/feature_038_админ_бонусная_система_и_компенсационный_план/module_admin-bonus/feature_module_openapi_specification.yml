@@ -1,0 +1,330 @@
+openapi: 3.0.3
+info:
+  title: Admin Bonus Program API
+  version: 1.0.0
+  description: Feature 038 API for bonus rules, qualifications, calculations and payout batches.
+servers:
+  - url: /api/admin/bonus-program
+paths:
+  /rules:
+    get:
+      summary: Search bonus rules
+      operationId: searchBonusRules
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: ruleType
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Bonus rules page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusRulePage'
+    post:
+      summary: Create bonus rule draft
+      operationId: createBonusRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BonusRuleRequest'
+      responses:
+        '201':
+          description: Created rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusRule'
+  /rules/{ruleId}/activate:
+    post:
+      summary: Activate bonus rule after validation and preview
+      operationId: activateBonusRule
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      responses:
+        '200':
+          description: Activated rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusRule'
+        '409':
+          description: Conflict mnemonic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MnemonicError'
+  /rules/{ruleId}/preview:
+    post:
+      summary: Preview rule calculation without financial writes
+      operationId: previewBonusRule
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BonusPreviewRequest'
+      responses:
+        '200':
+          description: Preview result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusPreviewResult'
+  /qualifications:
+    post:
+      summary: Create qualification version
+      operationId: createQualification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualificationRequest'
+      responses:
+        '201':
+          description: Qualification version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Qualification'
+  /calculations:
+    post:
+      summary: Run bonus calculation for period
+      operationId: runBonusCalculation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculationRunRequest'
+      responses:
+        '202':
+          description: Calculation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationRunResult'
+  /accruals:
+    get:
+      summary: Search bonus accruals
+      operationId: searchAccruals
+      parameters:
+        - name: periodCode
+          in: query
+          schema: { type: string }
+        - name: partnerId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Accrual page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccrualPage'
+  /payout-batches:
+    post:
+      summary: Create payout batch from payout-ready accruals
+      operationId: createPayoutBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayoutBatchRequest'
+      responses:
+        '201':
+          description: Created payout batch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutBatch'
+  /payout-batches/{batchId}/approve:
+    post:
+      summary: Approve payout batch
+      operationId: approvePayoutBatch
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Approved payout batch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutBatch'
+  /payout-batches/{batchId}/send:
+    post:
+      summary: Send payout batch idempotently
+      operationId: sendPayoutBatch
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '202':
+          description: Send accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutBatch'
+  /integrations/events:
+    get:
+      summary: Search bonus integration events
+      operationId: searchBonusIntegrationEvents
+      parameters:
+        - name: correlationId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Integration events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationEventPage'
+components:
+  parameters:
+    RuleId:
+      name: ruleId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    BonusRuleRequest:
+      type: object
+      required: [ruleCode, ruleType, currency, rateValue, validFrom, validTo]
+      properties:
+        ruleCode: { type: string, maxLength: 64 }
+        ruleType: { type: string, enum: [ORDER_BONUS, STRUCTURE_LEVEL_BONUS, PROMO_BONUS, MANUAL_ADJUSTMENT] }
+        priority: { type: integer }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        rateValue: { type: number }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+    BonusRule:
+      allOf:
+        - $ref: '#/components/schemas/BonusRuleRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string, enum: [DRAFT, ACTIVE, SUSPENDED, ARCHIVED] }
+            version: { type: integer }
+            updatedAt: { type: string, format: date-time }
+    BonusRulePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BonusRule' }
+    BonusPreviewRequest:
+      type: object
+      properties:
+        testOrderId: { type: string }
+        partnerId: { type: string }
+    BonusPreviewResult:
+      type: object
+      properties:
+        calculationBase: { type: number }
+        expectedAmount: { type: number }
+        currency: { type: string }
+        appliedRestrictions:
+          type: array
+          items: { type: string }
+    QualificationRequest:
+      type: object
+      required: [qualificationCode, levelNumber, personalVolumeThreshold, groupVolumeThreshold]
+      properties:
+        qualificationCode: { type: string }
+        levelNumber: { type: integer }
+        personalVolumeThreshold: { type: number }
+        groupVolumeThreshold: { type: number }
+        structureDepth: { type: integer }
+    Qualification:
+      allOf:
+        - $ref: '#/components/schemas/QualificationRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            version: { type: integer }
+    CalculationRunRequest:
+      type: object
+      required: [periodCode]
+      properties:
+        periodCode: { type: string }
+        recalculation: { type: boolean }
+    CalculationRunResult:
+      type: object
+      properties:
+        calculationId: { type: string, format: uuid }
+        periodCode: { type: string }
+        status: { type: string }
+        correlationId: { type: string }
+    AccrualPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Accrual' }
+    Accrual:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        partnerId: { type: string }
+        ruleCode: { type: string }
+        status: { type: string, enum: [HOLD, ACCRUAL, PAYOUT_READY, REVERSED, ADJUSTED] }
+        amount: { type: number }
+        currency: { type: string }
+        correlationId: { type: string }
+    PayoutBatchRequest:
+      type: object
+      required: [periodCode, currency]
+      properties:
+        periodCode: { type: string }
+        currency: { type: string }
+        regionCode: { type: string }
+        partnerSegment: { type: string }
+    PayoutBatch:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        batchCode: { type: string }
+        status: { type: string, enum: [DRAFT, APPROVED, SENT, PAID, REJECTED, CANCELLED] }
+        totalAmount: { type: number }
+        currency: { type: string }
+        externalId: { type: string }
+        correlationId: { type: string }
+    IntegrationEventPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/IntegrationEvent' }
+    IntegrationEvent:
+      type: object
+      properties:
+        endpointAlias: { type: string }
+        status: { type: string }
+        retryCount: { type: integer }
+        checksum: { type: string }
+        lastErrorCode: { type: string }
+        lastErrorMessageMnemonic: { type: string }
+        correlationId: { type: string }
+    MnemonicError:
+      type: object
+      properties:
+        code: { type: string, pattern: '^STR_MNEMO_[A-Z0-9_]+$' }
+        correlationId: { type: string }

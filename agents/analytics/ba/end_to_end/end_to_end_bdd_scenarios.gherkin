@@ -499,3 +499,33 @@
     Тогда платформа показывает sourceSystem, previousStatus, newStatus и reasonCode
     И admin platform KPI учитывает problem rate и delivery SLA
     И backend response содержит только mnemonic-коды "STR_MNEMO_DELIVERY_*" для предопределенных сообщений
+  Сценарий: Партнерский заказ создает начисления по компенсационному плану
+    Допустим пользователь вошел с ролью "partner"
+    И в корзине есть товары текущей опубликованной кампании
+    И для периода активны правила компенсационного плана feature 038
+    Когда партнер оформляет и оплачивает заказ с доставкой
+    И delivery contour подтверждает статус "DELIVERED"
+    Тогда bonus contour получает структурированное событие заказа
+    И создает начисления "HOLD", "ACCRUAL" и "PAYOUT_READY" согласно активным правилам
+    И партнер видит результат в бонусном кошельке и партнерском отчете
+    И backend response содержит только mnemonic-коды "STR_MNEMO_ADMIN_BONUS_*" для предопределенных сообщений
+
+  Сценарий: Возврат после частичной выдачи корректирует бонус без изменения исходного начисления
+    Допустим пользователь вошел с ролью "pickup-owner"
+    И существует партнерский заказ с начислением "PAYOUT_READY"
+    Когда владелец точки выдачи фиксирует частичную выдачу с reasonCode "CUSTOMER_PARTIAL_REFUSAL"
+    Тогда orders, service, payment, WMS и delivery публикуют корректирующие события
+    И bonus contour создает отдельную запись "REVERSED" или "ADJUSTED"
+    И исходная финансовая запись начисления остается неизменной
+    И audit trail содержит actorRole, actionCode, reasonCode и correlationId
+
+  Сценарий: Финансовый менеджер формирует payout batch для партнерских начислений
+    Допустим пользователь вошел с ролью "finance-manager"
+    И существуют начисления "PAYOUT_READY" за период "2026-04"
+    Когда финансовый менеджер открывает "/admin/bonus-program/payout-batches"
+    И формирует payout batch по периоду, валюте и региону
+    И согласовывает payout batch
+    И отправляет payout batch во внешний bonus/payment contour
+    Тогда batch проходит статусы "DRAFT", "APPROVED" и "SENT"
+    И повторная отправка с тем же externalId не создает дублей выплат
+    И admin platform KPI показывает bonus accruals и payout status

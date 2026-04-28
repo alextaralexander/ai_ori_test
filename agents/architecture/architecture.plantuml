@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 037
+title Best Ori Gin monolith architecture through feature 038
 
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
@@ -12,6 +12,7 @@ package "frontend/monolith apps/web-shell" {
   [AdminOrders UI]
   [AdminService UI]
   [AdminPlatform UI]
+  [AdminBonus UI]
   [I18nProvider]
   [NotificationProvider]
   [OfflineStatusProvider]
@@ -44,6 +45,7 @@ package "backend/monolith/monolith-app" {
   [admin-service]
   [admin-identity]
   [admin-platform]
+  [admin-bonus]
 }
 
 database "Postgres / Liquibase XML" as db
@@ -67,6 +69,7 @@ cloud "Hybrid Pixel" as hybrid
 [AdminOrders UI] --> [admin-order] : HTTP/JSON admin order cards
 [AdminService UI] --> [admin-service] : HTTP/JSON service cases and decisions
 [AdminPlatform UI] --> [admin-platform] : HTTP/JSON KPI, audit, integrations
+[AdminBonus UI] --> [admin-bonus] : HTTP/JSON /api/admin/bonus-program/*
 [I18nProvider] --> [platform-experience] : HTTP/JSON i18n diagnostics
 [NotificationProvider] --> [platform-experience] : HTTP/JSON notification preferences
 [OfflineStatusProvider] --> [auth] : HTTP/JSON session check
@@ -85,20 +88,25 @@ cloud "Hybrid Pixel" as hybrid
 [order] --> [admin-wms] : reserve and release stock
 [order] --> pay : payment protocol
 [order] --> [delivery] : shipment creation and tracking links
+[order] --> [admin-bonus] : order facts for bonus calculation
 [delivery] --> [admin-wms] : stock/delivery constraints and return-to-logistics events
 [delivery] --> deliveryProvider : shipment task and status exchange
 [delivery] --> [order] : delivery lifecycle events
 [delivery] --> [admin-service] : delivery problem and return context
 [delivery] --> [admin-platform] : delivery SLA and problem-rate events
 [delivery] --> [bonus-wallet] : bonus-affecting delivery outcome events
+[delivery] --> [admin-bonus] : delivered, partial and not-collected events
 [employee] --> [delivery] : tracking links and delayed delivery signals
 [admin-order] --> [delivery] : shipment reference and delivery blocking context
 [admin-service] --> [delivery] : replacement delivery and issue context
+[admin-service] --> [admin-bonus] : service compensation and reversal events
 [admin-platform] --> [delivery] : delivery integration status and KPI read-model
+[admin-bonus] --> [admin-platform] : bonus accruals, payout status and integration health
 
 [admin-wms] --> wms : WMS/1C synchronization
 [admin-order] --> pay : payment/refund/dispute protocol
 [bonus-wallet] --> bonus : bonus protocol
+[admin-bonus] --> bonus : compensation plan and payout exchange
 [platform-experience] --> metrika : consent-aware analytics
 [platform-experience] --> mindbox : consent-aware marketing
 [platform-experience] --> hybrid : consent-aware pixel events
@@ -125,6 +133,7 @@ cloud "Hybrid Pixel" as hybrid
 [admin-service] --> db
 [admin-identity] --> db
 [admin-platform] --> db
+[admin-bonus] --> db
 [admin-cms] --> s3 : content documents/media metadata
 [admin-pim] --> s3 : product media metadata
 [admin-service] --> s3 : claim attachments metadata

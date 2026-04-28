@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет payout batch и интеграций feature 038</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Payout batch и интеграции bonus-системы</text>
+  <rect x="32" y="116" width="360" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="60" y="154" font-family="Arial" font-size="18">Формирование batch</text>
+  <text x="60" y="198" font-family="Arial" font-size="15">Период</text>
+  <rect x="178" y="176" width="170" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="244" font-family="Arial" font-size="15">Валюта</text>
+  <rect x="178" y="222" width="170" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="290" font-family="Arial" font-size="15">Регион</text>
+  <rect x="178" y="268" width="170" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <rect x="60" y="340" width="260" height="34" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="94" y="363" font-family="Arial" font-size="14">Сформировать batch</text>
+  <rect x="424" y="116" width="776" height="278" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="452" y="154" font-family="Arial" font-size="18">Начисления PAYOUT_READY</text>
+  <line x1="452" y1="186" x2="1172" y2="186" stroke="#8aa1b4"/>
+  <text x="452" y="218" font-family="Arial" font-size="14">partnerId</text>
+  <text x="610" y="218" font-family="Arial" font-size="14">amount</text>
+  <text x="760" y="218" font-family="Arial" font-size="14">ruleCode</text>
+  <text x="930" y="218" font-family="Arial" font-size="14">status</text>
+  <text x="1060" y="218" font-family="Arial" font-size="14">select</text>
+  <rect x="424" y="426" width="360" height="286" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="452" y="464" font-family="Arial" font-size="18">Статусы batch</text>
+  <text x="452" y="506" font-family="Arial" font-size="15">Draft -> Approved -> Sent -> Paid</text>
+  <text x="452" y="544" font-family="Arial" font-size="15">Rejected / Cancelled</text>
+  <rect x="812" y="426" width="388" height="286" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="840" y="464" font-family="Arial" font-size="18">Интеграционный журнал</text>
+  <text x="840" y="506" font-family="Arial" font-size="15">endpoint alias / checksum</text>
+  <text x="840" y="544" font-family="Arial" font-size="15">retryCount / lastErrorCode</text>
+  <text x="840" y="582" font-family="Arial" font-size="15">correlationId / safe retry</text>
+</svg>

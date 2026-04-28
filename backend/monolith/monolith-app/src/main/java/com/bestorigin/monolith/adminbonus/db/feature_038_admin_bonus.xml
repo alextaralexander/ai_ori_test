@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-038-admin-bonus-core" author="codex">
+        <createTable tableName="admin_bonus_rule">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="rule_code" type="varchar(64)"><constraints nullable="false" unique="true"/></column>
+            <column name="rule_type" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(24)"><constraints nullable="false"/></column>
+            <column name="priority" type="int"><constraints nullable="false"/></column>
+            <column name="currency" type="varchar(3)"><constraints nullable="false"/></column>
+            <column name="rate_value" type="numeric(19,4)"><constraints nullable="false"/></column>
+            <column name="valid_from" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="valid_to" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="version" type="int" defaultValueNumeric="1"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex tableName="admin_bonus_rule" indexName="idx_admin_bonus_rule_active_lookup">
+            <column name="rule_type"/>
+            <column name="status"/>
+            <column name="priority"/>
+            <column name="valid_from"/>
+            <column name="valid_to"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-038-admin-bonus-finance" author="codex">
+        <createTable tableName="admin_bonus_calculation_period">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="period_code" type="varchar(32)"><constraints nullable="false" unique="true"/></column>
+            <column name="status" type="varchar(24)"><constraints nullable="false"/></column>
+            <column name="started_at" type="timestamp with time zone"/>
+            <column name="closed_at" type="timestamp with time zone"/>
+            <column name="correlation_id" type="varchar(80)"/>
+        </createTable>
+        <createTable tableName="admin_bonus_accrual">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="period_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="partner_id" type="varchar(80)"><constraints nullable="false"/></column>
+            <column name="source_order_id" type="varchar(80)"/>
+            <column name="source_transaction_id" type="varchar(80)"/>
+            <column name="rule_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(24)"><constraints nullable="false"/></column>
+            <column name="amount" type="numeric(19,4)"><constraints nullable="false"/></column>
+            <column name="currency" type="varchar(3)"><constraints nullable="false"/></column>
+            <column name="reason_code" type="varchar(64)"/>
+            <column name="correlation_id" type="varchar(80)"/>
+            <column name="created_at" type="timestamp with time zone"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex tableName="admin_bonus_accrual" indexName="idx_admin_bonus_accrual_period_partner">
+            <column name="period_id"/>
+            <column name="partner_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

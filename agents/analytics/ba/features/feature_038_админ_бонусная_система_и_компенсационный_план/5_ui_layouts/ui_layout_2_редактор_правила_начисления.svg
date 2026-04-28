@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет редактора правила начисления feature 038</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Правило начисления бонусов</text>
+  <rect x="32" y="116" width="520" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="60" y="154" font-family="Arial" font-size="18">Основные параметры</text>
+  <text x="60" y="198" font-family="Arial" font-size="15">Тип правила</text>
+  <rect x="220" y="176" width="280" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="244" font-family="Arial" font-size="15">Период действия</text>
+  <rect x="220" y="222" width="280" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="290" font-family="Arial" font-size="15">Приоритет</text>
+  <rect x="220" y="268" width="120" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="336" font-family="Arial" font-size="15">Ставка и валюта</text>
+  <rect x="220" y="314" width="280" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="60" y="382" font-family="Arial" font-size="15">Ограничения</text>
+  <rect x="220" y="360" width="280" height="86" fill="#f7fafc" stroke="#8aa1b4"/>
+  <rect x="60" y="648" width="130" height="34" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="82" y="671" font-family="Arial" font-size="14">Сохранить</text>
+  <rect x="206" y="648" width="130" height="34" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="236" y="671" font-family="Arial" font-size="14">Preview</text>
+  <rect x="586" y="116" width="614" height="284" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="614" y="154" font-family="Arial" font-size="18">Preview расчета</text>
+  <text x="614" y="198" font-family="Arial" font-size="15">Тестовый заказ / партнерская ветка</text>
+  <rect x="614" y="220" width="550" height="130" fill="#f7fafc" stroke="#8aa1b4"/>
+  <rect x="586" y="428" width="614" height="284" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="614" y="466" font-family="Arial" font-size="18">Аудит и версии</text>
+  <line x1="614" y1="498" x2="1164" y2="498" stroke="#8aa1b4"/>
+  <text x="614" y="530" font-family="Arial" font-size="14">Дата / actor / actionCode / correlationId</text>
+</svg>

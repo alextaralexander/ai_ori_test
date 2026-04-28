@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin platform end-to-end flow with feature 037
+title Best Ori Gin platform end-to-end flow with feature 038
 start
 :Гость, покупатель или партнер входит в платформу;
 :Пользователь изучает каталог, акции и добавляет товары в корзину;
@@ -12,22 +12,24 @@ else (самовывоз из ПВЗ)
   :Платформа резервирует pickupPointId и создает shipment для ПВЗ;
 endif
 :Оплата, WMS/1C и сборочный контур подтверждают заказ;
-:Delivery contour передает статусы SHIPPED, IN_TRANSIT и ARRIVED_AT_PICKUP_POINT;
+:Delivery contour передает статусы SHIPPED, IN_TRANSIT, READY_FOR_PICKUP и DELIVERED;
 :Пользователь и партнер видят tracking timeline и локализованные уведомления;
-if (Отправление прибыло в ПВЗ?) then (да)
-  :Владелец ПВЗ принимает отправление сканированием или ручным кодом;
-  if (Получатель забрал заказ полностью?) then (да)
-    :Владелец ПВЗ выдает заказ по проверочному коду;
-    :Заказ получает статус DELIVERED;
-  else (частично или не выкуплен)
-    :Владелец ПВЗ фиксирует PARTIALLY_DELIVERED или NOT_COLLECTED;
-    :Платформа создает возврат в логистическую цепочку;
-  endif
+if (Заказ влияет на партнерскую программу?) then (да)
+  :Bonus admin contour применяет активные правила компенсационного плана;
+  :Bonus engine рассчитывает hold, accrual, payout-ready, reversal и adjustment;
+  :Партнер видит бонусный кошелек, отчеты комиссий и MLM-прогресс;
 else (нет)
-  :Оператор доставки расследует задержку или DELIVERY_PROBLEM по correlationId;
+  :Платформа завершает клиентский заказный поток без партнерских начислений;
 endif
-:Service, orders, WMS, delivery, payment, bonus и admin контуры получают согласованные события;
-:Audit trail фиксирует actorRole, actionCode, reasonCode, subjectRef и correlationId;
-:Platform KPI обновляет fulfillment SLA, delivery SLA и problem rate;
+if (Есть возврат, претензия или частичная выдача?) then (да)
+  :Orders, service, payment, delivery и WMS публикуют корректирующие события;
+  :Bonus contour создает reversal или adjustment без изменения исходной записи задним числом;
+else (нет)
+  :Начисления остаются готовыми к выплате по правилам периода;
+endif
+:Финансовый менеджер формирует payout batch из PAYOUT_READY начислений;
+:Финансовый менеджер согласовывает и отправляет payout batch во внешний bonus/payment contour идемпотентно;
+:Admin platform KPI обновляет продажи, delivery SLA, bonus accruals, payout status и problem rate;
+:Audit trail фиксирует actorRole, actionCode, reasonCode, subjectRef, externalId и correlationId;
 stop
 @enduml

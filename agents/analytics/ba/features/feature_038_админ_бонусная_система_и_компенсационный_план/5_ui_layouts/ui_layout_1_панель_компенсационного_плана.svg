@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет панели компенсационного плана feature 038</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Админ: бонусная система и компенсационный план</text>
+  <rect x="32" y="116" width="220" height="596" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="16">Разделы</text>
+  <text x="56" y="196" font-family="Arial" font-size="15">Правила начисления</text>
+  <text x="56" y="232" font-family="Arial" font-size="15">Квалификации</text>
+  <text x="56" y="268" font-family="Arial" font-size="15">Расчеты</text>
+  <text x="56" y="304" font-family="Arial" font-size="15">Payout batches</text>
+  <text x="56" y="340" font-family="Arial" font-size="15">Интеграции</text>
+  <rect x="284" y="116" width="916" height="108" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="312" y="154" font-family="Arial" font-size="18">Фильтры: период / регион / валюта / партнерский сегмент / статус</text>
+  <rect x="312" y="176" width="120" height="30" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="332" y="197" font-family="Arial" font-size="14">Применить</text>
+  <rect x="284" y="252" width="280" height="150" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="312" y="292" font-family="Arial" font-size="18">Активные правила</text>
+  <text x="312" y="332" font-family="Arial" font-size="15">ORDER / STRUCTURE / PROMO</text>
+  <rect x="594" y="252" width="280" height="150" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="622" y="292" font-family="Arial" font-size="18">Квалификации</text>
+  <text x="622" y="332" font-family="Arial" font-size="15">Версии и условия роста</text>
+  <rect x="904" y="252" width="296" height="150" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="932" y="292" font-family="Arial" font-size="18">Начисления</text>
+  <text x="932" y="332" font-family="Arial" font-size="15">Hold / Accrual / Payout</text>
+  <rect x="284" y="430" width="916" height="282" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="312" y="468" font-family="Arial" font-size="18">Таблица последних расчетов и payout batches</text>
+  <line x1="312" y1="500" x2="1172" y2="500" stroke="#8aa1b4"/>
+  <text x="312" y="532" font-family="Arial" font-size="14">Период</text>
+  <text x="460" y="532" font-family="Arial" font-size="14">Статус</text>
+  <text x="610" y="532" font-family="Arial" font-size="14">Сумма</text>
+  <text x="760" y="532" font-family="Arial" font-size="14">CorrelationId</text>
+  <text x="980" y="532" font-family="Arial" font-size="14">Действия</text>
+</svg>

@@ -1,0 +1,22 @@
+# ER description module admin-bonus
+
+## Версионная база
+На дату старта задачи 28.04.2026 модуль проектируется для текущей платформенной линии Best Ori Gin: Java/Spring Boot backend monolith, PostgreSQL, Liquibase XML, Hibernate/JPA, MapStruct и Lombok. Новые changelog-файлы должны храниться в owning module `db` пакете в XML-формате.
+
+## Таблицы feature scope
+- `admin_bonus_rule`: правило компенсационного плана. Поля: `id uuid` PK, `rule_code varchar(64)` unique, `rule_type varchar(40)`, `status varchar(24)`, `priority int`, `currency varchar(3)`, `rate_value numeric(19,4)`, `valid_from timestamptz`, `valid_to timestamptz`, `version int`, `created_at`, `updated_at`. Индексы: unique `rule_code`; composite `(rule_type, status, priority, valid_from, valid_to)` для поиска активных правил и проверки конфликтов.
+- `admin_bonus_qualification`: версия квалификации. Поля: `id uuid` PK, `qualification_code varchar(64)`, `level_number int`, `personal_volume_threshold numeric(19,4)`, `group_volume_threshold numeric(19,4)`, `structure_depth int`, `active_from`, `active_to`, `version`. Индексы: unique `(qualification_code, version)`; composite `(level_number, active_from, active_to)`.
+- `admin_bonus_calculation_period`: расчетный период. Поля: `id uuid` PK, `period_code varchar(32)` unique, `status varchar(24)`, `started_at`, `closed_at`, `correlation_id varchar(80)`. Индексы: unique `period_code`; `(status, started_at)`.
+- `admin_bonus_accrual`: финансовая запись начисления или корректировки. Поля: `id uuid` PK, `period_id uuid` FK, `partner_id varchar(80)`, `source_order_id varchar(80)`, `source_transaction_id varchar(80)`, `rule_id uuid` FK, `status varchar(24)`, `amount numeric(19,4)`, `currency varchar(3)`, `reason_code varchar(64)`, `correlation_id varchar(80)`, `created_at`. Индексы: `(period_id, partner_id)`, `(source_order_id)`, `(status, currency)`, `(correlation_id)`.
+- `admin_bonus_payout_batch`: batch выплат. Поля: `id uuid` PK, `batch_code varchar(64)` unique, `period_id uuid` FK, `status varchar(24)`, `total_amount numeric(19,4)`, `currency varchar(3)`, `external_id varchar(100)`, `correlation_id varchar(80)`, `created_at`. Индексы: unique `batch_code`; unique nullable `external_id`; `(period_id, status, currency)`.
+- `admin_bonus_integration_event`: журнал обмена с внешней bonus/payment-системой. Поля: `id uuid` PK, `direction varchar(16)`, `endpoint_alias varchar(80)`, `status varchar(24)`, `checksum varchar(128)`, `retry_count int`, `last_error_code varchar(80)`, `last_error_message_mnemonic varchar(120)`, `correlation_id varchar(80)`, `created_at`. Индексы: `(correlation_id)`, `(endpoint_alias, status, created_at)`.
+- `admin_bonus_audit_event`: аудит административных действий. Поля: `id uuid` PK, `actor_id varchar(80)`, `actor_role varchar(80)`, `action_code varchar(80)`, `entity_type varchar(80)`, `entity_id uuid`, `reason_code varchar(80)`, `before_summary text`, `after_summary text`, `correlation_id varchar(80)`, `created_at`. Индексы: `(entity_type, entity_id)`, `(actor_id, created_at)`, `(action_code, created_at)`, `(correlation_id)`.
+
+## Связи и ограничения
+`admin_bonus_rule` связан с `admin_bonus_accrual` через `rule_id`. `admin_bonus_calculation_period` связан с начислениями и payout batches через `period_id`. Payout batch включает только начисления со статусом `PAYOUT_READY`; физическая many-to-many связь может быть реализована join-таблицей `admin_bonus_payout_batch_accrual` при реализации. Интеграционные события связываются с payout batch через `external_id` и `correlation_id`. Аудит связан с доменной сущностью по `entity_type/entity_id`, чтобы не создавать жесткую FK-зависимость для всех типов.
+
+## Статусы и инварианты
+Правила: `DRAFT`, `ACTIVE`, `SUSPENDED`, `ARCHIVED`. Начисления: `HOLD`, `ACCRUAL`, `PAYOUT_READY`, `REVERSED`, `ADJUSTED`. Batch: `DRAFT`, `APPROVED`, `SENT`, `PAID`, `REJECTED`, `CANCELLED`. Published данные не удаляются физически; используется архивирование и версионность. Reversal/adjustment создаются отдельными строками и не изменяют исходное начисление задним числом.
+
+## Полнота модуля
+На текущем этапе feature #38 является первой владельческой поставкой module admin-bonus, поэтому полная ER-модель модуля совпадает с feature scope. Последующие фичи должны расширять этот документ без удаления инвариантов feature #38.

@@ -1,0 +1,58 @@
+@startuml
+title Feature 038 admin bonus sequence
+actor "Администратор бонусной программы" as BonusAdmin
+actor "MLM-менеджер" as MlmManager
+actor "Финансовый менеджер" as Finance
+participant "Admin Frontend" as FE
+participant "admin-bonus API" as BonusApi
+participant "admin-bonus service" as BonusService
+database "PostgreSQL admin_bonus_*" as DB
+participant "orders/payment/delivery/service events" as Events
+participant "External bonus/payment system" as External
+participant "admin-platform KPI" as KPI
+
+BonusAdmin -> FE : Открывает /admin/bonus-program/rules
+FE -> BonusApi : POST /rules
+BonusApi -> BonusService : validateRule(request)
+BonusService -> DB : insert admin_bonus_rule DRAFT
+BonusService -> DB : insert audit event
+BonusApi --> FE : BonusRule DRAFT
+
+BonusAdmin -> FE : Запускает preview и activation
+FE -> BonusApi : POST /rules/{ruleId}/preview
+BonusApi -> BonusService : preview(ruleId, testOrderId, partnerId)
+BonusService -> DB : read rule + restrictions
+BonusApi --> FE : BonusPreviewResult
+FE -> BonusApi : POST /rules/{ruleId}/activate
+BonusApi -> BonusService : activate(ruleId)
+BonusService -> DB : check active rule conflicts
+alt Конфликт приоритета
+  BonusApi --> FE : STR_MNEMO_BONUS_RULE_PRIORITY_CONFLICT
+else Нет конфликта
+  BonusService -> DB : update rule ACTIVE + audit
+  BonusApi --> FE : BonusRule ACTIVE
+end
+
+MlmManager -> FE : Запускает расчет периода
+FE -> BonusApi : POST /calculations
+BonusApi -> BonusService : runCalculation(periodCode, recalculation)
+BonusService -> Events : read order/payment/delivery/service facts
+BonusService -> DB : create calculation period + accruals
+BonusService -> KPI : publish bonus accrual metrics
+BonusApi --> FE : CalculationRunResult 202
+
+Finance -> FE : Формирует payout batch
+FE -> BonusApi : POST /payout-batches
+BonusApi -> BonusService : createBatch(period, currency, region)
+BonusService -> DB : select PAYOUT_READY accruals
+BonusService -> DB : insert payout batch DRAFT + audit
+BonusApi --> FE : PayoutBatch DRAFT
+FE -> BonusApi : POST /payout-batches/{batchId}/approve
+BonusService -> DB : update APPROVED + audit
+FE -> BonusApi : POST /payout-batches/{batchId}/send
+BonusService -> External : send batch externalId idempotently
+External --> BonusService : accepted or duplicate-safe result
+BonusService -> DB : insert integration event + update SENT
+BonusService -> KPI : publish payout status
+BonusApi --> FE : PayoutBatch SENT
+@enduml
