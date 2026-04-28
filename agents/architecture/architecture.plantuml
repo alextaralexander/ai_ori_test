@@ -1,5 +1,5 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 039
+title Best Ori Gin monolith architecture through feature 040
 
 package "frontend/monolith apps/web-shell" {
   [PublicShell]
@@ -14,6 +14,10 @@ package "frontend/monolith apps/web-shell" {
   [AdminPlatform UI]
   [AdminBonus UI]
   [AdminFulfillment UI]
+  [PartnerBenefits UI]
+  [RewardShop UI]
+  [ReferralSocialSelling UI]
+  [PartnerBenefitsSupport UI]
   [I18nProvider]
   [NotificationProvider]
   [OfflineStatusProvider]
@@ -48,6 +52,7 @@ package "backend/monolith/monolith-app" {
   [admin-platform]
   [admin-bonus]
   [admin-fulfillment]
+  [partner-benefits]
 }
 
 database "Postgres / Liquibase XML" as db
@@ -73,6 +78,10 @@ cloud "Hybrid Pixel" as hybrid
 [AdminPlatform UI] --> [admin-platform] : HTTP/JSON KPI, audit, integrations
 [AdminBonus UI] --> [admin-bonus] : HTTP/JSON /api/admin/bonus-program/*
 [AdminFulfillment UI] --> [admin-fulfillment] : HTTP/JSON /api/admin/fulfillment/*
+[PartnerBenefits UI] --> [partner-benefits] : HTTP/JSON /api/partner-benefits/me/summary, apply-preview
+[RewardShop UI] --> [partner-benefits] : HTTP/JSON /me/rewards, /redemptions
+[ReferralSocialSelling UI] --> [partner-benefits] : HTTP/JSON /me/referral-link, /referral-events
+[PartnerBenefitsSupport UI] --> [partner-benefits] : HTTP/JSON /support/accounts/{partnerNumber}/timeline
 [I18nProvider] --> [platform-experience] : HTTP/JSON i18n diagnostics
 [NotificationProvider] --> [platform-experience] : HTTP/JSON notification preferences
 [OfflineStatusProvider] --> [auth] : HTTP/JSON session check
@@ -113,6 +122,16 @@ cloud "Hybrid Pixel" as hybrid
 [admin-service] --> [admin-bonus] : service compensation and reversal events
 [admin-platform] --> [delivery] : delivery integration status and KPI read-model
 [admin-bonus] --> [admin-platform] : bonus accruals, payout status and integration health
+[partner-benefits] --> [auth] : HTTP/JSON session, role and activePartner ownership checks
+[partner-benefits] --> [catalog] : HTTP/JSON current and next catalog periods
+[partner-benefits] --> [admin-pricing] : HTTP/JSON benefit compatibility and offer rules
+[cart] --> [partner-benefits] : HTTP/JSON benefit apply preview context
+[order] --> [partner-benefits] : HTTP/JSON final checkout benefit validation
+[partner-benefits] --> [bonus-wallet] : HTTP/JSON reward balance, cashback and wallet events
+[partner-benefits] --> [admin-referral] : HTTP/JSON referral campaign and attribution policy
+[partner-benefits] --> [admin-fulfillment] : HTTP/JSON reward fulfillment events
+[partner-benefits] --> [platform-experience] : HTTP/JSON notification and i18n diagnostics
+[partner-benefits] --> [admin-platform] : HTTP/JSON partner benefits audit and KPI events
 
 [admin-wms] --> wms : WMS/1C synchronization
 [admin-order] --> pay : payment/refund/dispute protocol
@@ -146,6 +165,7 @@ cloud "Hybrid Pixel" as hybrid
 [admin-platform] --> db
 [admin-bonus] --> db
 [admin-fulfillment] --> db
+[partner-benefits] --> db
 [admin-cms] --> s3 : content documents/media metadata
 [admin-pim] --> s3 : product media metadata
 [admin-service] --> s3 : claim attachments metadata

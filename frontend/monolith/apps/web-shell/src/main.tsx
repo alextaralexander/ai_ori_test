@@ -32,6 +32,7 @@ import { EmployeeProfileSettingsView } from './components/EmployeeProfileSetting
 import { EmployeeWorkspaceView } from './components/EmployeeWorkspaceView';
 import { PartnerActivationView, PartnerRegistrationView, SponsorCabinetView } from './components/PartnerOnboardingViews';
 import { PartnerGrowthView } from './components/PartnerGrowthView';
+import { PartnerBenefitsView } from './components/PartnerBenefitsView';
 import { PartnerOfflineOrdersView } from './components/PartnerOfflineOrdersView';
 import { PartnerOfficeView } from './components/PartnerOfficeView';
 import { PartnerReportsView } from './components/PartnerReportsView';
@@ -108,6 +109,7 @@ const testLoginRoles = new Set([
   'delivery-admin',
   'pickup-network-admin',
   'support-operator',
+  'partner-support',
   'pickup-owner',
   'delivery-operator',
   'catalog-manager',
@@ -206,6 +208,14 @@ function App() {
     contentView = infoPage === null ? <ContentUnavailableView /> : infoPage ? <InfoPageView page={infoPage} /> : undefined;
   } else if (path.startsWith('/documents/')) {
     contentView = documentsPage === null ? <ContentUnavailableView /> : documentsPage ? <DocumentsPageView collection={documentsPage} /> : undefined;
+  } else if (path === '/member-benefits') {
+    contentView = (
+      <PlatformExperienceShell>
+        <PartnerBenefitsView />
+      </PlatformExperienceShell>
+    );
+  } else if (path === '/employee/partner-benefits-support') {
+    contentView = <PartnerBenefitsView mode="support" />;
   } else if (resolveBenefitRoute(path)) {
     const benefitRoute = resolveBenefitRoute(path);
     contentView = benefitRoute ? (

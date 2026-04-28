@@ -1,0 +1,64 @@
+@startuml
+title Feature 040 - Partner benefits runtime sequence
+
+actor Partner as partner
+actor "Support employee" as support
+participant "Frontend" as fe
+participant "Auth module" as auth
+participant "partner-benefits" as pb
+participant "catalog" as catalog
+participant "admin-pricing" as pricing
+participant "cart/checkout" as checkout
+participant "bonus-wallet" as wallet
+participant "admin-referral" as referral
+participant "delivery/fulfillment" as fulfillment
+participant "platform-experience" as experience
+participant "audit/admin-platform" as audit
+
+partner -> fe : open /member-benefits
+fe -> auth : restore session and activePartner
+auth --> fe : roles, activePartner, route policies
+fe -> pb : GET /api/partner-benefits/me/summary?catalogId
+pb -> auth : validate PARTNER_BENEFITS_VIEW and owner
+pb -> catalog : get current and next catalog period
+pb -> pricing : get compatible public offers and benefit applicability hints
+pb -> wallet : get reward balance and cashback status
+pb -> referral : get active referral campaign metadata
+pb --> fe : summary with benefits, progress, referral link, rewards, retention offers
+fe --> partner : render localized i18n labels and mnemonic states
+
+partner -> fe : apply benefit in cart/checkout
+fe -> pb : POST /me/benefits/{benefitId}/apply-preview
+pb -> pb : check owner, status, catalogId, expiry, target, compatibility
+pb --> fe : preview applicable or STR_MNEMO_PARTNER_BENEFITS_*
+fe -> checkout : submit checkout with benefitId only
+checkout -> pb : validate benefit for final application
+pb --> checkout : confirmed application details
+checkout -> wallet : publish cashback/reward balance event
+checkout -> audit : write order and benefit correlation
+
+partner -> fe : open referral and share link
+fe -> pb : GET /me/referral-link
+pb -> referral : validate campaign and attribution policy
+pb --> fe : referralUrl, qrPayload, campaignId
+referral -> pb : qualifying action event
+pb -> pb : create recommendation discount benefit grant
+pb -> experience : create notification event
+pb -> audit : write referral audit event
+
+partner -> fe : redeem reward
+fe -> pb : POST /me/rewards/{rewardId}/redemptions with Idempotency-Key
+pb -> wallet : reserve or debit reward balance
+pb -> fulfillment : publish reward fulfillment event
+pb -> audit : write redemption event
+pb --> fe : redemption RESERVED or conflict mnemonic
+
+support -> fe : open support view by partnerNumber
+fe -> auth : validate support session
+fe -> pb : GET /support/accounts/{partnerNumber}/timeline
+pb -> auth : validate PARTNER_BENEFITS_SUPPORT_VIEW
+pb -> pb : load masked timeline and permitted actions
+pb -> audit : write support view audit event
+pb --> fe : support timeline with mnemonic codes and correlationId
+
+@enduml

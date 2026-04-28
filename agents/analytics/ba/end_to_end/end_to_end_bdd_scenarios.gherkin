@@ -569,3 +569,46 @@
     И fulfillment contour создает задачу возврата в WMS/логистику
     И orders, service, payment, delivery и bonus contour получают согласованные структурированные события
     И bonus contour создает reversal или adjustment без изменения исходного начисления задним числом
+
+  Сценарий: Партнер использует программу преимуществ до оформления заказа
+    Допустим пользователь вошел с ролью "partner"
+    И у партнера активен каталог "CAT-2026-08"
+    И доступны welcome-выгода, бесплатная доставка, кешбэк и reward balance
+    Когда партнер открывает "/member-benefits"
+    Тогда платформа показывает текущий catalogId, прогресс условий, срок жизни выгод и предупреждения об истечении
+    Когда партнер переходит из программы преимуществ в корзину
+    И оформляет checkout с применением бесплатной доставки
+    Тогда backend повторно проверяет owner, status, catalogId, expiry и совместимость выгоды
+    И checkout применяет только подтвержденную backend выгоду
+    И история программы преимуществ содержит событие применения с correlationId
+
+  Сценарий: Referral link партнера создает recommendation discount после qualifying action
+    Допустим пользователь вошел с ролью "partner"
+    И у партнера есть referral link для campaignId "REF-CAT-2026-08"
+    Когда новый пользователь регистрируется по referral link
+    И размещает первый qualifying order
+    Тогда referral contour фиксирует статус "qualified"
+    И partner benefits contour создает recommendation discount для партнера
+    И контакты привлеченного пользователя в списке referral activity маскируются без отдельного permission
+    И audit trail содержит referralCode, source campaign и correlationId
+
+  Сценарий: Reward shop резервирует доступную награду без двойного списания
+    Допустим пользователь вошел с ролью "partner"
+    И партнер имеет достаточный balance для награды "REWARD-SKINCARE-BOX"
+    И награда доступна по региону, складу, catalogId и сроку действия
+    Когда партнер открывает reward shop в "/member-benefits"
+    И подтверждает redemption награды
+    Тогда partner benefits contour создает redemption в статусе "RESERVED"
+    И balance списывается один раз по optimistic lock
+    И fulfillment contour получает структурированное событие для подготовки награды
+    И повторная отправка с тем же idempotency key не создает дубль redemption
+
+  Сценарий: Сотрудник поддержки расследует спорную выгоду партнера
+    Допустим пользователь вошел с ролью "partner-support"
+    И существует партнер с отклоненной выгодой "WELCOME_DISCOUNT"
+    Когда сотрудник открывает support view программы преимуществ из карточки партнера
+    Тогда система показывает хронологию начислений, применений, отказов и ручных корректировок
+    И каждое событие содержит sourceSystem, actionCode, actorUserId, reasonCode и correlationId
+    Когда сотрудник запускает разрешенный повторный расчет применимости
+    Тогда результат возвращается mnemonic-кодом семейства "STR_MNEMO_PARTNER_BENEFITS_*"
+    И audit trail содержит действие сотрудника без раскрытия лишних персональных данных

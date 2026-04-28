@@ -1,0 +1,326 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Partner Benefits API
+  version: 1.0.0
+  description: Runtime API for feature 040 partner benefits, referral, reward shop and support view.
+servers:
+  - url: /api/partner-benefits
+tags:
+  - name: PartnerBenefits
+  - name: PartnerBenefitsSupport
+paths:
+  /me/summary:
+    get:
+      tags: [PartnerBenefits]
+      summary: Get current partner benefits summary
+      operationId: getMyPartnerBenefitsSummary
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_VIEW]
+      parameters:
+        - { name: catalogId, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Partner benefits summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PartnerBenefitsSummaryResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/benefits/{benefitId}/apply-preview:
+    post:
+      tags: [PartnerBenefits]
+      summary: Preview benefit application before cart or checkout
+      operationId: previewBenefitApplication
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_VIEW]
+      parameters:
+        - { name: benefitId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BenefitApplyPreviewRequest' }
+      responses:
+        '200':
+          description: Application preview
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BenefitApplyPreviewResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/ConflictError' }
+  /me/referral-link:
+    get:
+      tags: [PartnerBenefits]
+      summary: Get active referral link and QR payload
+      operationId: getMyReferralLink
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REFERRAL_VIEW]
+      responses:
+        '200':
+          description: Referral link
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReferralLinkResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/referral-events:
+    get:
+      tags: [PartnerBenefits]
+      summary: Search my referral events with masked contacts
+      operationId: searchMyReferralEvents
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REFERRAL_VIEW]
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: Referral event page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReferralEventPageResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/rewards:
+    get:
+      tags: [PartnerBenefits]
+      summary: Search available reward shop items
+      operationId: searchMyRewards
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REWARD_VIEW]
+      parameters:
+        - { name: catalogId, in: query, schema: { type: string } }
+        - { name: onlyAvailable, in: query, schema: { type: boolean, default: true } }
+      responses:
+        '200':
+          description: Reward page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RewardPageResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/rewards/{rewardId}/redemptions:
+    post:
+      tags: [PartnerBenefits]
+      summary: Redeem reward with idempotency and optimistic locking
+      operationId: redeemReward
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REWARD_REDEEM]
+      parameters:
+        - { name: rewardId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, maxLength: 120 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RewardRedemptionRequest' }
+      responses:
+        '201':
+          description: Redemption created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RewardRedemptionResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/ConflictError' }
+  /support/accounts/{partnerNumber}/timeline:
+    get:
+      tags: [PartnerBenefitsSupport]
+      summary: Get support timeline for partner benefits account
+      operationId: getPartnerBenefitsSupportTimeline
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_SUPPORT_VIEW]
+      parameters:
+        - { name: partnerNumber, in: path, required: true, schema: { type: string } }
+        - { name: eventType, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Support timeline
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SupportTimelineResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    AccessDenied:
+      description: Access denied mnemonic error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ValidationError:
+      description: Validation mnemonic error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ConflictError:
+      description: Conflict mnemonic error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: Not found mnemonic error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    PartnerBenefitsSummaryResponse:
+      type: object
+      required: [accountId, partnerId, accountStatus, catalogId, benefits, referralLink, rewardBalance, retentionOffers]
+      properties:
+        accountId: { type: string, format: uuid }
+        partnerId: { type: string, format: uuid }
+        partnerNumber: { type: string }
+        accountStatus: { type: string, enum: [ACTIVE, SUSPENDED, ARCHIVED] }
+        catalogId: { type: string }
+        currentTier: { type: string }
+        rewardBalance: { $ref: '#/components/schemas/MoneyAmount' }
+        cashbackPending: { $ref: '#/components/schemas/MoneyAmount' }
+        cashbackConfirmed: { $ref: '#/components/schemas/MoneyAmount' }
+        benefits:
+          type: array
+          items: { $ref: '#/components/schemas/BenefitGrantResponse' }
+        referralLink: { $ref: '#/components/schemas/ReferralLinkResponse' }
+        retentionOffers:
+          type: array
+          items: { $ref: '#/components/schemas/RetentionOfferResponse' }
+    BenefitGrantResponse:
+      type: object
+      properties:
+        benefitId: { type: string, format: uuid }
+        benefitType: { type: string, enum: [WELCOME, CASHBACK, FREE_DELIVERY, RECOMMENDATION_DISCOUNT, REWARD, RETENTION] }
+        status: { type: string, enum: [AVAILABLE, PENDING, CONSUMED, EXPIRED, REVOKED, SUSPENDED] }
+        catalogId: { type: string }
+        startsAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        applicationTarget: { type: string, enum: [CART, CHECKOUT, REWARD_SHOP, WALLET, NOTIFICATION_ONLY] }
+        mnemonicCode: { type: string, example: STR_MNEMO_PARTNER_BENEFITS_AVAILABLE }
+        progress:
+          type: array
+          items: { $ref: '#/components/schemas/BenefitProgressResponse' }
+    BenefitProgressResponse:
+      type: object
+      properties:
+        conditionCode: { type: string }
+        requiredValue: { type: number }
+        currentValue: { type: number }
+        progressStatus: { type: string, enum: [NOT_STARTED, IN_PROGRESS, COMPLETED, FAILED] }
+    BenefitApplyPreviewRequest:
+      type: object
+      required: [target, cartId]
+      properties:
+        target: { type: string, enum: [CART, CHECKOUT] }
+        cartId: { type: string }
+        checkoutId: { type: string }
+    BenefitApplyPreviewResponse:
+      type: object
+      properties:
+        applicable: { type: boolean }
+        benefitId: { type: string, format: uuid }
+        target: { type: string }
+        mnemonicCode: { type: string }
+        discountAmount: { $ref: '#/components/schemas/MoneyAmount' }
+    ReferralLinkResponse:
+      type: object
+      properties:
+        referralCode: { type: string }
+        referralUrl: { type: string, format: uri }
+        qrPayload: { type: string }
+        campaignId: { type: string }
+        linkStatus: { type: string, enum: [ACTIVE, EXPIRED, ROTATED, DISABLED] }
+        expiresAt: { type: string, format: date-time }
+    ReferralEventPageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReferralEventResponse' }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+    ReferralEventResponse:
+      type: object
+      properties:
+        maskedContact: { type: string }
+        eventStatus: { type: string, enum: [INVITED, REGISTERED, FIRST_ORDER_PLACED, QUALIFIED, REJECTED, REWARD_GRANTED] }
+        qualifyingActionRef: { type: string }
+        rejectionMnemonic: { type: string }
+        occurredAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    RewardPageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/RewardItemResponse' }
+    RewardItemResponse:
+      type: object
+      properties:
+        rewardId: { type: string, format: uuid }
+        rewardCode: { type: string }
+        titleI18nKey: { type: string }
+        rewardStatus: { type: string }
+        costPoints: { type: number }
+        availableQuantity: { type: integer }
+        availabilityMnemonic: { type: string }
+    RewardRedemptionRequest:
+      type: object
+      required: [expectedCostPoints]
+      properties:
+        expectedCostPoints: { type: number }
+        deliveryAddressId: { type: string, format: uuid }
+    RewardRedemptionResponse:
+      type: object
+      properties:
+        redemptionId: { type: string, format: uuid }
+        rewardId: { type: string, format: uuid }
+        redemptionStatus: { type: string, enum: [RESERVED, FULFILLMENT_PENDING, FULFILLED, CANCELLED, REJECTED] }
+        costPoints: { type: number }
+        correlationId: { type: string }
+    RetentionOfferResponse:
+      type: object
+      properties:
+        offerCode: { type: string }
+        audienceCode: { type: string }
+        riskReasonCode: { type: string }
+        offerStatus: { type: string }
+        expiresAt: { type: string, format: date-time }
+    SupportTimelineResponse:
+      type: object
+      properties:
+        partnerNumber: { type: string }
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/SupportTimelineEventResponse' }
+    SupportTimelineEventResponse:
+      type: object
+      properties:
+        subjectRef: { type: string }
+        actionCode: { type: string }
+        reasonCode: { type: string }
+        actorRole: { type: string }
+        sourceSystem: { type: string }
+        mnemonicCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    MoneyAmount:
+      type: object
+      properties:
+        amount: { type: string, example: '120.00' }
+        currency: { type: string, example: RUB }
+    ErrorResponse:
+      type: object
+      required: [code, correlationId]
+      properties:
+        code: { type: string, example: STR_MNEMO_PARTNER_BENEFITS_ACCESS_DENIED }
+        correlationId: { type: string }
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              code: { type: string }

@@ -1,0 +1,255 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin Partner Benefits API
+  version: 1.0.0
+  description: Canonical OpenAPI baseline for module partner-benefits after feature 040.
+servers:
+  - url: /api/partner-benefits
+paths:
+  /me/summary:
+    get:
+      summary: Get current partner benefits summary
+      operationId: getMyPartnerBenefitsSummary
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_VIEW]
+      responses:
+        '200':
+          description: Partner benefits summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PartnerBenefitsSummaryResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/benefits/{benefitId}/apply-preview:
+    post:
+      summary: Preview benefit application
+      operationId: previewBenefitApplication
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_VIEW]
+      parameters:
+        - { name: benefitId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BenefitApplyPreviewRequest' }
+      responses:
+        '200':
+          description: Preview result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BenefitApplyPreviewResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/ConflictError' }
+  /me/referral-link:
+    get:
+      summary: Get active referral link
+      operationId: getMyReferralLink
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REFERRAL_VIEW]
+      responses:
+        '200':
+          description: Referral link
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReferralLinkResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/referral-events:
+    get:
+      summary: Search masked referral events
+      operationId: searchMyReferralEvents
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REFERRAL_VIEW]
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Referral event page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReferralEventPageResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/rewards:
+    get:
+      summary: Search reward shop
+      operationId: searchMyRewards
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REWARD_VIEW]
+      responses:
+        '200':
+          description: Reward page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RewardPageResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+  /me/rewards/{rewardId}/redemptions:
+    post:
+      summary: Redeem reward
+      operationId: redeemReward
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_REWARD_REDEEM]
+      parameters:
+        - { name: rewardId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RewardRedemptionRequest' }
+      responses:
+        '201':
+          description: Redemption created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RewardRedemptionResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/ConflictError' }
+  /support/accounts/{partnerNumber}/timeline:
+    get:
+      summary: Get support timeline
+      operationId: getPartnerBenefitsSupportTimeline
+      security:
+        - bearerAuth: [PARTNER_BENEFITS_SUPPORT_VIEW]
+      parameters:
+        - { name: partnerNumber, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Support timeline
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SupportTimelineResponse' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  responses:
+    AccessDenied: { description: Access denied mnemonic error, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+    ValidationError: { description: Validation mnemonic error, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+    ConflictError: { description: Conflict mnemonic error, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+    NotFound: { description: Not found mnemonic error, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  schemas:
+    PartnerBenefitsSummaryResponse:
+      type: object
+      properties:
+        accountId: { type: string, format: uuid }
+        partnerId: { type: string, format: uuid }
+        partnerNumber: { type: string }
+        accountStatus: { type: string }
+        catalogId: { type: string }
+        currentTier: { type: string }
+        rewardBalance: { $ref: '#/components/schemas/MoneyAmount' }
+        cashbackPending: { $ref: '#/components/schemas/MoneyAmount' }
+        cashbackConfirmed: { $ref: '#/components/schemas/MoneyAmount' }
+        benefits: { type: array, items: { $ref: '#/components/schemas/BenefitGrantResponse' } }
+        referralLink: { $ref: '#/components/schemas/ReferralLinkResponse' }
+        retentionOffers: { type: array, items: { $ref: '#/components/schemas/RetentionOfferResponse' } }
+    BenefitGrantResponse:
+      type: object
+      properties:
+        benefitId: { type: string, format: uuid }
+        benefitType: { type: string }
+        status: { type: string }
+        catalogId: { type: string }
+        expiresAt: { type: string, format: date-time }
+        applicationTarget: { type: string }
+        mnemonicCode: { type: string, example: STR_MNEMO_PARTNER_BENEFITS_AVAILABLE }
+        progress: { type: array, items: { $ref: '#/components/schemas/BenefitProgressResponse' } }
+    BenefitProgressResponse:
+      type: object
+      properties:
+        conditionCode: { type: string }
+        requiredValue: { type: number }
+        currentValue: { type: number }
+        progressStatus: { type: string }
+    BenefitApplyPreviewRequest:
+      type: object
+      properties:
+        target: { type: string, enum: [CART, CHECKOUT] }
+        cartId: { type: string }
+        checkoutId: { type: string }
+    BenefitApplyPreviewResponse:
+      type: object
+      properties:
+        applicable: { type: boolean }
+        benefitId: { type: string, format: uuid }
+        mnemonicCode: { type: string }
+        discountAmount: { $ref: '#/components/schemas/MoneyAmount' }
+    ReferralLinkResponse:
+      type: object
+      properties:
+        referralCode: { type: string }
+        referralUrl: { type: string }
+        qrPayload: { type: string }
+        campaignId: { type: string }
+        linkStatus: { type: string }
+        expiresAt: { type: string, format: date-time }
+    ReferralEventPageResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ReferralEventResponse' } }
+    ReferralEventResponse:
+      type: object
+      properties:
+        maskedContact: { type: string }
+        eventStatus: { type: string }
+        qualifyingActionRef: { type: string }
+        rejectionMnemonic: { type: string }
+        occurredAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    RewardPageResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/RewardItemResponse' } }
+    RewardItemResponse:
+      type: object
+      properties:
+        rewardId: { type: string, format: uuid }
+        rewardCode: { type: string }
+        titleI18nKey: { type: string }
+        costPoints: { type: number }
+        availabilityMnemonic: { type: string }
+    RewardRedemptionRequest:
+      type: object
+      properties:
+        expectedCostPoints: { type: number }
+        deliveryAddressId: { type: string, format: uuid }
+    RewardRedemptionResponse:
+      type: object
+      properties:
+        redemptionId: { type: string, format: uuid }
+        redemptionStatus: { type: string }
+        costPoints: { type: number }
+        correlationId: { type: string }
+    RetentionOfferResponse:
+      type: object
+      properties:
+        offerCode: { type: string }
+        audienceCode: { type: string }
+        riskReasonCode: { type: string }
+        expiresAt: { type: string, format: date-time }
+    SupportTimelineResponse:
+      type: object
+      properties:
+        partnerNumber: { type: string }
+        events: { type: array, items: { $ref: '#/components/schemas/SupportTimelineEventResponse' } }
+    SupportTimelineEventResponse:
+      type: object
+      properties:
+        actionCode: { type: string }
+        reasonCode: { type: string }
+        sourceSystem: { type: string }
+        mnemonicCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    MoneyAmount:
+      type: object
+      properties:
+        amount: { type: string }
+        currency: { type: string }
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string, example: STR_MNEMO_PARTNER_BENEFITS_ACCESS_DENIED }
+        correlationId: { type: string }

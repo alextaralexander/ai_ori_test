@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect x="0" y="0" width="1280" height="820" fill="#ffffff"/>
+  <text x="48" y="54" font-family="Arial" font-size="28">Support view программы преимуществ</text>
+  <rect x="48" y="92" width="1184" height="66" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="72" y="132" font-family="Arial" font-size="18">Поиск: userId / partnerNumber / email / phone / referralCode</text>
+  <rect x="48" y="190" width="340" height="510" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="72" y="226" font-family="Arial" font-size="18">Карточка партнера</text>
+  <text x="72" y="270" font-family="Arial" font-size="15">роль / уровень / catalogId</text>
+  <text x="72" y="306" font-family="Arial" font-size="15">активные выгоды</text>
+  <text x="72" y="342" font-family="Arial" font-size="15">referral activity</text>
+  <text x="72" y="378" font-family="Arial" font-size="15">маскирование ПДн</text>
+  <rect x="420" y="190" width="760" height="240" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="444" y="226" font-family="Arial" font-size="18">Хронология событий</text>
+  <text x="444" y="270" font-family="Arial" font-size="15">accrued / consumed / expired / revoked / recalculated / manual review</text>
+  <text x="444" y="310" font-family="Arial" font-size="15">timestamp / sourceSystem / actionCode / actor / correlationId</text>
+  <rect x="420" y="468" width="360" height="232" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="444" y="504" font-family="Arial" font-size="18">Разрешенные действия</text>
+  <text x="444" y="548" font-family="Arial" font-size="15">повторный расчет</text>
+  <text x="444" y="584" font-family="Arial" font-size="15">эскалация в CRM</text>
+  <text x="444" y="620" font-family="Arial" font-size="15">пометка спорной выгоды</text>
+  <text x="444" y="656" font-family="Arial" font-size="15">запрос компенсации</text>
+  <rect x="820" y="468" width="360" height="232" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="844" y="504" font-family="Arial" font-size="18">Ошибки и ограничения</text>
+  <text x="844" y="548" font-family="Arial" font-size="15">403 access denied</text>
+  <text x="844" y="584" font-family="Arial" font-size="15">409 version conflict</text>
+  <text x="844" y="620" font-family="Arial" font-size="15">mnemonic STR_MNEMO_*</text>
+</svg>

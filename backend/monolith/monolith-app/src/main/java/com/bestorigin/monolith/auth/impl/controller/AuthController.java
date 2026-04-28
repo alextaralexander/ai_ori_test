@@ -49,6 +49,11 @@ public class AuthController {
         return service.login(request);
     }
 
+    @PostMapping("/login")
+    public AuthSessionResponse login(@RequestBody AuthLoginRequest request) {
+        return service.login(request);
+    }
+
     @GetMapping("/session")
     public AuthSessionResponse currentSession(@RequestHeader HttpHeaders headers) {
         return service.currentSession(token(headers));

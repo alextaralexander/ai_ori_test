@@ -1,0 +1,150 @@
+@startuml
+title Module partner-benefits - canonical ER baseline after feature 040
+
+entity partner_benefit_account {
+  * account_id : uuid
+  --
+  * partner_id : uuid
+  * user_id : uuid
+  partner_number : varchar(80)
+  * account_status : varchar(40)
+  active_catalog_id : varchar(80)
+  current_tier : varchar(60)
+  reward_balance : numeric(19,2)
+  cashback_pending : numeric(19,2)
+  cashback_confirmed : numeric(19,2)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity partner_benefit_grant {
+  * benefit_id : uuid
+  --
+  * account_id : uuid
+  * benefit_type : varchar(40)
+  * benefit_status : varchar(40)
+  source_system : varchar(80)
+  source_ref : varchar(120)
+  catalog_id : varchar(80)
+  starts_at : timestamptz
+  expires_at : timestamptz
+  consumed_at : timestamptz
+  amount_value : numeric(19,2)
+  currency_code : varchar(3)
+  application_target : varchar(40)
+  mnemonic_code : varchar(120)
+  version : bigint
+}
+
+entity partner_benefit_progress {
+  * progress_id : uuid
+  --
+  * benefit_id : uuid
+  condition_code : varchar(80)
+  required_value : numeric(19,2)
+  current_value : numeric(19,2)
+  progress_status : varchar(40)
+  last_event_ref : varchar(120)
+  updated_at : timestamptz
+}
+
+entity partner_referral_link {
+  * referral_link_id : uuid
+  --
+  * account_id : uuid
+  * referral_code : varchar(80)
+  campaign_id : varchar(80)
+  source_channel : varchar(40)
+  link_status : varchar(40)
+  qr_payload_hash : varchar(128)
+  starts_at : timestamptz
+  expires_at : timestamptz
+  rotated_at : timestamptz
+}
+
+entity partner_referral_event {
+  * referral_event_id : uuid
+  --
+  * referral_link_id : uuid
+  referred_user_id : uuid
+  masked_contact : varchar(160)
+  event_status : varchar(40)
+  qualifying_action_ref : varchar(120)
+  reward_benefit_id : uuid
+  rejection_mnemonic : varchar(120)
+  occurred_at : timestamptz
+  correlation_id : varchar(120)
+}
+
+entity partner_reward_catalog_item {
+  * reward_id : uuid
+  --
+  reward_code : varchar(80)
+  reward_status : varchar(40)
+  catalog_id : varchar(80)
+  title_i18n_key : varchar(160)
+  cost_points : numeric(19,2)
+  region_code : varchar(40)
+  warehouse_id : uuid
+  available_quantity : integer
+  starts_at : timestamptz
+  expires_at : timestamptz
+}
+
+entity partner_reward_redemption {
+  * redemption_id : uuid
+  --
+  * account_id : uuid
+  * reward_id : uuid
+  redemption_status : varchar(40)
+  cost_points : numeric(19,2)
+  fulfillment_ref : varchar(120)
+  idempotency_key : varchar(120)
+  correlation_id : varchar(120)
+  created_at : timestamptz
+  updated_at : timestamptz
+  version : bigint
+}
+
+entity partner_retention_offer {
+  * retention_offer_id : uuid
+  --
+  * account_id : uuid
+  offer_code : varchar(80)
+  audience_code : varchar(80)
+  risk_reason_code : varchar(80)
+  offer_status : varchar(40)
+  catalog_id : varchar(80)
+  priority : integer
+  stackability_group : varchar(80)
+  starts_at : timestamptz
+  expires_at : timestamptz
+}
+
+entity partner_benefit_audit_event {
+  * audit_event_id : uuid
+  --
+  account_id : uuid
+  subject_ref : varchar(120)
+  actor_user_id : uuid
+  actor_role : varchar(80)
+  action_code : varchar(80)
+  reason_code : varchar(80)
+  source_system : varchar(80)
+  old_value_json : jsonb
+  new_value_json : jsonb
+  correlation_id : varchar(120)
+  occurred_at : timestamptz
+}
+
+partner_benefit_account ||--o{ partner_benefit_grant
+partner_benefit_grant ||--o{ partner_benefit_progress
+partner_benefit_account ||--o{ partner_referral_link
+partner_referral_link ||--o{ partner_referral_event
+partner_benefit_account ||--o{ partner_reward_redemption
+partner_reward_catalog_item ||--o{ partner_reward_redemption
+partner_benefit_account ||--o{ partner_retention_offer
+partner_benefit_account ||--o{ partner_benefit_audit_event
+
+@enduml

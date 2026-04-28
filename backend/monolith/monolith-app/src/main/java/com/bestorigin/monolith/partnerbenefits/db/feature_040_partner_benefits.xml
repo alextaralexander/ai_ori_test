@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-040-partner-benefits-baseline" author="codex">
+        <createTable tableName="partner_benefit_account">
+            <column name="account_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="partner_id" type="uuid">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="partner_number" type="varchar(80)">
+                <constraints unique="true"/>
+            </column>
+            <column name="account_status" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_catalog_id" type="varchar(80)"/>
+            <column name="current_tier" type="varchar(60)"/>
+            <column name="reward_balance" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="cashback_pending" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="cashback_confirmed" type="numeric(19,2)" defaultValueNumeric="0"/>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+
+        <createTable tableName="partner_benefit_grant">
+            <column name="benefit_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="benefit_type" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="benefit_status" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_system" type="varchar(80)"/>
+            <column name="source_ref" type="varchar(120)"/>
+            <column name="catalog_id" type="varchar(80)"/>
+            <column name="starts_at" type="timestamptz"/>
+            <column name="expires_at" type="timestamptz"/>
+            <column name="consumed_at" type="timestamptz"/>
+            <column name="amount_value" type="numeric(19,2)"/>
+            <column name="currency_code" type="varchar(3)"/>
+            <column name="application_target" type="varchar(40)"/>
+            <column name="mnemonic_code" type="varchar(120)"/>
+            <column name="version" type="bigint" defaultValueNumeric="0"/>
+        </createTable>
+
+        <createTable tableName="partner_benefit_audit_event">
+            <column name="audit_event_id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="uuid"/>
+            <column name="subject_ref" type="varchar(120)"/>
+            <column name="actor_user_id" type="uuid"/>
+            <column name="actor_role" type="varchar(80)"/>
+            <column name="action_code" type="varchar(80)"/>
+            <column name="reason_code" type="varchar(80)"/>
+            <column name="source_system" type="varchar(80)"/>
+            <column name="old_value_json" type="jsonb"/>
+            <column name="new_value_json" type="jsonb"/>
+            <column name="correlation_id" type="varchar(120)"/>
+            <column name="occurred_at" type="timestamptz"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

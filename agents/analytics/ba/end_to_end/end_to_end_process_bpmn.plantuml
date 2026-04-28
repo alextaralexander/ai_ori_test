@@ -1,9 +1,17 @@
 @startuml
-title Best Ori Gin platform end-to-end flow with feature 039
+title Best Ori Gin platform end-to-end flow with feature 040
 start
 :Гость, покупатель или партнер входит в платформу;
 :Пользователь изучает каталог, акции и добавляет товары в корзину;
+:Партнер или VIP-клиент открывает программу преимуществ, видит welcome-выгоды, referral link, кешбэк, награды и retention offers;
+if (Пользователь использует referral или reward?) then (да)
+  :Referral contour фиксирует источник привлечения, qualifying action и recommendation discount;
+  :Reward shop проверяет баланс, регион, склад, каталог, срок действия и создает redemption;
+else (нет)
+  :Программа преимуществ только показывает доступные и скоро истекающие выгоды;
+endif
 :Checkout проверяет кампанию, цены, offers, остатки WMS/1C и доступность доставки;
+:Checkout повторно проверяет применимость partner benefits и не принимает frontend-only выгоды;
 if (Выбран способ доставки?) then (домой или курьер)
   :Пользователь выбирает адрес, интервал и подтверждает заказ;
   :Платформа создает shipment и передает задачу во внешний delivery contour;
@@ -22,9 +30,10 @@ endif
 :Delivery contour передает статусы SHIPPED, IN_TRANSIT, READY_FOR_PICKUP и DELIVERED;
 :Пользователь и партнер видят tracking timeline и локализованные уведомления;
 if (Заказ влияет на партнерскую программу?) then (да)
+  :Partner benefits contour обновляет прогресс welcome, cashback, referral, reward и retention выгод;
   :Bonus admin contour применяет активные правила компенсационного плана;
   :Bonus engine рассчитывает hold, accrual, payout-ready, reversal и adjustment;
-  :Партнер видит бонусный кошелек, отчеты комиссий и MLM-прогресс;
+  :Партнер видит программу преимуществ, бонусный кошелек, отчеты комиссий и MLM-прогресс;
 else (нет)
   :Платформа завершает клиентский заказный поток без партнерских начислений;
 endif
@@ -38,6 +47,7 @@ endif
 :Финансовый менеджер формирует payout batch из PAYOUT_READY начислений;
 :Финансовый менеджер согласовывает и отправляет payout batch во внешний bonus/payment contour идемпотентно;
 :Admin platform KPI обновляет продажи, delivery SLA, bonus accruals, payout status и problem rate;
+:CRM и notification contour отправляют локализованные сообщения о доступных, истекающих и использованных выгодах;
 :Audit trail фиксирует actorRole, actionCode, reasonCode, subjectRef, externalId и correlationId;
 stop
 @enduml

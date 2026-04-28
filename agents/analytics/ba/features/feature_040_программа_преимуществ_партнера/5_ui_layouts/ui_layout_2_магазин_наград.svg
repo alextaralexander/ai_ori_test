@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect x="0" y="0" width="1280" height="820" fill="#ffffff"/>
+  <text x="48" y="54" font-family="Arial" font-size="28">Магазин наград программы преимуществ</text>
+  <rect x="48" y="92" width="1184" height="66" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="72" y="132" font-family="Arial" font-size="18">Баланс / доступно к списанию / catalogId / фильтры регион, склад, статус</text>
+  <rect x="48" y="190" width="260" height="540" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="72" y="226" font-family="Arial" font-size="18">Фильтры</text>
+  <text x="72" y="270" font-family="Arial" font-size="15">Категория награды</text>
+  <text x="72" y="306" font-family="Arial" font-size="15">Стоимость баллами</text>
+  <text x="72" y="342" font-family="Arial" font-size="15">Доступность склада</text>
+  <text x="72" y="378" font-family="Arial" font-size="15">Срок действия</text>
+  <text x="72" y="414" font-family="Arial" font-size="15">Только доступные</text>
+  <rect x="340" y="190" width="260" height="220" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="364" y="226" font-family="Arial" font-size="18">Reward card</text>
+  <text x="364" y="266" font-family="Arial" font-size="15">название / остаток / баллы</text>
+  <text x="364" y="306" font-family="Arial" font-size="15">условия / срок / CTA redeem</text>
+  <rect x="624" y="190" width="260" height="220" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="648" y="226" font-family="Arial" font-size="18">Reward card</text>
+  <text x="648" y="266" font-family="Arial" font-size="15">недоступна: причина mnemonic</text>
+  <text x="648" y="306" font-family="Arial" font-size="15">нет списания баланса</text>
+  <rect x="908" y="190" width="260" height="220" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="932" y="226" font-family="Arial" font-size="18">Reward card</text>
+  <text x="932" y="266" font-family="Arial" font-size="15">reserved / fulfillment status</text>
+  <rect x="340" y="450" width="828" height="280" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="364" y="486" font-family="Arial" font-size="18">Панель подтверждения redemption</text>
+  <text x="364" y="530" font-family="Arial" font-size="15">rewardId / стоимость / доставка / условия / итоговый баланс</text>
+  <text x="364" y="574" font-family="Arial" font-size="15">валидация backend перед списанием, optimistic lock, idempotency key</text>
+  <text x="364" y="618" font-family="Arial" font-size="15">успех: reserved; конфликт: STR_MNEMO_PARTNER_BENEFITS_VERSION_CONFLICT</text>
+</svg>

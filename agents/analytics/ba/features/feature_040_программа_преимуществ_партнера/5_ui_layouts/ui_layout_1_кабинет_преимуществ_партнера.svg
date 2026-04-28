@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect x="0" y="0" width="1280" height="820" fill="#ffffff"/>
+  <text x="48" y="54" font-family="Arial" font-size="28">/member-benefits - кабинет преимуществ партнера</text>
+  <rect x="48" y="88" width="1184" height="74" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="72" y="126" font-family="Arial" font-size="18">Статус партнера / catalogId / период каталога / следующий каталог</text>
+  <rect x="48" y="190" width="260" height="520" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="72" y="226" font-family="Arial" font-size="18">Навигация</text>
+  <text x="72" y="270" font-family="Arial" font-size="15">Мои выгоды</text>
+  <text x="72" y="306" font-family="Arial" font-size="15">Магазин наград</text>
+  <text x="72" y="342" font-family="Arial" font-size="15">Referral link</text>
+  <text x="72" y="378" font-family="Arial" font-size="15">История</text>
+  <text x="72" y="414" font-family="Arial" font-size="15">Уведомления</text>
+  <rect x="340" y="190" width="872" height="128" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="364" y="226" font-family="Arial" font-size="18">Welcome-выгоды и прогресс</text>
+  <text x="364" y="264" font-family="Arial" font-size="15">условия / выполнено / осталось / срок окончания / применить в корзине</text>
+  <rect x="340" y="342" width="420" height="150" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="364" y="378" font-family="Arial" font-size="18">Кешбэк</text>
+  <text x="364" y="416" font-family="Arial" font-size="15">прогноз / подтверждено / wallet status</text>
+  <rect x="792" y="342" width="420" height="150" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="816" y="378" font-family="Arial" font-size="18">Бесплатная доставка</text>
+  <text x="816" y="416" font-family="Arial" font-size="15">условия корзины / статус / перейти в checkout</text>
+  <rect x="340" y="518" width="420" height="192" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="364" y="554" font-family="Arial" font-size="18">Retention-офферы</text>
+  <text x="364" y="592" font-family="Arial" font-size="15">audience / risk reason / срок жизни / совместимость</text>
+  <rect x="792" y="518" width="420" height="192" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="816" y="554" font-family="Arial" font-size="18">Истекающие выгоды</text>
+  <text x="816" y="592" font-family="Arial" font-size="15">warning banner / CTA / уведомления</text>
+  <rect x="340" y="736" width="872" height="42" fill="#f7fafc" stroke="#8aa1b4"/>
+  <text x="364" y="762" font-family="Arial" font-size="15">Все тексты приходят из i18n, backend передает mnemonic STR_MNEMO_PARTNER_BENEFITS_*</text>
+</svg>
