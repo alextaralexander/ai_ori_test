@@ -2,6 +2,7 @@ import { Alert, Button, Input, Space, Steps } from 'antd';
 import type { ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { applyBenefits, confirmCheckout, OrderApiError, selectDelivery, selectPayment, startCheckout, updateAddress, updateRecipient, validateCheckout, type AddressRequest, type CheckoutDraftResponse, type CheckoutType, type OrderConfirmationResponse } from '../api/order';
+import { CheckoutDeliverySection } from './DeliveryViews';
 import { t } from '../i18n';
 
 interface OrderCheckoutViewProps {
@@ -124,6 +125,8 @@ export function OrderCheckoutView({ checkoutType = 'MAIN', seed }: OrderCheckout
       {validationCode ? (
         <Alert className="order-validation" data-testid="order-validation-message" message={`${t(validationCode)} (${validationCode})`} type="warning" />
       ) : null}
+
+      <CheckoutDeliverySection />
 
       <section className="order-layout">
         <div className="order-workspace">

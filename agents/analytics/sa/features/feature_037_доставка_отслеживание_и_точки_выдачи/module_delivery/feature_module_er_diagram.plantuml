@@ -1,0 +1,86 @@
+@startuml
+title Feature 037 delivery module ER diagram
+
+entity delivery_pickup_point {
+  * id : uuid
+  --
+  code : varchar(64)
+  name : varchar(255)
+  address_line : varchar(500)
+  city : varchar(128)
+  region : varchar(128)
+  contact_phone : varchar(64)
+  work_schedule : varchar(500)
+  storage_limit_days : integer
+  max_orders_capacity : integer
+  status : varchar(32)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity delivery_shipment {
+  * id : uuid
+  --
+  order_id : uuid
+  customer_id : uuid
+  partner_id : uuid
+  delivery_method : varchar(32)
+  pickup_point_id : uuid
+  address_line : varchar(500)
+  delivery_window_start : timestamptz
+  delivery_window_end : timestamptz
+  expected_receive_at : timestamptz
+  current_status : varchar(48)
+  external_shipment_id : varchar(128)
+  idempotency_key : varchar(128)
+  correlation_id : varchar(128)
+  version : bigint
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity delivery_tracking_event {
+  * id : uuid
+  --
+  shipment_id : uuid
+  status : varchar(48)
+  source_system : varchar(64)
+  reason_code : varchar(128)
+  occurred_at : timestamptz
+  correlation_id : varchar(128)
+  external_event_id : varchar(128)
+  created_at : timestamptz
+}
+
+entity delivery_pickup_operation {
+  * id : uuid
+  --
+  shipment_id : uuid
+  pickup_point_id : uuid
+  operation_type : varchar(48)
+  actor_user_id : uuid
+  verification_code_hash : varchar(255)
+  reason_code : varchar(128)
+  idempotency_key : varchar(128)
+  correlation_id : varchar(128)
+  occurred_at : timestamptz
+  created_at : timestamptz
+}
+
+entity delivery_pickup_operation_item {
+  * id : uuid
+  --
+  pickup_operation_id : uuid
+  order_item_id : uuid
+  sku : varchar(128)
+  quantity : numeric(19,3)
+  item_result : varchar(32)
+}
+
+delivery_pickup_point ||--o{ delivery_shipment
+delivery_shipment ||--o{ delivery_tracking_event
+delivery_shipment ||--o{ delivery_pickup_operation
+delivery_pickup_operation ||--o{ delivery_pickup_operation_item
+
+@enduml

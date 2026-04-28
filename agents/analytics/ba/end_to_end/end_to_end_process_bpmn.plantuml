@@ -1,18 +1,33 @@
 @startuml
-title Best Ori Gin platform end-to-end flow with feature 036
+title Best Ori Gin platform end-to-end flow with feature 037
 start
-:Пользователь покупает или партнер оформляет продажи;
-:Заказы, WMS, доставка, payment, bonus и service создают события;
-:Админские модули управляют каталогом, ценами, заказами, сервисом и identity;
-:Platform KPI read-model агрегирует метрики кампании и SLA;
-if (Найдена аномалия или сбой интеграции?) then (да)
-  :Integration admin открывает /admin/platform/integrations;
-  :Настраивает SLA, retry policy и maintenance window;
-  :Audit trail фиксирует reasonCode и correlationId;
-else (нет)
-  :Business admin просматривает KPI dashboard;
+:Гость, покупатель или партнер входит в платформу;
+:Пользователь изучает каталог, акции и добавляет товары в корзину;
+:Checkout проверяет кампанию, цены, offers, остатки WMS/1C и доступность доставки;
+if (Выбран способ доставки?) then (домой или курьер)
+  :Пользователь выбирает адрес, интервал и подтверждает заказ;
+  :Платформа создает shipment и передает задачу во внешний delivery contour;
+else (самовывоз из ПВЗ)
+  :Пользователь выбирает точку выдачи по адресу, графику, сроку хранения и лимитам;
+  :Платформа резервирует pickupPointId и создает shipment для ПВЗ;
 endif
-:Audit admin проверяет действия по actor, domain и actionCode;
-:BI analyst запускает экспорт KPI/SLA отчета;
+:Оплата, WMS/1C и сборочный контур подтверждают заказ;
+:Delivery contour передает статусы SHIPPED, IN_TRANSIT и ARRIVED_AT_PICKUP_POINT;
+:Пользователь и партнер видят tracking timeline и локализованные уведомления;
+if (Отправление прибыло в ПВЗ?) then (да)
+  :Владелец ПВЗ принимает отправление сканированием или ручным кодом;
+  if (Получатель забрал заказ полностью?) then (да)
+    :Владелец ПВЗ выдает заказ по проверочному коду;
+    :Заказ получает статус DELIVERED;
+  else (частично или не выкуплен)
+    :Владелец ПВЗ фиксирует PARTIALLY_DELIVERED или NOT_COLLECTED;
+    :Платформа создает возврат в логистическую цепочку;
+  endif
+else (нет)
+  :Оператор доставки расследует задержку или DELIVERY_PROBLEM по correlationId;
+endif
+:Service, orders, WMS, delivery, payment, bonus и admin контуры получают согласованные события;
+:Audit trail фиксирует actorRole, actionCode, reasonCode, subjectRef и correlationId;
+:Platform KPI обновляет fulfillment SLA, delivery SLA и problem rate;
 stop
 @enduml

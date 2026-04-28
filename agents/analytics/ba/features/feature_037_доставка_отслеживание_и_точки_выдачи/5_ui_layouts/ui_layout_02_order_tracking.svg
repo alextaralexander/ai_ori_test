@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет отслеживания заказа feature 037</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Детали заказа: трекинг доставки</text>
+  <rect x="32" y="116" width="360" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="18">Сводка заказа</text>
+  <text x="56" y="204" font-family="Arial" font-size="15">Номер заказа</text>
+  <text x="56" y="246" font-family="Arial" font-size="15">Способ доставки</text>
+  <text x="56" y="288" font-family="Arial" font-size="15">Точка выдачи / адрес</text>
+  <text x="56" y="330" font-family="Arial" font-size="15">Срок хранения</text>
+  <rect x="424" y="116" width="792" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="452" y="154" font-family="Arial" font-size="18">Лента статусов</text>
+  <line x1="492" y1="204" x2="492" y2="620" stroke="#8aa1b4" stroke-width="2"/>
+  <circle cx="492" cy="220" r="12" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="532" y="226" font-family="Arial" font-size="15">Заказ подтвержден</text>
+  <circle cx="492" cy="300" r="12" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="532" y="306" font-family="Arial" font-size="15">Сборка завершена</text>
+  <circle cx="492" cy="380" r="12" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="532" y="386" font-family="Arial" font-size="15">В пути</text>
+  <circle cx="492" cy="460" r="12" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="532" y="466" font-family="Arial" font-size="15">Готов к выдаче</text>
+  <circle cx="492" cy="540" r="12" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="532" y="546" font-family="Arial" font-size="15">Выдан / возвращен / проблема</text>
+  <rect x="860" y="188" width="300" height="140" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="884" y="226" font-family="Arial" font-size="15">Уведомления и причина</text>
+  <text x="884" y="266" font-family="Arial" font-size="13">STR_MNEMO_DELIVERY_*</text>
+</svg>

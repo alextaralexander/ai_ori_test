@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет кабинета владельца точки выдачи feature 037</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Кабинет владельца точки выдачи</text>
+  <rect x="32" y="116" width="260" height="596" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="18">Фильтры</text>
+  <text x="56" y="204" font-family="Arial" font-size="15">Статус отправления</text>
+  <text x="56" y="248" font-family="Arial" font-size="15">Дата поступления</text>
+  <text x="56" y="292" font-family="Arial" font-size="15">Проблемные кейсы</text>
+  <rect x="324" y="116" width="560" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="352" y="154" font-family="Arial" font-size="18">Список отправлений</text>
+  <rect x="352" y="184" width="500" height="72" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="376" y="226" font-family="Arial" font-size="15">Ожидается приемка</text>
+  <rect x="352" y="276" width="500" height="72" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="376" y="318" font-family="Arial" font-size="15">Принято, готово к выдаче</text>
+  <rect x="352" y="368" width="500" height="72" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="376" y="410" font-family="Arial" font-size="15">Проблема / невыкуп / возврат</text>
+  <rect x="916" y="116" width="300" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="944" y="154" font-family="Arial" font-size="18">Действия</text>
+  <rect x="944" y="190" width="224" height="52" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="990" y="222" font-family="Arial" font-size="15">Принять</text>
+  <rect x="944" y="270" width="224" height="52" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="1004" y="302" font-family="Arial" font-size="15">Выдать</text>
+  <rect x="944" y="350" width="224" height="52" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="968" y="382" font-family="Arial" font-size="15">Частичная выдача</text>
+  <rect x="944" y="430" width="224" height="52" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="982" y="462" font-family="Arial" font-size="15">Невыкуп</text>
+</svg>

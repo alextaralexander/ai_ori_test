@@ -1,4 +1,4 @@
-// Managed synchronized artifact from agents/tests/ui. Do not edit manually.
+// GENERATED FROM agents/tests/ui. DO NOT EDIT MANUALLY.
 import { test } from '@playwright/test';
 
 import '../feature_001_публичная_главная_и_навигация/feature_ui_flow';
@@ -38,6 +38,7 @@ import { runFeature033AdminOrdersFlow } from '../feature_033_админ_зака
 import { runFeature034AdminServiceFlow } from '../feature_034_админ_претензии_возвраты_и_сервис/feature_ui_flow';
 import { runFeature035AdminIdentityFlow } from '../feature_035_админ_пользователи_партнеры_сотрудники_и_имперсонация/feature_ui_flow';
 import { runFeature036AdminPlatformFlow } from '../feature_036_админ_kpi_аудит_и_интеграции_платформы/feature_ui_flow';
+import { runFeature037DeliveryFlow } from '../feature_037_доставка_отслеживание_и_точки_выдачи/feature_ui_flow';
 
 test('admin WMS green path participates in product e2e flow', async ({ page }) => {
   await runFeature032AdminWmsFlow(page);
@@ -58,4 +59,8 @@ test('admin identity users partners employees and impersonation green path parti
 
 test('admin platform KPI audit and integrations green path participates in product e2e flow', async ({ page }) => {
   await runFeature036AdminPlatformFlow(page);
+});
+
+test('delivery tracking and pickup points green path participates in product e2e flow', async ({ page }) => {
+  await runFeature037DeliveryFlow(page);
 });

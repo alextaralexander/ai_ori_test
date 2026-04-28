@@ -1,0 +1,398 @@
+openapi: 3.0.3
+info:
+  title: Best Ori Gin delivery module API for feature 037
+  version: 1.0.0
+  description: API module_delivery for delivery choice, tracking and pickup point operations.
+servers:
+  - url: /api/delivery
+tags:
+  - name: DeliveryOptions
+  - name: Shipments
+  - name: PickupOwner
+  - name: DeliveryIntegration
+paths:
+  /options:
+    get:
+      tags: [DeliveryOptions]
+      summary: Get delivery options for checkout
+      parameters:
+        - name: orderDraftId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: city
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Delivery options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryOptionsResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenMnemonic'
+  /pickup-points:
+    get:
+      tags: [DeliveryOptions]
+      summary: Search active pickup points
+      parameters:
+        - name: city
+          in: query
+          required: false
+          schema: { type: string }
+        - name: region
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Pickup point list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PickupPointDto'
+  /shipments:
+    post:
+      tags: [Shipments]
+      summary: Create shipment for confirmed order
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShipmentRequest'
+      responses:
+        '201':
+          description: Created shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentDto'
+        '400':
+          $ref: '#/components/responses/ValidationMnemonic'
+  /shipments/{shipmentId}/tracking:
+    get:
+      tags: [Shipments]
+      summary: Get shipment tracking timeline
+      parameters:
+        - name: shipmentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Tracking timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingTimelineDto'
+        '403':
+          $ref: '#/components/responses/ForbiddenMnemonic'
+  /pickup-owner/shipments:
+    get:
+      tags: [PickupOwner]
+      summary: Get shipments for current pickup point owner
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ShipmentStatus'
+      responses:
+        '200':
+          description: Owner shipment list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShipmentDto'
+  /pickup-owner/shipments/{shipmentId}/accept:
+    post:
+      tags: [PickupOwner]
+      summary: Accept shipment at pickup point
+      parameters:
+        - name: shipmentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupAcceptRequest'
+      responses:
+        '200':
+          description: Accepted shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentDto'
+  /pickup-owner/shipments/{shipmentId}/deliver:
+    post:
+      tags: [PickupOwner]
+      summary: Deliver shipment to recipient
+      parameters:
+        - name: shipmentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupDeliverRequest'
+      responses:
+        '200':
+          description: Delivery result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentDto'
+  /pickup-owner/shipments/{shipmentId}/partial-deliver:
+    post:
+      tags: [PickupOwner]
+      summary: Record partial delivery and return items
+      parameters:
+        - name: shipmentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupPartialDeliverRequest'
+      responses:
+        '200':
+          description: Partial delivery result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentDto'
+  /integration/status-events:
+    post:
+      tags: [DeliveryIntegration]
+      summary: Receive external delivery status event
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalDeliveryStatusEvent'
+      responses:
+        '202':
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingEventDto'
+        '409':
+          $ref: '#/components/responses/ValidationMnemonic'
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, maxLength: 128 }
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: true
+      schema: { type: string, maxLength: 128 }
+  responses:
+    ValidationMnemonic:
+      description: Validation error with mnemonic code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MnemonicError'
+    ForbiddenMnemonic:
+      description: Access denied with mnemonic code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MnemonicError'
+  schemas:
+    MnemonicError:
+      type: object
+      required: [code, correlationId]
+      properties:
+        code:
+          type: string
+          example: STR_MNEMO_DELIVERY_ACCESS_DENIED
+        correlationId:
+          type: string
+    DeliveryMethod:
+      type: string
+      enum: [HOME_DELIVERY, COURIER_DELIVERY, PICKUP_POINT]
+    ShipmentStatus:
+      type: string
+      enum:
+        - ORDER_CONFIRMED
+        - ASSEMBLY_STARTED
+        - ASSEMBLY_COMPLETED
+        - SHIPPED
+        - IN_TRANSIT
+        - ARRIVED_AT_PICKUP_POINT
+        - READY_FOR_PICKUP
+        - DELIVERED
+        - PARTIALLY_DELIVERED
+        - NOT_COLLECTED
+        - RETURNED_TO_LOGISTICS
+        - DELIVERY_PROBLEM
+    DeliveryOptionsResponse:
+      type: object
+      required: [options]
+      properties:
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryOptionDto'
+    DeliveryOptionDto:
+      type: object
+      required: [method, available]
+      properties:
+        method:
+          $ref: '#/components/schemas/DeliveryMethod'
+        available:
+          type: boolean
+        priceAmount:
+          type: number
+        currency:
+          type: string
+        expectedReceiveAt:
+          type: string
+          format: date-time
+        unavailableReasonCode:
+          type: string
+          example: STR_MNEMO_DELIVERY_PICKUP_POINT_UNAVAILABLE
+    PickupPointDto:
+      type: object
+      required: [id, code, name, addressLine, city, status, storageLimitDays]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        addressLine: { type: string }
+        city: { type: string }
+        region: { type: string }
+        contactPhone: { type: string }
+        workSchedule: { type: string }
+        storageLimitDays: { type: integer }
+        maxOrdersCapacity: { type: integer }
+        status: { type: string, enum: [ACTIVE, TEMPORARILY_CLOSED, DISABLED] }
+    CreateShipmentRequest:
+      type: object
+      required: [orderId, customerId, deliveryMethod]
+      properties:
+        orderId: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        partnerId: { type: string, format: uuid }
+        deliveryMethod:
+          $ref: '#/components/schemas/DeliveryMethod'
+        pickupPointId: { type: string, format: uuid }
+        addressLine: { type: string }
+        deliveryWindowStart: { type: string, format: date-time }
+        deliveryWindowEnd: { type: string, format: date-time }
+    ShipmentDto:
+      type: object
+      required: [id, orderId, deliveryMethod, currentStatus, correlationId]
+      properties:
+        id: { type: string, format: uuid }
+        orderId: { type: string, format: uuid }
+        deliveryMethod:
+          $ref: '#/components/schemas/DeliveryMethod'
+        pickupPoint:
+          $ref: '#/components/schemas/PickupPointDto'
+        addressLine: { type: string }
+        expectedReceiveAt: { type: string, format: date-time }
+        currentStatus:
+          $ref: '#/components/schemas/ShipmentStatus'
+        externalShipmentId: { type: string }
+        correlationId: { type: string }
+    TrackingTimelineDto:
+      type: object
+      required: [shipment, events]
+      properties:
+        shipment:
+          $ref: '#/components/schemas/ShipmentDto'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackingEventDto'
+    TrackingEventDto:
+      type: object
+      required: [id, status, sourceSystem, occurredAt, correlationId]
+      properties:
+        id: { type: string, format: uuid }
+        status:
+          $ref: '#/components/schemas/ShipmentStatus'
+        sourceSystem: { type: string }
+        reasonCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+        correlationId: { type: string }
+    PickupAcceptRequest:
+      type: object
+      required: [shipmentCode, occurredAt]
+      properties:
+        shipmentCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+    PickupDeliverRequest:
+      type: object
+      required: [verificationCode, occurredAt]
+      properties:
+        verificationCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+    PickupPartialDeliverRequest:
+      type: object
+      required: [verificationCode, reasonCode, items, occurredAt]
+      properties:
+        verificationCode: { type: string }
+        reasonCode: { type: string }
+        occurredAt: { type: string, format: date-time }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickupOperationItemDto'
+    PickupOperationItemDto:
+      type: object
+      required: [orderItemId, sku, quantity, itemResult]
+      properties:
+        orderItemId: { type: string, format: uuid }
+        sku: { type: string }
+        quantity: { type: number }
+        itemResult:
+          type: string
+          enum: [DELIVERED, RETURN_TO_LOGISTICS, DAMAGED, MISSING]
+    ExternalDeliveryStatusEvent:
+      type: object
+      required: [externalShipmentId, status, sourceSystem, occurredAt]
+      properties:
+        externalShipmentId: { type: string }
+        externalEventId: { type: string }
+        status:
+          $ref: '#/components/schemas/ShipmentStatus'
+        sourceSystem: { type: string }
+        reasonCode: { type: string }
+        occurredAt: { type: string, format: date-time }

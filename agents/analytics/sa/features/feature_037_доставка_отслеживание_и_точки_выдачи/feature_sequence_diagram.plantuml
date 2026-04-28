@@ -1,0 +1,67 @@
+@startuml
+title Feature 037 delivery, tracking and pickup points sequence
+
+actor Customer as customer
+actor Partner as partner
+actor PickupOwner as pickupOwner
+actor DeliveryOperator as deliveryOperator
+participant "Frontend React" as frontend
+participant "module_delivery" as delivery
+participant "module_order" as order
+participant "module_adminwms" as wms
+participant "Payment provider" as payment
+participant "External delivery provider" as provider
+participant "module_adminservice" as service
+participant "module_adminplatform" as platform
+
+customer -> frontend : Открывает checkout
+frontend -> delivery : GET /api/delivery/options?orderDraftId
+delivery -> wms : Проверить ограничения SKU/склада
+delivery --> frontend : DeliveryOptionsResponse
+customer -> frontend : Выбирает PICKUP_POINT
+frontend -> delivery : GET /api/delivery/pickup-points
+delivery --> frontend : PickupPointDto[]
+customer -> frontend : Подтверждает заказ
+frontend -> order : Confirm order
+order -> payment : Capture payment
+order -> delivery : POST /api/delivery/shipments
+delivery -> provider : Create shipment task
+delivery --> order : ShipmentDto
+
+provider -> delivery : POST /api/delivery/integration/status-events SHIPPED
+delivery -> order : DeliveryTrackingStatusChanged
+delivery -> platform : Delivery SLA event
+delivery --> provider : 202 accepted
+
+provider -> delivery : Status READY_FOR_PICKUP
+delivery -> frontend : Notification code STR_MNEMO_DELIVERY_READY_FOR_PICKUP
+partner -> frontend : Открывает детали заказа
+frontend -> delivery : GET /api/delivery/shipments/{id}/tracking
+delivery --> frontend : TrackingTimelineDto
+
+pickupOwner -> frontend : Открывает кабинет ПВЗ
+frontend -> delivery : GET /api/delivery/pickup-owner/shipments
+delivery --> frontend : ShipmentDto[]
+pickupOwner -> frontend : Принимает отправление
+frontend -> delivery : POST /accept with Idempotency-Key
+delivery -> order : PickupPointShipmentAccepted
+pickupOwner -> frontend : Выдает по проверочному коду
+frontend -> delivery : POST /deliver with Idempotency-Key
+delivery -> order : PickupPointShipmentDelivered
+delivery -> platform : Delivery completion KPI
+
+alt Частичная выдача или невыкуп
+  pickupOwner -> frontend : Фиксирует PARTIAL_DELIVER или NOT_COLLECTED
+  frontend -> delivery : POST /partial-deliver
+  delivery -> wms : Return to logistics event
+  delivery -> service : Service context event
+  delivery -> order : Shipment partially delivered
+  delivery -> platform : Problem/SLA event
+else Проблемный внешний статус
+  provider -> delivery : DELIVERY_PROBLEM with correlationId
+  deliveryOperator -> frontend : Открывает журнал доставки
+  frontend -> delivery : GET tracking by filters
+  delivery --> frontend : sourceSystem, reasonCode, correlationId
+end
+
+@enduml

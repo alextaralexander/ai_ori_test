@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="feature-037-delivery-001" author="codex">
+        <createTable tableName="delivery_pickup_point">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="code" type="varchar(64)"><constraints nullable="false" unique="true"/></column>
+            <column name="name" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="address_line" type="varchar(500)"><constraints nullable="false"/></column>
+            <column name="city" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="region" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="contact_phone" type="varchar(64)"/>
+            <column name="work_schedule" type="varchar(500)"><constraints nullable="false"/></column>
+            <column name="storage_limit_days" type="int"><constraints nullable="false"/></column>
+            <column name="max_orders_capacity" type="int"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="version" type="bigint"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamptz"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamptz"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex tableName="delivery_pickup_point" indexName="idx_delivery_pickup_point_city_status">
+            <column name="city"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-037-delivery-002" author="codex">
+        <createTable tableName="delivery_shipment">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="order_id" type="uuid"><constraints nullable="false" unique="true"/></column>
+            <column name="customer_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="partner_id" type="uuid"/>
+            <column name="delivery_method" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="pickup_point_id" type="uuid"/>
+            <column name="address_line" type="varchar(500)"/>
+            <column name="delivery_window_start" type="timestamptz"/>
+            <column name="delivery_window_end" type="timestamptz"/>
+            <column name="expected_receive_at" type="timestamptz"/>
+            <column name="current_status" type="varchar(48)"><constraints nullable="false"/></column>
+            <column name="external_shipment_id" type="varchar(128)"/>
+            <column name="idempotency_key" type="varchar(128)"><constraints nullable="false" unique="true"/></column>
+            <column name="correlation_id" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="version" type="bigint"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamptz"><constraints nullable="false"/></column>
+            <column name="updated_at" type="timestamptz"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="delivery_shipment" baseColumnNames="pickup_point_id" referencedTableName="delivery_pickup_point" referencedColumnNames="id" constraintName="fk_delivery_shipment_pickup_point"/>
+        <createIndex tableName="delivery_shipment" indexName="idx_delivery_shipment_pickup_status">
+            <column name="pickup_point_id"/>
+            <column name="current_status"/>
+        </createIndex>
+        <createIndex tableName="delivery_shipment" indexName="idx_delivery_shipment_correlation">
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-037-delivery-003" author="codex">
+        <createTable tableName="delivery_tracking_event">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="shipment_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(48)"><constraints nullable="false"/></column>
+            <column name="source_system" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="reason_code" type="varchar(128)"/>
+            <column name="occurred_at" type="timestamptz"><constraints nullable="false"/></column>
+            <column name="correlation_id" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="external_event_id" type="varchar(128)"/>
+            <column name="created_at" type="timestamptz"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="delivery_tracking_event" baseColumnNames="shipment_id" referencedTableName="delivery_shipment" referencedColumnNames="id" constraintName="fk_delivery_tracking_event_shipment"/>
+        <createIndex tableName="delivery_tracking_event" indexName="idx_delivery_tracking_shipment_time">
+            <column name="shipment_id"/>
+            <column name="occurred_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="feature-037-delivery-004" author="codex">
+        <createTable tableName="delivery_pickup_operation">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="shipment_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="pickup_point_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="operation_type" type="varchar(48)"><constraints nullable="false"/></column>
+            <column name="actor_user_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="verification_code_hash" type="varchar(255)"/>
+            <column name="reason_code" type="varchar(128)"/>
+            <column name="idempotency_key" type="varchar(128)"><constraints nullable="false" unique="true"/></column>
+            <column name="correlation_id" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="occurred_at" type="timestamptz"><constraints nullable="false"/></column>
+            <column name="created_at" type="timestamptz"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="delivery_pickup_operation" baseColumnNames="shipment_id" referencedTableName="delivery_shipment" referencedColumnNames="id" constraintName="fk_delivery_pickup_operation_shipment"/>
+        <addForeignKeyConstraint baseTableName="delivery_pickup_operation" baseColumnNames="pickup_point_id" referencedTableName="delivery_pickup_point" referencedColumnNames="id" constraintName="fk_delivery_pickup_operation_pickup_point"/>
+    </changeSet>
+
+    <changeSet id="feature-037-delivery-005" author="codex">
+        <createTable tableName="delivery_pickup_operation_item">
+            <column name="id" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="pickup_operation_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="order_item_id" type="uuid"><constraints nullable="false"/></column>
+            <column name="sku" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="quantity" type="numeric(19,3)"><constraints nullable="false"/></column>
+            <column name="item_result" type="varchar(32)"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="delivery_pickup_operation_item" baseColumnNames="pickup_operation_id" referencedTableName="delivery_pickup_operation" referencedColumnNames="id" constraintName="fk_delivery_pickup_operation_item_operation"/>
+    </changeSet>
+</databaseChangeLog>

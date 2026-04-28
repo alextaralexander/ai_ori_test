@@ -1,97 +1,36 @@
 @startuml
-title Best Ori Gin monolith architecture through feature 035
+title Best Ori Gin monolith architecture through feature 037
 
 package "frontend/monolith apps/web-shell" {
+  [PublicShell]
+  [Catalog UI]
+  [Cart UI]
+  [Checkout Delivery UI]
+  [Order Tracking UI]
+  [Pickup Owner Cabinet UI]
+  [EmployeeWorkspace UI]
+  [AdminOrders UI]
+  [AdminService UI]
+  [AdminPlatform UI]
   [I18nProvider]
   [NotificationProvider]
   [OfflineStatusProvider]
   [AnalyticsProvider]
-  [ConsentPanel]
-  [AnalyticsDiagnostics UI]
-  [AdminRbac UI]
-  [AdminRbacAudit UI]
-  [AdminRbacServiceAccounts UI]
-  [AdminCms UI]
-  [AdminCmsEditor UI]
-  [AdminCmsReview UI]
-  [AdminCmsAudit UI]
-  [AdminReferral UI]
-  [AdminReferralLanding UI]
-  [AdminReferralFunnel UI]
-  [AdminReferralAnalytics UI]
-  [AdminReferralAudit UI]
-  [AdminPim UI]
-  [AdminPimProducts UI]
-  [AdminPimCategories UI]
-  [AdminPimMedia UI]
-  [AdminPimImportExport UI]
-  [AdminPimAudit UI]
-  [AdminCatalog UI]
-  [AdminCatalogCampaigns UI]
-  [AdminCatalogMaterials UI]
-  [AdminCatalogHotspots UI]
-  [AdminCatalogRollover UI]
-  [AdminCatalogAudit UI]
-  [AdminPricing UI]
-  [AdminPricingPriceLists UI]
-  [AdminPricingPromotions UI]
-  [AdminPricingImportExport UI]
-  [AdminPricingAudit UI]
-  [AdminWms UI]
-  [AdminWmsWarehouses UI]
-  [AdminWmsStocks UI]
-  [AdminWmsSupplies UI]
-  [AdminWmsSync UI]
-  [AdminWmsAudit UI]
-  [AdminOrders UI]
-  [AdminOrderCard UI]
-  [AdminOrderPayments UI]
-  [AdminOrderSupplementary UI]
-  [AdminOrderRisk UI]
-  [AdminOrderAudit UI]
-  [AdminService UI]
-  [AdminServiceQueue UI]
-  [AdminServiceCaseCard UI]
-  [AdminServiceDecisions UI]
-  [AdminServiceSlaBoard UI]
-  [AdminServiceAudit UI]
-  [AdminIdentity UI]
-  [AdminIdentitySubjects UI]
-  [AdminIdentityPartners UI]
-  [AdminIdentityEmployees UI]
-  [AdminIdentityImpersonation UI]
-  [AdminIdentityAudit UI]
   [AuthProvider]
   [RoleRouter]
-  [ActivePartnerSwitcher]
-  [ImpersonationPanel]
-  [PublicShell]
-  [Catalog UI]
-  [Cart UI]
-  [Order UI]
-  [Partner UI]
-  [EmployeeWorkspace UI]
-  [EmployeeOrderHistory UI]
-  [EmployeeClaims UI]
-  [EmployeePartnerCard UI]
-  [EmployeePartnerReport UI]
-  [EmployeeProfileSettings UI]
-  [EmployeeSuperUser UI]
 }
 
 package "backend/monolith/monolith-app" {
   [public-content]
   [auth]
+  [authorization]
   [catalog]
   [cart]
   [order]
+  [delivery]
   [profile]
-  [authorization]
   [bonus-wallet]
-  [partner-reporting]
-  [mlm-structure]
   [partner-office]
-  [partner-onboarding]
   [employee]
   [platform-experience]
   [admin-rbac]
@@ -104,203 +43,90 @@ package "backend/monolith/monolith-app" {
   [admin-order]
   [admin-service]
   [admin-identity]
+  [admin-platform]
 }
 
-database "Postgres/Liquibase XML" as db
-cloud "S3/MinIO documents" as s3
-cloud "WMS/1C" as wms
-cloud "Payment" as pay
-cloud "Delivery" as delivery
+database "Postgres / Liquibase XML" as db
+cloud "S3 / MinIO" as s3
+cloud "WMS / 1C" as wms
+cloud "Payment provider" as pay
+cloud "External delivery provider" as deliveryProvider
 cloud "Bonus engine" as bonus
-cloud "Claims" as claims
 cloud "Yandex Metrika" as metrika
 cloud "Mindbox" as mindbox
 cloud "Hybrid Pixel" as hybrid
 
-[I18nProvider] --> [platform-experience] : HTTP/JSON /api/platform-experience/diagnostics/i18n-missing-keys
-[NotificationProvider] --> [platform-experience] : HTTP/JSON /api/platform-experience/notification/preferences
-[OfflineStatusProvider] --> [auth] : HTTP/JSON session check after reconnect
-[AnalyticsProvider] --> [platform-experience] : HTTP/JSON /runtime-config, /consent/preferences, /diagnostics/analytics-events
-[ConsentPanel] --> [platform-experience] : HTTP/JSON /api/platform-experience/consent/preferences
-[AnalyticsDiagnostics UI] --> [platform-experience] : HTTP/JSON /api/platform-experience/diagnostics/summary
-[AdminRbac UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/accounts, /roles, /security-policies
-[AdminRbacServiceAccounts UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/service-accounts, /rotate-secret
-[AdminRbacAudit UI] --> [admin-rbac] : HTTP/JSON /api/admin/rbac/audit-events, /emergency-deactivations
-[AdminCms UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials, /materials/{materialId}
-[AdminCmsEditor UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials, /preview, /publish, /archive
-[AdminCmsReview UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/materials/{materialId}/review
-[AdminCmsAudit UI] --> [admin-cms] : HTTP/JSON /api/admin-cms/audit
-[AdminReferral UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/landing-variants, /referral-codes
-[AdminReferralLanding UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/landing-variants/{landingId}/preview, /activate
-[AdminReferralFunnel UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/funnels, /attribution-policy
-[AdminReferralAnalytics UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/analytics/conversions
-[AdminReferralAudit UI] --> [admin-referral] : HTTP/JSON /api/admin-referral/audit
-[AdminPim UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/workspace, /products, /categories
-[AdminPimProducts UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/products, /products/{productId}/publish
-[AdminPimCategories UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/categories, /categories/{categoryId}/activate
-[AdminPimMedia UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/products/{productId}/media, /media/{mediaId}/approve
-[AdminPimImportExport UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/imports, /exports
-[AdminPimAudit UI] --> [admin-pim] : HTTP/JSON /api/admin-pim/audit
-[AdminCatalog UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/workspace, /campaigns, /archive
-[AdminCatalogCampaigns UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/campaigns, /campaigns/{campaignId}/issues
-[AdminCatalogMaterials UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/materials, /materials/{materialId}/approve, /pages
-[AdminCatalogHotspots UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/hotspots, /validate-links
-[AdminCatalogRollover UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/issues/{issueId}/rollover
-[AdminCatalogAudit UI] --> [admin-catalog] : HTTP/JSON /api/admin-catalog/audit
-[AdminPricing UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/price-lists, /promotions
-[AdminPricingPriceLists UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/price-lists, /prices, /promo-prices, /segment-rules
-[AdminPricingPromotions UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/promotions, /offers, /gift-rules, /publish, /pause
-[AdminPricingImportExport UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/imports, /exports
-[AdminPricingAudit UI] --> [admin-pricing] : HTTP/JSON /api/admin/pricing/audit-events
-[AdminWms UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/warehouses, /stocks, /supplies
-[AdminWmsWarehouses UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/warehouses, /warehouses/{warehouseId}
-[AdminWmsStocks UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/stocks, /availability-rule, /reservations
-[AdminWmsSupplies UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/supplies, /supplies/{supplyId}/acceptance
-[AdminWmsSync UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/sync-runs, /sync-messages
-[AdminWmsAudit UI] --> [admin-wms] : HTTP/JSON /api/admin/wms/audit-events
-[AdminOrders UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders, /orders/{orderId}
-[AdminOrderCard UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}, /status-transition, /operator-actions
-[AdminOrderSupplementary UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}/supplementary-orders
-[AdminOrderPayments UI] --> [admin-order] : HTTP/JSON /api/admin/orders/payment-events, /orders/{orderId}/refunds, /financial-holds
-[AdminOrderRisk UI] --> [admin-order] : HTTP/JSON /api/admin/orders/orders/{orderId}/risk-decisions
-[AdminOrderAudit UI] --> [admin-order] : HTTP/JSON /api/admin/orders/audit-events, /audit-events/export
-[AdminService UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases, /cases/{serviceCaseId}
-[AdminServiceQueue UI] --> [admin-service] : HTTP/JSON /api/admin/service/queues, /cases/{serviceCaseId}/assignment
-[AdminServiceCaseCard UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases/{serviceCaseId}, /messages, /status-transition
-[AdminServiceDecisions UI] --> [admin-service] : HTTP/JSON /api/admin/service/cases/{serviceCaseId}/decisions, /decisions/{decisionId}/refund-actions, /replacement-actions
-[AdminServiceSlaBoard UI] --> [admin-service] : HTTP/JSON /api/admin/service/supervisor/sla-board
-[AdminServiceAudit UI] --> [admin-service] : HTTP/JSON /api/admin/service/audit-events, /audit-events/export
-[AdminIdentity UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/subjects, /subjects/{subjectId}
-[AdminIdentitySubjects UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/subjects, /subjects/{subjectId}/status, /eligibility-rules
-[AdminIdentityPartners UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/partners/{partnerSubjectId}/sponsor-relationships
-[AdminIdentityEmployees UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/employees/{employeeSubjectId}/bindings
-[AdminIdentityImpersonation UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/impersonation/policies, /sessions
-[AdminIdentityAudit UI] --> [admin-identity] : HTTP/JSON /api/admin/identity/audit-events
-[EmployeeWorkspace UI] --> [employee] : HTTP/JSON /api/employee/workspace, /operator-orders, /order-support
-[EmployeeOrderHistory UI] --> [employee] : HTTP/JSON /api/employee/order-history, /order-history/{orderId}
-[EmployeeClaims UI] --> [employee] : HTTP/JSON /api/employee/submit-claim, /claims, /claims/{claimId}, /transitions
-[EmployeePartnerCard UI] --> [employee] : HTTP/JSON /api/employee/partner-card, /partner-card/{partnerId}
-[EmployeePartnerReport UI] --> [employee] : HTTP/JSON /api/employee/report/order-history
-[EmployeeProfileSettings UI] --> [employee] : HTTP/JSON /api/employee/profile-settings/*
-[EmployeeSuperUser UI] --> [employee] : HTTP/JSON /api/employee/super-user/*
-[AuthProvider] --> [auth] : HTTP/JSON /api/auth/session, /test-login, /invitation-code
-[RoleRouter] --> [auth] : HTTP/JSON /api/auth/session/route-access
-[ActivePartnerSwitcher] --> [auth] : HTTP/JSON /api/auth/partners/search, /partners/active
-[ImpersonationPanel] --> [auth] : HTTP/JSON /api/auth/impersonation/*
+[PublicShell] --> [public-content] : HTTP/JSON public content
+[Catalog UI] --> [catalog] : HTTP/JSON catalog and products
+[Cart UI] --> [cart] : HTTP/JSON cart and offers
+[Checkout Delivery UI] --> [delivery] : HTTP/JSON /api/delivery/options, /pickup-points
+[Checkout Delivery UI] --> [order] : HTTP/JSON confirm order
+[Order Tracking UI] --> [delivery] : HTTP/JSON /shipments/{id}/tracking
+[Pickup Owner Cabinet UI] --> [delivery] : HTTP/JSON /pickup-owner/shipments/*
+[EmployeeWorkspace UI] --> [employee] : HTTP/JSON employee workspace and support
+[AdminOrders UI] --> [admin-order] : HTTP/JSON admin order cards
+[AdminService UI] --> [admin-service] : HTTP/JSON service cases and decisions
+[AdminPlatform UI] --> [admin-platform] : HTTP/JSON KPI, audit, integrations
+[I18nProvider] --> [platform-experience] : HTTP/JSON i18n diagnostics
+[NotificationProvider] --> [platform-experience] : HTTP/JSON notification preferences
+[OfflineStatusProvider] --> [auth] : HTTP/JSON session check
+[AnalyticsProvider] --> [platform-experience] : HTTP/JSON runtime config and consent
+[AuthProvider] --> [auth] : HTTP/JSON session/login/logout
+[RoleRouter] --> [auth] : HTTP/JSON route access
 
-[auth] --> [authorization] : role, route policy, MFA/elevated policy checks
-[auth] --> [employee] : elevatedSessionId validation for controlled impersonation
-[auth] --> [admin-rbac] : session permission matrix and affected session termination
-[auth] --> db : auth sessions, roles, route policies, active partner, impersonation and audit
-[admin-rbac] --> [authorization] : role, permission set, scope, MFA/elevated policy checks
-[admin-rbac] --> [auth] : current session and terminate sessions after block/deactivation
-[admin-rbac] --> db : internal accounts, roles, permission sets, scopes, policies, service accounts and audit
-[admin-rbac] --> wms : service account scope for WMS/1C integration access
-[admin-rbac] --> pay : service account scope for payment integration access
-[admin-rbac] --> delivery : service account scope for delivery integration access
-[admin-rbac] --> bonus : service account scope for bonus integration access
-[admin-cms] --> [authorization] : admin CMS permission, scope and elevated checks
-[admin-cms] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-cms] --> [public-content] : published render model projection for home/news/FAQ/documents/offers
-[admin-cms] --> s3 : document/image fileReferenceId metadata, no private storage paths
-[admin-cms] --> db : CMS materials, versions, blocks, SEO, relations, review decisions and audit
-[admin-referral] --> [authorization] : admin referral permission, scope and elevated checks
-[admin-referral] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-referral] --> [public-content] : active benefit landing render model and campaign context
-[admin-referral] --> [partner-onboarding] : referral code validation and sponsor attribution context
-[admin-referral] --> [platform-experience] : conversion analytics diagnostics and mnemonic message contract
-[admin-referral] --> db : landing variants, versions, funnels, referral codes, attribution, conversion events and audit
-[admin-pim] --> [authorization] : admin PIM permission, scope and elevated checks
-[admin-pim] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-pim] --> [catalog] : published product/category render data for public catalog and product card
-[admin-pim] --> [admin-cms] : published product/category references for CMS product links
-[admin-pim] --> s3 : product media, PDF, certificate fileReferenceId metadata
-[admin-pim] --> db : categories, brands, products, attributes, tags, media, recommendations, import/export jobs and audit
-[admin-catalog] --> [authorization] : admin catalog permission, scope and elevated checks
-[admin-catalog] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-catalog] --> [admin-pim] : validate published products for catalog hotspots
-[admin-catalog] --> [catalog] : current issue, PDF pages, hotspots and archive projection for digital catalog
-[admin-catalog] --> s3 : PDF, cover and page image fileReferenceId metadata
-[admin-catalog] --> db : campaigns, issues, materials, pages, hotspots, rollover jobs and audit
-[admin-pricing] --> [authorization] : admin pricing permission, scope and elevated checks
-[admin-pricing] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-pricing] --> [admin-pim] : validate published products, bundle items and gift SKU
-[admin-pricing] --> [admin-catalog] : validate campaign windows and current/next catalog context
-[admin-pricing] --> [catalog] : active price lists, promo prices, offers and gifts for storefront
-[admin-pricing] --> [cart] : active shopping offers, gift rules and threshold benefits
-[admin-pricing] --> [order] : checkout validation for prices, offers and gifts
-[admin-pricing] --> db : price lists, prices, promo prices, segment rules, promotions, offers, gifts, import/export jobs and audit
-[admin-wms] --> [authorization] : admin WMS permission, warehouse scope and elevated checks
-[admin-wms] --> [admin-rbac] : permission matrix, service account scopes and responsibility scopes
-[admin-wms] --> [admin-pim] : validate published SKU/product references for stock and supply lines
-[admin-wms] --> [admin-catalog] : validate catalog periods and channel availability windows
-[admin-wms] --> [catalog] : stock availability, ATP and mnemonic availability reasons for storefront
-[admin-wms] --> [cart] : reservation availability and backorder possibility
-[admin-wms] --> [order] : reserve, release, partial shipment and stock conflict responses
-[admin-wms] --> [partner-office] : supply, acceptance and discrepancy context
-[admin-wms] --> wms : WMS/1C stock, supply and movement synchronization
-[admin-wms] --> db : warehouses, stock snapshots, availability rules, supplies, reservations, sync messages, discrepancies and audit
-[admin-order] --> [authorization] : admin order permission, role, region, channel and elevated checks
-[admin-order] --> [admin-rbac] : permission matrix and responsibility scopes
-[admin-order] --> [admin-wms] : reserve, warehouse, partial availability and blocked reason context
-[admin-order] --> [admin-pim] : validate published SKU/product references for supplementary order lines
-[admin-order] --> [admin-catalog] : validate catalog period and campaign context
-[admin-order] --> [admin-pricing] : validate prices, offers, gifts and bonus-affecting commercial rules
-[admin-order] --> [order] : order lifecycle read/write projection and customer history links
-[admin-order] --> [employee] : order support, operator action and audit context
-[admin-order] --> pay : payment capture, refund, dispute and chargeback protocol
-[admin-order] --> bonus : bonus writeoff and compensation consistency checks
-[admin-order] --> delivery : shipment reference and delivery blocking context
-[admin-order] --> db : orders, lines, fulfillment groups, payment events, refunds, holds, risk events, operator actions and audit
-[admin-service] --> [authorization] : admin service permission, role, queue, amount and elevated checks
-[admin-service] --> [admin-rbac] : permission matrix, supervisor scopes and responsibility scopes
-[admin-service] --> [admin-order] : order, payment, refund limit and financial hold context
-[admin-service] --> [admin-wms] : return inspection, warehouse availability and replacement shipment context
-[admin-service] --> [employee] : employee claim links and support context
-[admin-service] --> claims : customer/partner claim ids and public claim status projection
-[admin-service] --> pay : refund command protocol through order/payment context
-[admin-service] --> bonus : bonus compensation transaction protocol
-[admin-service] --> delivery : replacement delivery status and delivery issue context
-[admin-service] --> s3 : claim attachments and redaction metadata
-[admin-service] --> db : service cases, queues, routing rules, SLA policies, messages, attachments, decisions, actions, WMS events and audit
-[admin-identity] --> [authorization] : admin identity permission, PII scope and impersonation checks
-[admin-identity] --> [admin-rbac] : permission matrix, employee roles and responsibility scopes
-[admin-identity] --> [auth] : session termination, impersonation context and blocked subject validation
-[admin-identity] --> [profile] : user and partner profile read/update projection with PII masking
-[admin-identity] --> [mlm-structure] : sponsor/downline validation and relationship projection
-[admin-identity] --> [employee] : employee bindings and operational scopes
-[admin-identity] --> [admin-order] : order/offline sales eligibility and partner context
-[admin-identity] --> [admin-service] : support subject context and impersonation audit links
-[admin-identity] --> db : subjects, profile attributes, partner relationships, employee bindings, eligibility rules, impersonation policies/sessions and audit
-[platform-experience] --> db : consent preferences, notification preferences, runtime config snapshots and diagnostics
-[AnalyticsProvider] --> metrika : consent-aware pageview/conversion events
-[AnalyticsProvider] --> mindbox : consent-aware marketing/conversion events
-[AnalyticsProvider] --> hybrid : consent-aware pixel events
-[employee] --> [authorization] : role, scope, MFA, locks, supervisor checks
-[employee] --> [order] : order read links and elevated operation context
-[employee] --> [cart] : active cart/operator order context
-[employee] --> [profile] : masked customer, partner and employee profile data
-[employee] --> [partner-reporting] : partner KPI/report links
-[employee] --> [bonus-wallet] : partner bonus balance and volume links
-[employee] --> claims : claim ids, claim creation and claim deep links
-[employee] --> pay : payment events, refund and compensation tasks
-[employee] --> [admin-wms] : WMS batch, reservation, discrepancy and warehouse review read models
-[employee] --> delivery : delivery tracking links and delayed delivery signals
-[employee] --> s3 : employee document fileReferenceId verification
-[employee] --> db : employee support/order-history/claims/partner/profile/elevated read models and audit tables
+[auth] --> [authorization] : role, route, MFA and policy checks
+[auth] --> [admin-rbac] : session permission matrix
+[admin-rbac] --> [authorization] : permission set and scope checks
 
+[cart] --> [catalog] : product and campaign projection
+[cart] --> [admin-pricing] : active offers and gifts
+[order] --> [cart] : cart snapshot
+[order] --> [admin-pricing] : checkout price validation
+[order] --> [admin-wms] : reserve and release stock
 [order] --> pay : payment protocol
-[order] --> delivery : delivery protocol
-[order] --> [admin-wms] : reservation and stock availability HTTP/JSON
-[order] --> [admin-order] : administrative order support and supplementary order HTTP/JSON
-[admin-wms] --> wms : fulfillment stock/movement protocol
+[order] --> [delivery] : shipment creation and tracking links
+[delivery] --> [admin-wms] : stock/delivery constraints and return-to-logistics events
+[delivery] --> deliveryProvider : shipment task and status exchange
+[delivery] --> [order] : delivery lifecycle events
+[delivery] --> [admin-service] : delivery problem and return context
+[delivery] --> [admin-platform] : delivery SLA and problem-rate events
+[delivery] --> [bonus-wallet] : bonus-affecting delivery outcome events
+[employee] --> [delivery] : tracking links and delayed delivery signals
+[admin-order] --> [delivery] : shipment reference and delivery blocking context
+[admin-service] --> [delivery] : replacement delivery and issue context
+[admin-platform] --> [delivery] : delivery integration status and KPI read-model
+
+[admin-wms] --> wms : WMS/1C synchronization
+[admin-order] --> pay : payment/refund/dispute protocol
 [bonus-wallet] --> bonus : bonus protocol
-[partner-office] --> [admin-wms] : supply and acceptance HTTP/JSON projection
+[platform-experience] --> metrika : consent-aware analytics
+[platform-experience] --> mindbox : consent-aware marketing
+[platform-experience] --> hybrid : consent-aware pixel events
+
+[public-content] --> db
+[auth] --> db
+[catalog] --> db
+[cart] --> db
+[order] --> db
+[delivery] --> db
+[profile] --> db
+[bonus-wallet] --> db
+[partner-office] --> db
+[employee] --> db
+[platform-experience] --> db
+[admin-rbac] --> db
+[admin-cms] --> db
+[admin-referral] --> db
+[admin-pim] --> db
+[admin-catalog] --> db
+[admin-pricing] --> db
+[admin-wms] --> db
+[admin-order] --> db
+[admin-service] --> db
+[admin-identity] --> db
+[admin-platform] --> db
+[admin-cms] --> s3 : content documents/media metadata
+[admin-pim] --> s3 : product media metadata
+[admin-service] --> s3 : claim attachments metadata
 
 @enduml
-
-component "admin-platform" as AdminPlatform
-AdminPlatform --> AdminWms : KPI/SLA read-model
-AdminPlatform --> AdminOrder : order/payment KPI
-AdminPlatform --> AdminService : claims/SLA KPI
-AdminPlatform --> PlatformExperience : analytics diagnostics

@@ -10,6 +10,7 @@ import { BonusWalletFinanceView, BonusWalletView } from './components/BonusWalle
 import { CartView } from './components/CartView';
 import { CatalogSearchView } from './components/CatalogSearchView';
 import { DigitalCatalogueView } from './components/DigitalCatalogueView';
+import { DeliveryOperatorJournalView, DeliveryTrackingView, PickupOwnerCabinetView } from './components/DeliveryViews';
 import { AuthImpersonationView, AuthProvider, AuthRouteForbidden, AuthSessionView } from './components/AuthViews';
 import { AdminCatalogView } from './components/AdminCatalogView';
 import { AdminCmsView } from './components/AdminCmsView';
@@ -97,6 +98,8 @@ const testLoginRoles = new Set([
   'business-admin',
   'bi-analyst',
   'integration-admin',
+  'pickup-owner',
+  'delivery-operator',
   'catalog-manager',
 ]);
 
@@ -256,6 +259,14 @@ function App() {
     );
   } else if (path === '/order/supplementary') {
     contentView = <OrderCheckoutView checkoutType="SUPPLEMENTARY" seed={params.get('seed')} />;
+  } else if (path === '/orders/not-owned-order/tracking') {
+    contentView = <DeliveryTrackingView forbidden />;
+  } else if (path.startsWith('/orders/')) {
+    contentView = <DeliveryTrackingView />;
+  } else if (path === '/pickup-owner/shipments') {
+    contentView = <PickupOwnerCabinetView />;
+  } else if (path === '/delivery/operator/journal') {
+    contentView = <DeliveryOperatorJournalView />;
   } else if (path === '/order/order-history') {
     contentView = <OrderHistoryView params={params} />;
   } else if (path === '/vip-orders' || path === '/business/tools/order-management/vip-orders/partner-orders') {

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <title>Макет выбора доставки feature 037</title>
+  <rect width="1280" height="760" fill="#ffffff"/>
+  <rect x="32" y="28" width="1216" height="64" fill="#f3f6f8" stroke="#8aa1b4"/>
+  <text x="56" y="68" font-family="Arial" font-size="24">Оформление заказа: выбор доставки</text>
+  <rect x="32" y="116" width="780" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="56" y="154" font-family="Arial" font-size="18">Способы доставки</text>
+  <rect x="56" y="180" width="704" height="96" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="80" y="218" font-family="Arial" font-size="16">Домашняя доставка: адрес, интервал, стоимость</text>
+  <rect x="56" y="300" width="704" height="96" fill="#f8fafc" stroke="#8aa1b4"/>
+  <text x="80" y="338" font-family="Arial" font-size="16">Курьерская доставка: зона, слот, SLA</text>
+  <rect x="56" y="420" width="704" height="164" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="80" y="458" font-family="Arial" font-size="16">Самовывоз из точки выдачи</text>
+  <text x="80" y="492" font-family="Arial" font-size="14">Адрес / график / срок хранения / лимиты</text>
+  <rect x="832" y="116" width="384" height="596" fill="#ffffff" stroke="#8aa1b4"/>
+  <text x="860" y="154" font-family="Arial" font-size="18">Итоги доставки</text>
+  <text x="860" y="204" font-family="Arial" font-size="15">Выбранный способ</text>
+  <text x="860" y="248" font-family="Arial" font-size="15">Стоимость</text>
+  <text x="860" y="292" font-family="Arial" font-size="15">Ожидаемая дата получения</text>
+  <rect x="860" y="610" width="300" height="54" fill="#eef3f7" stroke="#8aa1b4"/>
+  <text x="902" y="644" font-family="Arial" font-size="16">Подтвердить заказ</text>
+</svg>
